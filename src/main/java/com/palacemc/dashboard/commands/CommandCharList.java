@@ -10,7 +10,7 @@ import java.util.*;
 
 public class CommandCharList extends MagicCommand {
 
-    public Commandcharlist() {
+    public CommandCharList() {
         super(Rank.CHARACTER);
     }
 
