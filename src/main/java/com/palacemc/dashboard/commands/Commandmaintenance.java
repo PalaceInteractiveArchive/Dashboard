@@ -24,7 +24,7 @@ public class Commandmaintenance extends MagicCommand {
         PacketMaintenance packet = new PacketMaintenance(Dashboard.isMaintenance());
         if (Dashboard.isMaintenance()) {
             HashMap<Rank, List<UUID>> staff = Dashboard.sqlUtil.getPlayersByRanks(Rank.SQUIRE, Rank.KNIGHT,
-                    Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS, Rank.OWNER);
+                    Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
             List<UUID> list = new ArrayList<>();
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
                 for (UUID uuid : entry.getValue()) {

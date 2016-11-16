@@ -12,7 +12,7 @@ public class PacketPlayerRank extends BasePacket {
     private Rank rank;
 
     public PacketPlayerRank() {
-        this(null, Rank.GUEST);
+        this(null, Rank.SETTLER);
     }
 
     public PacketPlayerRank(UUID uuid, Rank rank) {

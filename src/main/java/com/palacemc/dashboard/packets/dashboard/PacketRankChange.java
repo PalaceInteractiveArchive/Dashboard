@@ -16,7 +16,7 @@ public class PacketRankChange extends BasePacket {
     private String source;
 
     public PacketRankChange() {
-        this(null, Rank.GUEST, "");
+        this(null, Rank.SETTLER, "");
     }
 
     public PacketRankChange(UUID uuid, Rank rank, String source) {

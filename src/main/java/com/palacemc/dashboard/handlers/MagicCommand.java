@@ -12,7 +12,7 @@ public abstract class MagicCommand {
     public boolean tabCompletePlayers = false;
 
     public MagicCommand() {
-        rank = Rank.GUEST;
+        rank = Rank.SETTLER;
     }
 
     public MagicCommand(Rank rank) {

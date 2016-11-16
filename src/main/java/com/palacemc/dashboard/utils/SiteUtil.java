@@ -49,26 +49,24 @@ public class SiteUtil implements HttpHandler {
                 Rank r = tp.getRank();
                 if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                     switch (r) {
-                        case EARNINGMYEARS:
+                        case SQUIRE:
                             earningmyears.add(tp.getName());
                             break;
-                        case CASTMEMBER:
+                        case KNIGHT:
                             castmembers.add(tp.getName());
                             break;
-                        case COORDINATOR:
+                        case PALADIN:
                             coordinators.add(tp.getName());
                             break;
-                        case DEVELOPER:
+                        case WIZARD:
                             developers.add(tp.getName());
                             break;
-                        case MANAGER:
+                        case EMPEROR:
                             managers.add(tp.getName());
                             break;
-                        case MAYOR:
-                            mayors.add(tp.getName());
+                        case EMPRESS:
+                            managers.add(tp.getName());
                             break;
-                        case OWNER:
-                            owners.add(tp.getName());
                     }
                 }
             }
@@ -89,11 +87,6 @@ public class SiteUtil implements HttpHandler {
                         names += ", ";
                     }
                 }
-                JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Owner");
-                obj.addProperty("text", names);
-                obj.addProperty("color", getColor(Rank.OWNER));
-                array.add(obj);
             }
             if (!mayors.isEmpty()) {
                 String names = "";
@@ -210,19 +203,17 @@ public class SiteUtil implements HttpHandler {
 
     private String getColor(Rank rank) {
         switch (rank) {
-            case OWNER:
+            case EMPEROR:
                 return "#FFAA00";
-            case MAYOR:
+            case EMPRESS:
                 return "#FFAA00";
-            case MANAGER:
+            case WIZARD:
                 return "#FFAA00";
-            case DEVELOPER:
-                return "#FFAA00";
-            case COORDINATOR:
+            case PALADIN:
                 return "#55FF55";
-            case CASTMEMBER:
+            case KNIGHT:
                 return "#55FF55";
-            case EARNINGMYEARS:
+            case SQUIRE:
                 return "#55FF55";
         }
         return "good";

@@ -93,7 +93,7 @@ public class SqlUtil {
                         return;
                     }
                     Rank rank = Rank.fromString(result.getString("rank"));
-                    if (rank.getRankId() != Rank.GUEST.getRankId()) {
+                    if (rank.getRankId() != Rank.SETTLER.getRankId()) {
                         PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
                         player.send(packet);
                     }

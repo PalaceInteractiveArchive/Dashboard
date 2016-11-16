@@ -40,7 +40,7 @@ public class Commandbseen extends MagicCommand {
                     player.sendMessage(ChatColor.RED + "That player can't be found!");
                     return;
                 }
-                Rank rank = Rank.GUEST;
+                Rank rank = Rank.SETTLER;
                 long lastLogin = 0;
                 String ip = "no ip";
                 Mute mute;

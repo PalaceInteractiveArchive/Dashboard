@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Player {
     private UUID uuid;
     private String username;
-    private Rank rank = Rank.GUEST;
+    private Rank rank = Rank.SETTLER;
     private String address;
     private String server;
     private UUID bungeeID;

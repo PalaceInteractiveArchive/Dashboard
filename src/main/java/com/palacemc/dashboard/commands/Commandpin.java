@@ -46,7 +46,7 @@ public class Commandpin extends MagicCommand {
             return;
         }
         // Is Guest, before 11/1 @ 3pm
-        if (r.equals(Rank.GUEST) && curt < 1478026800) {
+        if (r.equals(Rank.SETTLER) && curt < 1478026800) {
             player.sendMessage(ChatColor.GREEN +
                     "MyMCMagic will release to the public " + ChatColor.YELLOW + "Tuesday, November 1st at 3:00pm EST.");
             player.sendMessage(ChatColor.GREEN + "Purchase " + Rank.DVCMEMBER.getNameWithBrackets() + ChatColor.GREEN +
