@@ -17,7 +17,6 @@ public enum Rank {
     MAJESTIC("Majestic", ChatColor.DARK_PURPLE, ChatColor.AQUA, 4),
     NOBLE("Noble", ChatColor.BLUE, ChatColor.AQUA, 3),
     DWELLER("Dweller", ChatColor.AQUA, ChatColor.AQUA, 2),
-    LEGACY("Legacy", ChatColor.AQUA, ChatColor.WHITE, 2),
     SHAREHOLDER("Shareholder", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, 3),
     DVCMEMBER("DVC", ChatColor.AQUA, ChatColor.WHITE, 2),
     SETTLER("Settler", ChatColor.DARK_AQUA, ChatColor.WHITE, 1);
@@ -67,8 +66,6 @@ public enum Rank {
                 return NOBLE;
             case "dweller":
                 return DWELLER;
-            case "legacy":
-                return LEGACY;
             case "shareholder":
                 return SHAREHOLDER;
             case "dvc":

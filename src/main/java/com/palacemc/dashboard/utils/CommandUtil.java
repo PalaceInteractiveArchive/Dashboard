@@ -16,14 +16,14 @@ public class CommandUtil {
     }
 
     private void initialize() {
-        register("audio", new Commandaudio());
+        register("audio", new CommandAudio());
         register("b", new CommandDB());
         register("ban", new CommandBan());
         register("banip", new CommandBanIP());
         register("bseen", new CommandBSeen());
         register("bug", new CommandBug());
         register("cc", new CommandCC());
-        register("charlist", new Commandcharlist());
+        register("charlist", new CommandCharList());
         register("chat", new CommandChat());
         register("chatdelay", new CommandChatDelay());
         register("chatreload", new CommandChatReload());
@@ -37,11 +37,11 @@ public class CommandUtil {
         register("kick", new CommandKick());
         register("kickall", new CommandKickAll());
         register("maintenance", new CommandMaintenance());
-        register("mentions", new Commandmentions());
+        register("mentions", new CommandMentions());
         register("modlog", new CommandModLog());
         register("motdrl", new CommandMotdrl());
         register("msg", new CommandMsg());
-        register("msgtoggle", new Commandmsgtoggle());
+        register("msgtoggle", new CommandMsgToggle());
         register("mumble", new CommandMumble());
         register("mute", new CommandMute());
         register("mutechat", new CommandMuteChat());

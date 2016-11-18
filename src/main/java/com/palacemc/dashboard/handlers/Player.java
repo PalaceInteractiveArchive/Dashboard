@@ -2,8 +2,8 @@ package com.palacemc.dashboard.handlers;
 
 import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.packets.BasePacket;
-import com.palacemc.dashboard.packets.dashboard.PacketMessage;
 import com.palacemc.dashboard.packets.dashboard.PacketMention;
+import com.palacemc.dashboard.packets.dashboard.PacketMessage;
 import com.palacemc.dashboard.packets.dashboard.PacketPlayerChat;
 import com.palacemc.dashboard.packets.dashboard.PacketPlayerDisconnect;
 

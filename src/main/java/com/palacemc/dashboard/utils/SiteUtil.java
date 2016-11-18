@@ -38,136 +38,124 @@ public class SiteUtil implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         try {
-            List<String> owners = new ArrayList<>();
-            List<String> mayors = new ArrayList<>();
-            List<String> managers = new ArrayList<>();
-            List<String> developers = new ArrayList<>();
-            List<String> coordinators = new ArrayList<>();
-            List<String> castmembers = new ArrayList<>();
-            List<String> earningmyears = new ArrayList<>();
+            List<String> empress = new ArrayList<>();
+            List<String> emperors = new ArrayList<>();
+            List<String> wizards = new ArrayList<>();
+            List<String> paladins = new ArrayList<>();
+            List<String> knights = new ArrayList<>();
+            List<String> squires = new ArrayList<>();
             for (Player tp : Dashboard.getOnlinePlayers()) {
                 Rank r = tp.getRank();
                 if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                     switch (r) {
                         case SQUIRE:
-                            earningmyears.add(tp.getName());
+                            squires.add(tp.getName());
                             break;
                         case KNIGHT:
-                            castmembers.add(tp.getName());
+                            knights.add(tp.getName());
                             break;
                         case PALADIN:
-                            coordinators.add(tp.getName());
+                            paladins.add(tp.getName());
                             break;
                         case WIZARD:
-                            developers.add(tp.getName());
+                            wizards.add(tp.getName());
                             break;
                         case EMPEROR:
-                            managers.add(tp.getName());
+                            emperors.add(tp.getName());
                             break;
                         case EMPRESS:
-                            managers.add(tp.getName());
-                            break;
+                            empress.add(tp.getName());
                     }
                 }
             }
-            Collections.sort(owners);
-            Collections.sort(mayors);
-            Collections.sort(managers);
-            Collections.sort(developers);
-            Collections.sort(coordinators);
-            Collections.sort(castmembers);
-            Collections.sort(earningmyears);
+            Collections.sort(empress);
+            Collections.sort(emperors);
+            Collections.sort(wizards);
+            Collections.sort(paladins);
+            Collections.sort(knights);
+            Collections.sort(squires);
             JsonArray array = new JsonArray();
             int n = 0;
-            if (!owners.isEmpty()) {
+            if (!empress.isEmpty()) {
                 String names = "";
-                for (int i = 0; i < owners.size(); i++) {
-                    names += owners.get(i);
-                    if (i < (owners.size() - 1)) {
-                        names += ", ";
-                    }
-                }
-            }
-            if (!mayors.isEmpty()) {
-                String names = "";
-                for (int i = 0; i < mayors.size(); i++) {
-                    names += mayors.get(i);
-                    if (i < (mayors.size() - 1)) {
+                for (int i = 0; i < empress.size(); i++) {
+                    names += empress.get(i);
+                    if (i < (empress.size() - 1)) {
                         names += ", ";
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Mayor");
+                obj.addProperty("title", "Empress");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.EMPRESS));
                 array.add(obj);
             }
-            if (!managers.isEmpty()) {
+            if (!emperors.isEmpty()) {
                 String names = "";
-                for (int i = 0; i < managers.size(); i++) {
-                    names += managers.get(i);
-                    if (i < (managers.size() - 1)) {
+                for (int i = 0; i < emperors.size(); i++) {
+                    names += emperors.get(i);
+                    if (i < (emperors.size() - 1)) {
                         names += ", ";
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Managers");
+                obj.addProperty("title", "Emperor");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.EMPEROR));
                 array.add(obj);
             }
-            if (!developers.isEmpty()) {
+            if (!wizards.isEmpty()) {
                 String names = "";
-                for (int i = 0; i < developers.size(); i++) {
-                    names += developers.get(i);
-                    if (i < (developers.size() - 1)) {
+                for (int i = 0; i < wizards.size(); i++) {
+                    names += wizards.get(i);
+                    if (i < (wizards.size() - 1)) {
                         names += ", ";
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Developers");
+                obj.addProperty("title", "Wizard");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.WIZARD));
                 array.add(obj);
             }
-            if (!coordinators.isEmpty()) {
+            if (!paladins.isEmpty()) {
                 String names = "";
-                for (int i = 0; i < coordinators.size(); i++) {
-                    names += coordinators.get(i);
-                    if (i < (coordinators.size() - 1)) {
+                for (int i = 0; i < paladins.size(); i++) {
+                    names += paladins.get(i);
+                    if (i < (paladins.size() - 1)) {
                         names += ", ";
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Coordinators");
+                obj.addProperty("title", "Paladin");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.PALADIN));
                 array.add(obj);
             }
-            if (!castmembers.isEmpty()) {
+            if (!knights.isEmpty()) {
                 String names = "";
-                for (int i = 0; i < castmembers.size(); i++) {
-                    names += castmembers.get(i);
-                    if (i < (castmembers.size() - 1)) {
+                for (int i = 0; i < knights.size(); i++) {
+                    names += knights.get(i);
+                    if (i < (knights.size() - 1)) {
                         names += ", ";
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Cast Members");
+                obj.addProperty("title", "Knight");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.KNIGHT));
                 array.add(obj);
             }
-            if (!earningmyears.isEmpty()) {
+            if (!squires.isEmpty()) {
                 String names = "";
-                for (int i = 0; i < earningmyears.size(); i++) {
-                    names += earningmyears.get(i);
-                    if (i < (earningmyears.size() - 1)) {
+                for (int i = 0; i < squires.size(); i++) {
+                    names += squires.get(i);
+                    if (i < (squires.size() - 1)) {
                         names += ", ";
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Earning My Ears");
+                obj.addProperty("title", "Squire");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.SQUIRE));
                 array.add(obj);
@@ -175,7 +163,7 @@ public class SiteUtil implements HttpHandler {
             JsonObject obj = new JsonObject();
             if (array.size() > 0) {
                 try {
-                    obj.addProperty("text", "Current online Cast Members");
+                    obj.addProperty("text", "Current online Staff Members");
                     obj.addProperty("response_type", "ephemeral");
                     obj.add("attachments", array);
                 } catch (Exception e) {
@@ -183,7 +171,7 @@ public class SiteUtil implements HttpHandler {
                 }
             } else {
                 try {
-                    obj.addProperty("text", "No Cast Members are currently online!");
+                    obj.addProperty("text", "No Staff Members are currently online!");
                     obj.addProperty("response_type", "ephemeral");
                 } catch (Exception e) {
                     return;
@@ -203,16 +191,15 @@ public class SiteUtil implements HttpHandler {
 
     private String getColor(Rank rank) {
         switch (rank) {
-            case EMPEROR:
-                return "#FFAA00";
             case EMPRESS:
+            case EMPEROR:
                 return "#FFAA00";
             case WIZARD:
                 return "#FFAA00";
             case PALADIN:
-                return "#55FF55";
+                return "#FFAA00";
             case KNIGHT:
-                return "#55FF55";
+                return "#FFAA00";
             case SQUIRE:
                 return "#55FF55";
         }
