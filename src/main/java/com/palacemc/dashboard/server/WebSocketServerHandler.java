@@ -4,10 +4,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.handlers.*;
-import com.palacemc.dashboard.packets.audio.*;
+import com.palacemc.dashboard.packets.audio.PacketContainer;
+import com.palacemc.dashboard.packets.audio.PacketGetPlayer;
+import com.palacemc.dashboard.packets.audio.PacketPlayerInfo;
+import com.palacemc.dashboard.packets.bungee.PacketBungeeID;
 import com.palacemc.dashboard.packets.dashboard.*;
-import com.palacemc.dashboard.packets.dashboard.PacketServerSwitch;
 import com.palacemc.dashboard.packets.park.*;
+import com.palacemc.dashboard.slack.SlackAttachment;
+import com.palacemc.dashboard.slack.SlackMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -15,10 +19,6 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import com.palacemc.dashboard.packets.audio.PacketContainer;
-import com.palacemc.dashboard.packets.audio.PacketPlayerInfo;
-import com.palacemc.dashboard.slack.SlackAttachment;
-import com.palacemc.dashboard.slack.SlackMessage;
 
 import java.util.*;
 
@@ -688,6 +688,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
+            }
+            /**
+             * Bungee ID (Sent when a bungee changes IDs)
+             */
+            case 65: {
+                PacketBungeeID packet = new PacketBungeeID().fromJSON(object);
+                UUID bid = packet.getBungeeID(); //Old ID
+                UUID nid = channel.getBungeeID(); //New ID
+                for (Player tp : Dashboard.getOnlinePlayers()) {
+                    if (tp.getBungeeID().equals(bid)) {
+                        tp.setBungeeID(nid);
+                    }
+                }
+                Dashboard.getLogger().info("Bungee UUID updated for Bungee on " +
+                        channel.localAddress().getAddress().toString());
             }
         }
     }

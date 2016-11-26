@@ -92,6 +92,10 @@ public class Player {
         return bungeeID;
     }
 
+    public void setBungeeID(UUID bungeeID) {
+        this.bungeeID = bungeeID;
+    }
+
     public boolean isToggled() {
         return toggled;
     }

@@ -6,10 +6,10 @@ import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Server;
 import com.palacemc.dashboard.packets.dashboard.PacketConnectionType;
 import com.palacemc.dashboard.packets.dashboard.PacketOnlineCount;
-import com.palacemc.dashboard.packets.dashboard.PacketTargetLobby;
-import com.palacemc.dashboard.server.WebSocketServerHandler;
 import com.palacemc.dashboard.packets.dashboard.PacketSendToServer;
+import com.palacemc.dashboard.packets.dashboard.PacketTargetLobby;
 import com.palacemc.dashboard.server.DashboardSocketChannel;
+import com.palacemc.dashboard.server.WebSocketServerHandler;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -111,6 +111,19 @@ public class ServerUtil {
                 }
             }
         }, 0, 5000);
+        /**
+         * Game Server Timer
+         new Timer().schedule(new TimerTask() {
+        @Override public void run() {
+        for (Server s : getServers()) {
+        if (s.getName().toLowerCase().matches("[a-z]\\d{1,3}") && s.isOnline()) {
+        PacketGameStatus packet = new PacketGameStatus(s.getName(), s.getCount(), s.isOnline() ?
+        "online" : "offline");
+        }
+        }
+        }
+        }, 0, 2000);
+         */
     }
 
     public List<Server> getServers() {

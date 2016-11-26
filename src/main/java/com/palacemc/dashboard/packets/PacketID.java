@@ -52,4 +52,32 @@ public enum PacketID {
             return id;
         }
     }
+
+    public enum Arcade {
+        GAMESTATUS(64);
+
+        final int id;
+
+        Arcade(int id) {
+            this.id = id;
+        }
+
+        public int getID() {
+            return id;
+        }
+    }
+
+    public enum Bungee {
+        BUNGEEID(65);
+
+        final int id;
+
+        Bungee(int id) {
+            this.id = id;
+        }
+
+        public int getID() {
+            return id;
+        }
+    }
 }
