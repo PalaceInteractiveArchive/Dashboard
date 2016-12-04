@@ -48,7 +48,7 @@ public class CommandMaintenance extends MagicCommand {
                     continue;
                 }
                 tp.kickPlayer(ChatColor.AQUA + "Maintenance Mode has been enabled!\nFollow " + ChatColor.BLUE +
-                        "@MCMagicDev " + ChatColor.AQUA + "on Twitter for updates.");
+                        "@PalaceDev " + ChatColor.AQUA + "on Twitter for updates.");
             }
             new Timer().schedule(new TimerTask() {
                 @Override

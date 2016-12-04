@@ -21,6 +21,7 @@ public class DashboardSocketChannel extends NioSocketChannel {
     private PacketConnectionType.ConnectionType type = PacketConnectionType.ConnectionType.UNKNOWN;
     private UUID bungeeID = UUID.randomUUID();
     private String serverName = "";
+    private long connectTime = System.currentTimeMillis();
 
     public DashboardSocketChannel(PacketConnectionType.ConnectionType type) {
         this.type = type;
@@ -68,5 +69,9 @@ public class DashboardSocketChannel extends NioSocketChannel {
 
     public void send(BasePacket packet) {
         send(packet.getJSON().toString());
+    }
+
+    public long getConnectTime() {
+        return connectTime;
     }
 }

@@ -122,6 +122,9 @@ public class SqlUtil {
                             }
                         }
                         staffClock(player.getUniqueId(), true, connection);
+                        if (rank.getRankId() >= Rank.SQUIRE.getRankId() && Dashboard.chatUtil.isChatMuted("ParkChat")) {
+                            player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
+                        }
                     }
                     HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
                     HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
@@ -175,6 +178,33 @@ public class SqlUtil {
         sql.setString(3, player.getUniqueId().toString());
         sql.execute();
         sql.close();
+    }
+
+    public void silentJoin(final Player player) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT toggled,mentions,onlinetime FROM player_data WHERE uuid=?");
+            sql.setString(1, player.getUniqueId().toString());
+            ResultSet result = sql.executeQuery();
+            if (!result.next()) {
+                return;
+            }
+            Rank rank = player.getRank();
+            player.setToggled(result.getInt("toggled") == 1);
+            player.setMentions(result.getInt("mentions") == 1);
+            player.setOnlineTime(result.getLong("onlinetime"));
+            Dashboard.addPlayer(player);
+            Dashboard.addToCache(player.getUniqueId(), player.getName());
+            result.close();
+            sql.close();
+            HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
+            HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
+            player.setFriends(friends);
+            player.setRequests(requests);
+            Mute mute = getMute(player.getUniqueId(), player.getName());
+            player.setMute(mute);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void logout(final Player player) {

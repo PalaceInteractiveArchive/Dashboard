@@ -8,6 +8,7 @@ import com.palacemc.dashboard.packets.audio.PacketContainer;
 import com.palacemc.dashboard.packets.audio.PacketGetPlayer;
 import com.palacemc.dashboard.packets.audio.PacketPlayerInfo;
 import com.palacemc.dashboard.packets.bungee.PacketBungeeID;
+import com.palacemc.dashboard.packets.bungee.PacketPlayerListInfo;
 import com.palacemc.dashboard.packets.dashboard.*;
 import com.palacemc.dashboard.packets.park.*;
 import com.palacemc.dashboard.slack.SlackAttachment;
@@ -57,7 +58,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
-    private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
+    private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) throws Exception {
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
             return;
@@ -176,12 +177,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketTargetLobby lobby = new PacketTargetLobby(Dashboard.getTargetServer());
                     PacketCommandList commands = new PacketCommandList(new ArrayList<>(Dashboard.commandUtil.getCommandsAndAliases()));
                     PacketMaintenance maintenance = new PacketMaintenance(Dashboard.isMaintenance());
+                    PacketBungeeID bungeeID = new PacketBungeeID(channel.getBungeeID());
                     channel.send(motd);
                     channel.send(count);
                     channel.send(server);
                     channel.send(lobby);
                     channel.send(commands);
                     channel.send(maintenance);
+                    channel.send(bungeeID);
                     if (Dashboard.isMaintenance()) {
                         PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(Dashboard.getMaintenanceWhitelist());
                         channel.send(whitelist);
@@ -248,7 +251,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (Dashboard.serverUtil.getServer(tp.getServer()) == null) {
                     Dashboard.serverUtil.getServer(target).changeCount(1);
                     tp.setServer(target);
-                    if (Dashboard.getServer(target).isPark()) {
+                    if (Dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
                         tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
                         try {
@@ -266,14 +269,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             public void run() {
                                 switch (i) {
                                     case 0: {
-                                        tp.sendMessage(ChatColor.GREEN + "\nWelcome to " + ChatColor.AQUA + "MCMagic" +
+                                        tp.sendMessage(ChatColor.GREEN + "\nWelcome to the " + ChatColor.AQUA + "Palace Network" +
                                                 ChatColor.GREEN + ", we're happy you're here!");
                                         tp.mention();
                                         break;
                                     }
                                     case 4: {
-                                        tp.sendMessage(ChatColor.GREEN + "\nWe have recreated " + ChatColor.AQUA +
-                                                "Walt Disney World " + ChatColor.GREEN + "in Minecraft!");
+                                        tp.sendMessage(ChatColor.GREEN + "\nWe are an all-inclusive family-friendly " +
+                                                ChatColor.DARK_GREEN + "Minecraft " + ChatColor.GREEN + "gaming network!");
                                         tp.mention();
                                         break;
                                     }
@@ -703,6 +706,31 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 Dashboard.getLogger().info("Bungee UUID updated for Bungee on " +
                         channel.localAddress().getAddress().toString());
+                break;
+            }
+            /**
+             * Player List Info (Import players from Bungee on Dashboard reboot)
+             */
+            case 66: {
+                PacketPlayerListInfo packet = new PacketPlayerListInfo().fromJSON(object);
+                List<PacketPlayerListInfo.Player> players = packet.getPlayers();
+                List<Player> list = new ArrayList<>();
+                for (PacketPlayerListInfo.Player p : players) {
+                    Player tp = new Player(p.getUniqueId(), p.getUsername(), p.getAddress(), p.getServer(),
+                            channel.getBungeeID());
+                    tp.setRank(Rank.fromString(p.getRank()));
+                    list.add(tp);
+                }
+                final List<Player> finalList = list;
+                Dashboard.schedulerManager.runAsync(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Player p : finalList) {
+                            Dashboard.sqlUtil.silentJoin(p);
+                        }
+                    }
+                });
+                break;
             }
         }
     }
@@ -787,7 +815,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         if (msg instanceof FullHttpRequest) {
             handleHttpRequest(ctx, (FullHttpRequest) msg);
         } else if (msg instanceof WebSocketFrame) {
-            handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+            try {
+                handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+            } catch (Exception e) {
+                Dashboard.getLogger().warn(e.getMessage(), e);
+            }
         }
     }
 }

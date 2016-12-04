@@ -1,9 +1,9 @@
 package com.palacemc.dashboard.commands;
 
 import com.palacemc.dashboard.Dashboard;
-import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
+import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 
 import java.util.Arrays;
@@ -25,11 +25,11 @@ public class CommandMuteChat extends MagicCommand {
         String msg = "";
         if (muted) {
             Dashboard.chatUtil.unmuteChat(server);
-            msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "MCMagic Chat" + ChatColor.WHITE + "] " +
+            msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                     ChatColor.YELLOW + "Chat has been unmuted";
         } else {
             Dashboard.chatUtil.muteChat(server);
-            msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "MCMagic Chat" + ChatColor.WHITE + "] " +
+            msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                     ChatColor.YELLOW + "Chat has been muted";
         }
         String msgname = msg + " by " + player.getName();

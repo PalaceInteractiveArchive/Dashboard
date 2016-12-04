@@ -1,8 +1,9 @@
 package com.palacemc.dashboard.utils;
 
+import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.slack.SlackAttachment;
 import com.palacemc.dashboard.slack.SlackMessage;
 import com.palacemc.dashboard.slack.SlackService;
-import com.palacemc.dashboard.slack.SlackAttachment;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ public class SlackUtil {
     }
 
     public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments) {
+        if (Dashboard.isTestNetwork()) {
+            return;
+        }
         String webhook = "https://hooks.slack.com/services/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";
         try {
             s.push(webhook, msg, attachments);
