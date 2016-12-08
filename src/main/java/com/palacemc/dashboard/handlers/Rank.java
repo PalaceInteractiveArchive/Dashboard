@@ -8,6 +8,7 @@ public enum Rank {
     EMPEROR("Emperor", ChatColor.RED, ChatColor.YELLOW, 11),
     WIZARD("Wizard", ChatColor.GOLD, ChatColor.YELLOW, 11),
     PALADIN("Paladin", ChatColor.YELLOW, ChatColor.GREEN, 10),
+    ARCHITECT("Architect", ChatColor.GREEN, ChatColor.GREEN, 9),
     KNIGHT("Knight", ChatColor.GREEN, ChatColor.GREEN, 9),
     SQUIRE("Squire", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, 8),
     CHARACTER("Character", ChatColor.BLUE, ChatColor.BLUE, 7),
@@ -48,6 +49,8 @@ public enum Rank {
                 return WIZARD;
             case "paladin":
                 return PALADIN;
+            case "architect":
+                return ARCHITECT;
             case "knight":
                 return KNIGHT;
             case "squire":

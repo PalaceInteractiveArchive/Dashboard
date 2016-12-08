@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.handlers.Player;
+import com.palacemc.dashboard.handlers.Rank;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import com.palacemc.dashboard.handlers.Rank;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,6 +42,7 @@ public class SiteUtil implements HttpHandler {
             List<String> emperors = new ArrayList<>();
             List<String> wizards = new ArrayList<>();
             List<String> paladins = new ArrayList<>();
+            List<String> architects = new ArrayList<>();
             List<String> knights = new ArrayList<>();
             List<String> squires = new ArrayList<>();
             for (Player tp : Dashboard.getOnlinePlayers()) {
@@ -53,6 +54,9 @@ public class SiteUtil implements HttpHandler {
                             break;
                         case KNIGHT:
                             knights.add(tp.getName());
+                            break;
+                        case ARCHITECT:
+                            architects.add(tp.getName());
                             break;
                         case PALADIN:
                             paladins.add(tp.getName());
@@ -72,6 +76,7 @@ public class SiteUtil implements HttpHandler {
             Collections.sort(emperors);
             Collections.sort(wizards);
             Collections.sort(paladins);
+            Collections.sort(architects);
             Collections.sort(knights);
             Collections.sort(squires);
             JsonArray array = new JsonArray();
@@ -130,6 +135,20 @@ public class SiteUtil implements HttpHandler {
                 obj.addProperty("title", "Paladin");
                 obj.addProperty("text", names);
                 obj.addProperty("color", getColor(Rank.PALADIN));
+                array.add(obj);
+            }
+            if (!architects.isEmpty()) {
+                String names = "";
+                for (int i = 0; i < architects.size(); i++) {
+                    names += architects.get(i);
+                    if (i < (architects.size() - 1)) {
+                        names += ", ";
+                    }
+                }
+                JsonObject obj = new JsonObject();
+                obj.addProperty("title", "Architect");
+                obj.addProperty("text", names);
+                obj.addProperty("color", getColor(Rank.ARCHITECT));
                 array.add(obj);
             }
             if (!knights.isEmpty()) {
@@ -198,6 +217,7 @@ public class SiteUtil implements HttpHandler {
                 return "#FFAA00";
             case PALADIN:
                 return "#FFAA00";
+            case ARCHITECT:
             case KNIGHT:
                 return "#FFAA00";
             case SQUIRE:

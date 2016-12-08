@@ -97,7 +97,7 @@ public class ServerUtil {
                         server = s;
                     }
                 }
-                if (Dashboard.getTargetServer().equals(server.getName())) {
+                if (server == null || Dashboard.getTargetServer().equals(server.getName())) {
                     return;
                 }
                 Dashboard.setTargetServer(server.getName());
@@ -134,7 +134,8 @@ public class ServerUtil {
         servers.clear();
         try (Connection connection = Dashboard.sqlUtil.getConnection()) {
             //TODO Change this back to the regular table
-            PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM newservers;");
+            PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
+                    (Dashboard.isTestNetwork() ? "playground" : "") + "servers;");
             ResultSet result = sql.executeQuery();
             while (result.next()) {
                 servers.put(result.getString("name"), new Server(result.getString("name"), result.getString("address"),

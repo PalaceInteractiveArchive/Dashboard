@@ -34,19 +34,6 @@ import java.util.*;
 
 public class Dashboard {
     public static final int PORT = 7892;
-    private static Logger logger = Logger.getLogger("Dashboard");
-    private static List<String> serverTypes = new ArrayList<>();
-    private static HashMap<UUID, Player> players = new HashMap<>();
-    private static HashMap<UUID, String> cache = new HashMap<>();
-    private static String motd = "";
-    private static String motdmaintenance = "";
-    private static List<String> info = new ArrayList<>();
-    private static String targetServer = "unknown";
-    private static List<String> joinServers = new ArrayList<>();
-    private static long startTime;
-    private static boolean maintenance = false;
-    private static List<UUID> maintenanceWhitelist = new ArrayList<>();
-    private static boolean testNetwork = false;
     public static SqlUtil sqlUtil = null;
     public static ServerUtil serverUtil = null;
     public static ChatUtil chatUtil = null;
@@ -61,6 +48,19 @@ public class Dashboard {
     public static SiteUtil siteUtil;
     public static AFKUtil afkUtil;
     public static StatUtil statUtil;
+    private static Logger logger = Logger.getLogger("Dashboard");
+    private static List<String> serverTypes = new ArrayList<>();
+    private static HashMap<UUID, Player> players = new HashMap<>();
+    private static HashMap<UUID, String> cache = new HashMap<>();
+    private static String motd = "";
+    private static String motdmaintenance = "";
+    private static List<String> info = new ArrayList<>();
+    private static String targetServer = "unknown";
+    private static List<String> joinServers = new ArrayList<>();
+    private static long startTime;
+    private static boolean maintenance = false;
+    private static List<UUID> maintenanceWhitelist = new ArrayList<>();
+    private static boolean testNetwork = false;
 
     public static void main(String[] args) throws IOException {
         startTime = System.currentTimeMillis();
@@ -139,8 +139,8 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            HashMap<Rank, List<UUID>> staff = Dashboard.sqlUtil.getPlayersByRanks(Rank.SQUIRE, Rank.KNIGHT,
-                    Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
+            HashMap<Rank, List<UUID>> staff = Dashboard.sqlUtil.getPlayersByRanks(Rank.SQUIRE, Rank.ARCHITECT,
+                    Rank.KNIGHT, Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
                 for (UUID uuid : entry.getValue()) {
                     maintenanceWhitelist.add(uuid);
@@ -319,32 +319,32 @@ public class Dashboard {
         return motd;
     }
 
-    public static String getMOTDMaintenance() {
-        return motdmaintenance;
-    }
-
-    public static List<String> getInfo() {
-        return info;
-    }
-
     public static void setMOTD(String motd) {
         Dashboard.motd = motd;
+    }
+
+    public static String getMOTDMaintenance() {
+        return motdmaintenance;
     }
 
     public static void setMOTDMaintenance(String motd) {
         Dashboard.motdmaintenance = motd;
     }
 
+    public static List<String> getInfo() {
+        return info;
+    }
+
     public static void setInfo(List<String> info) {
         Dashboard.info = info;
     }
 
-    public static void setTargetServer(String targetServer) {
-        Dashboard.targetServer = targetServer;
-    }
-
     public static String getTargetServer() {
         return targetServer;
+    }
+
+    public static void setTargetServer(String targetServer) {
+        Dashboard.targetServer = targetServer;
     }
 
     public static List<String> getJoinServers() {
