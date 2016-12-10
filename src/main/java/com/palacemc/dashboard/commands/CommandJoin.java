@@ -1,11 +1,11 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
-import com.palacemc.dashboard.handlers.Player;
-import com.palacemc.dashboard.packets.dashboard.PacketJoinCommand;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
+import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
+import com.palacemc.dashboard.packets.dashboard.PacketJoinCommand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,29 +15,33 @@ public class CommandJoin extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        List<String> servers = Dashboard.getJoinServers();
+        List<String> servers = Launcher.getDashboard().getJoinServers();
+
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("reload") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
-                Dashboard.loadJoinServers();
+                Launcher.getDashboard().loadJoinServers();
                 player.sendMessage(ChatColor.GREEN + "Join Servers have been reloaded!");
                 return;
             }
+
             if (exists(args[0])) {
-                if (Dashboard.getServer(player.getServer()).getServerType().equalsIgnoreCase(args[0])) {
+                if (Launcher.getDashboard().getServer(player.getServer()).getServerType().equalsIgnoreCase(args[0])) {
                     player.sendMessage(ChatColor.RED + "You are already on this server!");
                     return;
                 }
+
                 try {
-                    Dashboard.serverUtil.sendPlayerByType(player, formatName(args[0]));
+                    Launcher.getDashboard().getServerUtil().sendPlayerByType(player, formatName(args[0]));
                 } catch (Exception ignored) {
                     player.sendMessage(ChatColor.RED + "There was a problem joining that server!");
                 }
                 return;
             }
+
             if (endsInNumber(args[0]) && exists(args[0].substring(0, args[0].length() - 1)) &&
-                    Dashboard.serverUtil.getServer(formatName(args[0])) != null) {
+                    Launcher.getDashboard().getServerUtil().getServer(formatName(args[0])) != null) {
                 try {
-                    Dashboard.serverUtil.sendPlayer(player, formatName(args[0]));
+                    Launcher.getDashboard().getServerUtil().sendPlayer(player, formatName(args[0]));
                 } catch (Exception ignored) {
                     player.sendMessage(ChatColor.RED + "There was a problem joining that server!");
                 }
@@ -58,7 +62,7 @@ public class CommandJoin extends MagicCommand {
     }
 
     private boolean exists(String s) {
-        for (String server : Dashboard.getJoinServers()) {
+        for (String server : Launcher.getDashboard().getJoinServers()) {
             if (server.equalsIgnoreCase(s)) {
                 return true;
             }
@@ -94,7 +98,7 @@ public class CommandJoin extends MagicCommand {
     @Override
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         List<String> list = new ArrayList<>();
-        for (String s : Dashboard.getJoinServers()) {
+        for (String s : Launcher.getDashboard().getJoinServers()) {
             list.add(s);
         }
         Collections.sort(list);

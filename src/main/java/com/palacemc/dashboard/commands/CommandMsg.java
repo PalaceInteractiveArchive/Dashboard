@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -21,41 +21,54 @@ public class CommandMsg extends MagicCommand {
             player.sendMessage(ChatColor.RED + "/msg [Player] [Message]");
             return;
         }
+
         if (!enoughTime(player)) {
             player.sendMessage(ChatColor.RED + "New Guests must be on the server for at least 15 minutes before talking in chat. " +
                     ChatColor.DARK_AQUA + "Learn more at mcmagic.us/rules#chat");
             return;
         }
+
         String target = args[0];
-        Player tp = Dashboard.getPlayer(args[0]);
+        Player tp = Launcher.getDashboard().getPlayer(args[0]);
+
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
+
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.isMuted(player)) {
+            if (Launcher.getDashboard().getChatUtil().isMuted(player)) {
                 return;
             }
+
             if (!tp.canRecieveMessages()) {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
             }
-            if (!Dashboard.chatUtil.privateMessagesEnabled()) {
+
+            if (!Launcher.getDashboard().getChatUtil().privateMessagesEnabled()) {
                 player.sendMessage(ChatColor.RED + "Private messages are currently disabled.");
                 return;
             }
         }
+
         String msg = "";
+
         for (int i = 1; i < args.length; i++) {
             msg += args[i] + " ";
         }
-        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Dashboard.chatUtil.removeCaps(player,
+
+        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Launcher.getDashboard().getChatUtil().removeCaps(player,
                 msg.trim()) : msg.trim();
+
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.containsSwear(player, msg) || Dashboard.chatUtil.isAdvert(player, msg)
-                    || Dashboard.chatUtil.spamCheck(player, msg) || Dashboard.chatUtil.containsUnicode(player, msg)) {
+            if (Launcher.getDashboard().getChatUtil().containsSwear(player, msg) ||
+                    Launcher.getDashboard().getChatUtil().isAdvert(player, msg) ||
+                    Launcher.getDashboard().getChatUtil().spamCheck(player, msg) ||
+                    Launcher.getDashboard().getChatUtil().containsUnicode(player, msg)) {
                 return;
             }
+
             String mm = msg.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
@@ -63,18 +76,23 @@ public class CommandMsg extends MagicCommand {
                 return;
             }
         }
+
         if (tp.hasMentions()) {
             tp.mention();
         }
+
         tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getName() +
                 ChatColor.GREEN + " -> " + ChatColor.LIGHT_PURPLE + "You: " + ChatColor.WHITE + msg);
+
         player.sendMessage(ChatColor.LIGHT_PURPLE + "You " + ChatColor.GREEN + "-> " +
                 tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getName() + ": " +
                 ChatColor.WHITE + msg);
+
         tp.setReply(player.getUniqueId());
         player.setReply(tp.getUniqueId());
-        Dashboard.chatUtil.socialSpyMessage(player, tp, msg, "msg");
-        Dashboard.chatUtil.logMessage(player.getUniqueId(), "/msg " + tp.getName() + " " + msg);
+
+        Launcher.getDashboard().getChatUtil().socialSpyMessage(player, tp, msg, "msg");
+        Launcher.getDashboard().getChatUtil().logMessage(player.getUniqueId(), "/msg " + tp.getName() + " " + msg);
     }
 
     private boolean enoughTime(Player player) {

@@ -37,20 +37,24 @@ public class PacketInventoryStatus extends BasePacket {
 
     public PacketInventoryStatus fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.status = obj.get("status").getAsInt();
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         obj.addProperty("id", this.id);
         obj.addProperty("uuid", this.uuid.toString());
         obj.addProperty("status", this.status);
+
         return obj;
     }
 }

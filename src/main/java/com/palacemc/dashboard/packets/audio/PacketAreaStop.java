@@ -38,6 +38,7 @@ public class PacketAreaStop extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("audioid", this.audioid);

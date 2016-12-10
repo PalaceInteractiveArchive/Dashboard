@@ -9,18 +9,18 @@ import java.util.UUID;
 /**
  * Created by Marc on 8/22/16
  */
-public class PacketBseenCommand extends BasePacket {
+public class PacketBSeenCommand extends BasePacket {
     private UUID uuid;
     private String username;
     private String address;
     private String server;
     private boolean online;
 
-    public PacketBseenCommand() {
+    public PacketBSeenCommand() {
         this(null, "", "", "", false);
     }
 
-    public PacketBseenCommand(UUID uuid, String username, String address, String server, boolean online) {
+    public PacketBSeenCommand(UUID uuid, String username, String address, String server, boolean online) {
         this.id = PacketID.Dashboard.BSEENCOMMAND.getID();
         this.uuid = uuid;
         this.username = username;
@@ -49,21 +49,24 @@ public class PacketBseenCommand extends BasePacket {
         return online;
     }
 
-    public PacketBseenCommand fromJSON(JsonObject obj) {
+    public PacketBSeenCommand fromJSON(JsonObject obj) {
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.username = obj.get("username").getAsString();
         this.address = obj.get("address").getAsString();
         this.server = obj.get("server").getAsString();
         this.online = obj.get("online").getAsBoolean();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
@@ -74,6 +77,7 @@ public class PacketBseenCommand extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

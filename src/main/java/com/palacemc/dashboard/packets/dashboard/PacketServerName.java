@@ -30,6 +30,7 @@ public class PacketServerName extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("name", this.name);

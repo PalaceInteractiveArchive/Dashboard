@@ -18,6 +18,7 @@ public class SchedulerManager {
     public SchedulerManager() {
         this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Dashboard Pool Thread #%1$d")
                 .setThreadFactory(new GroupedThreadFactory("Dashboard")).build());
+
         broadcastClock = new BroadcastClock();
         broadcastTimer = new Timer();
         broadcastTimer.schedule(broadcastClock, 10000, 300000);
@@ -29,9 +30,11 @@ public class SchedulerManager {
 
     public void stop() {
         broadcastTimer.cancel();
+
         List<Runnable> tasks = executor.shutdownNow();
-        for (Runnable r : tasks) {
-            r.run();
+
+        for (Runnable runnable : tasks) {
+            runnable.run();
         }
     }
 

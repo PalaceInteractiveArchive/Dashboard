@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -21,21 +21,25 @@ public class CommandUnmute extends MagicCommand {
             player.sendMessage(ChatColor.RED + "/unmute [Username]");
             return;
         }
+
         String username = args[0];
-        Player tp = Dashboard.getPlayer(username);
+        Player tp = Launcher.getDashboard().getPlayer(username);
         UUID uuid;
+
         if (tp == null) {
-            uuid = Dashboard.sqlUtil.uuidFromUsername(username);
+            uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
         } else {
             uuid = tp.getUniqueId();
             username = tp.getName();
         }
+
         if (uuid == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
-        Dashboard.sqlUtil.unmutePlayer(uuid);
+
+        Launcher.getDashboard().getSqlUtil().unmutePlayer(uuid);
         tp.getMute().setMuted(false);
-        Dashboard.moderationUtil.announceUnmute(username, player.getName());
+        Launcher.getDashboard().getModerationUtil().announceUnmute(username, player.getName());
     }
 }

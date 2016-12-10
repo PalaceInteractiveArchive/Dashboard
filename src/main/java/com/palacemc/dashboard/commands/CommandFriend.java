@@ -1,9 +1,9 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
-import com.palacemc.dashboard.handlers.Player;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
+import com.palacemc.dashboard.handlers.Player;
 
 import java.util.Arrays;
 
@@ -20,29 +20,27 @@ public class CommandFriend extends MagicCommand {
             case 1:
                 switch (args[0].toLowerCase()) {
                     case "help":
-                        Dashboard.friendUtil.helpMenu(player);
+                        Launcher.getDashboard().getFriendUtil().helpMenu(player);
                         return;
                     case "list":
-                        Dashboard.friendUtil.listFriends(player, 1);
+                        Launcher.getDashboard().getFriendUtil().listFriends(player, 1);
                         return;
                     case "toggle":
-                        Dashboard.schedulerManager.runAsync(new Runnable() {
-                            @Override
-                            public void run() {
-                                player.setHasFriendToggled(!player.hasFriendToggledOff());
-                                if (player.hasFriendToggledOff()) {
-                                    player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
-                                            ChatColor.RED + "OFF");
-                                } else {
-                                    player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
-                                            ChatColor.GREEN + "ON");
-                                }
-                                Dashboard.friendUtil.toggleRequests(player);
+                        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+                            player.setHasFriendToggled(!player.hasFriendToggledOff());
+
+                            if (player.hasFriendToggledOff()) {
+                                player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
+                                        ChatColor.RED + "OFF");
+                            } else {
+                                player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
+                                        ChatColor.GREEN + "ON");
                             }
+                            Launcher.getDashboard().getFriendUtil().toggleRequests(player);
                         });
                         return;
                     case "requests":
-                        Dashboard.friendUtil.listRequests(player);
+                        Launcher.getDashboard().getFriendUtil().listRequests(player);
                         return;
                 }
                 return;
@@ -50,40 +48,43 @@ public class CommandFriend extends MagicCommand {
                 switch (args[0].toLowerCase()) {
                     case "list":
                         if (!isInt(args[1])) {
-                            Dashboard.friendUtil.listFriends(player, 1);
+                            Launcher.getDashboard().getFriendUtil().listFriends(player, 1);
                             return;
                         }
-                        Dashboard.friendUtil.listFriends(player, Integer.parseInt(args[1]));
+
+                        Launcher.getDashboard().getFriendUtil().listFriends(player, Integer.parseInt(args[1]));
                         return;
                     case "tp":
                         String user = args[1];
-                        Player tp = Dashboard.getPlayer(user);
+                        Player tp = Launcher.getDashboard().getPlayer(user);
+
                         if (tp == null) {
                             player.sendMessage(ChatColor.RED + "Player not found!");
                             return;
                         }
+
                         if (!player.getFriends().containsKey(tp.getUniqueId())) {
                             player.sendMessage(ChatColor.GREEN + tp.getName() + ChatColor.RED +
                                     " is not on your Friend List!");
                             return;
                         }
-                        Dashboard.friendUtil.teleportPlayer(player, tp);
+                        Launcher.getDashboard().getFriendUtil().teleportPlayer(player, tp);
                         return;
                     case "add":
-                        Dashboard.friendUtil.addFriend(player, args[1]);
+                        Launcher.getDashboard().getFriendUtil().addFriend(player, args[1]);
                         return;
                     case "remove":
-                        Dashboard.friendUtil.removeFriend(player, args[1]);
+                        Launcher.getDashboard().getFriendUtil().removeFriend(player, args[1]);
                         return;
                     case "accept":
-                        Dashboard.friendUtil.acceptFriend(player, args[1]);
+                        Launcher.getDashboard().getFriendUtil().acceptFriend(player, args[1]);
                         return;
                     case "deny":
-                        Dashboard.friendUtil.denyFriend(player, args[1]);
+                        Launcher.getDashboard().getFriendUtil().denyFriend(player, args[1]);
                         return;
                 }
         }
-        Dashboard.friendUtil.helpMenu(player);
+        Launcher.getDashboard().getFriendUtil().helpMenu(player);
     }
 
     private boolean isInt(String s) {

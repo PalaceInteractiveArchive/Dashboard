@@ -49,6 +49,7 @@ public class PacketWarning extends BasePacket {
         } catch (Exception e) {
             this.warningid = null;
         }
+
         this.username = obj.get("username").getAsString();
         this.message = obj.get("message").getAsString();
         this.action = obj.get("action").getAsString();
@@ -57,6 +58,7 @@ public class PacketWarning extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("warningid", this.warningid.toString());

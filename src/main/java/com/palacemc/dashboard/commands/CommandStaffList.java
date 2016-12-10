@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
@@ -24,7 +24,8 @@ public class CommandStaffList extends MagicCommand {
         List<String> paladin = new ArrayList<>();
         List<String> knight = new ArrayList<>();
         List<String> squire = new ArrayList<>();
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             Rank r = tp.getRank();
             if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                 switch (r) {
@@ -49,6 +50,7 @@ public class CommandStaffList extends MagicCommand {
                 }
             }
         }
+
         Collections.sort(emperor);
         Collections.sort(empress);
         Collections.sort(wizard);

@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -21,31 +21,37 @@ public class CommandKickAll extends MagicCommand {
     @Override
     public void execute(final Player player, String label, String[] args) {
         if (args.length <= 0) {
-            player.sendMessage(ChatColor.RED + "/kickall [Message]");
+            player.sendMessage(ChatColor.RED + "/kickall [reason]");
             return;
         }
+
         String r = "";
+
         for (String arg : args) {
             r += arg + " ";
         }
+
         r = ChatColor.translateAlternateColorCodes('&', r.trim());
         player.sendMessage(ChatColor.GREEN + "Disconnecting all players for " + r);
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
                 continue;
             }
             tp.kickPlayer(r);
         }
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 boolean empty = true;
-                for (Player tp : Dashboard.getOnlinePlayers()) {
+                for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                     if (tp.getRank().getRankId() < Rank.WIZARD.getRankId()) {
                         empty = false;
                         break;
                     }
                 }
+
                 if (empty) {
                     player.sendMessage(ChatColor.GREEN + "All players have been disconnected!");
                     cancel();

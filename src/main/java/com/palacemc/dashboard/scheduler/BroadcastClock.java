@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.scheduler;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.Player;
 
@@ -24,6 +24,7 @@ public class BroadcastClock extends TimerTask {
 
     public void reload() {
         List<String> newList = new ArrayList<>();
+
         try (BufferedReader br = new BufferedReader(new FileReader("announcements.txt"))) {
             String line = br.readLine();
             boolean read = false;
@@ -31,14 +32,17 @@ public class BroadcastClock extends TimerTask {
                 if (read) {
                     newList.add(line);
                 }
+
                 if (line.startsWith("announcements:")) {
                     read = true;
                 }
+
                 line = br.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         if (!newList.equals(announcements)) {
             announcements = newList;
             i = 0;
@@ -48,10 +52,12 @@ public class BroadcastClock extends TimerTask {
     @Override
     public void run() {
         String msg = ChatColor.translateAlternateColorCodes('&', announcements.get(i));
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             tp.sendMessage(msg);
         }
+
         i++;
+
         if (i >= announcements.size()) {
             i = 0;
         }

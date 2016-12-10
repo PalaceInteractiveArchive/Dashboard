@@ -18,11 +18,14 @@ public class CommandProcesses extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        String msg = ChatColor.YELLOW + "Processes connected to Dashboard:";
+        String msg = ChatColor.YELLOW + "Processes connected to Dashboard: ";
+
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
+
             String type = "";
             String ip = dash.remoteAddress().getAddress().getHostAddress();
+
             switch (dash.getType()) {
                 case BUNGEECORD:
                     type = "BungeeCord - " + ip;
@@ -43,8 +46,10 @@ public class CommandProcesses extends MagicCommand {
                     type = "Unknown - " + ip;
                     break;
             }
+
             msg += ChatColor.GREEN + "\n- " + type;
         }
+
         player.sendMessage(msg);
     }
 }

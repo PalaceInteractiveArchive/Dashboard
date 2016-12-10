@@ -40,11 +40,13 @@ public class PacketRankChange extends BasePacket {
 
     public PacketRankChange fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.rank = Rank.fromString(obj.get("rank").getAsString());
         this.source = obj.get("source").getAsString();
         return this;
@@ -52,6 +54,7 @@ public class PacketRankChange extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

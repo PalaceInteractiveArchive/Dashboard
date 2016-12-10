@@ -1,8 +1,9 @@
 package com.palacemc.dashboard.server;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
@@ -11,21 +12,28 @@ import java.util.List;
  */
 public class DashboardServerSocketChannel extends NioServerSocketChannel {
 
-    protected int doReadMessages(List<Object> buf)
-            throws Exception {
-        SocketChannel ch = javaChannel().accept();
+    protected int doReadMessages(List<Object> buf) {
+        SocketChannel ch = null;
+
+        try {
+            ch = javaChannel().accept();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         try {
             if (ch != null) {
                 buf.add(new DashboardSocketChannel(this, ch));
                 return 1;
             }
         } catch (Throwable t) {
-            Dashboard.getLogger().error("Failed to create a new channel from an accepted socket.");
+            Launcher.getDashboard().getLogger().error("Failed to create a new channel from an accepted socket.");
             t.printStackTrace();
+
             try {
                 ch.close();
             } catch (Throwable t2) {
-                Dashboard.getLogger().error("Failed to close a socket.");
+                Launcher.getDashboard().getLogger().error("Failed to close a socket.");
                 t2.printStackTrace();
             }
         }

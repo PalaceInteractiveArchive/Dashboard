@@ -49,6 +49,7 @@ public class PacketPlayerInfo extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.username = obj.get("username").getAsString();
         this.auth = obj.get("auth").getAsInt();
         this.server = obj.get("server").getAsString();
@@ -57,6 +58,7 @@ public class PacketPlayerInfo extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", uuid != null ? uuid.toString() : null);

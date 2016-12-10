@@ -39,11 +39,13 @@ public class PacketWarp extends BasePacket {
 
     public PacketWarp fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.warp = obj.get("warp").getAsString();
         this.server = obj.get("server").getAsString();
         return this;
@@ -51,6 +53,7 @@ public class PacketWarp extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         obj.addProperty("id", this.id);
         obj.addProperty("uuid", this.uuid.toString());
         obj.addProperty("warp", this.warp);

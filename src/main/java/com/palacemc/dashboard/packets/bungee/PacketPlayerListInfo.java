@@ -33,6 +33,7 @@ public class PacketPlayerListInfo extends BasePacket {
     public PacketPlayerListInfo fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
         JsonArray list = obj.get("players").getAsJsonArray();
+
         for (JsonElement e : list) {
             Player p = fromString(e.toString());
             this.players.add(p);
@@ -42,13 +43,17 @@ public class PacketPlayerListInfo extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
-            obj.addProperty("id", this.id);
             Gson gson = new Gson();
+
+            obj.addProperty("id", this.id);
             List<String> list = new ArrayList<>();
+
             for (Player p : players) {
                 list.add(p.toString());
             }
+
             obj.add("players", gson.toJsonTree(list).getAsJsonArray());
         } catch (Exception e) {
             return null;
@@ -60,10 +65,12 @@ public class PacketPlayerListInfo extends BasePacket {
         Player p = new Player();
         String sr = s.replace("\"Player{", "").replace("}\"", "");
         String[] list = sr.split(",");
+
         for (String st : list) {
             String[] list2 = st.split("=");
             String next = "";
             boolean first = true;
+
             for (String str : list2) {
                 if (first) {
                     next = str;
@@ -110,8 +117,7 @@ public class PacketPlayerListInfo extends BasePacket {
             this.rank = rank;
         }
 
-        public Player() {
-        }
+        public Player() { }
 
         public UUID getUniqueId() {
             return uuid;

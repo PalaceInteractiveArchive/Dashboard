@@ -37,12 +37,14 @@ public class PacketMyMCMagicRegister extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.pin = obj.get("pin").getAsInt();
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

@@ -31,21 +31,26 @@ public class PacketCommandList extends BasePacket {
 
     public PacketCommandList fromJSON(JsonObject obj) {
         JsonArray list = obj.get("commands").getAsJsonArray();
+
         for (JsonElement e : list) {
             this.commands.add(e.getAsString());
         }
+
         return this;
     }
 
     public JsonObject getJSON() {
+
         JsonObject obj = new JsonObject();
         try {
-            obj.addProperty("id", this.id);
             Gson gson = new Gson();
+
+            obj.addProperty("id", this.id);
             obj.add("commands", gson.toJsonTree(this.commands).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

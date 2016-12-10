@@ -31,11 +31,13 @@ public class PacketMention extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

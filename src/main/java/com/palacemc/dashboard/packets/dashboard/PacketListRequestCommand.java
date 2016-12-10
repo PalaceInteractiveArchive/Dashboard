@@ -50,15 +50,18 @@ public class PacketListRequestCommand extends BasePacket {
     }
 
     public JsonObject getJSON() {
+
         JsonObject obj = new JsonObject();
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            Gson gson = new Gson();
             obj.add("requestlist", gson.toJsonTree(this.requestlist).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

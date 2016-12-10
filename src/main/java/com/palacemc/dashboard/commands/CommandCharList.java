@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -17,9 +17,11 @@ public class CommandCharList extends MagicCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         HashMap<String, List<String>> servers = new HashMap<>();
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             if (tp.getRank().name().toLowerCase().contains("character")) {
                 String server = tp.getServer();
+
                 if (servers.containsKey(server)) {
                     servers.get(server).add(tp.getName());
                 } else {
@@ -27,6 +29,7 @@ public class CommandCharList extends MagicCommand {
                 }
             }
         }
+
         if (servers.isEmpty()) {
             player.sendMessage(ChatColor.RED + "No Characters are online right now!");
         } else {
@@ -43,6 +46,7 @@ public class CommandCharList extends MagicCommand {
                 }
                 msgs.add(msg);
             }
+
             player.sendMessage(ChatColor.BLUE + "Online Characters:");
             for (String s : msgs) {
                 player.sendMessage(s);

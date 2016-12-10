@@ -44,6 +44,7 @@ public class PacketAddServer extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("name", this.name);
@@ -52,6 +53,7 @@ public class PacketAddServer extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

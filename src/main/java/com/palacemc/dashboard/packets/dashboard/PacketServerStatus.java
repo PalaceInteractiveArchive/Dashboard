@@ -38,6 +38,7 @@ public class PacketServerStatus extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("onlineCount", this.onlineCount);
@@ -45,6 +46,7 @@ public class PacketServerStatus extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

@@ -19,6 +19,7 @@ public class PacketStatusRequest extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
         } catch (Exception e) {

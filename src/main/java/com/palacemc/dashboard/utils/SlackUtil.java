@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.utils;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.slack.SlackAttachment;
 import com.palacemc.dashboard.slack.SlackMessage;
 import com.palacemc.dashboard.slack.SlackService;
@@ -16,14 +16,14 @@ public class SlackUtil {
     public SlackService s = new SlackService();
 
     public void sendDashboardMessage(SlackMessage msg) {
-        sendDashboardMessage(msg, new ArrayList<SlackAttachment>());
+        sendDashboardMessage(msg, new ArrayList<>());
     }
 
     public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments) {
-        if (Dashboard.isTestNetwork()) {
-            return;
-        }
+        if (Launcher.getDashboard().isTestNetwork()) return;
+
         String webhook = "https://hooks.slack.com/services/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";
+
         try {
             s.push(webhook, msg, attachments);
         } catch (IOException e) {

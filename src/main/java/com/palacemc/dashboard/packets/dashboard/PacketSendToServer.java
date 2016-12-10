@@ -37,12 +37,14 @@ public class PacketSendToServer extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.server = obj.get("server").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

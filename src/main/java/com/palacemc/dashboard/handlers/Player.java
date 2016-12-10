@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.dashboard.PacketMention;
 import com.palacemc.dashboard.packets.dashboard.PacketMessage;
@@ -65,7 +65,7 @@ public class Player {
         if (packet == null) {
             return;
         }
-        Dashboard.getBungee(bungeeID).send(packet.getJSON().toString());
+        Launcher.getDashboard().getBungee(bungeeID).send(packet.getJSON().toString());
     }
 
     public UUID getUniqueId() {
@@ -215,7 +215,7 @@ public class Player {
     public void mention() {
         try {
             PacketMention packet = new PacketMention(uuid);
-            Dashboard.getInstance(server).send(packet);
+            Launcher.getDashboard().getInstance(server).send(packet);
         } catch (Exception ignored) {
         }
     }

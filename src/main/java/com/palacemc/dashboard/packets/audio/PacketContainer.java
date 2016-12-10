@@ -32,17 +32,20 @@ public class PacketContainer extends BasePacket {
 
     public PacketContainer fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.container = obj.get("container").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", uuid != null ? uuid.toString() : null);

@@ -33,6 +33,7 @@ public class PacketPlayerList extends BasePacket {
     public PacketPlayerList fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
         JsonArray list = obj.get("players").getAsJsonArray();
+
         for (JsonElement e : list) {
             this.players.add(UUID.fromString(e.getAsString()));
         }
@@ -41,9 +42,11 @@ public class PacketPlayerList extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
-            obj.addProperty("id", this.id);
             Gson gson = new Gson();
+
+            obj.addProperty("id", this.id);
             obj.add("players", gson.toJsonTree(this.players).getAsJsonArray());
         } catch (Exception e) {
             return null;

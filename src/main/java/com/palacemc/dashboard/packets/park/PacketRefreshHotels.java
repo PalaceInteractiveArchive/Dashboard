@@ -31,6 +31,7 @@ public class PacketRefreshHotels extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         obj.addProperty("id", this.id);
         obj.addProperty("server", this.server);
         return obj;

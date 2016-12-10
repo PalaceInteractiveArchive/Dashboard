@@ -45,6 +45,7 @@ public class PacketLogin extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("version", this.version);

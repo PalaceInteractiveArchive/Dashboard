@@ -27,6 +27,7 @@ public class PacketClientAccept extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("servername", this.servername);

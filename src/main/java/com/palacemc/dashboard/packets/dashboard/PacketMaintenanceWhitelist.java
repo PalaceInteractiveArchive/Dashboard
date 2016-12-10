@@ -32,6 +32,7 @@ public class PacketMaintenanceWhitelist extends BasePacket {
 
     public PacketMaintenanceWhitelist fromJSON(JsonObject obj) {
         JsonArray list = obj.get("allowed").getAsJsonArray();
+
         for (JsonElement e : list) {
             try {
                 this.allowed.add(UUID.fromString(e.getAsString()));
@@ -43,6 +44,7 @@ public class PacketMaintenanceWhitelist extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             Gson gson = new Gson();
@@ -50,6 +52,7 @@ public class PacketMaintenanceWhitelist extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

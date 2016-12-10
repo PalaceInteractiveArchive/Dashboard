@@ -7,11 +7,13 @@ import java.util.UUID;
  */
 public class Mute {
     private UUID uuid;
+
     private String name;
-    private boolean muted;
-    private long release;
     private String reason;
     private String source;
+
+    private boolean muted;
+    private long release;
 
     public Mute(UUID uuid, String name, boolean muted, long release, String reason, String source) {
         this.uuid = uuid;

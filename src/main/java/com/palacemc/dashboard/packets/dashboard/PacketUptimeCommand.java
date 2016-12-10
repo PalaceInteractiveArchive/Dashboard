@@ -37,12 +37,14 @@ public class PacketUptimeCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.time = obj.get("time").getAsLong();
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

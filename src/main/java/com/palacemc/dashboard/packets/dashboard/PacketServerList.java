@@ -39,9 +39,11 @@ public class PacketServerList extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
-            obj.addProperty("id", this.id);
             Gson gson = new Gson();
+
+            obj.addProperty("id", this.id);
             obj.add("servers", gson.toJsonTree(this.servers).getAsJsonArray());
         } catch (Exception e) {
             return null;

@@ -26,12 +26,14 @@ public class PacketConnectionType extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("type", this.type.name().toLowerCase());
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 
@@ -55,6 +57,7 @@ public class PacketConnectionType extends BasePacket {
                 case "audioserver":
                     return AUDIOSERVER;
             }
+
             return UNKNOWN;
         }
     }

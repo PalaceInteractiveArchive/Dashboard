@@ -37,12 +37,15 @@ public class PacketFriendRequest extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.from = obj.get("from").getAsString();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
@@ -50,6 +53,7 @@ public class PacketFriendRequest extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

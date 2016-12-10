@@ -20,6 +20,7 @@ public class ActivityUtil {
     public void logActivity(UUID uuid, String action, String description) {
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO activity (uuid, action, description) VALUES (?,?,?)");
+
             sql.setString(1, uuid.toString());
             sql.setString(2, action);
             sql.setString(3, description);

@@ -37,12 +37,14 @@ public class PacketServerSwitch extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.target = obj.get("target").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

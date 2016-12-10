@@ -10,35 +10,36 @@ import java.util.UUID;
  * Created by Marc on 11/25/16
  */
 public class PacketBungeeID extends BasePacket {
-    private UUID bid;
+    private UUID bungeeID;
 
     public PacketBungeeID() {
         this(null);
     }
 
-    public PacketBungeeID(UUID id) {
+    public PacketBungeeID(UUID bungeeID) {
         this.id = PacketID.Bungee.BUNGEEID.getID();
-        this.bid = id;
+        this.bungeeID = bungeeID;
     }
 
     public UUID getBungeeID() {
-        return bid;
+        return bungeeID;
     }
 
     public PacketBungeeID fromJSON(JsonObject obj) {
         try {
-            this.bid = UUID.fromString(obj.get("bid").getAsString());
+            this.bungeeID = UUID.fromString(obj.get("bid").getAsString());
         } catch (Exception e) {
-            this.bid = null;
+            this.bungeeID = null;
         }
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
-            obj.addProperty("bid", this.bid.toString());
+            obj.addProperty("bid", this.bungeeID.toString());
         } catch (Exception e) {
             return null;
         }

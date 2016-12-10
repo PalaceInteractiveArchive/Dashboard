@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.utils;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
@@ -21,7 +21,7 @@ public class AFKUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                for (Player tp : Dashboard.getOnlinePlayers()) {
+                for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                     if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getRank().getRankId() >=
                             Rank.WIZARD.getRankId()) {
                         continue;
@@ -78,7 +78,7 @@ public class AFKUtil {
                 try {
                     if (player != null && player.isAFK()) {
                         player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
-                        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +
                                     uuid + "')");
                             sql.execute();

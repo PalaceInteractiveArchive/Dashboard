@@ -43,6 +43,7 @@ public class PacketSetPack extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
@@ -50,6 +51,7 @@ public class PacketSetPack extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

@@ -18,10 +18,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DashboardSocketChannel extends NioSocketChannel {
     private static AtomicLong nextId = new AtomicLong(0L);
     protected long id = nextId.getAndIncrement();
+    private long connectTime = System.currentTimeMillis();
+
     private PacketConnectionType.ConnectionType type = PacketConnectionType.ConnectionType.UNKNOWN;
     private UUID bungeeID = UUID.randomUUID();
     private String serverName = "";
-    private long connectTime = System.currentTimeMillis();
 
     public DashboardSocketChannel(PacketConnectionType.ConnectionType type) {
         this.type = type;

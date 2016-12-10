@@ -35,11 +35,13 @@ public class PacketPlayerRank extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.rank = Rank.fromString(obj.get("rank").getAsString());
         return this;
     }
 
     public JsonObject getJSON() {
+
         JsonObject obj = new JsonObject();
         try {
             obj.addProperty("id", this.id);

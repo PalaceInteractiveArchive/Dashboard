@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -19,11 +19,13 @@ public class CommandIP extends MagicCommand {
             player.sendMessage(ChatColor.RED + "/ip [Player]");
             return;
         }
-        Player tp = Dashboard.getPlayer(args[0]);
+
+        Player tp = Launcher.getDashboard().getPlayer(args[0]);
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "That player wasn't found!");
             return;
         }
+
         player.sendMessage(ChatColor.GREEN + "IP of " + tp.getName() + " is " + tp.getAddress());
     }
 }

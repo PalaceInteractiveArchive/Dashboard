@@ -1,7 +1,7 @@
 package com.palacemc.dashboard.utils;
 
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
-import com.palacemc.dashboard.Dashboard;
 
 /**
  * Created by Marc on 8/20/16
@@ -51,7 +51,7 @@ public class ModerationUtil {
 
     public void sendMessage(String message) {
         String msg = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + message;
-        for (Player player : Dashboard.getOnlinePlayers()) {
+        for (Player player : Launcher.getDashboard().getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                 player.sendMessage(msg);
             }

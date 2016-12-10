@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.utils;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Server;
@@ -38,7 +38,7 @@ public class ServerUtil {
             public void run() {
                 try {
                     i++;
-                    int count = Dashboard.getOnlinePlayers().size();
+                    int count = Launcher.getDashboard().getOnlinePlayers().size();
                     PacketOnlineCount packet = new PacketOnlineCount(count);
                     if (count != lastCount) {
                         lastCount = count;
@@ -97,10 +97,10 @@ public class ServerUtil {
                         server = s;
                     }
                 }
-                if (server == null || Dashboard.getTargetServer().equals(server.getName())) {
+                if (server == null || Launcher.getDashboard().getTargetServer().equals(server.getName())) {
                     return;
                 }
-                Dashboard.setTargetServer(server.getName());
+                Launcher.getDashboard().setTargetServer(server.getName());
                 PacketTargetLobby packet = new PacketTargetLobby(server.getName());
                 for (Object o : WebSocketServerHandler.getGroup()) {
                     DashboardSocketChannel dash = (DashboardSocketChannel) o;
@@ -111,19 +111,6 @@ public class ServerUtil {
                 }
             }
         }, 0, 5000);
-        /**
-         * Game Server Timer
-         new Timer().schedule(new TimerTask() {
-        @Override public void run() {
-        for (Server s : getServers()) {
-        if (s.getName().toLowerCase().matches("[a-z]\\d{1,3}") && s.isOnline()) {
-        PacketGameStatus packet = new PacketGameStatus(s.getName(), s.getCount(), s.isOnline() ?
-        "online" : "offline");
-        }
-        }
-        }
-        }, 0, 2000);
-         */
     }
 
     public List<Server> getServers() {
@@ -132,10 +119,10 @@ public class ServerUtil {
 
     private void loadServers() {
         servers.clear();
-        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             //TODO Change this back to the regular table
             PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
-                    (Dashboard.isTestNetwork() ? "playground" : "") + "servers;");
+                    (Launcher.getDashboard().isTestNetwork() ? "playground" : "") + "servers;");
             ResultSet result = sql.executeQuery();
             while (result.next()) {
                 servers.put(result.getString("name"), new Server(result.getString("name"), result.getString("address"),
@@ -145,7 +132,7 @@ public class ServerUtil {
             sql.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            Dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
+            Launcher.getDashboard().getLogger().error("Error loading servers, shutting Dashboard!");
             System.exit(0);
         }
     }

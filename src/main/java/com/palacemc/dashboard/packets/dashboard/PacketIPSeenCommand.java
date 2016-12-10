@@ -48,25 +48,32 @@ public class PacketIPSeenCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         JsonArray list = obj.get("usernames").getAsJsonArray();
+
         for (JsonElement e : list) {
             this.usernames.add(e.getAsString());
         }
+
         this.address = obj.get("address").getAsString();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            Gson gson = new Gson();
             obj.add("usernames", gson.toJsonTree(this.usernames).getAsJsonArray());
             obj.addProperty("address", this.address);
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

@@ -1,10 +1,10 @@
 package com.palacemc.dashboard.utils;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 import com.palacemc.dashboard.packets.dashboard.*;
-import com.palacemc.dashboard.server.WebSocketServerHandler;
 import com.palacemc.dashboard.server.DashboardSocketChannel;
+import com.palacemc.dashboard.server.WebSocketServerHandler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -51,7 +51,7 @@ public class ChatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
                     if (messages.isEmpty()) {
                         return;
                     }
@@ -134,7 +134,7 @@ public class ChatUtil {
 
     public void chatEvent(PacketPlayerChat packet) {
         UUID uuid = packet.getUniqueId();
-        Player player = Dashboard.getPlayer(uuid);
+        Player player = Launcher.getDashboard().getPlayer(uuid);
         if (player == null) {
             return;
         }
@@ -170,7 +170,7 @@ public class ChatUtil {
             msg += l[i];
         }
         if (command) {
-            if (!Dashboard.commandUtil.handleCommand(player, msg.replaceFirst("/", ""))) {
+            if (!Launcher.getDashboard().getCommandUtil().handleCommand(player, msg.replaceFirst("/", ""))) {
                 player.chat(msg);
             }
             return;
@@ -186,7 +186,7 @@ public class ChatUtil {
         if (!eme) {
             //Muted Chat Check
             String server = player.getServer();
-            if (Dashboard.getServer(server).isPark()) {
+            if (Launcher.getDashboard().getServer(server).isPark()) {
                 server = "ParkChat";
             }
             if (mutedChats.contains(server)) {
@@ -220,20 +220,20 @@ public class ChatUtil {
             messageCache.put(player.getUniqueId(), msg);
         } else {
             if (msg.startsWith(":warn-")) {
-                Dashboard.warningUtil.handle(player, msg);
+                Launcher.getDashboard().getWarningUtil().handle(player, msg);
                 return;
             }
         }
         if (!player.getChannel().equals("all")) {
             switch (player.getChannel()) {
                 case "party":
-                    Dashboard.commandUtil.handleCommand(player, "pchat " + msg);
+                    Launcher.getDashboard().getCommandUtil().handleCommand(player, "pchat " + msg);
                     return;
                 case "staff":
-                    Dashboard.commandUtil.handleCommand(player, "sc " + msg);
+                    Launcher.getDashboard().getCommandUtil().handleCommand(player, "sc " + msg);
                     return;
                 case "admin":
-                    Dashboard.commandUtil.handleCommand(player, "ho " + msg);
+                    Launcher.getDashboard().getCommandUtil().handleCommand(player, "ho " + msg);
                     return;
             }
         }
@@ -250,7 +250,7 @@ public class ChatUtil {
             long releaseTime = mute.getRelease();
             Date currentTime = new Date();
             if (currentTime.getTime() > releaseTime) {
-                Dashboard.sqlUtil.unmutePlayer(player.getUniqueId());
+                Launcher.getDashboard().getSqlUtil().unmutePlayer(player.getUniqueId());
                 player.getMute().setMuted(false);
             } else {
                 String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
@@ -267,22 +267,22 @@ public class ChatUtil {
 
     public void sendChat(Player player, String msg) {
         logMessage(player.getUniqueId(), msg);
-        String sname = Dashboard.getServer(player.getServer()).getServerType();
+        String sname = Launcher.getDashboard().getServer(player.getServer()).getServerType();
         if (sname.startsWith("New")) {
             sname = sname.replaceAll("New", "");
         }
-        if (Dashboard.getServer(player.getServer()).isPark()) {
+        if (Launcher.getDashboard().getServer(player.getServer()).isPark()) {
             Rank rank = player.getRank();
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
             String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getName() + ": " +
                     rank.getChatColor() + msg;
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.isNewGuest()) {
                     continue;
                 }
-                if (Dashboard.getServer(tp.getServer()).isPark()) {
+                if (Launcher.getDashboard().getServer(tp.getServer()).isPark()) {
                     String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + message;
                     boolean mention = false;
                     if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
@@ -382,7 +382,7 @@ public class ChatUtil {
         UUID id = UUID.randomUUID();
         String response = "Please keep chat appropriate.";
         Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
-        Dashboard.warningUtil.trackWarning(warning);
+        Launcher.getDashboard().getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "possibly swears");
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
@@ -434,7 +434,7 @@ public class ChatUtil {
     }
 
     public boolean spamCheck(Player player, String msg) {
-        if (Dashboard.getPlayer(msg) != null) {
+        if (Launcher.getDashboard().getPlayer(msg) != null) {
             return false;
         }
         Character last = null;
@@ -447,7 +447,7 @@ public class ChatUtil {
                 continue;
             }
             if (c == ' ') {
-                if (Dashboard.getPlayer(word.trim()) != null) {
+                if (Launcher.getDashboard().getPlayer(word.trim()) != null) {
                     spam = false;
                 }
                 word = "";
@@ -464,7 +464,7 @@ public class ChatUtil {
             last = c;
             word += c;
         }
-        if (Dashboard.getPlayer(word.trim()) != null) {
+        if (Launcher.getDashboard().getPlayer(word.trim()) != null) {
             spam = false;
         }
         if (spam) {
@@ -476,7 +476,7 @@ public class ChatUtil {
         word = "";
         for (char c : msg.toCharArray()) {
             if (c == ' ') {
-                if (Dashboard.getPlayer(word.trim()) != null) {
+                if (Launcher.getDashboard().getPlayer(word.trim()) != null) {
                     spam = false;
                 }
                 word = "";
@@ -490,7 +490,7 @@ public class ChatUtil {
             }
             word += c;
         }
-        if (Dashboard.getPlayer(word.trim()) != null) {
+        if (Launcher.getDashboard().getPlayer(word.trim()) != null) {
             spam = false;
         }
         if (spam) {
@@ -540,7 +540,7 @@ public class ChatUtil {
     }
 
     public void staffChatMessage(String msg) {
-        for (Player player : Dashboard.getOnlinePlayers()) {
+        for (Player player : Launcher.getDashboard().getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                 try {
                     player.sendMessage(msg);
@@ -551,20 +551,20 @@ public class ChatUtil {
     }
 
     public void socialSpyMessage(Player from, Player to, String message, String command) {
-        if (Dashboard.getServer(from.getServer()).isPark()) {
+        if (Launcher.getDashboard().getServer(from.getServer()).isPark()) {
             String msg = ChatColor.WHITE + from.getName() + ": /" + command + " " + to.getName() + " " + message;
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId())) {
                     continue;
                 }
-                if (Dashboard.getServer(tp.getServer()).isPark()) {
+                if (Launcher.getDashboard().getServer(tp.getServer()).isPark()) {
                     tp.sendMessage(msg);
                 }
             }
         } else {
             String server = from.getServer();
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId())) {
                     continue;
@@ -577,21 +577,21 @@ public class ChatUtil {
     }
 
     public void socialSpyParty(Player player, Party party, String message, String command) {
-        if (Dashboard.getServer(player.getServer()).isPark()) {
+        if (Launcher.getDashboard().getServer(player.getServer()).isPark()) {
             String msg = ChatColor.WHITE + player.getName() + ": /" + command + " " + party.getLeader().getName() +
                     " " + message;
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         party.getMembers().contains(tp.getUniqueId())) {
                     continue;
                 }
-                if (Dashboard.getServer(tp.getServer()).isPark()) {
+                if (Launcher.getDashboard().getServer(tp.getServer()).isPark()) {
                     tp.sendMessage(msg);
                 }
             }
         } else {
             String server = player.getServer();
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         party.getMembers().contains(tp.getUniqueId())) {
                     continue;

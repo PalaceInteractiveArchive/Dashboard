@@ -14,6 +14,7 @@ public class CommandBug extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         PacketLink packet = new PacketLink(player.getUniqueId(), "https://goo.gl/sMMiYZ", "Click to report a bug",
                 ChatColor.YELLOW, true);
+
         player.send(packet);
     }
 }

@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 
 import java.util.UUID;
 
@@ -64,7 +64,7 @@ public class Server {
 
     public void emptyServer() {
         Server s = null;
-        for (Server server : Dashboard.serverUtil.getServers()) {
+        for (Server server : Launcher.getDashboard().getServerUtil().getServers()) {
             if (server.getUniqueId().equals(getUniqueId())) {
                 continue;
             }
@@ -78,9 +78,9 @@ public class Server {
                 }
             }
         }
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             if (tp.getServer().equals(getName())) {
-                Dashboard.serverUtil.sendPlayer(tp, s.getName());
+                Launcher.getDashboard().getServerUtil().sendPlayer(tp, s.getName());
             }
         }
     }

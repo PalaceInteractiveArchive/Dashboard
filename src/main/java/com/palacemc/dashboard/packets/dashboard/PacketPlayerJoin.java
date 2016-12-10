@@ -45,11 +45,13 @@ public class PacketPlayerJoin extends BasePacket {
 
     public PacketPlayerJoin fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.username = obj.get("username").getAsString();
         this.server = obj.get("server").getAsString();
         this.address = obj.get("address").getAsString();
@@ -58,6 +60,7 @@ public class PacketPlayerJoin extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());

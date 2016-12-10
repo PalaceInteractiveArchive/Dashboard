@@ -27,22 +27,26 @@ public class PacketAudioConnect extends BasePacket {
 
     public PacketAudioConnect fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

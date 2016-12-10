@@ -63,6 +63,7 @@ public class PacketTitle extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.title = obj.get("title").getAsString();
         this.subtitle = obj.get("subtitle").getAsString();
         this.fadeIn = obj.get("fadeIn").getAsInt();
@@ -74,6 +75,7 @@ public class PacketTitle extends BasePacket {
     @Override
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         obj.addProperty("id", this.id);
         obj.addProperty("uuid", this.uuid.toString());
         obj.addProperty("title", this.title);

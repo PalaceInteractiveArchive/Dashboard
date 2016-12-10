@@ -40,15 +40,18 @@ public class PacketMuteChat extends BasePacket {
         this.server = obj.get("server").getAsString();
         this.mute = obj.get("mute").getAsBoolean();
         this.source = obj.get("source").getAsString();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         obj.addProperty("id", this.id);
         obj.addProperty("server", this.server);
         obj.addProperty("mute", this.mute);
         obj.addProperty("source", this.source);
+
         return obj;
     }
 }

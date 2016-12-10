@@ -33,17 +33,21 @@ public class PacketAudioCommand extends BasePacket {
 
     public PacketAudioCommand fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
+
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.auth = obj.get("auth").getAsInt();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
@@ -51,6 +55,7 @@ public class PacketAudioCommand extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

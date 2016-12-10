@@ -74,39 +74,47 @@ public class PacketStaffListCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         JsonArray may = obj.get("empress").getAsJsonArray();
         for (JsonElement e : may) {
             this.empress.add(e.getAsString());
         }
+
         JsonArray man = obj.get("emperors").getAsJsonArray();
         for (JsonElement e : man) {
             this.emperors.add(e.getAsString());
         }
+
         JsonArray dev = obj.get("wizards").getAsJsonArray();
         for (JsonElement e : dev) {
             this.wizards.add(e.getAsString());
         }
+
         JsonArray crd = obj.get("paladins").getAsJsonArray();
         for (JsonElement e : crd) {
             this.paladins.add(e.getAsString());
         }
+
         JsonArray cas = obj.get("knights").getAsJsonArray();
         for (JsonElement e : cas) {
             this.knights.add(e.getAsString());
         }
+
         JsonArray ear = obj.get("squires").getAsJsonArray();
         for (JsonElement e : ear) {
             this.squires.add(e.getAsString());
         }
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            Gson gson = new Gson();
             obj.add("empress", gson.toJsonTree(this.empress).getAsJsonArray());
             obj.add("emperors", gson.toJsonTree(this.emperors).getAsJsonArray());
             obj.add("wizards", gson.toJsonTree(this.wizards).getAsJsonArray());

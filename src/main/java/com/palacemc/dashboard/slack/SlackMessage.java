@@ -6,8 +6,7 @@ package com.palacemc.dashboard.slack;
 public class SlackMessage {
     private StringBuilder textBuffer = new StringBuilder();
 
-    public SlackMessage() {
-    }
+    public SlackMessage() { }
 
     public SlackMessage(String text) {
         text(text);

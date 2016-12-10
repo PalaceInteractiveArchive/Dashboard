@@ -66,16 +66,19 @@ public class PacketLink extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.url = obj.get("url").getAsString();
         this.name = obj.get("name").getAsString();
         this.color = ChatColor.valueOf(obj.get("color").getAsString());
         this.bold = obj.get("bold").getAsBoolean();
         this.spacing = obj.get("spacing").getAsBoolean();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
@@ -87,6 +90,7 @@ public class PacketLink extends BasePacket {
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

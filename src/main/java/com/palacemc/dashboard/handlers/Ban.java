@@ -4,11 +4,13 @@ import java.util.UUID;
 
 public class Ban {
     private UUID uuid;
+
     private String name;
-    private boolean permanent;
-    private long release;
     private String reason;
     private String source;
+
+    private boolean permanent;
+    private long release;
 
     public Ban(UUID uuid, String name, boolean permanent, long release, String reason, String source) {
         this.uuid = uuid;

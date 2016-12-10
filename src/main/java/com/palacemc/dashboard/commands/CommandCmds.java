@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.commands;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -23,15 +23,19 @@ public class CommandCmds extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         player.sendMessage(ChatColor.GREEN + "Registered Commands:");
         String msg = null;
-        TreeMap<String, MagicCommand> map = Dashboard.commandUtil.getCommands();
+
+        TreeMap<String, MagicCommand> map = Launcher.getDashboard().getCommandUtil().getCommands();
+
         for (Map.Entry<String, MagicCommand> entry : map.entrySet()) {
             if (msg != null) {
                 msg += "\n";
             } else {
                 msg = "";
             }
+
             msg += "- /" + entry.getKey() + " ";
             List<String> aliases = entry.getValue().getAliases();
+
             if (!aliases.isEmpty()) {
                 msg += "(";
                 for (int i = 0; i < aliases.size(); i++) {
@@ -42,8 +46,10 @@ public class CommandCmds extends MagicCommand {
                 }
                 msg += ") ";
             }
+
             msg += entry.getValue().getRank().getName();
         }
+
         player.sendMessage(ChatColor.YELLOW + msg);
     }
 }

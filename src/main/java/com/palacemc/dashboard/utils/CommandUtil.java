@@ -74,8 +74,10 @@ public class CommandUtil {
             String[] parts = message.split(" ");
             String command = parts[0].toLowerCase();
             String[] args = new String[parts.length - 1];
+
             int i = 0;
             boolean first = true;
+
             for (String s : parts) {
                 if (first) {
                     first = false;
@@ -84,7 +86,9 @@ public class CommandUtil {
                 args[i] = s;
                 i++;
             }
+
             MagicCommand cmd = null;
+
             if (!commands.containsKey(command)) {
                 for (MagicCommand c : new ArrayList<>(commands.values())) {
                     if (c.getAliases().contains(command)) {
@@ -95,10 +99,13 @@ public class CommandUtil {
             } else {
                 cmd = commands.get(command);
             }
+
             if (cmd == null) {
                 return false;
             }
+
             execute(player, cmd, command, args);
+
             return true;
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "An internal error occured whilst executing this command.");
@@ -120,6 +127,7 @@ public class CommandUtil {
             player.sendMessage(ChatColor.RED + "You do not have permission to execute this command!");
             return;
         }
+
         c.execute(player, command, args);
     }
 
@@ -127,11 +135,13 @@ public class CommandUtil {
         if (commands.containsKey(label.toLowerCase())) {
             commands.remove(label.toLowerCase());
         }
+
         commands.put(label.toLowerCase(), command);
     }
 
     public void tabComplete(Player player, String command, List<String> args, List<String> results) {
         MagicCommand cmd = null;
+
         if (!commands.containsKey(command)) {
             for (MagicCommand c : new ArrayList<>(commands.values())) {
                 if (c.getAliases().contains(command)) {
@@ -142,32 +152,39 @@ public class CommandUtil {
         } else {
             cmd = commands.get(command);
         }
+
         if (cmd == null) {
             return;
         }
+
         Iterable<String> l = cmd.onTabComplete(player, args);
         List<String> list = new ArrayList<>();
+
         for (String s : l) {
             list.add(s);
         }
+
         if (!list.isEmpty()) {
             results.clear();
             for (String s : list) {
                 results.add(s);
             }
         }
+
         PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), command, args, results);
         player.send(packet);
     }
 
     public List<String> getCommandsAndAliases() {
         List<String> list = new ArrayList<>();
+
         for (Map.Entry<String, MagicCommand> entry : commands.entrySet()) {
             list.add(entry.getKey());
             for (String s : entry.getValue().getAliases()) {
                 list.add(s);
             }
         }
+
         return list;
     }
 }

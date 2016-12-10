@@ -23,6 +23,7 @@ public class SlackService {
 
     public SlackService(Proxy proxy) {
         NetHttpTransport.Builder builder = new NetHttpTransport.Builder();
+
         builder.setProxy(proxy);
         requestFactory = builder.build().createRequestFactory();
     }
@@ -33,20 +34,23 @@ public class SlackService {
 
     public void push(String webHookUrl, SlackMessage text, List<SlackAttachment> attachments) throws IOException {
         Map<String, Object> payload = new HashMap<>();
+
         if (!attachments.isEmpty()) {
             payload.put("attachments", attachments);
         }
+
         payload.put("text", text.toString());
         execute(webHookUrl, payload);
     }
 
     public void push(String webHookUrl, SlackMessage text) throws IOException {
-        push(webHookUrl, text, new ArrayList<SlackAttachment>());
+        push(webHookUrl, text, new ArrayList<>());
     }
 
     public void execute(String webHookUrl, Map<String, Object> payload) throws IOException {
         String jsonEncodedMessage = new Gson().toJson(payload);
         HashMap<Object, Object> payloadToSend = Maps.newHashMap();
+
         payloadToSend.put("payload", jsonEncodedMessage);
 
         requestFactory.buildPostRequest(new GenericUrl(webHookUrl), new UrlEncodedContent(payloadToSend))

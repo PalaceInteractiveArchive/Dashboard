@@ -1,8 +1,8 @@
 package com.palacemc.dashboard.utils;
 
-import com.palacemc.dashboard.Dashboard;
-import com.palacemc.dashboard.handlers.Player;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
+import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Warning;
 
 import java.util.*;
@@ -43,7 +43,7 @@ public class WarningUtil {
                 return;
             }
             warnings.remove(warning.getId());
-            if (Dashboard.getPlayer(warning.getName()) == null) {
+            if (Launcher.getDashboard().getPlayer(warning.getName()) == null) {
                 player.sendMessage(ChatColor.RED + "That player has logged off!");
                 return;
             }
@@ -54,7 +54,7 @@ public class WarningUtil {
             }
             String[] args = new String[list.size()];
             list.toArray(args);
-            Dashboard.commandUtil.getCommand("msg").execute(player, "msg", args);
+            Launcher.getDashboard().getCommandUtil().getCommand("msg").execute(player, "msg", args);
         } catch (Exception ignored) {
             ignored.printStackTrace();
             player.sendMessage(ChatColor.RED + "There was an error processing that warning!");

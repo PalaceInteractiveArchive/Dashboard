@@ -42,23 +42,29 @@ public class PacketJoinCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         JsonArray list = obj.get("servers").getAsJsonArray();
+
         for (JsonElement e : list) {
             this.servers.add(e.getAsString());
         }
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            Gson gson = new Gson();
             obj.add("servers", gson.toJsonTree(this.servers).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

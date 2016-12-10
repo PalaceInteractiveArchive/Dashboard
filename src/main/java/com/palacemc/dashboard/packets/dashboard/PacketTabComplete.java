@@ -21,7 +21,7 @@ public class PacketTabComplete extends BasePacket {
     private List<String> results = new ArrayList<>();
 
     public PacketTabComplete() {
-        this(null, "", new ArrayList<String>(), new ArrayList<String>());
+        this(null, "", new ArrayList<>(), new ArrayList<>());
     }
 
     public PacketTabComplete(UUID uuid, String command, List<String> args, List<String> results) {
@@ -54,11 +54,14 @@ public class PacketTabComplete extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.command = obj.get("command").getAsString();
+
         JsonArray args = obj.get("args").getAsJsonArray();
         for (JsonElement e : args) {
             this.args.add(e.getAsString());
         }
+
         JsonArray list = obj.get("results").getAsJsonArray();
         for (JsonElement e : list) {
             this.results.add(e.getAsString());
@@ -69,10 +72,11 @@ public class PacketTabComplete extends BasePacket {
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
             obj.addProperty("command", this.command);
-            Gson gson = new Gson();
             obj.add("args", gson.toJsonTree(this.args).getAsJsonArray());
             obj.add("results", gson.toJsonTree(this.results).getAsJsonArray());
         } catch (Exception e) {

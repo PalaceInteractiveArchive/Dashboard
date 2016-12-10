@@ -1,6 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +36,7 @@ public abstract class MagicCommand {
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         List<String> list = new ArrayList<>();
         if (tabCompletePlayers) {
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 list.add(tp.getName());
             }
             if (args.size() > 0) {

@@ -53,11 +53,13 @@ public class PacketUpdateMOTD extends BasePacket {
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("motd", this.motd);
             obj.addProperty("maintenance", this.maintenance);
-            Gson gson = new Gson();
             obj.add("info", gson.toJsonTree(this.info).getAsJsonArray());
         } catch (Exception e) {
             return null;

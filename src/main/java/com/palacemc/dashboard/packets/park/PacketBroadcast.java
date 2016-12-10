@@ -33,14 +33,17 @@ public class PacketBroadcast extends BasePacket {
         this.id = obj.get("id").getAsInt();
         this.message = obj.get("message").getAsString();
         this.source = obj.get("source").getAsString();
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         obj.addProperty("id", this.id);
         obj.addProperty("message", this.message);
         obj.addProperty("source", this.source);
+
         return obj;
     }
 }

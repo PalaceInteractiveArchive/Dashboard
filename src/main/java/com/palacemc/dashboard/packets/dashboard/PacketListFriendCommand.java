@@ -54,27 +54,34 @@ public class PacketListFriendCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
+
         this.page = obj.get("page").getAsInt();
         this.maxpage = obj.get("maxpage").getAsInt();
+
         JsonArray list = obj.get("friendlist").getAsJsonArray();
+
         for (JsonElement e : list) {
             this.friendlist.add(e.getAsString());
         }
+
         return this;
     }
 
     public JsonObject getJSON() {
         JsonObject obj = new JsonObject();
+
         try {
+            Gson gson = new Gson();
+
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
             obj.addProperty("page", this.page);
             obj.addProperty("maxpage", this.maxpage);
-            Gson gson = new Gson();
             obj.add("friendlist", gson.toJsonTree(this.friendlist).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
+
         return obj;
     }
 }

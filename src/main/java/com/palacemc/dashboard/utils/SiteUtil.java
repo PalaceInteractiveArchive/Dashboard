@@ -2,7 +2,7 @@ package com.palacemc.dashboard.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.palacemc.dashboard.Dashboard;
+import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 import com.sun.net.httpserver.Headers;
@@ -45,7 +45,8 @@ public class SiteUtil implements HttpHandler {
             List<String> architects = new ArrayList<>();
             List<String> knights = new ArrayList<>();
             List<String> squires = new ArrayList<>();
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+
+            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 Rank r = tp.getRank();
                 if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                     switch (r) {
