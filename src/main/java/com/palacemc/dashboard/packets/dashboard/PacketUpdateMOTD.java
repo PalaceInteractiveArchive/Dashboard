@@ -2,10 +2,10 @@ package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +14,12 @@ import java.util.List;
  * Created by Marc on 8/24/16
  */
 public class PacketUpdateMOTD extends BasePacket {
-    private String motd;
-    private String maintenance;
-    private List<String> info = new ArrayList<>();
+    @Getter private String motd;
+    @Getter private String maintenance;
+    @Getter private List<String> info = new ArrayList<>();
 
     public PacketUpdateMOTD() {
-        this("", "", new ArrayList<String>());
+        this("", "", new ArrayList<>());
     }
 
     public PacketUpdateMOTD(String motd, String maintenance, List<String> info) {
@@ -29,25 +29,13 @@ public class PacketUpdateMOTD extends BasePacket {
         this.info = info;
     }
 
-    public String getMOTD() {
-        return motd;
-    }
-
-    public String getMaintenance() {
-        return maintenance;
-    }
-
-    public List<String> getInfo() {
-        return info;
-    }
-
     public PacketUpdateMOTD fromJSON(JsonObject obj) {
         this.motd = obj.get("motd").getAsString();
         this.maintenance = obj.get("maintenance").getAsString();
-        JsonArray list = obj.get("info").getAsJsonArray();
-        for (JsonElement e : list) {
-            this.info.add(e.getAsString());
-        }
+
+        JsonArray array = obj.get("info").getAsJsonArray();
+
+        array.forEach(element -> this.info.add(element.getAsString()));
         return this;
     }
 

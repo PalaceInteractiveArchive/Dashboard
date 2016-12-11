@@ -30,22 +30,22 @@ public class CommandStaffList extends MagicCommand {
             if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                 switch (r) {
                     case SQUIRE:
-                        squire.add(tp.getName() + ":" + tp.getServer());
+                        squire.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                     case KNIGHT:
-                        knight.add(tp.getName() + ":" + tp.getServer());
+                        knight.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                     case PALADIN:
-                        paladin.add(tp.getName() + ":" + tp.getServer());
+                        paladin.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                     case WIZARD:
-                        wizard.add(tp.getName() + ":" + tp.getServer());
+                        wizard.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                     case EMPEROR:
-                        emperor.add(tp.getName() + ":" + tp.getServer());
+                        emperor.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                     case EMPRESS:
-                        empress.add(tp.getName() + ":" + tp.getServer());
+                        empress.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                 }
             }
@@ -57,7 +57,7 @@ public class CommandStaffList extends MagicCommand {
         Collections.sort(paladin);
         Collections.sort(knight);
         Collections.sort(squire);
-        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), empress, emperor,
+        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUuid(), empress, emperor,
                 wizard, paladin, knight, squire);
         player.send(packet);
     }

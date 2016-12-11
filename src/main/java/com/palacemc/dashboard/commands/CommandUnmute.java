@@ -29,8 +29,8 @@ public class CommandUnmute extends MagicCommand {
         if (tp == null) {
             uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
         } else {
-            uuid = tp.getUniqueId();
-            username = tp.getName();
+            uuid = tp.getUuid();
+            username = tp.getUsername();
         }
 
         if (uuid == null) {
@@ -40,6 +40,6 @@ public class CommandUnmute extends MagicCommand {
 
         Launcher.getDashboard().getSqlUtil().unmutePlayer(uuid);
         tp.getMute().setMuted(false);
-        Launcher.getDashboard().getModerationUtil().announceUnmute(username, player.getName());
+        Launcher.getDashboard().getModerationUtil().announceUnmute(username, player.getUsername());
     }
 }

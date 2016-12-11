@@ -3,14 +3,15 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketPlayOnceGlobal extends BasePacket {
-    private int audioid = 0;
-    private String name = "";
-    private float volume = 1.0F;
+    @Getter private int audioid = 0;
+    @Getter private String name = "";
+    @Getter private float volume = 1.0F;
 
     public PacketPlayOnceGlobal() {
         this(-1, "", 1.0F);
@@ -28,23 +29,11 @@ public class PacketPlayOnceGlobal extends BasePacket {
         this.volume = volume;
     }
 
-    public float getVolume() {
-        return this.volume;
-    }
-
-    public int getAudioID() {
-        return this.audioid;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public PacketPlayOnceGlobal fromJSON(JsonObject obj) {
+    public PacketPlayOnceGlobal fromJSON(JsonObject object) {
         try {
-            this.audioid = obj.get("audioid").getAsInt();
-            this.name = obj.get("name").getAsString();
-            this.volume = obj.get("volume").getAsFloat();
+            this.audioid = object.get("audioid").getAsInt();
+            this.name = object.get("name").getAsString();
+            this.volume = object.get("volume").getAsFloat();
         } catch (Exception e) {
             return null;
         }
@@ -52,16 +41,16 @@ public class PacketPlayOnceGlobal extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("audioid", this.audioid);
-            obj.addProperty("name", this.name);
-            obj.addProperty("volume", this.volume);
+            object.addProperty("id", this.id);
+            object.addProperty("audioid", this.audioid);
+            object.addProperty("name", this.name);
+            object.addProperty("volume", this.volume);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

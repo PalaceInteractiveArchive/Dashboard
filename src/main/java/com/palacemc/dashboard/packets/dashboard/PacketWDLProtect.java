@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
  * Created by Marc on 9/17/16
  */
 public class PacketWDLProtect extends BasePacket {
-    private UUID uuid;
+    @Getter private UUID uuid;
 
     public PacketWDLProtect() {
         this(null);
@@ -19,10 +20,6 @@ public class PacketWDLProtect extends BasePacket {
     public PacketWDLProtect(UUID uuid) {
         this.id = PacketID.Dashboard.WDLPROTECT.getID();
         this.uuid = uuid;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
     }
 
     public PacketWDLProtect fromJSON(JsonObject obj) {

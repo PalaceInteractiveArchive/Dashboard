@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.park;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,8 +11,8 @@ import java.util.UUID;
  * Created by Marc on 9/18/16
  */
 public class PacketInventoryStatus extends BasePacket {
-    private UUID uuid;
-    private int status;
+    @Getter private UUID uuid;
+    @Getter private int status;
 
     /**
      * 0 = uploaded (sent from previous server)
@@ -22,17 +23,9 @@ public class PacketInventoryStatus extends BasePacket {
     }
 
     public PacketInventoryStatus(UUID uuid, int status) {
-        this.id = PacketID.Park.INVENTORYSTATUS.getID();
+        this.id = PacketID.Park.INVENTORYSTATUS.getId();
         this.uuid = uuid;
         this.status = status;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public int getStatus() {
-        return status;
     }
 
     public PacketInventoryStatus fromJSON(JsonObject obj) {

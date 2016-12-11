@@ -25,12 +25,12 @@ public class FriendUtil {
         }
         if (player.getServer().equals(target.getServer())) {
             player.sendMessage(ChatColor.RED + "You're already on the same server as " + ChatColor.AQUA +
-                    target.getName() + "!");
+                    target.getUsername() + "!");
             return;
         }
         try {
             Launcher.getDashboard().getServerUtil().sendPlayer(player, target.getServer());
-            player.sendMessage(ChatColor.BLUE + "You connected to the server " + ChatColor.GREEN + target.getName() +
+            player.sendMessage(ChatColor.BLUE + "You connected to the server " + ChatColor.GREEN + target.getUsername() +
                     " " + ChatColor.BLUE + "is on! (" + target.getServer() + ")");
         } catch (Exception ignored) {
         }
@@ -74,7 +74,7 @@ public class FriendUtil {
         for (String s : currentFriends.subList(startAmount, endAmount)) {
             fsOnPage.add(s);
         }
-        PacketListFriendCommand packet = new PacketListFriendCommand(player.getUniqueId(), page, maxPage, fsOnPage);
+        PacketListFriendCommand packet = new PacketListFriendCommand(player.getUuid(), page, maxPage, fsOnPage);
         player.send(packet);
     }
 
@@ -82,7 +82,7 @@ public class FriendUtil {
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET toggled=? WHERE uuid=?");
             sql.setInt(1, player.hasFriendToggledOff() ? 1 : 0);
-            sql.setString(2, player.getUniqueId().toString());
+            sql.setString(2, player.getUuid().toString());
             sql.execute();
             sql.close();
         } catch (SQLException e) {
@@ -98,7 +98,7 @@ public class FriendUtil {
             player.sendMessage(" ");
             return;
         }
-        PacketListRequestCommand packet = new PacketListRequestCommand(player.getUniqueId(), new ArrayList<>(requests.values()));
+        PacketListRequestCommand packet = new PacketListRequestCommand(player.getUuid(), new ArrayList<>(requests.values()));
         player.send(packet);
     }
 
@@ -169,7 +169,7 @@ public class FriendUtil {
     }
 
     public static void addFriend(Player player, String name) {
-        if (name.equalsIgnoreCase(player.getName())) {
+        if (name.equalsIgnoreCase(player.getUsername())) {
             player.sendMessage(ChatColor.RED + "You can't be your own friend, sorry!");
             return;
         }
@@ -185,7 +185,7 @@ public class FriendUtil {
             try {
                 UUID tuuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(name);
                 HashMap<UUID, String> requests = getList(tuuid, 0);
-                if (requests.containsKey(player.getUniqueId())) {
+                if (requests.containsKey(player.getUuid())) {
                     player.sendMessage(ChatColor.RED + "You have already sent this player a Friend Request!");
                     return;
                 }
@@ -202,20 +202,20 @@ public class FriendUtil {
                  */
                 try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
                     PreparedStatement sql = connection.prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
-                    sql.setString(1, player.getUniqueId().toString());
+                    sql.setString(1, player.getUuid().toString());
                     sql.setString(2, tuuid.toString());
                     sql.execute();
                     sql.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                Launcher.getDashboard().getActivityUtil().logActivity(player.getUniqueId(), "Send Friend Request", name);
+                Launcher.getDashboard().getActivityUtil().logActivity(player.getUuid(), "Send Friend Request", name);
             } catch (Exception ignored) {
                 player.sendMessage(ChatColor.RED + "That player could not be found!");
             }
             return;
         }
-        if (tp.getRequests().containsKey(player.getUniqueId())) {
+        if (tp.getRequests().containsKey(player.getUuid())) {
             player.sendMessage(ChatColor.RED + "You have already sent this player a Friend Request!");
             return;
         }
@@ -225,24 +225,24 @@ public class FriendUtil {
                 return;
             }
         }
-        tp.getRequests().put(player.getUniqueId(), player.getName());
-        player.sendMessage(ChatColor.YELLOW + "You have sent " + ChatColor.AQUA + tp.getName() + ChatColor.YELLOW +
+        tp.getRequests().put(player.getUuid(), player.getUsername());
+        player.sendMessage(ChatColor.YELLOW + "You have sent " + ChatColor.AQUA + tp.getUsername() + ChatColor.YELLOW +
                 " a Friend Request!");
-        PacketFriendRequest packet = new PacketFriendRequest(tp.getUniqueId(), player.getName());
+        PacketFriendRequest packet = new PacketFriendRequest(tp.getUuid(), player.getUsername());
         tp.send(packet);
         /**
          * Add request to database
          */
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
-            sql.setString(1, player.getUniqueId().toString());
-            sql.setString(2, tp.getUniqueId().toString());
+            sql.setString(1, player.getUuid().toString());
+            sql.setString(2, tp.getUuid().toString());
             sql.execute();
             sql.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        Launcher.getDashboard().getActivityUtil().logActivity(player.getUniqueId(), "Send Friend Request", name);
+        Launcher.getDashboard().getActivityUtil().logActivity(player.getUuid(), "Send Friend Request", name);
     }
 
     public static void removeFriend(Player player, String name) {
@@ -259,8 +259,8 @@ public class FriendUtil {
                         " from your Friend List!");
                 try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
                     PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
-                    sql.setString(1, player.getUniqueId().toString());
-                    sql.setString(2, player.getUniqueId().toString());
+                    sql.setString(1, player.getUuid().toString());
+                    sql.setString(2, player.getUuid().toString());
                     sql.setString(3, tuuid.toString());
                     sql.setString(4, tuuid.toString());
                     sql.execute();
@@ -271,30 +271,30 @@ public class FriendUtil {
             } catch (Exception ignored) {
                 player.sendMessage(ChatColor.RED + "That player could not be found!");
             }
-            Launcher.getDashboard().getActivityUtil().logActivity(player.getUniqueId(), "Remove Friend", name);
+            Launcher.getDashboard().getActivityUtil().logActivity(player.getUuid(), "Remove Friend", name);
             return;
         }
-        if (!player.getFriends().containsKey(tp.getUniqueId())) {
+        if (!player.getFriends().containsKey(tp.getUuid())) {
             player.sendMessage(ChatColor.RED + "That player isn't on your Friend List!");
             return;
         }
-        player.getFriends().remove(tp.getUniqueId());
-        tp.getFriends().remove(player.getUniqueId());
-        player.sendMessage(ChatColor.RED + "You removed " + ChatColor.GREEN + tp.getName() + ChatColor.RED +
+        player.getFriends().remove(tp.getUuid());
+        tp.getFriends().remove(player.getUuid());
+        player.sendMessage(ChatColor.RED + "You removed " + ChatColor.GREEN + tp.getUsername() + ChatColor.RED +
                 " from your Friend List!");
-        tp.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.RED + " removed you from their Friend List!");
+        tp.sendMessage(ChatColor.GREEN + player.getUsername() + ChatColor.RED + " removed you from their Friend List!");
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
-            sql.setString(1, player.getUniqueId().toString());
-            sql.setString(2, player.getUniqueId().toString());
-            sql.setString(3, tp.getUniqueId().toString());
-            sql.setString(4, tp.getUniqueId().toString());
+            sql.setString(1, player.getUuid().toString());
+            sql.setString(2, player.getUuid().toString());
+            sql.setString(3, tp.getUuid().toString());
+            sql.setString(4, tp.getUuid().toString());
             sql.execute();
             sql.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        Launcher.getDashboard().getActivityUtil().logActivity(player.getUniqueId(), "Remove Friend", name);
+        Launcher.getDashboard().getActivityUtil().logActivity(player.getUuid(), "Remove Friend", name);
     }
 
     public static void acceptFriend(Player player, String name) {
@@ -316,8 +316,8 @@ public class FriendUtil {
                 "Friend Request!");
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("UPDATE friends SET status=1 WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
-            sql.setString(1, player.getUniqueId().toString());
-            sql.setString(2, player.getUniqueId().toString());
+            sql.setString(1, player.getUuid().toString());
+            sql.setString(2, player.getUuid().toString());
             sql.setString(3, tuuid.toString());
             sql.setString(4, tuuid.toString());
             sql.execute();
@@ -326,11 +326,11 @@ public class FriendUtil {
         }
         Player tp = Launcher.getDashboard().getPlayer(tuuid);
         if (tp != null) {
-            tp.getFriends().put(player.getUniqueId(), player.getName());
-            tp.sendMessage(player.getRank().getTagColor() + player.getName() + ChatColor.YELLOW +
+            tp.getFriends().put(player.getUuid(), player.getUsername());
+            tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.YELLOW +
                     " has accepted your Friend Request!");
         }
-        Launcher.getDashboard().getActivityUtil().logActivity(player.getUniqueId(), "Accept Friend Request", name);
+        Launcher.getDashboard().getActivityUtil().logActivity(player.getUuid(), "Accept Friend Request", name);
     }
 
     public static void denyFriend(Player player, String name) {
@@ -351,15 +351,15 @@ public class FriendUtil {
                 "Friend Request!");
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
-            sql.setString(1, player.getUniqueId().toString());
-            sql.setString(2, player.getUniqueId().toString());
+            sql.setString(1, player.getUuid().toString());
+            sql.setString(2, player.getUuid().toString());
             sql.setString(3, tuuid.toString());
             sql.setString(4, tuuid.toString());
             sql.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        Launcher.getDashboard().getActivityUtil().logActivity(player.getUniqueId(), "Denied Friend Request", name);
+        Launcher.getDashboard().getActivityUtil().logActivity(player.getUuid(), "Denied Friend Request", name);
     }
 
     public static boolean hasFriendsToggledOff(UUID uuid) {

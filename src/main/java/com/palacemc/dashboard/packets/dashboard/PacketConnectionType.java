@@ -3,12 +3,13 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 7/14/16
  */
 public class PacketConnectionType extends BasePacket {
-    private ConnectionType type;
+    @Getter private ConnectionType type;
 
     public PacketConnectionType() {
         this(null);
@@ -19,22 +20,22 @@ public class PacketConnectionType extends BasePacket {
         this.type = type;
     }
 
-    public PacketConnectionType fromJSON(JsonObject obj) {
-        this.type = ConnectionType.fromString(obj.get("type").getAsString());
+    public PacketConnectionType fromJSON(JsonObject object) {
+        this.type = ConnectionType.fromString(object.get("type").getAsString());
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("type", this.type.name().toLowerCase());
+            object.addProperty("id", this.id);
+            object.addProperty("type", this.type.name().toLowerCase());
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 
     public ConnectionType getType() {

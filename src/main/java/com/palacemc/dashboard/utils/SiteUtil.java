@@ -51,25 +51,25 @@ public class SiteUtil implements HttpHandler {
                 if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                     switch (r) {
                         case SQUIRE:
-                            squires.add(tp.getName());
+                            squires.add(tp.getUsername());
                             break;
                         case KNIGHT:
-                            knights.add(tp.getName());
+                            knights.add(tp.getUsername());
                             break;
                         case ARCHITECT:
-                            architects.add(tp.getName());
+                            architects.add(tp.getUsername());
                             break;
                         case PALADIN:
-                            paladins.add(tp.getName());
+                            paladins.add(tp.getUsername());
                             break;
                         case WIZARD:
-                            wizards.add(tp.getName());
+                            wizards.add(tp.getUsername());
                             break;
                         case EMPEROR:
-                            emperors.add(tp.getName());
+                            emperors.add(tp.getUsername());
                             break;
                         case EMPRESS:
-                            empress.add(tp.getName());
+                            empress.add(tp.getUsername());
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.bungee;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,24 +11,20 @@ import java.util.UUID;
  * Created by Marc on 11/25/16
  */
 public class PacketBungeeID extends BasePacket {
-    private UUID bungeeID;
+    @Getter private UUID bungeeID;
 
     public PacketBungeeID() {
         this(null);
     }
 
     public PacketBungeeID(UUID bungeeID) {
-        this.id = PacketID.Bungee.BUNGEEID.getID();
+        this.id = PacketID.Bungee.BUNGEEID.getId();
         this.bungeeID = bungeeID;
     }
 
-    public UUID getBungeeID() {
-        return bungeeID;
-    }
-
-    public PacketBungeeID fromJSON(JsonObject obj) {
+    public PacketBungeeID fromJSON(JsonObject object) {
         try {
-            this.bungeeID = UUID.fromString(obj.get("bid").getAsString());
+            this.bungeeID = UUID.fromString(object.get("bid").getAsString());
         } catch (Exception e) {
             this.bungeeID = null;
         }
@@ -35,14 +32,14 @@ public class PacketBungeeID extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("bid", this.bungeeID.toString());
+            object.addProperty("id", this.id);
+            object.addProperty("bid", this.bungeeID.toString());
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

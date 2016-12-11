@@ -171,7 +171,7 @@ public class CommandUtil {
             }
         }
 
-        PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), command, args, results);
+        PacketTabComplete packet = new PacketTabComplete(player.getUuid(), command, args, results);
         player.send(packet);
     }
 

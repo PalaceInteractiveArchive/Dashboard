@@ -11,8 +11,8 @@ import io.netty.handler.codec.http.HttpServerCodec;
  */
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
-    public void initChannel(SocketChannel ch) throws Exception {
-        ChannelPipeline pipeline = ch.pipeline();
+    public void initChannel(SocketChannel socketChannel) {
+        ChannelPipeline pipeline = socketChannel.pipeline();
 
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(65536));

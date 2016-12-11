@@ -65,10 +65,7 @@ public enum ChatColor {
     ChatColor(char code, String name) {
         this.code = code;
         this.name = name;
-        this.toString = new String(new char[]
-                {
-                        COLOR_CHAR, code
-                });
+        this.toString = new String(new char[] { COLOR_CHAR, code });
     }
 
     @Override
@@ -112,7 +109,7 @@ public enum ChatColor {
         return BY_CHAR.get(code);
     }
 
-    public String getName() {
+    public String getUsername() {
         return name;
     }
 }

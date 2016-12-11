@@ -25,7 +25,7 @@ public class CommandBanIP extends MagicCommand {
 
         String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
         reason = reason.trim();
-        Launcher.getDashboard().getSqlUtil().banIP(ip, reason, player.getName());
+        Launcher.getDashboard().getSqlUtil().banIP(ip, reason, player.getUsername());
 
         if (!ip.contains("*")) {
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
@@ -49,6 +49,6 @@ public class CommandBanIP extends MagicCommand {
                 }
             }
         }
-        Launcher.getDashboard().getModerationUtil().announceBan(new AddressBan(ip, reason, player.getName()));
+        Launcher.getDashboard().getModerationUtil().announceBan(new AddressBan(ip, reason, player.getUsername()));
     }
 }

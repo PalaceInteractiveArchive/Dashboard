@@ -44,7 +44,7 @@ public class CommandModLog extends MagicCommand {
                     return;
                 }
             } else {
-                uuid = tp.getUniqueId();
+                uuid = tp.getUuid();
             }
 
             String action;

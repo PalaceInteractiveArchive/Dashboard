@@ -22,15 +22,15 @@ public class CommandSC extends MagicCommand {
             }
 
             String msg;
-            player = Launcher.getDashboard().getPlayer(player.getUniqueId());
+            player = Launcher.getDashboard().getPlayer(player.getUuid());
             Rank rank = player.getRank();
             msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getNameWithBrackets()
-                    + " " + ChatColor.GRAY + player.getName() + ": " + ChatColor.WHITE +
+                    + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
                     ChatColor.translateAlternateColorCodes('&', message);
 
             Launcher.getDashboard().getChatUtil().staffChatMessage(msg);
             if (player != null) {
-                Launcher.getDashboard().getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getName() + " " + message);
+                Launcher.getDashboard().getChatUtil().logMessage(player.getUuid(), "/sc " + player.getUsername() + " " + message);
             }
             return;
         }

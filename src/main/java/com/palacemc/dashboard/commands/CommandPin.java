@@ -26,7 +26,7 @@ public class CommandPin extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
-        if (generating.contains(player.getUniqueId())) {
+        if (generating.contains(player.getUuid())) {
             player.sendMessage(ChatColor.RED + "We're already generating your PIN!");
             return;
         }
@@ -66,13 +66,13 @@ public class CommandPin extends MagicCommand {
         }
 
         player.sendMessage(ChatColor.GREEN + "Generating your PIN for MyMCMagic...");
-        generating.add(player.getUniqueId());
+        generating.add(player.getUuid());
 
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             try (Connection connection = Launcher.getDashboard().getActivityUtil().getConnection()) {
                 PreparedStatement account = connection.prepareStatement("SELECT id FROM users WHERE uuid=?");
 
-                account.setString(1, player.getUniqueId().toString());
+                account.setString(1, player.getUuid().toString());
 
                 ResultSet hasAccount = account.executeQuery();
                 boolean has = hasAccount.next();
@@ -87,13 +87,13 @@ public class CommandPin extends MagicCommand {
                             ChatColor.BLUE + "Sign In " + ChatColor.GREEN + "button.");
                     player.sendMessage(ChatColor.GREEN + "Contact a Cast Member on the server if you need further assistance.");
 
-                    generating.remove(player.getUniqueId());
+                    generating.remove(player.getUuid());
                     return;
                 }
 
                 PreparedStatement exist = connection.prepareStatement("SELECT pin FROM pins WHERE uuid=?");
 
-                exist.setString(1, player.getUniqueId().toString());
+                exist.setString(1, player.getUuid().toString());
 
                 ResultSet doesExist = exist.executeQuery();
                 boolean exists = doesExist.next();
@@ -107,10 +107,10 @@ public class CommandPin extends MagicCommand {
                     player.sendMessage(ChatColor.GREEN + "Your PIN has already been generated! It is " +
                             ChatColor.AQUA + pin);
 
-                    PacketMyMCMagicRegister packet = new PacketMyMCMagicRegister(player.getUniqueId(), pin);
+                    PacketMyMCMagicRegister packet = new PacketMyMCMagicRegister(player.getUuid(), pin);
                     player.send(packet);
 
-                    generating.remove(player.getUniqueId());
+                    generating.remove(player.getUuid());
                     return;
                 }
 
@@ -124,7 +124,7 @@ public class CommandPin extends MagicCommand {
                     tries++;
                     if (tries >= 10) {
                         player.sendMessage(ChatColor.GREEN + "We've tried to generate a PIN 10 times but all were taken. Try again soon!");
-                        generating.remove(player.getUniqueId());
+                        generating.remove(player.getUuid());
                         return;
                     }
                     pin = generatePIN();
@@ -132,7 +132,7 @@ public class CommandPin extends MagicCommand {
 
                 PreparedStatement add = connection.prepareStatement("INSERT INTO pins (uuid,pin) VALUES (?,?)");
 
-                add.setString(1, player.getUniqueId().toString());
+                add.setString(1, player.getUuid().toString());
                 add.setInt(2, pin);
 
                 add.execute();
@@ -141,16 +141,16 @@ public class CommandPin extends MagicCommand {
                 player.sendMessage(ChatColor.GREEN + "Your PIN has been generated! It is " +
                         ChatColor.AQUA + pin);
 
-                PacketMyMCMagicRegister packet = new PacketMyMCMagicRegister(player.getUniqueId(), pin);
+                PacketMyMCMagicRegister packet = new PacketMyMCMagicRegister(player.getUuid(), pin);
                 player.send(packet);
 
-                generating.remove(player.getUniqueId());
+                generating.remove(player.getUuid());
             } catch (SQLException e) {
                 e.printStackTrace();
 
                 player.sendMessage(ChatColor.RED + "There was an error generating your PIN! Please try again soon.");
 
-                generating.remove(player.getUniqueId());
+                generating.remove(player.getUuid());
             }
         });
     }

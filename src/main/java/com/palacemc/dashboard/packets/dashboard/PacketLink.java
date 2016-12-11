@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -11,12 +12,12 @@ import java.util.UUID;
  * Created by Marc on 9/22/16
  */
 public class PacketLink extends BasePacket {
-    private UUID uuid;
-    private String url;
-    private String name;
-    private ChatColor color;
-    private boolean bold;
-    private boolean spacing;
+    @Getter private UUID uuid;
+    @Getter private String url;
+    @Getter private String name;
+    @Getter private ChatColor color;
+    @Getter private boolean bold;
+    @Getter private boolean spacing;
 
     public PacketLink() {
         this(null, "", "", ChatColor.YELLOW, true);
@@ -36,61 +37,37 @@ public class PacketLink extends BasePacket {
         this.spacing = spacing;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ChatColor getColor() {
-        return color;
-    }
-
-    public boolean isBold() {
-        return bold;
-    }
-
-    public boolean isSpacing() {
-        return spacing;
-    }
-
-    public PacketLink fromJSON(JsonObject obj) {
+    public PacketLink fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.url = obj.get("url").getAsString();
-        this.name = obj.get("name").getAsString();
-        this.color = ChatColor.valueOf(obj.get("color").getAsString());
-        this.bold = obj.get("bold").getAsBoolean();
-        this.spacing = obj.get("spacing").getAsBoolean();
+        this.url = object.get("url").getAsString();
+        this.name = object.get("name").getAsString();
+        this.color = ChatColor.valueOf(object.get("color").getAsString());
+        this.bold = object.get("bold").getAsBoolean();
+        this.spacing = object.get("spacing").getAsBoolean();
 
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("url", this.url);
-            obj.addProperty("name", this.name);
-            obj.addProperty("color", this.color.name());
-            obj.addProperty("bold", this.bold);
-            obj.addProperty("spacing", this.spacing);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("url", this.url);
+            object.addProperty("name", this.name);
+            object.addProperty("color", this.color.name());
+            object.addProperty("bold", this.bold);
+            object.addProperty("spacing", this.spacing);
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

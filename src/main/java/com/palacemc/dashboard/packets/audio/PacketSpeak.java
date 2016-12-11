@@ -3,12 +3,13 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketSpeak extends BasePacket {
-    private String voiceText = "";
+    @Getter private String voiceText = "";
 
     public PacketSpeak() {
         this("");
@@ -20,13 +21,9 @@ public class PacketSpeak extends BasePacket {
         this.voiceText = script;
     }
 
-    public String getScript() {
-        return this.voiceText;
-    }
-
-    public PacketSpeak fromJSON(JsonObject obj) {
+    public PacketSpeak fromJSON(JsonObject object) {
         try {
-            this.voiceText = obj.get("voicetext").getAsString();
+            this.voiceText = object.get("voicetext").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -34,14 +31,14 @@ public class PacketSpeak extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("voicetext", this.voiceText);
+            object.addProperty("id", this.id);
+            object.addProperty("voicetext", this.voiceText);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

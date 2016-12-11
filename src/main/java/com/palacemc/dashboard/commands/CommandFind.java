@@ -27,6 +27,6 @@ public class CommandFind extends MagicCommand {
             return;
         }
 
-        player.sendMessage(ChatColor.BLUE + tp.getName() + " is on the server " + ChatColor.GOLD + tp.getServer());
+        player.sendMessage(ChatColor.BLUE + tp.getUsername() + " is on the server " + ChatColor.GOLD + tp.getServer());
     }
 }

@@ -6,6 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,24 +17,20 @@ import java.util.UUID;
  * Created by Marc on 12/3/16
  */
 public class PacketPlayerListInfo extends BasePacket {
-    private List<Player> players = new ArrayList<>();
+    @Getter private List<Player> players = new ArrayList<>();
 
     public PacketPlayerListInfo() {
-        this(new ArrayList<Player>());
+        this(new ArrayList<>());
     }
 
     public PacketPlayerListInfo(List<Player> players) {
-        this.id = PacketID.Bungee.PLAYERLISTINFO.getID();
+        this.id = PacketID.Bungee.PLAYERLISTINFO.getId();
         this.players = players;
     }
 
-    public List<Player> getPlayers() {
-        return players;
-    }
-
-    public PacketPlayerListInfo fromJSON(JsonObject obj) {
-        this.id = obj.get("id").getAsInt();
-        JsonArray list = obj.get("players").getAsJsonArray();
+    public PacketPlayerListInfo fromJSON(JsonObject object) {
+        this.id = object.get("id").getAsInt();
+        JsonArray list = object.get("players").getAsJsonArray();
 
         for (JsonElement e : list) {
             Player p = fromString(e.toString());
@@ -42,33 +40,34 @@ public class PacketPlayerListInfo extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
             Gson gson = new Gson();
 
-            obj.addProperty("id", this.id);
+            object.addProperty("id", this.id);
             List<String> list = new ArrayList<>();
 
             for (Player p : players) {
                 list.add(p.toString());
             }
 
-            obj.add("players", gson.toJsonTree(list).getAsJsonArray());
+            object.add("players", gson.toJsonTree(list).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 
-    public Player fromString(String s) {
-        Player p = new Player();
-        String sr = s.replace("\"Player{", "").replace("}\"", "");
-        String[] list = sr.split(",");
+    public Player fromString(String playerName) {
+        Player player = new Player();
+        playerName = playerName.replace("\"Player{", "").replace("}\"", "");
+        String[] list = playerName.split(",");
 
         for (String st : list) {
             String[] list2 = st.split("=");
             String next = "";
+
             boolean first = true;
 
             for (String str : list2) {
@@ -79,35 +78,35 @@ public class PacketPlayerListInfo extends BasePacket {
                     switch (next.toLowerCase()) {
                         case "uuid":
                             try {
-                                p.setUniqueId(UUID.fromString(str));
+                                player.setUuid(UUID.fromString(str));
                             } catch (Exception ignored) {
                             }
                             break;
                         case "username":
-                            p.setUsername(str);
+                            player.setUsername(str);
                             break;
                         case "address":
-                            p.setAddress(str);
+                            player.setAddress(str);
                             break;
                         case "server":
-                            p.setServer(str);
+                            player.setServer(str);
                             break;
                         case "rank":
-                            p.setRank(str);
+                            player.setRank(str);
                             break;
                     }
                 }
             }
         }
-        return p;
+        return player;
     }
 
     public static class Player {
-        private UUID uuid;
-        private String username;
-        private String address;
-        private String server;
-        private String rank;
+        @Getter @Setter private UUID uuid;
+        @Getter @Setter private String username;
+        @Getter @Setter private String address;
+        @Getter @Setter private String server;
+        @Getter @Setter private String rank;
 
         public Player(UUID uuid, String username, String address, String server, String rank) {
             this.uuid = uuid;
@@ -118,46 +117,6 @@ public class PacketPlayerListInfo extends BasePacket {
         }
 
         public Player() { }
-
-        public UUID getUniqueId() {
-            return uuid;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public String getServer() {
-            return server;
-        }
-
-        public String getRank() {
-            return rank;
-        }
-
-        public void setUniqueId(UUID uuid) {
-            this.uuid = uuid;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        public void setServer(String server) {
-            this.server = server;
-        }
-
-        public void setRank(String rank) {
-            this.rank = rank;
-        }
 
         @Override
         public String toString() {

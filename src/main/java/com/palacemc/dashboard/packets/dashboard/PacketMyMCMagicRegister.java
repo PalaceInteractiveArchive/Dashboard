@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,8 +11,8 @@ import java.util.UUID;
  * Created by Marc on 9/22/16
  */
 public class PacketMyMCMagicRegister extends BasePacket {
-    private UUID uuid;
-    private int pin;
+    @Getter private UUID uuid;
+    @Getter private int pin;
 
     public PacketMyMCMagicRegister() {
         this(null, 0);
@@ -23,35 +24,27 @@ public class PacketMyMCMagicRegister extends BasePacket {
         this.pin = pin;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public int getPin() {
-        return pin;
-    }
-
-    public PacketMyMCMagicRegister fromJSON(JsonObject obj) {
+    public PacketMyMCMagicRegister fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.pin = obj.get("pin").getAsInt();
+        this.pin = object.get("pin").getAsInt();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("pin", this.pin);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("pin", this.pin);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

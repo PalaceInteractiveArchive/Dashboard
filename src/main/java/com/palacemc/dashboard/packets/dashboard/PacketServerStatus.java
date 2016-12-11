@@ -4,13 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketServerStatus extends BasePacket {
-    private int onlineCount;
-    private JsonArray serverStatus;
+    @Getter private int onlineCount;
+    @Getter private JsonArray serverStatus;
 
     public PacketServerStatus() {
         this(0, null);
@@ -22,31 +23,23 @@ public class PacketServerStatus extends BasePacket {
         this.serverStatus = serverStatus;
     }
 
-    public JsonArray getServerStatus() {
-        return serverStatus;
-    }
-
-    public int getOnlineCount() {
-        return onlineCount;
-    }
-
-    public PacketServerStatus fromJSON(JsonObject obj) {
-        this.onlineCount = obj.get("onlineCount").getAsInt();
-        this.serverStatus = obj.get("serverStatus").getAsJsonArray();
+    public PacketServerStatus fromJSON(JsonObject object) {
+        this.onlineCount = object.get("onlineCount").getAsInt();
+        this.serverStatus = object.get("serverStatus").getAsJsonArray();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("onlineCount", this.onlineCount);
-            obj.add("serverStatus", this.serverStatus);
+            object.addProperty("id", this.id);
+            object.addProperty("onlineCount", this.onlineCount);
+            object.add("serverStatus", this.serverStatus);
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

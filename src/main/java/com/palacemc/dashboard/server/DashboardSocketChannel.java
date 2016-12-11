@@ -5,6 +5,8 @@ import com.palacemc.dashboard.packets.dashboard.PacketConnectionType;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
@@ -17,12 +19,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings("unchecked")
 public class DashboardSocketChannel extends NioSocketChannel {
     private static AtomicLong nextId = new AtomicLong(0L);
-    protected long id = nextId.getAndIncrement();
-    private long connectTime = System.currentTimeMillis();
+    @Getter protected long id = nextId.getAndIncrement();
+    @Getter private long connectTime = System.currentTimeMillis();
 
-    private PacketConnectionType.ConnectionType type = PacketConnectionType.ConnectionType.UNKNOWN;
-    private UUID bungeeID = UUID.randomUUID();
-    private String serverName = "";
+    @Getter @Setter private PacketConnectionType.ConnectionType type = PacketConnectionType.ConnectionType.UNKNOWN;
+    @Getter private UUID bungeeID = UUID.randomUUID();
+    @Getter @Setter private String serverName = "";
 
     public DashboardSocketChannel(PacketConnectionType.ConnectionType type) {
         this.type = type;
@@ -40,39 +42,11 @@ public class DashboardSocketChannel extends NioSocketChannel {
         super(parent, socket);
     }
 
-    public long getId() {
-        return this.id;
-    }
-
     public void send(String message) {
         writeAndFlush(new TextWebSocketFrame(message));
     }
 
-    public void setType(PacketConnectionType.ConnectionType type) {
-        this.type = type;
-    }
-
-    public PacketConnectionType.ConnectionType getType() {
-        return type;
-    }
-
-    public UUID getBungeeID() {
-        return bungeeID;
-    }
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
     public void send(BasePacket packet) {
         send(packet.getJSON().toString());
-    }
-
-    public long getConnectTime() {
-        return connectTime;
     }
 }

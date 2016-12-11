@@ -1,6 +1,7 @@
 package com.palacemc.dashboard.handlers;
 
 import com.palacemc.dashboard.Launcher;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +11,13 @@ import java.util.UUID;
  * Created by Marc on 9/12/16
  */
 public class Party {
-    private UUID leader;
-    private List<UUID> members;
+    @Getter private UUID leader;
+    @Getter  private List<UUID> members;
+    @Getter private UUID uuid = UUID.randomUUID();
+
     public String headerMessage = ChatColor.GOLD + "-----------------------------------------------------";
     public String footerMessage = ChatColor.GOLD + "-----------------------------------------------------";
     public String warpMessage = ChatColor.GREEN + "Your Party Leader has warped you to their server.";
-    private UUID uuid = UUID.randomUUID();
 
     public Party(UUID leader, List<UUID> members) {
         this.leader = leader;
@@ -26,32 +28,24 @@ public class Party {
         }
     }
 
-    public Player getLeader() {
-        if (leader == null) {
-            return null;
-        }
-
-        return Launcher.getDashboard().getPlayer(leader);
-    }
-
     public List<UUID> getMembers() {
         return new ArrayList<>(members);
     }
 
     public void addMember(Player player) {
-        if (members.contains(player.getUniqueId())) {
+        if (members.contains(player.getUuid())) {
             return;
         }
 
-        members.add(player.getUniqueId());
+        members.add(player.getUuid());
     }
 
     public void removeMember(Player player) {
-        if (!members.contains(player.getUniqueId())) {
+        if (!members.contains(player.getUuid())) {
             return;
         }
 
-        members.remove(player.getUniqueId());
+        members.remove(player.getUuid());
     }
 
     public void close() {
@@ -59,7 +53,7 @@ public class Party {
         Player lead = Launcher.getDashboard().getPlayer(leader);
 
         if (lead != null) {
-            name = lead.getName();
+            name = lead.getUsername();
         }
 
         messageToAllMembers(ChatColor.RED + (name == null ? "The Party has been closed!" : name +
@@ -95,7 +89,7 @@ public class Party {
                 return;
             }
 
-            if (member.getUniqueId().equals(leader)) {
+            if (member.getUuid().equals(leader)) {
                 continue;
             }
 
@@ -105,7 +99,7 @@ public class Party {
     }
 
     public boolean isLeader(Player player) {
-        return leader.equals(player.getUniqueId());
+        return leader.equals(player.getUuid());
     }
 
     public String getHeaderMessage() {
@@ -129,6 +123,7 @@ public class Party {
             }
 
             tp.sendMessage(message);
+
             if (bars) {
                 tp.sendMessage(footerMessage);
             }
@@ -142,10 +137,10 @@ public class Party {
             boolean l = members.get(i).equals(leader);
 
             if (i == (members.size() - 1)) {
-                sb.append(l ? "*" : "").append(Launcher.getDashboard().getPlayer(members.get(i)).getName());
+                sb.append(l ? "*" : "").append(Launcher.getDashboard().getPlayer(members.get(i)).getUsername());
                 continue;
             }
-            sb.append(l ? "*" : "").append(Launcher.getDashboard().getPlayer(members.get(i)).getName()).append(", ");
+            sb.append(l ? "*" : "").append(Launcher.getDashboard().getPlayer(members.get(i)).getUsername()).append(", ");
         }
 
         String msg = ChatColor.YELLOW + "Members of your Party: " + sb.toString();
@@ -154,13 +149,9 @@ public class Party {
         player.sendMessage(footerMessage);
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
     public void leave(Player player) {
         removeMember(player);
-        messageToAllMembers(ChatColor.RED + player.getName() + ChatColor.YELLOW + " has left the Party!", true);
+        messageToAllMembers(ChatColor.RED + player.getUsername() + ChatColor.YELLOW + " has left the Party!", true);
         player.sendMessage(ChatColor.RED + "You have left the party!");
 
         if (player.getChannel().equals("party")) {
@@ -171,14 +162,14 @@ public class Party {
     }
 
     public void remove(Player tp) {
-        if (!getMembers().contains(tp.getUniqueId())) {
+        if (!getMembers().contains(tp.getUuid())) {
             Launcher.getDashboard().getPlayer(leader).sendMessage(ChatColor.YELLOW + "That player is not in your Party!");
             return;
         }
 
         removeMember(tp);
-        messageToAllMembers(ChatColor.YELLOW + Launcher.getDashboard().getPlayer(leader).getName() + " has removed " +
-                tp.getName() + " from the Party!", true);
+        messageToAllMembers(ChatColor.YELLOW + Launcher.getDashboard().getPlayer(leader).getUsername() + " has removed " +
+                tp.getUsername() + " from the Party!", true);
 
         if (tp.getChannel().equals("party")) {
             tp.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
@@ -189,17 +180,17 @@ public class Party {
 
     public void chat(Player player, String msg) {
         Rank r = player.getRank();
-        String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUniqueId()) ? ChatColor.YELLOW + "* " : "") +
-                r.getNameWithBrackets() + ChatColor.GRAY + " " + player.getName() + ": " + ChatColor.WHITE +
+        String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUuid()) ? ChatColor.YELLOW + "* " : "") +
+                r.getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
                 (r.getRankId() >= Rank.SQUIRE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
 
         for (UUID uuid : getMembers()) {
-            if (uuid.equals(player.getUniqueId())) {
+            if (uuid.equals(player.getUuid())) {
                 continue;
             }
 
             Player tp = Launcher.getDashboard().getPlayer(uuid);
-            if (tp != null && tp.hasMentions()) {
+            if (tp != null && tp.isMentions()) {
                 tp.mention();
             }
         }
@@ -209,17 +200,21 @@ public class Party {
     }
 
     public void promote(Player player, Player tp) {
-        messageToAllMembers(ChatColor.YELLOW + player.getName() + " promoted " + tp.getName() +
+        messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " promoted " + tp.getUsername() +
                 " to Party Leader!", true);
-        leader = tp.getUniqueId();
+        leader = tp.getUuid();
     }
 
     public void takeover(Player player) {
-        if (!members.contains(player.getUniqueId())) {
-            members.add(player.getUniqueId());
+        if (!members.contains(player.getUuid())) {
+            members.add(player.getUuid());
         }
 
-        leader = player.getUniqueId();
-        messageToAllMembers(ChatColor.YELLOW + player.getName() + " has taken over the Party!", true);
+        leader = player.getUuid();
+        messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " has taken over the Party!", true);
+    }
+
+    public Player getLeader() {
+        return Launcher.getDashboard().getPlayer(uuid);
     }
 }

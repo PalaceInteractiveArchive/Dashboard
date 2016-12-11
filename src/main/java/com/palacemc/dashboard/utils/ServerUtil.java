@@ -76,30 +76,31 @@ public class ServerUtil {
             @Override
             public void run() {
                 List<Server> lobbies = new ArrayList<>();
+
                 for (Server s : getServers()) {
                     if (s.getServerType().equalsIgnoreCase("hub")) {
                         lobbies.add(s);
                     }
                 }
-                Collections.sort(lobbies, new Comparator<Server>() {
-                    @Override
-                    public int compare(final Server s1, final Server s2) {
-                        return s1.getName().compareToIgnoreCase(s2.getName());
-                    }
-                });
+
+                Collections.sort(lobbies, (s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
                 Server server = null;
+
                 for (Server s : lobbies) {
                     if (server == null) {
                         server = s;
                         continue;
                     }
+
                     if (((s.getCount() < server.getCount()) || !server.isOnline()) && s.isOnline()) {
                         server = s;
                     }
                 }
+
                 if (server == null || Launcher.getDashboard().getTargetServer().equals(server.getName())) {
                     return;
                 }
+
                 Launcher.getDashboard().setTargetServer(server.getName());
                 PacketTargetLobby packet = new PacketTargetLobby(server.getName());
                 for (Object o : WebSocketServerHandler.getGroup()) {
@@ -119,6 +120,7 @@ public class ServerUtil {
 
     private void loadServers() {
         servers.clear();
+
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
             //TODO Change this back to the regular table
             PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
@@ -149,7 +151,7 @@ public class ServerUtil {
         Server s = null;
         List<Server> servers = new ArrayList<>(this.servers.values());
         for (Server server : servers) {
-            if ((exclude != null && server.getUniqueId().equals(exclude)) || !server.isOnline()) {
+            if ((exclude != null && server.getUuid().equals(exclude)) || !server.isOnline()) {
                 continue;
             }
             if (server.getServerType().equalsIgnoreCase(type)) {
@@ -166,7 +168,7 @@ public class ServerUtil {
     }
 
     public void sendPlayer(Player player, String server) {
-        PacketSendToServer packet = new PacketSendToServer(player.getUniqueId(), server);
+        PacketSendToServer packet = new PacketSendToServer(player.getUuid(), server);
         player.send(packet);
     }
 
@@ -194,7 +196,7 @@ public class ServerUtil {
         Server s = null;
         List<Server> servers = new ArrayList<>(this.servers.values());
         for (Server server : servers) {
-            if ((exclude != null && server.getUniqueId().equals(exclude)) || !server.isOnline()) {
+            if ((exclude != null && server.getUuid().equals(exclude)) || !server.isOnline()) {
                 continue;
             }
             if (!server.isPark()) {

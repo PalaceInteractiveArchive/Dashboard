@@ -24,6 +24,6 @@ public class CommandUnbanIP extends MagicCommand {
 
         String address = args[0];
         Launcher.getDashboard().getSqlUtil().unbanIP(address);
-        Launcher.getDashboard().getModerationUtil().announceUnban("IP " + address, player.getName());
+        Launcher.getDashboard().getModerationUtil().announceUnban("IP " + address, player.getUsername());
     }
 }

@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,10 +11,10 @@ import java.util.UUID;
  * Created by Marc on 7/14/16
  */
 public class PacketPlayerJoin extends BasePacket {
-    private UUID uuid;
-    private String username;
-    private String server;
-    private String address;
+    @Getter private UUID uuid;
+    @Getter private String username;
+    @Getter private String server;
+    @Getter private String address;
 
     public PacketPlayerJoin() {
         this(null, "", "", "");
@@ -27,50 +28,34 @@ public class PacketPlayerJoin extends BasePacket {
         this.address = address;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public PacketPlayerJoin fromJSON(JsonObject obj) {
-        this.id = obj.get("id").getAsInt();
+    public PacketPlayerJoin fromJSON(JsonObject object) {
+        this.id = object.get("id").getAsInt();
 
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.username = obj.get("username").getAsString();
-        this.server = obj.get("server").getAsString();
-        this.address = obj.get("address").getAsString();
+        this.username = object.get("username").getAsString();
+        this.server = object.get("server").getAsString();
+        this.address = object.get("address").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("username", this.username);
-            obj.addProperty("server", this.server);
-            obj.addProperty("address", this.address);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("username", this.username);
+            object.addProperty("server", this.server);
+            object.addProperty("address", this.address);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 
     public String getRank() {

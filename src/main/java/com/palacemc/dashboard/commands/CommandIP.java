@@ -26,6 +26,6 @@ public class CommandIP extends MagicCommand {
             return;
         }
 
-        player.sendMessage(ChatColor.GREEN + "IP of " + tp.getName() + " is " + tp.getAddress());
+        player.sendMessage(ChatColor.GREEN + "IP of " + tp.getUsername() + " is " + tp.getAddress());
     }
 }

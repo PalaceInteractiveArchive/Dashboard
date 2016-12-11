@@ -21,7 +21,7 @@ public class CommandDB extends MagicCommand {
                 message += arg + " ";
             }
 
-            String sname = player.getName();
+            String sname = player.getUsername();
 
             String msg = ChatColor.WHITE + "[" + ChatColor.AQUA + "Information" +
                     ChatColor.WHITE + "] " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message);
@@ -31,7 +31,7 @@ public class CommandDB extends MagicCommand {
                     ChatColor.translateAlternateColorCodes('&', message);
 
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-                if (Launcher.getDashboard().getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
+                if (Launcher.getDashboard().getPlayer(tp.getUuid()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
                     tp.sendMessage(staff);
                 } else {
                     tp.sendMessage(msg);

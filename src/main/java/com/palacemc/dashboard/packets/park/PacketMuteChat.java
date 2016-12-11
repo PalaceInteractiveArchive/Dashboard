@@ -3,36 +3,25 @@ package com.palacemc.dashboard.packets.park;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 9/18/16
  */
 public class PacketMuteChat extends BasePacket {
-    private String server;
-    private boolean mute;
-    private String source;
+    @Getter private String server;
+    @Getter private boolean mute;
+    @Getter private String source;
 
     public PacketMuteChat() {
         this("", false, "");
     }
 
     public PacketMuteChat(String server, boolean mute, String source) {
-        this.id = PacketID.Park.MUTECHAT.getID();
+        this.id = PacketID.Park.MUTECHAT.getId();
         this.server = server;
         this.mute = mute;
         this.source = source;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public boolean isMute() {
-        return mute;
-    }
-
-    public String getSource() {
-        return source;
     }
 
     public PacketMuteChat fromJSON(JsonObject obj) {

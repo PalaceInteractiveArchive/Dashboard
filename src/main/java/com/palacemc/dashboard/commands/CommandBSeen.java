@@ -28,11 +28,11 @@ public class CommandBSeen extends MagicCommand {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             Player tp = Launcher.getDashboard().getPlayer(args[0]);
             boolean online = tp != null;
-            String name = online ? tp.getName() : args[0];
+            String name = online ? tp.getUsername() : args[0];
             UUID uuid;
 
             if (online) {
-                uuid = tp.getUniqueId();
+                uuid = tp.getUuid();
             } else {
                 uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(args[0]);
             }
@@ -93,7 +93,7 @@ public class CommandBSeen extends MagicCommand {
                         ". Reason: " + mute.getReason());
             }
 
-            PacketBSeenCommand packet = new PacketBSeenCommand(player.getUniqueId(), name, ip, server, online);
+            PacketBSeenCommand packet = new PacketBSeenCommand(player.getUuid(), name, ip, server, online);
 
             player.sendMessage(ChatColor.GREEN + name + " has been " + (online ? "online" : "away") + " for " +
                     DateUtil.formatDateDiff(lastLogin));

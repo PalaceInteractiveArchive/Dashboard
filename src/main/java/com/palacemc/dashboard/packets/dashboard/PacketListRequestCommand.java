@@ -1,11 +1,10 @@
 package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,8 @@ import java.util.UUID;
  * Created by Marc on 8/22/16
  */
 public class PacketListRequestCommand extends BasePacket {
-    private UUID uuid;
-    private List<String> requestlist = new ArrayList<>();
+    @Getter private UUID uuid;
+    @Getter private List<String> requestlist = new ArrayList<>();
 
     public PacketListRequestCommand() {
         this(null, new ArrayList<String>());
@@ -28,40 +27,29 @@ public class PacketListRequestCommand extends BasePacket {
         this.requestlist = requestlist;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public List<String> getRequestlist() {
-        return requestlist;
-    }
-
-    public PacketListRequestCommand fromJSON(JsonObject obj) {
+    public PacketListRequestCommand fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
-        JsonArray list = obj.get("requestlist").getAsJsonArray();
-        for (JsonElement e : list) {
-            this.requestlist.add(e.getAsString());
-        }
+        object.get("requestlist").getAsJsonArray().forEach(element -> this.requestlist.add(element.getAsString()));
         return this;
     }
 
     public JsonObject getJSON() {
+        JsonObject object = new JsonObject();
 
-        JsonObject obj = new JsonObject();
         try {
             Gson gson = new Gson();
 
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.add("requestlist", gson.toJsonTree(this.requestlist).getAsJsonArray());
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.add("requestlist", gson.toJsonTree(this.requestlist).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

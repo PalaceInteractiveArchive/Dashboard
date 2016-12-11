@@ -28,7 +28,7 @@ public class CommandParties extends MagicCommand {
             String msg = null;
 
             for (Party p : parties) {
-                String leader = p.getLeader().getName();
+                String leader = p.getLeader().getUsername();
 
                 if (msg != null) {
                     msg += "\n";
@@ -50,7 +50,7 @@ public class CommandParties extends MagicCommand {
             return;
         }
 
-        Party p = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(tp.getUniqueId());
+        Party p = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(tp.getUuid());
         if (p == null) {
             player.sendMessage(ChatColor.RED + "This player is not in a Party!");
             return;
@@ -59,10 +59,10 @@ public class CommandParties extends MagicCommand {
         List<String> names = new ArrayList<>();
 
         for (UUID uuid : members) {
-            names.add(Launcher.getDashboard().getPlayer(uuid).getName());
+            names.add(Launcher.getDashboard().getPlayer(uuid).getUsername());
         }
 
-        String msg = "Party Leader: " + p.getLeader().getName() + "\nParty Members: ";
+        String msg = "Party Leader: " + p.getLeader().getUsername() + "\nParty Members: ";
 
         for (int i = 0; i < names.size(); i++) {
             msg += names.get(i);

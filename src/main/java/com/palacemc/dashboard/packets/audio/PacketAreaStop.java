@@ -26,10 +26,10 @@ public class PacketAreaStop extends BasePacket {
         return this.audioid;
     }
 
-    public PacketAreaStop fromJSON(JsonObject obj) {
+    public PacketAreaStop fromJSON(JsonObject object) {
         try {
-            this.audioid = obj.get("audioid").getAsInt();
-            this.fadetime = obj.get("fadetime").getAsInt();
+            this.audioid = object.get("audioid").getAsInt();
+            this.fadetime = object.get("fadetime").getAsInt();
         } catch (Exception e) {
             return null;
         }
@@ -37,15 +37,15 @@ public class PacketAreaStop extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("audioid", this.audioid);
-            obj.addProperty("fadetime", this.fadetime);
+            object.addProperty("id", this.id);
+            object.addProperty("audioid", this.audioid);
+            object.addProperty("fadetime", this.fadetime);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

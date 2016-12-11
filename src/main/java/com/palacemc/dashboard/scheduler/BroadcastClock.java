@@ -27,14 +27,10 @@ public class BroadcastClock extends TimerTask {
 
         try (BufferedReader br = new BufferedReader(new FileReader("announcements.txt"))) {
             String line = br.readLine();
-            boolean read = false;
-            while (line != null) {
-                if (read) {
-                    newList.add(line);
-                }
 
+            while (line != null) {
                 if (line.startsWith("announcements:")) {
-                    read = true;
+                    newList.add(line);
                 }
 
                 line = br.readLine();
@@ -58,8 +54,6 @@ public class BroadcastClock extends TimerTask {
 
         i++;
 
-        if (i >= announcements.size()) {
-            i = 0;
-        }
+        if (i >= announcements.size()) i = 0;
     }
 }

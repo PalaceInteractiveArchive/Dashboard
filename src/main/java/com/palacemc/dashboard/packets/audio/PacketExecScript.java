@@ -3,12 +3,13 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketExecScript extends BasePacket {
-    private String script = "";
+    @Getter private String script = "";
 
     public PacketExecScript() {
         this("");
@@ -20,13 +21,9 @@ public class PacketExecScript extends BasePacket {
         this.script = script;
     }
 
-    public String getScript() {
-        return this.script;
-    }
-
-    public PacketExecScript fromJSON(JsonObject obj) {
+    public PacketExecScript fromJSON(JsonObject object) {
         try {
-            this.script = obj.get("script").getAsString();
+            this.script = object.get("script").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -34,14 +31,14 @@ public class PacketExecScript extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("script", this.script);
+            object.addProperty("id", this.id);
+            object.addProperty("script", this.script);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

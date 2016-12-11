@@ -12,7 +12,7 @@ public class CommandStore extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        PacketLink packet = new PacketLink(player.getUniqueId(), "https://store.palace.network",
+        PacketLink packet = new PacketLink(player.getUuid(), "https://store.palace.network",
                 "Click to visit our store", ChatColor.YELLOW, true);
         player.send(packet);
     }

@@ -1,6 +1,8 @@
 package com.palacemc.dashboard.handlers;
 
 import com.palacemc.dashboard.Launcher;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -8,14 +10,14 @@ import java.util.UUID;
  * Created by Marc on 5/29/16
  */
 public class Server {
-    private UUID uuid = UUID.randomUUID();
-    private String name;
-    private String address;
-    private int port;
-    private boolean park;
-    private int count;
-    private String serverType;
-    private boolean online = false;
+    @Getter private UUID uuid = UUID.randomUUID();
+    @Getter private String name;
+    @Getter private String address;
+    @Getter private int port;
+    @Getter private boolean park;
+    @Getter private int count;
+    @Getter private String serverType;
+    @Getter @Setter private boolean online = false;
 
     public Server(String name, String address, int port, boolean park, int count, String serverType) {
         this.name = name;
@@ -26,38 +28,6 @@ public class Server {
         this.serverType = serverType;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public boolean isPark() {
-        return park;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public String getServerType() {
-        return serverType;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
     public void changeCount(int i) {
         this.count += i;
     }
@@ -65,7 +35,7 @@ public class Server {
     public void emptyServer() {
         Server s = null;
         for (Server server : Launcher.getDashboard().getServerUtil().getServers()) {
-            if (server.getUniqueId().equals(getUniqueId())) {
+            if (server.getUuid().equals(getUuid())) {
                 continue;
             }
             if (server.getServerType().equalsIgnoreCase("hub")) {
@@ -83,13 +53,5 @@ public class Server {
                 Launcher.getDashboard().getServerUtil().sendPlayer(tp, s.getName());
             }
         }
-    }
-
-    public boolean isOnline() {
-        return online;
-    }
-
-    public void setOnline(boolean online) {
-        this.online = online;
     }
 }

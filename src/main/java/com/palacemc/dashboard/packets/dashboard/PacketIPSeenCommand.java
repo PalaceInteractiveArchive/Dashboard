@@ -1,11 +1,10 @@
 package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +14,12 @@ import java.util.UUID;
  * Created by Marc on 9/10/16
  */
 public class PacketIPSeenCommand extends BasePacket {
-    private UUID uuid;
-    private List<String> usernames = new ArrayList<>();
-    private String address;
+    @Getter private UUID uuid;
+    @Getter private List<String> usernames = new ArrayList<>();
+    @Getter private String address;
 
     public PacketIPSeenCommand() {
-        this(null, new ArrayList<String>(), "");
+        this(null, new ArrayList<>(), "");
     }
 
     public PacketIPSeenCommand(UUID uuid, List<String> usernames, String address) {
@@ -30,50 +29,33 @@ public class PacketIPSeenCommand extends BasePacket {
         this.address = address;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public List<String> getUsernames() {
-        return usernames;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public PacketIPSeenCommand fromJSON(JsonObject obj) {
+    public PacketIPSeenCommand fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        JsonArray list = obj.get("usernames").getAsJsonArray();
-
-        for (JsonElement e : list) {
-            this.usernames.add(e.getAsString());
-        }
-
-        this.address = obj.get("address").getAsString();
+        object.get("usernames").getAsJsonArray().forEach(element -> this.usernames.add(element.getAsString()));
+        this.address = object.get("address").getAsString();
 
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
             Gson gson = new Gson();
 
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.add("usernames", gson.toJsonTree(this.usernames).getAsJsonArray());
-            obj.addProperty("address", this.address);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.add("usernames", gson.toJsonTree(this.usernames).getAsJsonArray());
+            object.addProperty("address", this.address);
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

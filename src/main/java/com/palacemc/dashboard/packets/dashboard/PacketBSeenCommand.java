@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,11 +11,11 @@ import java.util.UUID;
  * Created by Marc on 8/22/16
  */
 public class PacketBSeenCommand extends BasePacket {
-    private UUID uuid;
-    private String username;
-    private String address;
-    private String server;
-    private boolean online;
+    @Getter private UUID uuid;
+    @Getter private String username;
+    @Getter private String address;
+    @Getter private String server;
+    @Getter private boolean online;
 
     public PacketBSeenCommand() {
         this(null, "", "", "", false);
@@ -29,55 +30,35 @@ public class PacketBSeenCommand extends BasePacket {
         this.online = online;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public boolean isOnline() {
-        return online;
-    }
-
-    public PacketBSeenCommand fromJSON(JsonObject obj) {
+    public PacketBSeenCommand fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.username = obj.get("username").getAsString();
-        this.address = obj.get("address").getAsString();
-        this.server = obj.get("server").getAsString();
-        this.online = obj.get("online").getAsBoolean();
+        this.username = object.get("username").getAsString();
+        this.address = object.get("address").getAsString();
+        this.server = object.get("server").getAsString();
+        this.online = object.get("online").getAsBoolean();
 
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("username", this.username);
-            obj.addProperty("address", this.address);
-            obj.addProperty("server", this.server);
-            obj.addProperty("online", this.online);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("username", this.username);
+            object.addProperty("address", this.address);
+            object.addProperty("server", this.server);
+            object.addProperty("online", this.online);
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

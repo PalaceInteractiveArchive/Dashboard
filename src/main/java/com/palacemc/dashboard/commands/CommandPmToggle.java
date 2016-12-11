@@ -21,6 +21,6 @@ public class CommandPmToggle extends MagicCommand {
         Launcher.getDashboard().getChatUtil().setPrivateMessages(!enabled);
 
         Launcher.getDashboard().getModerationUtil().togglePrivate(
-                Launcher.getDashboard().getChatUtil().privateMessagesEnabled(), player.getName());
+                Launcher.getDashboard().getChatUtil().privateMessagesEnabled(), player.getUsername());
     }
 }

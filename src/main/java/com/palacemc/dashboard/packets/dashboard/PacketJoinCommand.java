@@ -1,11 +1,10 @@
 package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,25 +14,17 @@ import java.util.UUID;
  * Created by Marc on 8/26/16
  */
 public class PacketJoinCommand extends BasePacket {
-    private UUID uuid;
-    private List<String> servers = new ArrayList<>();
+    @Getter private UUID uuid;
+    @Getter private List<String> servers = new ArrayList<>();
 
     public PacketJoinCommand() {
-        this(null, new ArrayList<String>());
+        this(null, new ArrayList<>());
     }
 
     public PacketJoinCommand(UUID uuid, List<String> servers) {
         this.id = PacketID.Dashboard.JOINCOMMAND.getID();
         this.uuid = uuid;
         this.servers = servers;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public List<String> getServers() {
-        return servers;
     }
 
     public PacketJoinCommand fromJSON(JsonObject obj) {
@@ -43,28 +34,23 @@ public class PacketJoinCommand extends BasePacket {
             this.uuid = null;
         }
 
-        JsonArray list = obj.get("servers").getAsJsonArray();
-
-        for (JsonElement e : list) {
-            this.servers.add(e.getAsString());
-        }
-
+        obj.get("servers").getAsJsonArray().forEach(element -> this.servers.add(element.getAsString()));
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
             Gson gson = new Gson();
 
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.add("servers", gson.toJsonTree(this.servers).getAsJsonArray());
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.add("servers", gson.toJsonTree(this.servers).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

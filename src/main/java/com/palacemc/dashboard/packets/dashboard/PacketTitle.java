@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,12 +11,12 @@ import java.util.UUID;
  * Created by Marc on 9/28/16
  */
 public class PacketTitle extends BasePacket {
-    private UUID uuid;
-    private String title;
-    private String subtitle;
-    private int fadeIn;
-    private int stay;
-    private int fadeOut;
+    @Getter private UUID uuid;
+    @Getter private String title;
+    @Getter private String subtitle;
+    @Getter private int fadeIn;
+    @Getter private int stay;
+    @Getter private int fadeOut;
 
     public PacketTitle() {
         this(null, "", "", 0, 0, 0);
@@ -29,30 +30,6 @@ public class PacketTitle extends BasePacket {
         this.fadeIn = fadeIn;
         this.stay = stay;
         this.fadeOut = fadeOut;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getSubtitle() {
-        return subtitle;
-    }
-
-    public int getFadeIn() {
-        return fadeIn;
-    }
-
-    public int getStay() {
-        return stay;
-    }
-
-    public int getFadeOut() {
-        return fadeOut;
     }
 
     @Override

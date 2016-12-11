@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
  * Created by Marc on 9/17/16
  */
 public class PacketMention extends BasePacket {
-    private UUID uuid;
+    @Getter private UUID uuid;
 
     public PacketMention() {
         this(null);
@@ -21,13 +22,9 @@ public class PacketMention extends BasePacket {
         this.uuid = uuid;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public PacketMention fromJSON(JsonObject obj) {
+    public PacketMention fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
@@ -36,14 +33,14 @@ public class PacketMention extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

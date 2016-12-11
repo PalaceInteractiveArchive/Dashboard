@@ -3,16 +3,17 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketAreaStart extends BasePacket {
-    private int audioid = 0;
-    private String name = "";
-    private float volume = 1.0F;
-    private int fadetime = 0;
-    private boolean repeat = true;
+    @Getter private int audioid = 0;
+    @Getter private String name = "";
+    @Getter private float volume = 1.0F;
+    @Getter private int fadetime = 0;
+    @Getter private boolean repeat = true;
 
     public PacketAreaStart() {
         this(-1, "", 1.0F, 0, true);
@@ -27,29 +28,17 @@ public class PacketAreaStart extends BasePacket {
         this.repeat = repeat;
     }
 
-    public float getVolume() {
-        return this.volume;
-    }
-
-    public int getAudioID() {
-        return this.audioid;
-    }
-
-    public int getFadetime() {
-        return this.fadetime;
-    }
-
-    public String getName() {
+    public String getUsername() {
         return this.name;
     }
 
-    public PacketAreaStart fromJSON(JsonObject obj) {
+    public PacketAreaStart fromJSON(JsonObject object) {
         try {
-            this.audioid = obj.get("audioid").getAsInt();
-            this.name = obj.get("name").getAsString();
-            this.volume = obj.get("volume").getAsFloat();
-            this.fadetime = obj.get("fadetime").getAsInt();
-            this.repeat = obj.get("repeat").getAsBoolean();
+            this.audioid = object.get("audioid").getAsInt();
+            this.name = object.get("name").getAsString();
+            this.volume = object.get("volume").getAsFloat();
+            this.fadetime = object.get("fadetime").getAsInt();
+            this.repeat = object.get("repeat").getAsBoolean();
         } catch (Exception e) {
             return null;
         }
@@ -57,18 +46,18 @@ public class PacketAreaStart extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("audioid", this.audioid);
-            obj.addProperty("name", this.name);
-            obj.addProperty("volume", this.volume);
-            obj.addProperty("fadetime", this.fadetime);
-            obj.addProperty("repeat", this.repeat);
+            object.addProperty("id", this.id);
+            object.addProperty("audioid", this.audioid);
+            object.addProperty("name", this.name);
+            object.addProperty("volume", this.volume);
+            object.addProperty("fadetime", this.fadetime);
+            object.addProperty("repeat", this.repeat);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

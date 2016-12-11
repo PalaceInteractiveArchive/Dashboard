@@ -24,7 +24,7 @@ public class CommandAudio extends MagicCommand {
 
                     if (!list.isEmpty()) {
                         PacketKick packet = new PacketKick("You were disconnected!");
-                        PacketContainer container = new PacketContainer(player.getUniqueId(), packet.getJSON().toString());
+                        PacketContainer container = new PacketContainer(player.getUuid(), packet.getJSON().toString());
 
                         for (DashboardSocketChannel ch : list) {
                             ch.send(container);
@@ -41,7 +41,7 @@ public class CommandAudio extends MagicCommand {
             return;
         }
 
-        PacketAudioCommand packet = new PacketAudioCommand(player.getUniqueId(), player.setAudioAuth());
+        PacketAudioCommand packet = new PacketAudioCommand(player.getUuid(), player.setAudioAuth());
         player.send(packet);
     }
 }

@@ -48,7 +48,7 @@ public class CommandJoin extends MagicCommand {
                 return;
             }
         }
-        PacketJoinCommand packet = new PacketJoinCommand(player.getUniqueId(), servers);
+        PacketJoinCommand packet = new PacketJoinCommand(player.getUuid(), servers);
         player.send(packet);
     }
 

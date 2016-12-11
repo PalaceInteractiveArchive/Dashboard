@@ -1,19 +1,22 @@
 package com.palacemc.dashboard.handlers;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
 /**
  * Created by Marc on 7/16/16
  */
 public class Mute {
-    private UUID uuid;
+    @Getter private UUID uuid;
 
-    private String name;
-    private String reason;
-    private String source;
+    @Getter private String name;
+    @Getter private String reason;
+    @Getter private String source;
 
-    private boolean muted;
-    private long release;
+    @Getter @Setter private boolean muted;
+    @Getter private long release;
 
     public Mute(UUID uuid, String name, boolean muted, long release, String reason, String source) {
         this.uuid = uuid;
@@ -22,45 +25,5 @@ public class Mute {
         this.release = release;
         this.reason = reason;
         this.source = source;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isMuted() {
-        return muted;
-    }
-
-    public long getRelease() {
-        return release;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setMuted(boolean muted) {
-        this.muted = muted;
-    }
-
-    public void setRelease(long release) {
-        this.release = release;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
     }
 }

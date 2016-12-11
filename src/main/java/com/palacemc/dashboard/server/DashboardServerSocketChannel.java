@@ -12,29 +12,27 @@ import java.util.List;
  */
 public class DashboardServerSocketChannel extends NioServerSocketChannel {
 
-    protected int doReadMessages(List<Object> buf) {
-        SocketChannel ch = null;
+    protected int readMessagesFromBuffer(List<Object> buffer) {
+        SocketChannel socketChannel = null;
 
         try {
-            ch = javaChannel().accept();
+            socketChannel = javaChannel().accept();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
-            if (ch != null) {
-                buf.add(new DashboardSocketChannel(this, ch));
+            if (socketChannel != null) {
+                buffer.add(new DashboardSocketChannel(this, socketChannel));
                 return 1;
             }
         } catch (Throwable t) {
-            Launcher.getDashboard().getLogger().error("Failed to create a new channel from an accepted socket.");
-            t.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Failed to create a new channel from an accepted socket.", t);
 
             try {
-                ch.close();
+                socketChannel.close();
             } catch (Throwable t2) {
-                Launcher.getDashboard().getLogger().error("Failed to close a socket.");
-                t2.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Failed to close a socket.", t2);
             }
         }
 

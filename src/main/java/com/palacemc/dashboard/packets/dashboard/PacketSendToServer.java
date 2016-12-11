@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,8 +11,8 @@ import java.util.UUID;
  * Created by Marc on 8/22/16
  */
 public class PacketSendToServer extends BasePacket {
-    private UUID uuid;
-    private String server;
+    @Getter private UUID uuid;
+    @Getter private String server;
 
     public PacketSendToServer() {
         this(null, "");
@@ -23,35 +24,27 @@ public class PacketSendToServer extends BasePacket {
         this.server = server;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public PacketSendToServer fromJSON(JsonObject obj) {
+    public PacketSendToServer fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.server = obj.get("server").getAsString();
+        this.server = object.get("server").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("server", this.server);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("server", this.server);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

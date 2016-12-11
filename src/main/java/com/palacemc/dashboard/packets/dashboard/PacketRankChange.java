@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
 import com.palacemc.dashboard.handlers.Rank;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -11,9 +12,9 @@ import java.util.UUID;
  * Created by Marc on 9/17/16
  */
 public class PacketRankChange extends BasePacket {
-    private UUID uuid;
-    private Rank rank;
-    private String source;
+    @Getter private UUID uuid;
+    @Getter private Rank rank;
+    @Getter private String source;
 
     public PacketRankChange() {
         this(null, Rank.SETTLER, "");
@@ -26,43 +27,31 @@ public class PacketRankChange extends BasePacket {
         this.source = source;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public Rank getRank() {
-        return rank;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public PacketRankChange fromJSON(JsonObject obj) {
-        this.id = obj.get("id").getAsInt();
+    public PacketRankChange fromJSON(JsonObject object) {
+        this.id = object.get("id").getAsInt();
 
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.rank = Rank.fromString(obj.get("rank").getAsString());
-        this.source = obj.get("source").getAsString();
+        this.rank = Rank.fromString(object.get("rank").getAsString());
+        this.source = object.get("source").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("rank", this.rank.getSqlName());
-            obj.addProperty("source", this.source);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("rank", this.rank.getSqlName());
+            object.addProperty("source", this.source);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

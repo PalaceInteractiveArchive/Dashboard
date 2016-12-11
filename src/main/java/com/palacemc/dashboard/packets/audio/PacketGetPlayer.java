@@ -8,35 +8,35 @@ import com.palacemc.dashboard.packets.PacketID;
  * Created by Marc on 6/15/15
  */
 public class PacketGetPlayer extends BasePacket {
-    private String playername = "";
+    private String playerName = "";
 
     public PacketGetPlayer() {
         this("");
     }
 
-    public PacketGetPlayer(String playername) {
+    public PacketGetPlayer(String playerName) {
         this.id = PacketID.GETPLAYER.getID();
-        this.playername = playername;
+        this.playerName = playerName;
     }
 
     public String getPlayerName() {
-        return this.playername;
+        return this.playerName;
     }
 
-    public PacketGetPlayer fromJSON(JsonObject obj) {
-        this.playername = obj.get("playername").getAsString();
+    public PacketGetPlayer fromJSON(JsonObject object) {
+        this.playerName = object.get("playerName").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("playername", this.playername);
+            object.addProperty("id", this.id);
+            object.addProperty("playerName", this.playerName);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

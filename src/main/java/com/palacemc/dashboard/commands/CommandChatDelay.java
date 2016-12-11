@@ -24,7 +24,7 @@ public class CommandChatDelay extends MagicCommand {
         try {
             int time = Integer.parseInt(args[0]);
             Launcher.getDashboard().getChatUtil().setChatDelay(time * 1000);
-            Launcher.getDashboard().getModerationUtil().changeChatDelay(time, player.getName());
+            Launcher.getDashboard().getModerationUtil().changeChatDelay(time, player.getUsername());
         } catch (NumberFormatException e) {
             player.sendMessage(ChatColor.RED + "Please use a whole number");
         }

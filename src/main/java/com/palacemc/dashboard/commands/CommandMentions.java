@@ -13,11 +13,11 @@ public class CommandMentions extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
-        player.setMentions(!player.hasMentions());
-        player.sendMessage((player.hasMentions() ? ChatColor.GREEN : ChatColor.RED) + "You have " +
-                (player.hasMentions() ? "enabled" : "disabled") + " mention notifications!");
+        player.setMentions(!player.isMentions());
+        player.sendMessage((player.isMentions() ? ChatColor.GREEN : ChatColor.RED) + "You have " +
+                (player.isMentions() ? "enabled" : "disabled") + " mention notifications!");
 
-        if (player.hasMentions()) {
+        if (player.isMentions()) {
             player.mention();
         }
 
@@ -25,8 +25,8 @@ public class CommandMentions extends MagicCommand {
             try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET mentions=? WHERE uuid=?");
 
-                sql.setInt(1, player.hasMentions() ? 1 : 0);
-                sql.setString(2, player.getUniqueId().toString());
+                sql.setInt(1, player.isMentions() ? 1 : 0);
+                sql.setString(2, player.getUuid().toString());
                 sql.execute();
                 sql.close();
             } catch (SQLException e) {

@@ -17,7 +17,7 @@ public class PacketCommandList extends BasePacket {
     private List<String> commands = new ArrayList<>();
 
     public PacketCommandList() {
-        this(new ArrayList<String>());
+        this(new ArrayList<>());
     }
 
     public PacketCommandList(List<String> commands) {

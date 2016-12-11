@@ -56,7 +56,7 @@ public class CommandSend extends MagicCommand {
                     return;
                 }
 
-                player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + tp.getName() + ChatColor.GREEN +
+                player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + tp.getUsername() + ChatColor.GREEN +
                         " to " + ChatColor.YELLOW + server.getName());
                 Launcher.getDashboard().getServerUtil().sendPlayer(tp, server.getName());
         }
@@ -71,7 +71,7 @@ public class CommandSend extends MagicCommand {
             list.add("current");
 
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-                list.add(tp.getName());
+                list.add(tp.getUsername());
             }
 
             Collections.sort(list);
@@ -81,7 +81,7 @@ public class CommandSend extends MagicCommand {
             list.add("current");
 
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-                list.add(tp.getName());
+                list.add(tp.getUsername());
             }
 
             String arg = args.get(0);

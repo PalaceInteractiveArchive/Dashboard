@@ -32,7 +32,7 @@ public class CommandReply extends MagicCommand {
                 return;
             }
 
-            if (!tp.canRecieveMessages()) {
+            if (!tp.isRecieveMessages()) {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
             }
@@ -67,18 +67,18 @@ public class CommandReply extends MagicCommand {
             }
         }
 
-        if (tp.hasMentions()) {
+        if (tp.isMentions()) {
             tp.mention();
         }
 
-        tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getName() +
+        tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() +
                 ChatColor.GREEN + " -> " + ChatColor.LIGHT_PURPLE + "You: " + ChatColor.WHITE + msg);
         player.sendMessage(ChatColor.LIGHT_PURPLE + "You " + ChatColor.GREEN + "-> " +
-                tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getName() + ": " +
+                tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getUsername() + ": " +
                 ChatColor.WHITE + msg);
-        tp.setReply(player.getUniqueId());
+        tp.setReply(player.getUuid());
 
         Launcher.getDashboard().getChatUtil().socialSpyMessage(player, tp, msg, "reply");
-        Launcher.getDashboard().getChatUtil().logMessage(player.getUniqueId(), "/reply " + tp.getName() + " " + msg);
+        Launcher.getDashboard().getChatUtil().logMessage(player.getUuid(), "/reply " + tp.getUsername() + " " + msg);
     }
 }

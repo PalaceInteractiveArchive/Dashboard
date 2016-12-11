@@ -23,7 +23,7 @@ public class CommandCC extends MagicCommand {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
                     tp.sendMessage(clearMessage + ChatColor.DARK_AQUA + "Chat has been cleared");
                 } else {
-                    tp.sendMessage("\n" + ChatColor.DARK_AQUA + "Chat has been cleared by " + player.getName());
+                    tp.sendMessage("\n" + ChatColor.DARK_AQUA + "Chat has been cleared by " + player.getUsername());
                 }
             }
         }

@@ -1,11 +1,10 @@
 package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,10 @@ import java.util.UUID;
  * Created by Marc on 9/3/16
  */
 public class PacketTabComplete extends BasePacket {
-    private UUID uuid;
-    private String command;
-    private List<String> args;
-    private List<String> results = new ArrayList<>();
+    @Getter private UUID uuid;
+    @Getter private String command;
+    @Getter private List<String> args;
+    @Getter private List<String> results = new ArrayList<>();
 
     public PacketTabComplete() {
         this(null, "", new ArrayList<>(), new ArrayList<>());
@@ -32,56 +31,34 @@ public class PacketTabComplete extends BasePacket {
         this.results = results;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public List<String> getArgs() {
-        return args;
-    }
-
-    public List<String> getResults() {
-        return results;
-    }
-
-    public PacketTabComplete fromJSON(JsonObject obj) {
+    public PacketTabComplete fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.command = obj.get("command").getAsString();
+        this.command = object.get("command").getAsString();
 
-        JsonArray args = obj.get("args").getAsJsonArray();
-        for (JsonElement e : args) {
-            this.args.add(e.getAsString());
-        }
+        object.get("args").getAsJsonArray().forEach(element -> this.args.add(element.getAsString()));
+        object.get("results").getAsJsonArray().forEach(element -> this.results.add(element.getAsString()));
 
-        JsonArray list = obj.get("results").getAsJsonArray();
-        for (JsonElement e : list) {
-            this.results.add(e.getAsString());
-        }
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
         try {
             Gson gson = new Gson();
 
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("command", this.command);
-            obj.add("args", gson.toJsonTree(this.args).getAsJsonArray());
-            obj.add("results", gson.toJsonTree(this.results).getAsJsonArray());
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("command", this.command);
+            object.add("args", gson.toJsonTree(this.args).getAsJsonArray());
+            object.add("results", gson.toJsonTree(this.results).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

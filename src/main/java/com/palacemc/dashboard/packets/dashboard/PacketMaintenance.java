@@ -3,12 +3,13 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 9/12/16
  */
 public class PacketMaintenance extends BasePacket {
-    private boolean maintenance;
+    @Getter private boolean maintenance;
 
     public PacketMaintenance() {
         this(false);
@@ -19,25 +20,21 @@ public class PacketMaintenance extends BasePacket {
         this.maintenance = maintenance;
     }
 
-    public boolean isMaintenance() {
-        return maintenance;
-    }
-
-    public PacketMaintenance fromJSON(JsonObject obj) {
-        this.maintenance = obj.get("maintenance").getAsBoolean();
+    public PacketMaintenance fromJSON(JsonObject object) {
+        this.maintenance = object.get("maintenance").getAsBoolean();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("maintenance", this.maintenance);
+            object.addProperty("id", this.id);
+            object.addProperty("maintenance", this.maintenance);
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

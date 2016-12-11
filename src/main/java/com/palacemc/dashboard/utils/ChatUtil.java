@@ -133,7 +133,7 @@ public class ChatUtil {
     }
 
     public void chatEvent(PacketPlayerChat packet) {
-        UUID uuid = packet.getUniqueId();
+        UUID uuid = packet.getUuid();
         Player player = Launcher.getDashboard().getPlayer(uuid);
         if (player == null) {
             return;
@@ -148,7 +148,7 @@ public class ChatUtil {
             if (player.isAFK()) {
                 player.setAFK(false);
                 player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Your AFK Timer has been reset!");
-                PacketTitle title = new PacketTitle(player.getUniqueId(), ChatColor.RED + "" + ChatColor.BOLD + "Confirmed",
+                PacketTitle title = new PacketTitle(player.getUuid(), ChatColor.RED + "" + ChatColor.BOLD + "Confirmed",
                         ChatColor.RED + "" + ChatColor.BOLD + "Your AFK Timer has been reset!", 10, 100, 20);
                 player.send(title);
                 player.afkAction();
@@ -194,11 +194,11 @@ public class ChatUtil {
                 return;
             }
             //ChatDelay Check
-            if (time.containsKey(player.getUniqueId()) && System.currentTimeMillis() < time.get(player.getUniqueId())) {
+            if (time.containsKey(player.getUuid()) && System.currentTimeMillis() < time.get(player.getUuid())) {
                 player.sendMessage(ChatColor.RED + "You have to wait " + chatDelay / 1000 + " seconds before chatting!");
                 return;
             }
-            time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
+            time.put(player.getUuid(), System.currentTimeMillis() + chatDelay);
             msg = removeCaps(player, msg);
             if (containsSwear(player, packet.getMessage()) || isAdvert(player, packet.getMessage()) ||
                     spamCheck(player, packet.getMessage()) || containsUnicode(player, packet.getMessage())) {
@@ -211,13 +211,13 @@ public class ChatUtil {
                 return;
             }
             //Duplicate Message Check
-            if (messageCache.containsKey(player.getUniqueId())) {
-                if (msg.equalsIgnoreCase(messageCache.get(player.getUniqueId()))) {
+            if (messageCache.containsKey(player.getUuid())) {
+                if (msg.equalsIgnoreCase(messageCache.get(player.getUuid()))) {
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Please do not repeat the same message!");
                     return;
                 }
             }
-            messageCache.put(player.getUniqueId(), msg);
+            messageCache.put(player.getUuid(), msg);
         } else {
             if (msg.startsWith(":warn-")) {
                 Launcher.getDashboard().getWarningUtil().handle(player, msg);
@@ -250,7 +250,7 @@ public class ChatUtil {
             long releaseTime = mute.getRelease();
             Date currentTime = new Date();
             if (currentTime.getTime() > releaseTime) {
-                Launcher.getDashboard().getSqlUtil().unmutePlayer(player.getUniqueId());
+                Launcher.getDashboard().getSqlUtil().unmutePlayer(player.getUuid());
                 player.getMute().setMuted(false);
             } else {
                 String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
@@ -266,7 +266,7 @@ public class ChatUtil {
     }
 
     public void sendChat(Player player, String msg) {
-        logMessage(player.getUniqueId(), msg);
+        logMessage(player.getUuid(), msg);
         String sname = Launcher.getDashboard().getServer(player.getServer()).getServerType();
         if (sname.startsWith("New")) {
             sname = sname.replaceAll("New", "");
@@ -276,7 +276,7 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
-            String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getName() + ": " +
+            String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.isNewGuest()) {
@@ -285,9 +285,9 @@ public class ChatUtil {
                 if (Launcher.getDashboard().getServer(tp.getServer()).isPark()) {
                     String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + message;
                     boolean mention = false;
-                    if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
+                    if (tp.isMentions() && !tp.getUuid().equals(player.getUuid())) {
                         String possibleMention = send;
-                        String name = tp.getName().toLowerCase();
+                        String name = tp.getUsername().toLowerCase();
                         if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
                                 possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
                                 possibleMention.contains(" " + name + ".") || possibleMention.startsWith(name + ".") ||
@@ -340,8 +340,8 @@ public class ChatUtil {
         }
         if (bool) {
             player.sendMessage(ChatColor.RED + "Please do not swear!");
-            logMessage(player.getUniqueId(), msg);
-            swearMessage(player.getName(), msg);
+            logMessage(player.getUuid(), msg);
+            swearMessage(player.getUsername(), msg);
             return true;
         }
         return false;
@@ -360,7 +360,7 @@ public class ChatUtil {
             for (Character c : blocked) {
                 text += "\n- '" + c.toString() + "'";
             }
-            PacketLink packet = new PacketLink(player.getUniqueId(), "https://mcmagic.us/help/faq#blocked-chars", text,
+            PacketLink packet = new PacketLink(player.getUuid(), "https://mcmagic.us/help/faq#blocked-chars", text,
                     ChatColor.AQUA, false);
             player.send(packet);
             return true;
@@ -515,7 +515,7 @@ public class ChatUtil {
             if (isWhitelisted(m.toMatchResult().group())) {
                 return false;
             }
-            advertMessage(player.getName(), msg);
+            advertMessage(player.getUsername(), msg);
             player.sendMessage(ChatColor.RED + "Please do not attempt to advertise or share links.");
             return true;
         }
@@ -552,10 +552,10 @@ public class ChatUtil {
 
     public void socialSpyMessage(Player from, Player to, String message, String command) {
         if (Launcher.getDashboard().getServer(from.getServer()).isPark()) {
-            String msg = ChatColor.WHITE + from.getName() + ": /" + command + " " + to.getName() + " " + message;
+            String msg = ChatColor.WHITE + from.getUsername() + ": /" + command + " " + to.getUsername() + " " + message;
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId())) {
+                        tp.getUuid().equals(from.getUuid()) || tp.getUuid().equals(to.getUuid())) {
                     continue;
                 }
                 if (Launcher.getDashboard().getServer(tp.getServer()).isPark()) {
@@ -566,11 +566,11 @@ public class ChatUtil {
             String server = from.getServer();
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId())) {
+                        tp.getUuid().equals(from.getUuid()) || tp.getUuid().equals(to.getUuid())) {
                     continue;
                 }
                 if (tp.getServer().equals(server)) {
-                    tp.sendMessage(from.getName() + ": /" + command + " " + to.getName() + " " + message);
+                    tp.sendMessage(from.getUsername() + ": /" + command + " " + to.getUsername() + " " + message);
                 }
             }
         }
@@ -578,11 +578,11 @@ public class ChatUtil {
 
     public void socialSpyParty(Player player, Party party, String message, String command) {
         if (Launcher.getDashboard().getServer(player.getServer()).isPark()) {
-            String msg = ChatColor.WHITE + player.getName() + ": /" + command + " " + party.getLeader().getName() +
+            String msg = ChatColor.WHITE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
                     " " + message;
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        party.getMembers().contains(tp.getUniqueId())) {
+                        party.getMembers().contains(tp.getUuid())) {
                     continue;
                 }
                 if (Launcher.getDashboard().getServer(tp.getServer()).isPark()) {
@@ -593,11 +593,11 @@ public class ChatUtil {
             String server = player.getServer();
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        party.getMembers().contains(tp.getUniqueId())) {
+                        party.getMembers().contains(tp.getUuid())) {
                     continue;
                 }
                 if (tp.getServer().equals(server)) {
-                    tp.sendMessage(player.getName() + ": /" + command + " " + party.getLeader().getName() + " " + message);
+                    tp.sendMessage(player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() + " " + message);
                 }
             }
         }

@@ -3,24 +3,21 @@ package com.palacemc.dashboard.packets.park;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 9/18/16
  */
 public class PacketRefreshWarps extends BasePacket {
-    private String server;
+    @Getter private String server;
 
     public PacketRefreshWarps() {
         this("");
     }
 
     public PacketRefreshWarps(String server) {
-        this.id = PacketID.Park.REFRESHWARPS.getID();
+        this.id = PacketID.Park.REFRESHWARPS.getId();
         this.server = server;
-    }
-
-    public String getServer() {
-        return server;
     }
 
     public PacketRefreshWarps fromJSON(JsonObject obj) {

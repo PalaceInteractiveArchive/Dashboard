@@ -98,7 +98,7 @@ public class CommandParty extends MagicCommand {
                 return;
             }
 
-            if (tp.getUniqueId().equals(player.getUniqueId())) {
+            if (tp.getUuid().equals(player.getUuid())) {
                 player.sendMessage(ChatColor.RED + "You cannot invite yourself!");
                 return;
             }
@@ -121,14 +121,14 @@ public class CommandParty extends MagicCommand {
                 }
 
                 if (party != null) {
-                    if (!party.getMembers().contains(tp.getUniqueId())) {
+                    if (!party.getMembers().contains(tp.getUuid())) {
                         player.sendMessage("You must first leave your current Party!")
                         ;
                         return;
                     }
                 }
 
-                party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(tp.getUniqueId());
+                party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(tp.getUuid());
                 if (party == null) {
                     player.sendMessage(ChatColor.RED + "This player is not in a Party!");
                     return;
@@ -176,12 +176,12 @@ public class CommandParty extends MagicCommand {
                     return;
                 }
 
-                if (!party.getMembers().contains(tp.getUniqueId())) {
+                if (!party.getMembers().contains(tp.getUuid())) {
                     player.sendMessage("That player isn't in your Party!");
                     return;
                 }
 
-                if (tp.getUniqueId().equals(player.getUniqueId())) {
+                if (tp.getUuid().equals(player.getUuid())) {
                     player.sendMessage("You're already the Leader!");
                 }
 

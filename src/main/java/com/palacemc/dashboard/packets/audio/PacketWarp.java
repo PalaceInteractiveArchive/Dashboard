@@ -3,12 +3,13 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketWarp extends BasePacket {
-    private String warp = "";
+    @Getter private String warp = "";
 
     public PacketWarp() {
         this("");
@@ -20,13 +21,9 @@ public class PacketWarp extends BasePacket {
         this.warp = warp;
     }
 
-    public String getWarpName() {
-        return this.warp;
-    }
-
-    public PacketWarp fromJSON(JsonObject obj) {
+    public PacketWarp fromJSON(JsonObject object) {
         try {
-            this.warp = obj.get("warp").getAsString();
+            this.warp = object.get("warp").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -34,14 +31,14 @@ public class PacketWarp extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("warp", this.warp);
+            object.addProperty("id", this.id);
+            object.addProperty("warp", this.warp);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

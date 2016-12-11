@@ -24,7 +24,9 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class Dashboard {
+    @Getter private Logger logger = Logger.getLogger("Dashboard");
     @Getter private final int PORT = 7892;
+
     @Getter @Setter private SqlUtil sqlUtil = null;
     @Getter @Setter private ServerUtil serverUtil = null;
     @Getter @Setter private ChatUtil chatUtil = null;
@@ -36,28 +38,33 @@ public class Dashboard {
     @Getter @Setter private SlackUtil slackUtil;
     @Getter @Setter private WarningUtil warningUtil;
     @Getter @Setter private SiteUtil siteUtil;
-    @Getter @Setter  private AFKUtil afkUtil;
+    @Getter @Setter private AFKUtil afkUtil;
     @Getter @Setter private StatUtil statUtil;
+
     @Getter @Setter private SchedulerManager schedulerManager = null;
-    @Getter private Logger logger = Logger.getLogger("Dashboard");
 
     @Getter @Setter private long startTime;
 
     private List<String> serverTypes = new ArrayList<>();
     private HashMap<UUID, Player> players = new HashMap<>();
     private HashMap<UUID, String> cache = new HashMap<>();
+
     @Getter @Setter private String motd = "";
     @Getter @Setter private String motdMaintenance = "";
-    @Getter private List<String> info = new ArrayList<>();
     @Getter @Setter private String targetServer = "unknown";
+
+    @Getter private List<String> info = new ArrayList<>();
     @Getter private List<String> joinServers = new ArrayList<>();
-    @Getter @Setter private boolean maintenance = false;
     @Getter @Setter private List<UUID> maintenanceWhitelist = new ArrayList<>();
+
     @Getter private boolean testNetwork = false;
+    @Getter @Setter private boolean maintenance = false;
 
     public void loadConfiguration() {
-        try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("config.txt"));
             String line = br.readLine();
+
             while (line != null) {
                 if (line.startsWith("maintenance:")) {
                     maintenance = Boolean.parseBoolean(line.split("maintenance:")[1]);
@@ -67,11 +74,12 @@ public class Dashboard {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to open the config file! (config.txt)", e);
         }
 
         if (maintenance) {
             maintenanceWhitelist.clear();
+
             HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.SQUIRE, Rank.ARCHITECT,
                     Rank.KNIGHT, Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
 
@@ -80,15 +88,19 @@ public class Dashboard {
                     maintenanceWhitelist.add(uuid);
                 }
             }
+
         }
     }
 
     public void loadMOTD() {
         info.clear();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("motd.txt"))) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("motd.txt"));
+
             String line = br.readLine();
             boolean isInfo = false;
+
             while (line != null) {
                 if (line.startsWith("motd:")) {
                     motd = line.split("motd:")[1];
@@ -105,7 +117,7 @@ public class Dashboard {
             motd = motd.replaceAll("%n%", System.getProperty("line.separator"));
             motdMaintenance = motdMaintenance.replaceAll("%n%", System.getProperty("line.separator"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("Unable to reload the MOTD.", e);
         }
     }
 
@@ -123,7 +135,7 @@ public class Dashboard {
             result.close();
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to load server types from MySQL.", e);
             System.exit(0);
         }
     }
@@ -131,18 +143,23 @@ public class Dashboard {
     public void loadJoinServers() {
         joinServers.clear();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("servers.txt"))) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("servers.txt"));
+
             String line = br.readLine();
+
             while (line != null) {
-                String s = "";
+                String server = "";
+
                 if (line.startsWith("- ")) {
-                    s = line.split("- ")[1];
+                    server = line.split("- ")[1];
                 }
-                joinServers.add(s);
+
+                joinServers.add(server);
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Unable to load join servers.", e);
         }
     }
 
@@ -155,14 +172,15 @@ public class Dashboard {
     }
 
     public List<DashboardSocketChannel> getChannels(PacketConnectionType.ConnectionType type) {
-        List<DashboardSocketChannel> list = new ArrayList<>();
-        for (Object o : WebSocketServerHandler.getGroup()) {
-            DashboardSocketChannel dash = (DashboardSocketChannel) o;
-            if (dash.getType().equals(type)) {
-                list.add(dash);
-            }
-        }
-        return list;
+        List<DashboardSocketChannel> channels = new ArrayList<>();
+
+        // TODO: Look into maybe using a filter for this instead
+
+        WebSocketServerHandler.getGroup().stream().filter(
+                channel -> ((DashboardSocketChannel) channel).getType().equals(type)).forEach(socketChannel ->
+                    channels.add((DashboardSocketChannel) socketChannel));
+
+        return channels;
     }
 
     public Player getPlayer(UUID uuid) {
@@ -170,12 +188,8 @@ public class Dashboard {
     }
 
     public Player getPlayer(String username) {
-        for (Player player : players.values()) {
-            if (player.getName().equalsIgnoreCase(username)) {
-                return player;
-            }
-        }
-        return null;
+        return players.entrySet().stream().map(Map.Entry::getValue).filter(player ->
+                player.getUsername().equalsIgnoreCase(username)).findFirst().get();
     }
 
     public List<Player> getOnlinePlayers() {
@@ -183,15 +197,17 @@ public class Dashboard {
     }
 
     public void addPlayer(Player player) {
-        players.put(player.getUniqueId(), player);
+        players.put(player.getUuid(), player);
     }
 
-    public Server getServer(String server) {
-        Server s = serverUtil.getServer(server);
-        if (s == null) {
+    public Server getServer(String serverName) {
+        Server server = serverUtil.getServer(serverName);
+
+        if (server == null) {
             return serverUtil.getServer(targetServer);
         }
-        return s;
+
+        return server;
     }
 
     public DashboardSocketChannel getBungee(UUID bungeeID) {
@@ -200,6 +216,7 @@ public class Dashboard {
             if (!dash.getType().equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
                 continue;
             }
+
             if (dash.getBungeeID().equals(bungeeID)) {
                 return dash;
             }
@@ -210,12 +227,9 @@ public class Dashboard {
     public DashboardSocketChannel getInstance(String name) {
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
-            if (!dash.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) {
-                continue;
-            }
-            if (dash.getServerName().equalsIgnoreCase(name)) {
-                return dash;
-            }
+
+            if (!dash.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) continue;
+            if (dash.getServerName().equalsIgnoreCase(name)) return dash;
         }
         return null;
     }
@@ -223,15 +237,15 @@ public class Dashboard {
     public void logout(UUID uuid) {
         Player player = getPlayer(uuid);
 
-        if (player != null) {
-            if (!player.getServer().equalsIgnoreCase("unknown")) {
-                getServerUtil().getServer(player.getServer()).changeCount(-1);
-            }
-            if (player.getTutorial() != null) {
-                player.getTutorial().cancel();
-            }
-            sqlUtil.logout(player);
+        if (player == null) return;
+
+        if (!player.getServer().equalsIgnoreCase("unknown")) {
+            getServerUtil().getServer(player.getServer()).changeCount(-1);
         }
+        if (player.getTutorial() != null) {
+            player.getTutorial().cancel();
+        }
+        sqlUtil.logout(player);
 
         PacketKick packet = new PacketKick("See ya real soon!");
         PacketContainer kick = new PacketContainer(uuid, packet.getJSON().toString());

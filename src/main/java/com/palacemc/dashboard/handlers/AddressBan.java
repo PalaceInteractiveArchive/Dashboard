@@ -1,25 +1,15 @@
 package com.palacemc.dashboard.handlers;
 
+import lombok.Getter;
+
 public class AddressBan {
-    private String address;
-    private String reason;
-    private String source;
+    @Getter private String address;
+    @Getter private String reason;
+    @Getter private String source;
 
     public AddressBan(String address, String reason, String source) {
         this.address = address;
         this.reason = reason;
         this.source = source;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getSource() {
-        return source;
     }
 }

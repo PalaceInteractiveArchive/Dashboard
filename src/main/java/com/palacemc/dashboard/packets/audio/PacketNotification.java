@@ -3,14 +3,15 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketNotification extends BasePacket {
-    private String text = "";
-    private String body = "";
-    private String icon = "";
+    @Getter private String text = "";
+    @Getter private String body = "";
+    @Getter private String icon = "";
 
     public PacketNotification() {
         this("", "", "");
@@ -24,23 +25,11 @@ public class PacketNotification extends BasePacket {
         this.icon = icon;
     }
 
-    public String getText() {
-        return this.text;
-    }
-
-    public String getBody() {
-        return this.body;
-    }
-
-    public String getIcon() {
-        return this.icon;
-    }
-
-    public PacketNotification fromJSON(JsonObject obj) {
+    public PacketNotification fromJSON(JsonObject object) {
         try {
-            this.text = obj.get("text").getAsString();
-            this.body = obj.get("body").getAsString();
-            this.icon = obj.get("icon").getAsString();
+            this.text = object.get("text").getAsString();
+            this.body = object.get("body").getAsString();
+            this.icon = object.get("icon").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -48,16 +37,16 @@ public class PacketNotification extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("text", this.text);
-            obj.addProperty("body", this.body);
-            obj.addProperty("icon", this.icon);
+            object.addProperty("id", this.id);
+            object.addProperty("text", this.text);
+            object.addProperty("body", this.body);
+            object.addProperty("icon", this.icon);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

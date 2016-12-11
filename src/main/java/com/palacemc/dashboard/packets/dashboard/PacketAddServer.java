@@ -3,14 +3,15 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 8/25/16
  */
 public class PacketAddServer extends BasePacket {
-    private String name;
-    private String address;
-    private int port;
+    @Getter private String name;
+    @Getter private String address;
+    @Getter private int port;
 
     public PacketAddServer() {
         this("", "", 0);
@@ -23,37 +24,25 @@ public class PacketAddServer extends BasePacket {
         this.port = port;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public PacketAddServer fromJSON(JsonObject obj) {
-        this.name = obj.get("name").getAsString();
-        this.address = obj.get("address").getAsString();
-        this.port = obj.get("port").getAsInt();
+    public PacketAddServer fromJSON(JsonObject object) {
+        this.name = object.get("name").getAsString();
+        this.address = object.get("address").getAsString();
+        this.port = object.get("port").getAsInt();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("name", this.name);
-            obj.addProperty("address", this.address);
-            obj.addProperty("port", this.port);
+            object.addProperty("id", this.id);
+            object.addProperty("name", this.name);
+            object.addProperty("address", this.address);
+            object.addProperty("port", this.port);
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.UUID;
  * Created by Marc on 9/12/16
  */
 public class PacketMaintenanceWhitelist extends BasePacket {
-    private List<UUID> allowed = new ArrayList<>();
+    @Getter private List<UUID> allowed = new ArrayList<>();
 
     public PacketMaintenanceWhitelist() {
         this(new ArrayList<UUID>());
@@ -26,12 +27,8 @@ public class PacketMaintenanceWhitelist extends BasePacket {
         this.allowed = allowed;
     }
 
-    public List<UUID> getAllowed() {
-        return allowed;
-    }
-
-    public PacketMaintenanceWhitelist fromJSON(JsonObject obj) {
-        JsonArray list = obj.get("allowed").getAsJsonArray();
+    public PacketMaintenanceWhitelist fromJSON(JsonObject object) {
+        JsonArray list = object.get("allowed").getAsJsonArray();
 
         for (JsonElement e : list) {
             try {
@@ -43,16 +40,16 @@ public class PacketMaintenanceWhitelist extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
+            object.addProperty("id", this.id);
             Gson gson = new Gson();
-            obj.add("allowed", gson.toJsonTree(this.allowed).getAsJsonArray());
+            object.add("allowed", gson.toJsonTree(this.allowed).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

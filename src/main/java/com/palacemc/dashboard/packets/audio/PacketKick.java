@@ -3,13 +3,14 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketKick extends BasePacket {
-    private String message = "";
-    private String reason = "";
+    @Getter private String message = "";
+    @Getter private String reason = "";
 
     public PacketKick() {
         this("", "");
@@ -23,21 +24,13 @@ public class PacketKick extends BasePacket {
         this.id = PacketID.KICK.getID();
 
         this.message = kickmessage;
-        this.reason = "DEFAULT";
+        this.reason = reason;
     }
 
-    public String getMessage() {
-        return this.message;
-    }
-
-    public String getReason() {
-        return this.reason;
-    }
-
-    public PacketKick fromJSON(JsonObject obj) {
+    public PacketKick fromJSON(JsonObject object) {
         try {
-            this.reason = obj.get("reason").getAsString();
-            this.message = obj.get("message").getAsString();
+            this.reason = object.get("reason").getAsString();
+            this.message = object.get("message").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -45,15 +38,15 @@ public class PacketKick extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("message", this.message);
-            obj.addProperty("reason", this.reason);
+            object.addProperty("id", this.id);
+            object.addProperty("message", this.message);
+            object.addProperty("reason", this.reason);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

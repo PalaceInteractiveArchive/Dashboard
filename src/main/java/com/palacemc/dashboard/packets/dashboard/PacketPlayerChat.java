@@ -3,6 +3,7 @@ package com.palacemc.dashboard.packets.dashboard;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -10,8 +11,8 @@ import java.util.UUID;
  * Created by Marc on 7/15/16
  */
 public class PacketPlayerChat extends BasePacket {
-    private UUID uuid;
-    private String message;
+    @Getter private UUID uuid;
+    @Getter private String message;
 
     public PacketPlayerChat() {
         this(null, "");
@@ -23,35 +24,27 @@ public class PacketPlayerChat extends BasePacket {
         this.message = message;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public PacketPlayerChat fromJSON(JsonObject obj) {
+    public PacketPlayerChat fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.message = obj.get("message").getAsString();
+        this.message = object.get("message").getAsString();
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("message", this.message);
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("message", this.message);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

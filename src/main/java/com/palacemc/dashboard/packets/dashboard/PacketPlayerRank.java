@@ -4,12 +4,13 @@ import com.google.gson.JsonObject;
 import com.palacemc.dashboard.handlers.Rank;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.UUID;
 
 public class PacketPlayerRank extends BasePacket {
-    private UUID uuid;
-    private Rank rank;
+    @Getter private UUID uuid;
+    @Getter private Rank rank;
 
     public PacketPlayerRank() {
         this(null, Rank.SETTLER);
@@ -21,35 +22,27 @@ public class PacketPlayerRank extends BasePacket {
         this.rank = rank;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public Rank getRank() {
-        return rank;
-    }
-
-    public PacketPlayerRank fromJSON(JsonObject obj) {
+    public PacketPlayerRank fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.rank = Rank.fromString(obj.get("rank").getAsString());
+        this.rank = Rank.fromString(object.get("rank").getAsString());
         return this;
     }
 
     public JsonObject getJSON() {
 
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("rank", this.rank.getSqlName());
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("rank", this.rank.getSqlName());
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }

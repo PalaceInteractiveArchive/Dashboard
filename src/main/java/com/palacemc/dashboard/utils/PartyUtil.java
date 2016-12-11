@@ -15,7 +15,7 @@ public class PartyUtil {
     public HashMap<UUID, Party> timerList = new HashMap<>();
 
     public Party findPartyForPlayer(Player player) {
-        return findPartyForPlayer(player.getUniqueId());
+        return findPartyForPlayer(player.getUuid());
     }
 
     public Party findPartyForPlayer(UUID uuid) {
@@ -41,12 +41,12 @@ public class PartyUtil {
     }
 
     public void invitePlayer(final Party party, final Player tp) {
-        if (timerList.containsKey(tp.getUniqueId())) {
+        if (timerList.containsKey(tp.getUuid())) {
             party.getLeader().sendMessage(ChatColor.GREEN + "This player already has a party request pending!");
             return;
         }
 
-        Party p = findPartyForPlayer(tp.getUniqueId());
+        Party p = findPartyForPlayer(tp.getUuid());
 
         if (p != null) {
             if (p.getMembers().size() > 1 || hasTimer(p)) {
@@ -57,29 +57,29 @@ public class PartyUtil {
             partyList.remove(p);
         }
 
-        if (party.getMembers().contains(tp.getUniqueId())) {
+        if (party.getMembers().contains(tp.getUuid())) {
             party.getLeader().sendMessage(ChatColor.RED + "This player is already in your party!");
             return;
         }
 
-        timerList.put(tp.getUniqueId(), party);
-        PacketPartyRequest packet = new PacketPartyRequest(tp.getUniqueId(), party.getLeader().getName());
+        timerList.put(tp.getUuid(), party);
+        PacketPartyRequest packet = new PacketPartyRequest(tp.getUuid(), party.getLeader().getUsername());
         tp.send(packet);
 
-        party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getName() + " has asked " + tp.getName() +
+        party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + " has asked " + tp.getUsername() +
                 " to join their party, they have 5 minutes to accept!", true);
 
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if (timerList.containsKey(tp.getUniqueId()) && timerList.get(tp.getUniqueId()).getUniqueId()
-                        .equals(party.getUniqueId())) {
-                    timerList.remove(tp.getUniqueId());
+                if (timerList.containsKey(tp.getUuid()) && timerList.get(tp.getUuid()).getUuid()
+                        .equals(party.getUuid())) {
+                    timerList.remove(tp.getUuid());
 
-                    tp.sendMessage(ChatColor.YELLOW + party.getLeader().getName() + "'s party request has expired!");
+                    tp.sendMessage(ChatColor.YELLOW + party.getLeader().getUsername() + "'s party request has expired!");
 
-                    party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getName() + "'s request to " +
-                            tp.getName() + " has expired!", true);
+                    party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + "'s request to " +
+                            tp.getUsername() + " has expired!", true);
                 }
             }
         }, 300000);
@@ -87,7 +87,7 @@ public class PartyUtil {
 
     private boolean hasTimer(Party p) {
         for (Map.Entry<UUID, Party> entry : timerList.entrySet()) {
-            if (entry.getValue().getUniqueId().equals(p.getUniqueId())) {
+            if (entry.getValue().getUuid().equals(p.getUuid())) {
                 return true;
             }
         }
@@ -112,7 +112,7 @@ public class PartyUtil {
     }
 
     public Party createParty(Player player) {
-        Party party = new Party(player.getUniqueId(), new ArrayList<UUID>());
+        Party party = new Party(player.getUuid(), new ArrayList<UUID>());
         partyList.add(party);
 
         return party;
@@ -123,22 +123,22 @@ public class PartyUtil {
     }
 
     public void acceptRequest(Player player) {
-        if (!timerList.containsKey(player.getUniqueId())) {
+        if (!timerList.containsKey(player.getUuid())) {
             player.sendMessage(ChatColor.RED + "You have no pending Party Requests!");
             return;
         }
 
-        Party party = timerList.remove(player.getUniqueId());
+        Party party = timerList.remove(player.getUuid());
         party.addMember(player);
-        party.messageToAllMembers(ChatColor.YELLOW + player.getName() + " has accepted the Party Request!", true);
+        party.messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " has accepted the Party Request!", true);
     }
 
     public void denyRequest(Player player) {
-        if (!timerList.containsKey(player.getUniqueId())) {
+        if (!timerList.containsKey(player.getUuid())) {
             player.sendMessage(ChatColor.RED + "You have no pending Party Requests!");
             return;
         }
-        timerList.remove(player.getUniqueId());
+        timerList.remove(player.getUuid());
         player.sendMessage(ChatColor.RED + "You have denied the Party Request!");
     }
 

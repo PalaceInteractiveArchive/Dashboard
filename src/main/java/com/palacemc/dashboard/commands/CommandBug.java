@@ -12,7 +12,7 @@ public class CommandBug extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        PacketLink packet = new PacketLink(player.getUniqueId(), "https://goo.gl/sMMiYZ", "Click to report a bug",
+        PacketLink packet = new PacketLink(player.getUuid(), "https://goo.gl/sMMiYZ", "Click to report a bug",
                 ChatColor.YELLOW, true);
 
         player.send(packet);

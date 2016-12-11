@@ -1,11 +1,10 @@
 package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,10 @@ import java.util.UUID;
  * Created by Marc on 8/22/16
  */
 public class PacketListFriendCommand extends BasePacket {
-    private UUID uuid;
-    private int page;
-    private int maxpage;
-    private List<String> friendlist = new ArrayList<>();
+    @Getter private UUID uuid;
+    @Getter private int page;
+    @Getter private int maxpage;
+    @Getter private List<String> friendlist = new ArrayList<>();
 
     public PacketListFriendCommand() {
         this(null, 0, 0, new ArrayList<String>());
@@ -32,56 +31,35 @@ public class PacketListFriendCommand extends BasePacket {
         this.friendlist = friendlist;
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public int getPage() {
-        return page;
-    }
-
-    public int getMaxPage() {
-        return maxpage;
-    }
-
-    public List<String> getFriendlist() {
-        return friendlist;
-    }
-
-    public PacketListFriendCommand fromJSON(JsonObject obj) {
+    public PacketListFriendCommand fromJSON(JsonObject object) {
         try {
-            this.uuid = UUID.fromString(obj.get("uuid").getAsString());
+            this.uuid = UUID.fromString(object.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
         }
 
-        this.page = obj.get("page").getAsInt();
-        this.maxpage = obj.get("maxpage").getAsInt();
+        this.page = object.get("page").getAsInt();
+        this.maxpage = object.get("maxpage").getAsInt();
 
-        JsonArray list = obj.get("friendlist").getAsJsonArray();
-
-        for (JsonElement e : list) {
-            this.friendlist.add(e.getAsString());
-        }
-
+        object.get("friendlist").getAsJsonArray().forEach(element -> this.friendlist.add(element.getAsString()));
         return this;
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
             Gson gson = new Gson();
 
-            obj.addProperty("id", this.id);
-            obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("page", this.page);
-            obj.addProperty("maxpage", this.maxpage);
-            obj.add("friendlist", gson.toJsonTree(this.friendlist).getAsJsonArray());
+            object.addProperty("id", this.id);
+            object.addProperty("uuid", this.uuid.toString());
+            object.addProperty("page", this.page);
+            object.addProperty("maxpage", this.maxpage);
+            object.add("friendlist", gson.toJsonTree(this.friendlist).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }
 
-        return obj;
+        return object;
     }
 }

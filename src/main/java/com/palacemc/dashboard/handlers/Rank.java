@@ -1,5 +1,7 @@
 package com.palacemc.dashboard.handlers;
 
+import lombok.Getter;
+
 /**
  * Created by Marc on 7/15/16
  */
@@ -22,10 +24,10 @@ public enum Rank {
     DVCMEMBER("DVC", ChatColor.AQUA, ChatColor.WHITE, 2),
     SETTLER("Settler", ChatColor.DARK_AQUA, ChatColor.WHITE, 1);
 
-    private String name;
-    private ChatColor tagColor;
-    private ChatColor chatColor;
-    private int rankId;
+    @Getter private String name;
+    @Getter private ChatColor tagColor;
+    @Getter private ChatColor chatColor;
+    @Getter private int rankId;
 
     Rank(String name, ChatColor tagColor, ChatColor chatColor, int rankId) {
         this.name = name;
@@ -78,23 +80,11 @@ public enum Rank {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String getSqlName() {
         return name.toLowerCase().replaceAll(" ", "");
     }
 
     public String getNameWithBrackets() {
         return ChatColor.WHITE + "[" + getTagColor() + getName() + ChatColor.WHITE + "]";
-    }
-
-    public ChatColor getChatColor() {
-        return chatColor;
-    }
-
-    public ChatColor getTagColor() {
-        return tagColor;
     }
 }

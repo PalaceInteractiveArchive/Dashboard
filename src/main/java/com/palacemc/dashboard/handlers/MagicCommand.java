@@ -1,15 +1,16 @@
 package com.palacemc.dashboard.handlers;
 
 import com.palacemc.dashboard.Launcher;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public abstract class MagicCommand {
-    protected List<String> aliases = new ArrayList<>();
-    private Rank rank;
-    public boolean tabCompletePlayers = false;
+    @Getter protected List<String> aliases = new ArrayList<>();
+    @Getter private Rank rank;
+    @Getter public boolean tabCompletePlayers = false;
 
     public MagicCommand() {
         rank = Rank.SETTLER;
@@ -25,23 +26,17 @@ public abstract class MagicCommand {
         return rank.getRankId() >= this.rank.getRankId();
     }
 
-    public List<String> getAliases() {
-        return new ArrayList<>(aliases);
-    }
-
-    public boolean doTabCompletePlayers() {
-        return tabCompletePlayers;
-    }
-
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         List<String> list = new ArrayList<>();
+
         if (tabCompletePlayers) {
-            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-                list.add(tp.getName());
+            for (Player player : Launcher.getDashboard().getOnlinePlayers()) {
+                list.add(player.getUsername());
             }
             if (args.size() > 0) {
                 String arg2 = args.get(args.size() - 1);
                 List<String> l2 = new ArrayList<>();
+
                 for (String s : list) {
                     if (s.toLowerCase().startsWith(arg2.toLowerCase())) {
                         l2.add(s);
@@ -53,9 +48,5 @@ public abstract class MagicCommand {
         }
         Collections.sort(list);
         return list;
-    }
-
-    public Rank getRank() {
-        return rank;
     }
 }

@@ -13,7 +13,7 @@ public class CommandUptime extends MagicCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         PacketUptimeCommand packet = new PacketUptimeCommand(
-                player.getUniqueId(), Launcher.getDashboard().getStartTime());
+                player.getUuid(), Launcher.getDashboard().getStartTime());
         player.send(packet);
     }
 }

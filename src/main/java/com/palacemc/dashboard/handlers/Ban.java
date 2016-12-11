@@ -1,16 +1,18 @@
 package com.palacemc.dashboard.handlers;
 
+import lombok.Getter;
+
 import java.util.UUID;
 
 public class Ban {
-    private UUID uuid;
+    @Getter private UUID uuid;
 
-    private String name;
-    private String reason;
-    private String source;
+    @Getter private String name;
+    @Getter private String reason;
+    @Getter private String source;
 
-    private boolean permanent;
-    private long release;
+    @Getter private boolean permanent;
+    @Getter private long release;
 
     public Ban(UUID uuid, String name, boolean permanent, long release, String reason, String source) {
         this.uuid = uuid;
@@ -19,29 +21,5 @@ public class Ban {
         this.release = release;
         this.reason = reason;
         this.source = source;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isPermanent() {
-        return permanent;
-    }
-
-    public long getRelease() {
-        return release;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getSource() {
-        return source;
     }
 }

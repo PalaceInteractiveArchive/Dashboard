@@ -42,7 +42,7 @@ public class AFKUtil {
     }
 
     public void warn(final Player player) throws IOException {
-        final UUID uuid = player.getUniqueId();
+        final UUID uuid = player.getUuid();
         String afk = ChatColor.RED + "" + ChatColor.BOLD + "                      AFK Timer:";
         String blank = "";
         String msg = ChatColor.YELLOW + "" + ChatColor.BOLD + "Type anything in chat (it won't be seen by others)";
@@ -56,7 +56,7 @@ public class AFKUtil {
             public void run() {
                 try {
                     if (player != null && player.isAFK()) {
-                        PacketTitle packet = new PacketTitle(player.getUniqueId(), ChatColor.RED + "" + ChatColor.BOLD +
+                        PacketTitle packet = new PacketTitle(player.getUuid(), ChatColor.RED + "" + ChatColor.BOLD +
                                 "Are you AFK?", ChatColor.RED + "AFK kick in " + ChatColor.DARK_RED + (5 - i) + " " +
                                 ChatColor.RED + "minutes!", 10, 1200, 20);
                         player.send(packet);

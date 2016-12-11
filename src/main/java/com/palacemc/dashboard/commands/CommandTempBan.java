@@ -38,14 +38,14 @@ public class CommandTempBan extends MagicCommand {
             }
 
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
-            String source = player.getName();
+            String source = player.getUsername();
             Player tp = Launcher.getDashboard().getPlayer(username);
             UUID uuid;
 
             if (tp == null) {
                 uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
             } else {
-                uuid = tp.getUniqueId();
+                uuid = tp.getUuid();
             }
 
             Ban ban = new Ban(uuid, username, false, timestamp, reason, source);

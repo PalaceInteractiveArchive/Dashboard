@@ -1,6 +1,7 @@
 package com.palacemc.dashboard.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Timer;
@@ -12,7 +13,7 @@ import java.util.concurrent.Executors;
  */
 public class SchedulerManager {
     private final ExecutorService executor;
-    private final BroadcastClock broadcastClock;
+    @Getter private final BroadcastClock broadcastClock;
     private final Timer broadcastTimer;
 
     public SchedulerManager() {
@@ -36,9 +37,5 @@ public class SchedulerManager {
         for (Runnable runnable : tasks) {
             runnable.run();
         }
-    }
-
-    public BroadcastClock getBroadcastClock() {
-        return broadcastClock;
     }
 }

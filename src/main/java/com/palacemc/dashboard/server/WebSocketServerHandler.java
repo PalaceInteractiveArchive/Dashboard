@@ -54,7 +54,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
-            final DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
         }
     }
 
@@ -103,10 +102,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     info = new PacketPlayerInfo(null, username, 0, "");
                 } else {
                     info = new PacketPlayerInfo(
-                            player.getUniqueId(), username, player.getAudioAuth(), player.getServer());
+                            player.getUuid(), username, player.getAudioAuth(), player.getServer());
                     player.resetAudioAuth();
                     try {
-                        PacketAudioConnect connect = new PacketAudioConnect(player.getUniqueId());
+                        PacketAudioConnect connect = new PacketAudioConnect(player.getUuid());
                         Launcher.getDashboard().getInstance(player.getServer()).send(connect);
                     } catch (Exception ignored) {
                     }
@@ -215,7 +214,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 23:
                 PacketPlayerJoin playerJoinPacket = new PacketPlayerJoin().fromJSON(object);
-                player = new Player(playerJoinPacket.getUniqueId(), playerJoinPacket.getUsername(), playerJoinPacket.getAddress(),
+                player = new Player(playerJoinPacket.getUuid(), playerJoinPacket.getUsername(), playerJoinPacket.getAddress(),
                         playerJoinPacket.getServer(), channel.getBungeeID());
 
                 Launcher.getDashboard().getSqlUtil().login(player);
@@ -226,7 +225,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 24:
                 PacketPlayerDisconnect playerDisconnectPacket = new PacketPlayerDisconnect().fromJSON(object);
 
-                Launcher.getDashboard().logout(playerDisconnectPacket.getUniqueId());
+                Launcher.getDashboard().logout(playerDisconnectPacket.getUuid());
                 break;
             /**
              * PlayerChat
@@ -242,7 +241,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 26:
                 PacketMessage messagePacket = new PacketMessage().fromJSON(object);
 
-                UUID uuid = messagePacket.getUniqueId();
+                UUID uuid = messagePacket.getUuid();
                 String msg = messagePacket.getMessage();
                 player = Launcher.getDashboard().getPlayer(uuid);
 
@@ -256,7 +255,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 27:
                 PacketServerSwitch serverSwitchPacket = new PacketServerSwitch().fromJSON(object);
 
-                uuid = serverSwitchPacket.getUniqueId();
+                uuid = serverSwitchPacket.getUuid();
                 String target = serverSwitchPacket.getTarget();
                 player = Launcher.getDashboard().getPlayer(uuid);
 
@@ -270,7 +269,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                     if (Launcher.getDashboard().getServer(target).isPark() && Launcher.getDashboard().getInstance(target) != null) {
                         player.setInventoryUploaded(false);
-                        PacketInventoryStatus update = new PacketInventoryStatus(player.getUniqueId(), 1);
+                        PacketInventoryStatus update = new PacketInventoryStatus(player.getUuid(), 1);
                         try {
                             Launcher.getDashboard().getInstance(target).send(update);
                         } catch (Exception e) {
@@ -344,7 +343,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                                 ChatColor.AQUA + "mcmagic.us/rules#chat");
                                         tutorialPlayer.mention();
                                         tutorialPlayer.setNewGuest(false);
-                                        Launcher.getDashboard().getSqlUtil().completeTutorial(tutorialPlayer.getUniqueId());
+                                        Launcher.getDashboard().getSqlUtil().completeTutorial(tutorialPlayer.getUuid());
                                         cancel();
                                 }
                                 i++;
@@ -361,7 +360,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     // Leaving non-Park server or inventory is uploaded from Park server
                     if (!Launcher.getDashboard().getServer(player.getServer()).isPark() || player.isInventoryUploaded()) {
                         player.setInventoryUploaded(false);
-                        PacketInventoryStatus update = new PacketInventoryStatus(player.getUniqueId(), 1);
+                        PacketInventoryStatus update = new PacketInventoryStatus(player.getUuid(), 1);
                         try {
                             Launcher.getDashboard().getInstance(target).send(update);
                         } catch (Exception e) {
@@ -399,7 +398,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 32:
                 PacketSendToServer sendToServerPacket = new PacketSendToServer().fromJSON(object);
 
-                uuid = sendToServerPacket.getUniqueId();
+                uuid = sendToServerPacket.getUuid();
                 String serverName = sendToServerPacket.getServer();
                 player = Launcher.getDashboard().getPlayer(uuid);
 
@@ -430,7 +429,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 43:
                 PacketTabComplete tabCompletePacket = new PacketTabComplete().fromJSON(object);
 
-                uuid = tabCompletePacket.getUniqueId();
+                uuid = tabCompletePacket.getUuid();
                 String command = tabCompletePacket.getCommand();
                 List<String> args = tabCompletePacket.getArgs();
                 List<String> results = tabCompletePacket.getResults();
@@ -448,7 +447,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 48: {
                 PacketSetPack setPackPacket = new PacketSetPack().fromJSON(object);
-                uuid = setPackPacket.getUniqueId();
+                uuid = setPackPacket.getUuid();
                 String pack = setPackPacket.getPack();
                 player = Launcher.getDashboard().getPlayer(uuid);
 
@@ -465,7 +464,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 49:
                 PacketGetPack getPackPacket = new PacketGetPack().fromJSON(object);
 
-                uuid = getPackPacket.getUniqueId();
+                uuid = getPackPacket.getUuid();
                 player = Launcher.getDashboard().getPlayer(uuid);
 
                 if (player == null) {
@@ -505,12 +504,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 54:
                 PacketWDLProtect wdlPacket = new PacketWDLProtect().fromJSON(object);
 
-                uuid = wdlPacket.getUniqueId();
+                uuid = wdlPacket.getUuid();
                 player = Launcher.getDashboard().getPlayer(uuid);
                 Ban ban;
 
                 if (player != null) {
-                    ban = new Ban(player.getUniqueId(), player.getName(), false, System.currentTimeMillis() + 259200000,
+                    ban = new Ban(player.getUuid(), player.getUsername(), false, System.currentTimeMillis() + 259200000,
                             "Attempting to use a World Downloader", "Dashboard");
                     player.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods!\n" +
                             ChatColor.AQUA + "You have been temporarily banned for 3 Days.\n" + ChatColor.YELLOW +
@@ -533,7 +532,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
                     String playerName;
 
-                    UUID playerUUID = rankChangePacket.getUniqueId();
+                    UUID playerUUID = rankChangePacket.getUuid();
                     Player changedPlayer = Launcher.getDashboard().getPlayer(playerUUID);
                     final Rank rank = rankChangePacket.getRank();
                     final String source = rankChangePacket.getSource();
@@ -543,7 +542,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         PacketPlayerRank packet1 = new PacketPlayerRank(playerUUID, rank);
                         changedPlayer.send(packet1);
                         changedPlayer.setRank(rank);
-                        playerName = changedPlayer.getName();
+                        playerName = changedPlayer.getUsername();
                     } else {
                         playerName = Launcher.getDashboard().getSqlUtil().usernameFromUUID(playerUUID);
                     }
@@ -556,7 +555,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 56:
                 com.palacemc.dashboard.packets.park.PacketWarp warpPacket = new com.palacemc.dashboard.packets.park.PacketWarp().fromJSON(object);
 
-                uuid = warpPacket.getUniqueId();
+                uuid = warpPacket.getUuid();
                 String warp = warpPacket.getWarp();
                 String serverType = warpPacket.getServer();
                 player = Launcher.getDashboard().getPlayer(uuid);
@@ -585,7 +584,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
                     if (onlinePlayer.getServer().equals(server.getName())) {
-                        Server serverTarget = Launcher.getDashboard().getServerUtil().getServerByType(serverName.replaceAll("\\d*$", ""), server.getUniqueId());
+                        Server serverTarget = Launcher.getDashboard().getServerUtil().getServerByType(serverName.replaceAll("\\d*$", ""), server.getUuid());
                         if (serverTarget == null) {
                             if (server.getServerType().equalsIgnoreCase("hub")) {
                                 serverTarget = Launcher.getDashboard().getServerUtil().getServerByType("Arcade");
@@ -594,7 +593,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             }
                         }
                         if (serverTarget == null) {
-                            serverTarget = Launcher.getDashboard().getServerUtil().getEmptyParkServer(server.isPark() ? server.getUniqueId() : null);
+                            serverTarget = Launcher.getDashboard().getServerUtil().getEmptyParkServer(server.isPark() ? server.getUuid() : null);
                         }
                         if (!serverTarget.getName().toLowerCase().startsWith("hub") && !serverTarget.getName().toLowerCase().startsWith("arcade")) {
                             onlinePlayer.sendMessage(ChatColor.RED + "No fallback server available. Sending to parks.");
@@ -609,7 +608,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 58:
                 PacketInventoryStatus inventoryStatusPacket = new PacketInventoryStatus().fromJSON(object);
 
-                uuid = inventoryStatusPacket.getUniqueId();
+                uuid = inventoryStatusPacket.getUuid();
                 int status = inventoryStatusPacket.getStatus();
                 serverName = channel.getServerName();
                 player = Launcher.getDashboard().getPlayer(uuid);
@@ -619,7 +618,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
 
                 if (!player.getServer().equals(serverName)) {
-                    PacketInventoryStatus update = new PacketInventoryStatus(player.getUniqueId(), 1);
+                    PacketInventoryStatus update = new PacketInventoryStatus(player.getUuid(), 1);
                     DashboardSocketChannel socketChannel = Launcher.getDashboard().getInstance(player.getServer());
                     if (socketChannel == null) {
                         Launcher.getDashboard().getLogger().warn("Target server " + player.getServer() +
@@ -666,7 +665,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', broadcastMesage);
 
                 for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
-                    if (Launcher.getDashboard().getPlayer(onlinePlayer.getUniqueId()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
+                    if (Launcher.getDashboard().getPlayer(onlinePlayer.getUuid()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
                         onlinePlayer.sendMessage(staff);
                     } else {
                         onlinePlayer.sendMessage(finalMessage);
@@ -736,8 +735,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 uuid = channel.getBungeeID();
 
                 for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
-                    if (onlinePlayer.getBungeeID().equals(uuid) && !players.contains(onlinePlayer.getUniqueId())) {
-                        Launcher.getDashboard().logout(onlinePlayer.getUniqueId());
+                    if (onlinePlayer.getBungeeID().equals(uuid) && !players.contains(onlinePlayer.getUuid())) {
+                        Launcher.getDashboard().logout(onlinePlayer.getUuid());
                     }
                 }
                 break;
@@ -770,7 +769,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 for (PacketPlayerListInfo.Player playerInList : playerList) {
                     player = new Player(
-                            playerInList.getUniqueId(), playerInList.getUsername(), playerInList.getAddress(),
+                            playerInList.getUuid(), playerInList.getUsername(), playerInList.getAddress(),
                             playerInList.getServer(), channel.getBungeeID());
                     player.setRank(Rank.fromString(playerInList.getRank()));
                     list.add(player);

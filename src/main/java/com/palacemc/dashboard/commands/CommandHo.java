@@ -23,7 +23,7 @@ public class CommandHo extends MagicCommand {
 
             for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
                 if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
-                    tp.sendMessage(ChatColor.RED + "[ADMIN CHAT] " + ChatColor.GRAY + player.getName() + ": " +
+                    tp.sendMessage(ChatColor.RED + "[ADMIN CHAT] " + ChatColor.GRAY + player.getUsername() + ": " +
                             ChatColor.WHITE + ChatColor.translateAlternateColorCodes('&', message));
                 }
             }

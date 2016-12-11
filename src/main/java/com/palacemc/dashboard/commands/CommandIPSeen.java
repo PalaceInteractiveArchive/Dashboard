@@ -32,7 +32,7 @@ public class CommandIPSeen extends MagicCommand {
                 return;
             }
 
-            PacketIPSeenCommand packet = new PacketIPSeenCommand(player.getUniqueId(), users, args[0]);
+            PacketIPSeenCommand packet = new PacketIPSeenCommand(player.getUuid(), users, args[0]);
             player.send(packet);
         });
     }

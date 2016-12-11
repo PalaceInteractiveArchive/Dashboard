@@ -36,7 +36,7 @@ public class CommandMuteChat extends MagicCommand {
                     ChatColor.YELLOW + "Chat has been muted";
         }
 
-        String msgname = msg + " by " + player.getName();
+        String msgname = msg + " by " + player.getUsername();
 
         for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             if ((server.equals("ParkChat") && Launcher.getDashboard().getServer(tp.getServer()).isPark()) || tp.getServer().equals(server)) {

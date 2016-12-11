@@ -15,7 +15,7 @@ public class CommandPChat extends MagicCommand {
             return;
         }
 
-        Party party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(player.getUniqueId());
+        Party party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(player.getUuid());
 
         if (party == null) {
             player.sendMessage(ChatColor.RED + "You are not in a party!");
@@ -50,7 +50,7 @@ public class CommandPChat extends MagicCommand {
             Date currentTime = new Date();
 
             if (currentTime.getTime() > releaseTime) {
-                Launcher.getDashboard().getSqlUtil().unmutePlayer(player.getUniqueId());
+                Launcher.getDashboard().getSqlUtil().unmutePlayer(player.getUuid());
                 player.getMute().setMuted(false);
             } else {
                 String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
@@ -90,7 +90,7 @@ public class CommandPChat extends MagicCommand {
         }
 
         party.chat(player, msg);
-        Launcher.getDashboard().getChatUtil().logMessage(player.getUniqueId(), "/pchat " + party.getLeader().getName() + " " + msg);
+        Launcher.getDashboard().getChatUtil().logMessage(player.getUuid(), "/pchat " + party.getLeader().getUsername() + " " + msg);
     }
 
     private boolean enoughTime(Player player) {

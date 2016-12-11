@@ -1,11 +1,10 @@
 package com.palacemc.dashboard.packets.dashboard;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,10 @@ import java.util.UUID;
  * Created by Marc on 10/10/16
  */
 public class PacketPlayerList extends BasePacket {
-    private List<UUID> players = new ArrayList<>();
+    @Getter private List<UUID> players = new ArrayList<>();
 
     public PacketPlayerList() {
-        this(new ArrayList<UUID>());
+        this(new ArrayList<>());
     }
 
     public PacketPlayerList(List<UUID> players) {
@@ -26,17 +25,11 @@ public class PacketPlayerList extends BasePacket {
         this.players = players;
     }
 
-    public List<UUID> getPlayers() {
-        return players;
-    }
+    public PacketPlayerList fromJSON(JsonObject object) {
+        this.id = object.get("id").getAsInt();
+        object.get("players").getAsJsonArray().forEach(element ->
+                this.players.add(UUID.fromString(element.getAsString())));
 
-    public PacketPlayerList fromJSON(JsonObject obj) {
-        this.id = obj.get("id").getAsInt();
-        JsonArray list = obj.get("players").getAsJsonArray();
-
-        for (JsonElement e : list) {
-            this.players.add(UUID.fromString(e.getAsString()));
-        }
         return this;
     }
 

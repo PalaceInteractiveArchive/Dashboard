@@ -3,22 +3,23 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketClientAccept extends BasePacket {
-    private String servername = "";
+    @Getter private String serverName = "";
 
-    public PacketClientAccept(String servername) {
+    public PacketClientAccept(String serverName) {
         this.id = PacketID.CLIENT_ACCEPTED.getID();
 
-        this.servername = servername;
+        this.serverName = serverName;
     }
 
-    public PacketClientAccept fromJSON(JsonObject obj) {
+    public PacketClientAccept fromJSON(JsonObject object) {
         try {
-            this.servername = obj.get("servername").getAsString();
+            this.serverName = object.get("serverName").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -26,14 +27,14 @@ public class PacketClientAccept extends BasePacket {
     }
 
     public JsonObject getJSON() {
-        JsonObject obj = new JsonObject();
+        JsonObject object = new JsonObject();
 
         try {
-            obj.addProperty("id", this.id);
-            obj.addProperty("servername", this.servername);
+            object.addProperty("id", this.id);
+            object.addProperty("serverName", this.serverName);
         } catch (Exception e) {
             return null;
         }
-        return obj;
+        return object;
     }
 }
