@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 
@@ -8,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class CommandSend extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandSend() {
         super(Rank.WIZARD);
@@ -20,7 +23,7 @@ public class CommandSend extends MagicCommand {
             return;
         }
 
-        Server server = Launcher.getDashboard().getServerUtil().getServer(args[1]);
+        Server server = dashboard.getServerUtil().getServer(args[1]);
         if (server == null) {
             player.sendMessage(ChatColor.RED + "The server '" + args[1] + "' does not exist!");
             return;
@@ -31,25 +34,25 @@ public class CommandSend extends MagicCommand {
                 player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + "all players" + ChatColor.GREEN +
                         " to " + ChatColor.YELLOW + server.getName());
 
-                for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-                    Launcher.getDashboard().getServerUtil().sendPlayer(tp, server.getName());
+                for (Player tp : dashboard.getOnlinePlayers()) {
+                    dashboard.getServerUtil().sendPlayer(tp, server.getName());
                 }
                 return;
             case "current":
                 String name = player.getServer();
 
                 player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + "players on " + name + " (" +
-                        Launcher.getDashboard().getServer(name).getCount() + " players)" + ChatColor.GREEN + " to " +
+                        dashboard.getServer(name).getCount() + " players)" + ChatColor.GREEN + " to " +
                         ChatColor.YELLOW + server.getName());
 
-                for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+                for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getServer().equals(name)) {
-                        Launcher.getDashboard().getServerUtil().sendPlayer(tp, server.getName());
+                        dashboard.getServerUtil().sendPlayer(tp, server.getName());
                     }
                 }
                 return;
             default:
-                Player tp = Launcher.getDashboard().getPlayer(args[0]);
+                Player tp = dashboard.getPlayer(args[0]);
 
                 if (tp == null) {
                     player.sendMessage(ChatColor.RED + "Player not found!");
@@ -58,7 +61,7 @@ public class CommandSend extends MagicCommand {
 
                 player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + tp.getUsername() + ChatColor.GREEN +
                         " to " + ChatColor.YELLOW + server.getName());
-                Launcher.getDashboard().getServerUtil().sendPlayer(tp, server.getName());
+                dashboard.getServerUtil().sendPlayer(tp, server.getName());
         }
     }
 
@@ -70,7 +73,7 @@ public class CommandSend extends MagicCommand {
             list.add("all");
             list.add("current");
 
-            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 list.add(tp.getUsername());
             }
 
@@ -80,7 +83,7 @@ public class CommandSend extends MagicCommand {
             list.add("all");
             list.add("current");
 
-            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 list.add(tp.getUsername());
             }
 
@@ -96,7 +99,7 @@ public class CommandSend extends MagicCommand {
             Collections.sort(l2);
             return l2;
         } else if (args.size() == 2) {
-            for (Server server : Launcher.getDashboard().getServerUtil().getServers()) {
+            for (Server server : dashboard.getServerUtil().getServers()) {
                 list.add(server.getName());
             }
 

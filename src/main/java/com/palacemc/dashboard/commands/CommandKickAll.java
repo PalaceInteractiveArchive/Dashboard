@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -13,6 +14,8 @@ import java.util.TimerTask;
  * Created by Marc on 10/3/16
  */
 public class CommandKickAll extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandKickAll() {
         super(Rank.WIZARD);
@@ -34,7 +37,7 @@ public class CommandKickAll extends MagicCommand {
         r = ChatColor.translateAlternateColorCodes('&', r.trim());
         player.sendMessage(ChatColor.GREEN + "Disconnecting all players for " + r);
 
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
                 continue;
             }
@@ -45,7 +48,7 @@ public class CommandKickAll extends MagicCommand {
             @Override
             public void run() {
                 boolean empty = true;
-                for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+                for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getRank().getRankId() < Rank.WIZARD.getRankId()) {
                         empty = false;
                         break;

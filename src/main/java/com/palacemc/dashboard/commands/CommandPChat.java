@@ -1,12 +1,14 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
-import com.palacemc.dashboard.utils.DateUtil;
 
 import java.util.Date;
 
 public class CommandPChat extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     @Override
     public void execute(Player player, String label, String[] args) {
@@ -15,7 +17,7 @@ public class CommandPChat extends MagicCommand {
             return;
         }
 
-        Party party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(player.getUuid());
+        Party party = dashboard.getPartyUtil().findPartyForPlayer(player.getUuid());
 
         if (party == null) {
             player.sendMessage(ChatColor.RED + "You are not in a party!");
@@ -29,10 +31,10 @@ public class CommandPChat extends MagicCommand {
         }
 
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Launcher.getDashboard().getChatUtil().isMuted(player)) {
+            if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
-            if (!Launcher.getDashboard().getChatUtil().privateMessagesEnabled()) {
+            if (!dashboard.getChatUtil().privateMessagesEnabled()) {
                 player.sendMessage(ChatColor.RED + "Private messages are currently disabled.");
                 return;
             }
@@ -50,11 +52,11 @@ public class CommandPChat extends MagicCommand {
             Date currentTime = new Date();
 
             if (currentTime.getTime() > releaseTime) {
-                Launcher.getDashboard().getSqlUtil().unmutePlayer(player.getUuid());
+                dashboard.getSqlUtil().unmutePlayer(player.getUuid());
                 player.getMute().setMuted(false);
             } else {
                 String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
-                        DateUtil.formatDateDiff(mute.getRelease()) + ".";
+                        dashboard.getDateUtil().formatDateDiff(mute.getRelease()) + ".";
                 if (!mute.getReason().equals("")) {
                     msg += " Reason: " + player.getMute().getReason();
                 }
@@ -70,14 +72,14 @@ public class CommandPChat extends MagicCommand {
         }
 
         msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ?
-                Launcher.getDashboard().getChatUtil().removeCaps(player,
+                dashboard.getChatUtil().removeCaps(player,
                 msg.trim()) : msg.trim();
 
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Launcher.getDashboard().getChatUtil().containsSwear(player, msg) ||
-                    Launcher.getDashboard().getChatUtil().isAdvert(player, msg)
-                    || Launcher.getDashboard().getChatUtil().spamCheck(player, msg) ||
-                    Launcher.getDashboard().getChatUtil().containsUnicode(player, msg)) {
+            if (dashboard.getChatUtil().containsSwear(player, msg) ||
+                    dashboard.getChatUtil().isAdvert(player, msg)
+                    || dashboard.getChatUtil().spamCheck(player, msg) ||
+                    dashboard.getChatUtil().containsUnicode(player, msg)) {
                 return;
             }
 
@@ -90,7 +92,7 @@ public class CommandPChat extends MagicCommand {
         }
 
         party.chat(player, msg);
-        Launcher.getDashboard().getChatUtil().logMessage(player.getUuid(), "/pchat " + party.getLeader().getUsername() + " " + msg);
+        dashboard.getChatUtil().logMessage(player.getUuid(), "/pchat " + party.getLeader().getUsername() + " " + msg);
     }
 
     private boolean enoughTime(Player player) {

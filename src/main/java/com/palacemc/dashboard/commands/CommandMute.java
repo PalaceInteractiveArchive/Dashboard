@@ -1,12 +1,14 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
-import com.palacemc.dashboard.utils.DateUtil;
 
 import java.util.UUID;
 
 public class CommandMute extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandMute() {
         super(Rank.SQUIRE);
@@ -24,7 +26,7 @@ public class CommandMute extends MagicCommand {
         }
 
         final String username = args[0];
-        final long muteTimestamp = DateUtil.parseDateDiff(args[1], true);
+        final long muteTimestamp = dashboard.getDateUtil().parseDateDiff(args[1], true);
         long length = muteTimestamp - System.currentTimeMillis();
 
         if (length > 3600000) {
@@ -32,7 +34,7 @@ public class CommandMute extends MagicCommand {
             return;
         }
 
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             String reason;
             String r = "";
 
@@ -43,11 +45,11 @@ public class CommandMute extends MagicCommand {
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
 
             String source = player.getUsername();
-            Player tp = Launcher.getDashboard().getPlayer(username);
+            Player tp = dashboard.getPlayer(username);
             UUID uuid;
 
             if (tp == null) {
-                uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
+                uuid = dashboard.getSqlUtil().uuidFromUsername(username);
             } else {
                 uuid = tp.getUuid();
             }
@@ -58,8 +60,8 @@ public class CommandMute extends MagicCommand {
                 tp.setMute(mute);
             }
 
-            Launcher.getDashboard().getSqlUtil().mutePlayer(mute);
-            Launcher.getDashboard().getModerationUtil().announceMute(mute);
+            dashboard.getSqlUtil().mutePlayer(mute);
+            dashboard.getModerationUtil().announceMute(mute);
         });
     }
 }

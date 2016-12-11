@@ -1,11 +1,11 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
-import com.palacemc.dashboard.utils.DateUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class CommandModLog extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandModLog() {
         super(Rank.SQUIRE);
@@ -33,12 +35,12 @@ public class CommandModLog extends MagicCommand {
             }
 
             String playername = args[0];
-            Player tp = Launcher.getDashboard().getPlayer(playername);
+            Player tp = dashboard.getPlayer(playername);
             UUID uuid;
 
             if (tp == null) {
                 try {
-                    uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(playername);
+                    uuid = dashboard.getSqlUtil().uuidFromUsername(playername);
                 } catch (Exception e) {
                     player.sendMessage(ChatColor.RED + "Player not found!");
                     return;
@@ -55,7 +57,7 @@ public class CommandModLog extends MagicCommand {
                     case "bans":
                         List<String> msgs = new ArrayList<>();
 
-                        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("SELECT reason,permanent,`release`,source,active FROM banned_players WHERE uuid=?");
 
                             sql.setString(1, uuid.toString());
@@ -69,7 +71,7 @@ public class CommandModLog extends MagicCommand {
 
                                 if (result.getInt("permanent") != 1) {
                                     msg += "Expires: " + ChatColor.GREEN +
-                                            DateUtil.formatDateDiff(result.getTimestamp("release").getTime()) +
+                                            dashboard.getDateUtil().formatDateDiff(result.getTimestamp("release").getTime()) +
                                             ChatColor.RED + " | ";
                                 }
 
@@ -106,7 +108,7 @@ public class CommandModLog extends MagicCommand {
                     case "mutes":
                         msgs = new ArrayList<>();
 
-                        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
 
                             sql.setString(1, uuid.toString());
@@ -120,7 +122,7 @@ public class CommandModLog extends MagicCommand {
                                         ChatColor.RED + " | Source: " + ChatColor.GREEN + result.getString("source");
                                 if (active) {
                                     msg += ChatColor.RED + " | Expires: " + ChatColor.GREEN +
-                                            DateUtil.formatDateDiff(result.getTimestamp("release").getTime());
+                                            dashboard.getDateUtil().formatDateDiff(result.getTimestamp("release").getTime());
                                 }
 
                                 msg += ChatColor.RED + " | Active: " + ChatColor.GREEN + (active ? "True" : "False");
@@ -156,7 +158,7 @@ public class CommandModLog extends MagicCommand {
                         DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                         msgs = new ArrayList<>();
 
-                        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("SELECT reason,source,time FROM kicks WHERE uuid=?");
 
                             sql.setString(1, uuid.toString());
@@ -202,7 +204,7 @@ public class CommandModLog extends MagicCommand {
                 int muteCount = 0;
                 int kickCount = 0;
 
-                try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     PreparedStatement bans = connection.prepareStatement("SELECT count(*) FROM banned_players WHERE uuid=?");
 
                     bans.setString(1, uuid.toString());

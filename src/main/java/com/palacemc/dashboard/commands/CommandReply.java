@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -9,6 +10,8 @@ import com.palacemc.dashboard.handlers.Rank;
 import java.util.Arrays;
 
 public class CommandReply extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandReply() {
         aliases = Arrays.asList("r");
@@ -21,14 +24,14 @@ public class CommandReply extends MagicCommand {
             return;
         }
 
-        Player tp = Launcher.getDashboard().getPlayer(player.getReply());
+        Player tp = dashboard.getPlayer(player.getReply());
         if (player.getReply() == null || tp == null) {
             player.sendMessage(ChatColor.RED + "You don't have anyone to respond to!");
             return;
         }
 
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Launcher.getDashboard().getChatUtil().isMuted(player)) {
+            if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
 
@@ -36,7 +39,7 @@ public class CommandReply extends MagicCommand {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
             }
-            if (!Launcher.getDashboard().getChatUtil().privateMessagesEnabled()) {
+            if (!dashboard.getChatUtil().privateMessagesEnabled()) {
                 player.sendMessage(ChatColor.RED + "Private messages are currently disabled.");
                 return;
             }
@@ -48,14 +51,14 @@ public class CommandReply extends MagicCommand {
             msg += arg + " ";
         }
 
-        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Launcher.getDashboard().getChatUtil().removeCaps(player,
+        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
                 msg.trim()) : msg.trim();
 
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Launcher.getDashboard().getChatUtil().containsSwear(player, msg) ||
-                    Launcher.getDashboard().getChatUtil().isAdvert(player, msg)
-                    || Launcher.getDashboard().getChatUtil().spamCheck(player, msg) ||
-                    Launcher.getDashboard().getChatUtil().containsUnicode(player, msg)) {
+            if (dashboard.getChatUtil().containsSwear(player, msg) ||
+                    dashboard.getChatUtil().isAdvert(player, msg)
+                    || dashboard.getChatUtil().spamCheck(player, msg) ||
+                    dashboard.getChatUtil().containsUnicode(player, msg)) {
                 return;
             }
 
@@ -78,7 +81,7 @@ public class CommandReply extends MagicCommand {
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUuid());
 
-        Launcher.getDashboard().getChatUtil().socialSpyMessage(player, tp, msg, "reply");
-        Launcher.getDashboard().getChatUtil().logMessage(player.getUuid(), "/reply " + tp.getUsername() + " " + msg);
+        dashboard.getChatUtil().socialSpyMessage(player, tp, msg, "reply");
+        dashboard.getChatUtil().logMessage(player.getUuid(), "/reply " + tp.getUsername() + " " + msg);
     }
 }

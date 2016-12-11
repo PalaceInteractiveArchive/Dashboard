@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -10,6 +11,8 @@ import com.palacemc.dashboard.utils.NameUtil;
 import java.util.List;
 
 public class CommandNameCheck extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandNameCheck() {
         super(Rank.SQUIRE);
@@ -26,7 +29,7 @@ public class CommandNameCheck extends MagicCommand {
         player.sendMessage(ChatColor.GREEN + "Requesting name history for " + ChatColor.AQUA + args[0] +
                 ChatColor.GREEN + " from Mojang...");
 
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             List<String> names = NameUtil.getNames(args[0]);
 
             if (names.size() < 2 || names.isEmpty()) {

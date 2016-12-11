@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.dashboard.PacketMention;
@@ -45,6 +46,8 @@ public class Player {
     @Getter @Setter private long afkTime = System.currentTimeMillis();
     @Getter @Setter private boolean isAFK = false;
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public Player(UUID uuid, String username, String address, String server, UUID bungeeID) {
         this.uuid = uuid;
         this.username = username;
@@ -67,7 +70,7 @@ public class Player {
         if (packet == null) {
             return;
         }
-        Launcher.getDashboard().getBungee(bungeeID).send(packet.getJSON().toString());
+        dashboard.getBungee(bungeeID).send(packet.getJSON().toString());
     }
 
     public void chat(String msg) {
@@ -101,7 +104,7 @@ public class Player {
     public void mention() {
         try {
             PacketMention packet = new PacketMention(uuid);
-            Launcher.getDashboard().getInstance(server).send(packet);
+            dashboard.getInstance(server).send(packet);
         } catch (Exception ignored) {
         }
     }

@@ -2,6 +2,7 @@ package com.palacemc.dashboard.utils;
 
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 import com.palacemc.dashboard.packets.dashboard.PacketPlayerRank;
@@ -20,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 public class SqlUtil {
     BoneCP connectionPool = null;
     public String myMCMagicConnString;
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public SqlUtil() throws SQLException, IOException, ClassNotFoundException {
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
@@ -62,7 +65,7 @@ public class SqlUtil {
         mymcm.setMaxConnectionsPerPartition(300);
         mymcm.setPartitionCount(2);
         mymcm.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
-        Launcher.getDashboard().setActivityUtil(new ActivityUtil(new BoneCP(mymcm)));
+        dashboard.setActivityUtil(new ActivityUtil(new BoneCP(mymcm)));
     }
 
     public Connection getConnection() throws SQLException {
@@ -71,7 +74,7 @@ public class SqlUtil {
 
     public void stop() {
         connectionPool.shutdown();
-        Launcher.getDashboard().getActivityUtil().stop();
+        dashboard.getActivityUtil().stop();
     }
 
     /**
@@ -79,7 +82,7 @@ public class SqlUtil {
      */
 
     public void login(final Player player) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial FROM player_data WHERE uuid=?");
                 sql.setString(1, player.getUuid().toString());
@@ -104,8 +107,8 @@ public class SqlUtil {
                 player.setMentions(result.getInt("mentions") == 1);
                 player.setOnlineTime(result.getLong("onlinetime"));
                 player.setNewGuest(result.getInt("tutorial") != 1);
-                Launcher.getDashboard().addPlayer(player);
-                Launcher.getDashboard().addToCache(player.getUuid(), player.getUsername());
+                dashboard.addPlayer(player);
+                dashboard.addToCache(player.getUuid(), player.getUsername());
                 result.close();
                 sql.close();
                 if (needsUpdate) {
@@ -114,13 +117,13 @@ public class SqlUtil {
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
-                    for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+                    for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
                         }
                     }
                     staffClock(player.getUuid(), true, connection);
-                    if (rank.getRankId() >= Rank.SQUIRE.getRankId() && Launcher.getDashboard().getChatUtil().isChatMuted("ParkChat")) {
+                    if (rank.getRankId() >= Rank.SQUIRE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
                         player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
                     }
                 }
@@ -133,7 +136,7 @@ public class SqlUtil {
                     String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
                     if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                         for (Map.Entry<UUID, String> entry : flist.entrySet()) {
-                            Player tp = Launcher.getDashboard().getPlayer(entry.getKey());
+                            Player tp = dashboard.getPlayer(entry.getKey());
                             if (tp != null) {
                                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
                                     tp.sendMessage(joinMessage);
@@ -142,7 +145,7 @@ public class SqlUtil {
                         }
                     } else {
                         for (Map.Entry<UUID, String> entry : flist.entrySet()) {
-                            Player tp = Launcher.getDashboard().getPlayer(entry.getKey());
+                            Player tp = dashboard.getPlayer(entry.getKey());
                             if (tp != null) {
                                 tp.sendMessage(joinMessage);
                             }
@@ -165,7 +168,7 @@ public class SqlUtil {
         sql.setString(3, player.getAddress());
         sql.execute();
         sql.close();
-        Launcher.getDashboard().addPlayer(player);
+        dashboard.addPlayer(player);
     }
 
     private void update(Player player, Connection connection) throws SQLException {
@@ -189,8 +192,8 @@ public class SqlUtil {
             player.setToggled(result.getInt("toggled") == 1);
             player.setMentions(result.getInt("mentions") == 1);
             player.setOnlineTime(result.getLong("onlinetime"));
-            Launcher.getDashboard().addPlayer(player);
-            Launcher.getDashboard().addToCache(player.getUuid(), player.getUsername());
+            dashboard.addPlayer(player);
+            dashboard.addToCache(player.getUuid(), player.getUsername());
             result.close();
             sql.close();
             HashMap<UUID, String> friends = getFriendList(player.getUuid());
@@ -205,7 +208,7 @@ public class SqlUtil {
     }
 
     public void logout(final Player player) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET server=?,lastseen=?,onlinetime = onlinetime+? WHERE uuid=?");
                 if (player.getServer() != null) {
@@ -222,7 +225,7 @@ public class SqlUtil {
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
-                    for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+                    for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
                         }
@@ -234,7 +237,7 @@ public class SqlUtil {
                     String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has left.";
                     if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                         for (Map.Entry<UUID, String> entry : flist.entrySet()) {
-                            Player tp = Launcher.getDashboard().getPlayer(entry.getKey());
+                            Player tp = dashboard.getPlayer(entry.getKey());
                             if (tp != null) {
                                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
                                     tp.sendMessage(joinMessage);
@@ -243,7 +246,7 @@ public class SqlUtil {
                         }
                     } else {
                         for (Map.Entry<UUID, String> entry : flist.entrySet()) {
-                            Player tp = Launcher.getDashboard().getPlayer(entry.getKey());
+                            Player tp = dashboard.getPlayer(entry.getKey());
                             if (tp != null) {
                                 tp.sendMessage(joinMessage);
                             }
@@ -315,7 +318,7 @@ public class SqlUtil {
                     ResultSet result = sql.executeQuery();
                     while (result.next()) {
                         UUID tuuid = UUID.fromString(result.getString("sender"));
-                        String name = Launcher.getDashboard().getCachedName(tuuid);
+                        String name = dashboard.getCachedName(tuuid);
                         if (name == null) {
                             uuids.add(tuuid);
                         } else {
@@ -338,7 +341,7 @@ public class SqlUtil {
                         } else {
                             tuuid = UUID.fromString(result.getString("sender"));
                         }
-                        String name = Launcher.getDashboard().getCachedName(tuuid);
+                        String name = dashboard.getCachedName(tuuid);
                         if (name == null) {
                             uuids.add(tuuid);
                         } else {
@@ -368,7 +371,7 @@ public class SqlUtil {
                 UUID tuuid = UUID.fromString(res2.getString("uuid"));
                 String name = res2.getString("username");
                 map.put(tuuid, name);
-                Launcher.getDashboard().addToCache(tuuid, name);
+                dashboard.addToCache(tuuid, name);
             }
             res2.close();
             sql2.close();
@@ -435,7 +438,7 @@ public class SqlUtil {
     }
 
     public void completeTutorial(final UUID uuid) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET tutorial=1 WHERE uuid=?");
                 sql.setString(1, uuid.toString());
@@ -452,7 +455,7 @@ public class SqlUtil {
      */
 
     public void banPlayer(final UUID uuid, final String reason, final boolean permanent, final Date date, final String source) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_players (uuid,reason,permanent,`release`,source) VALUES (?,?,?,?,?)");
                 sql.setString(1, uuid.toString());
@@ -489,7 +492,7 @@ public class SqlUtil {
     }
 
     public void banIP(final String ip, final String reason, final String source) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_ips values(0,?,?,?,1)");
                 sql.setString(1, ip);
@@ -543,7 +546,7 @@ public class SqlUtil {
     }
 
     public void unbanPlayer(final UUID uuid) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE uuid=?");
                 sql.setString(1, uuid.toString());
@@ -556,7 +559,7 @@ public class SqlUtil {
     }
 
     public void unbanIP(final String address) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE banned_ips SET active=0 WHERE ipAddress=?");
                 sql.setString(1, address);
@@ -634,7 +637,7 @@ public class SqlUtil {
     }
 
     public void unmutePlayer(final UUID uuid) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE muted_players SET active=0 WHERE uuid=?");
                 sql.setString(1, uuid.toString());
@@ -650,7 +653,7 @@ public class SqlUtil {
      */
 
     public void logKick(final Kick kick) {
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("INSERT INTO kicks (uuid, reason, source) VALUES (?,?,?)");
                 sql.setString(1, kick.getUuid().toString());

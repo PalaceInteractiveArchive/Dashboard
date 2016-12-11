@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -10,6 +11,8 @@ import java.util.Arrays;
 import java.util.UUID;
 
 public class CommandUnban extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandUnban() {
         super(Rank.KNIGHT);
@@ -24,13 +27,13 @@ public class CommandUnban extends MagicCommand {
         }
 
         String username = args[0];
-        UUID uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
+        UUID uuid = dashboard.getSqlUtil().uuidFromUsername(username);
         if (uuid == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
 
-        Launcher.getDashboard().getSqlUtil().unbanPlayer(uuid);
-        Launcher.getDashboard().getModerationUtil().announceUnban(username, player.getUsername());
+        dashboard.getSqlUtil().unbanPlayer(uuid);
+        dashboard.getModerationUtil().announceUnban(username, player.getUsername());
     }
 }

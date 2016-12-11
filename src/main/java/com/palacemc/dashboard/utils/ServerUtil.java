@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.utils;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.Player;
@@ -26,6 +27,8 @@ public class ServerUtil {
     private int lastCount = 0;
     private int lastServerCount = 0;
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public ServerUtil() throws IOException {
         loadServers();
         /**
@@ -38,7 +41,7 @@ public class ServerUtil {
             public void run() {
                 try {
                     i++;
-                    int count = Launcher.getDashboard().getOnlinePlayers().size();
+                    int count = dashboard.getOnlinePlayers().size();
                     PacketOnlineCount packet = new PacketOnlineCount(count);
                     if (count != lastCount) {
                         lastCount = count;
@@ -97,11 +100,11 @@ public class ServerUtil {
                     }
                 }
 
-                if (server == null || Launcher.getDashboard().getTargetServer().equals(server.getName())) {
+                if (server == null || dashboard.getTargetServer().equals(server.getName())) {
                     return;
                 }
 
-                Launcher.getDashboard().setTargetServer(server.getName());
+                dashboard.setTargetServer(server.getName());
                 PacketTargetLobby packet = new PacketTargetLobby(server.getName());
                 for (Object o : WebSocketServerHandler.getGroup()) {
                     DashboardSocketChannel dash = (DashboardSocketChannel) o;
@@ -121,10 +124,10 @@ public class ServerUtil {
     private void loadServers() {
         servers.clear();
 
-        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             //TODO Change this back to the regular table
             PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
-                    (Launcher.getDashboard().isTestNetwork() ? "playground" : "") + "servers;");
+                    (dashboard.isTestNetwork() ? "playground" : "") + "servers;");
             ResultSet result = sql.executeQuery();
             while (result.next()) {
                 servers.put(result.getString("name"), new Server(result.getString("name"), result.getString("address"),
@@ -134,7 +137,7 @@ public class ServerUtil {
             sql.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            Launcher.getDashboard().getLogger().error("Error loading servers, shutting Dashboard!");
+            dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
             System.exit(0);
         }
     }

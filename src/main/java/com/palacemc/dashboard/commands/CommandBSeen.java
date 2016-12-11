@@ -1,9 +1,9 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 import com.palacemc.dashboard.packets.dashboard.PacketBSeenCommand;
-import com.palacemc.dashboard.utils.DateUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class CommandBSeen extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandBSeen() {
         super(Rank.SQUIRE);
@@ -25,8 +27,8 @@ public class CommandBSeen extends MagicCommand {
             return;
         }
 
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            Player tp = Launcher.getDashboard().getPlayer(args[0]);
+        dashboard.getSchedulerManager().runAsync(() -> {
+            Player tp = dashboard.getPlayer(args[0]);
             boolean online = tp != null;
             String name = online ? tp.getUsername() : args[0];
             UUID uuid;
@@ -34,7 +36,7 @@ public class CommandBSeen extends MagicCommand {
             if (online) {
                 uuid = tp.getUuid();
             } else {
-                uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(args[0]);
+                uuid = dashboard.getSqlUtil().uuidFromUsername(args[0]);
             }
 
             if (uuid == null) {
@@ -55,7 +57,7 @@ public class CommandBSeen extends MagicCommand {
                 mute = tp.getMute();
                 server = tp.getServer();
             } else {
-                try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
 
                     sql.setString(1, uuid.toString());
@@ -75,28 +77,28 @@ public class CommandBSeen extends MagicCommand {
                     e.printStackTrace();
                 }
 
-                Ban ban = Launcher.getDashboard().getSqlUtil().getBan(uuid, name);
+                Ban ban = dashboard.getSqlUtil().getBan(uuid, name);
 
                 if (ban != null) {
                     String type = ban.isPermanent() ? "Permanently" : ("Temporarily (Expires: " +
-                            DateUtil.formatDateDiff(ban.getRelease()) + ")");
+                            dashboard.getDateUtil().formatDateDiff(ban.getRelease()) + ")");
                     player.sendMessage(ChatColor.RED + name + " is Banned " + type + " for " + ban.getReason() +
                             " by " + ban.getSource());
                 }
 
-                mute = Launcher.getDashboard().getSqlUtil().getMute(uuid, name);
+                mute = dashboard.getSqlUtil().getMute(uuid, name);
             }
 
             if (mute != null && mute.isMuted()) {
                 player.sendMessage(ChatColor.RED + name + " is Muted for " +
-                        DateUtil.formatDateDiff(mute.getRelease()) + " by " + mute.getSource() +
+                        dashboard.getDateUtil().formatDateDiff(mute.getRelease()) + " by " + mute.getSource() +
                         ". Reason: " + mute.getReason());
             }
 
             PacketBSeenCommand packet = new PacketBSeenCommand(player.getUuid(), name, ip, server, online);
 
             player.sendMessage(ChatColor.GREEN + name + " has been " + (online ? "online" : "away") + " for " +
-                    DateUtil.formatDateDiff(lastLogin));
+                    dashboard.getDateUtil().formatDateDiff(lastLogin));
             player.sendMessage(ChatColor.RED + "Rank: " + rank.getNameWithBrackets());
             player.send(packet);
         });

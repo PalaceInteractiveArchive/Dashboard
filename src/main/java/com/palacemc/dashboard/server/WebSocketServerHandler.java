@@ -2,6 +2,7 @@ package com.palacemc.dashboard.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 import com.palacemc.dashboard.packets.audio.PacketContainer;
@@ -35,6 +36,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     public static ChannelGroup getGroup() {
         return channels;
     }
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -79,7 +82,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         int id = object.get("id").getAsInt();
-        Launcher.getDashboard().getLogger().info(object.toString());
+//        dashboard.getLogger().info(object.toString());
         DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
 
         Player player;
@@ -95,7 +98,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketGetPlayer packet = new PacketGetPlayer().fromJSON(object);
                 String username = packet.getPlayerName();
 
-                player = Launcher.getDashboard().getPlayer(username);
+                player = dashboard.getPlayer(username);
                 PacketPlayerInfo info;
 
                 if (player == null || player.getAudioAuth() == -1) {
@@ -106,7 +109,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     player.resetAudioAuth();
                     try {
                         PacketAudioConnect connect = new PacketAudioConnect(player.getUuid());
-                        Launcher.getDashboard().getInstance(player.getServer()).send(connect);
+                        dashboard.getInstance(player.getServer()).send(connect);
                     } catch (Exception ignored) {
                     }
                 }
@@ -117,6 +120,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 17:
                 PacketContainer audioContainer = new PacketContainer().fromJSON(object);
+
                 for (Object socketChannel : WebSocketServerHandler.getGroup()) {
                     DashboardSocketChannel dash = (DashboardSocketChannel) socketChannel;
                     if (!dash.getType().equals(PacketConnectionType.ConnectionType.AUDIOSERVER)) {
@@ -136,58 +140,58 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 switch (type) {
                     case BUNGEECORD:
-                        Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN +
+                        dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
                                 "A new BungeeCord instance has connected to Dashboard.");
 
                         attachment = new SlackAttachment("A new BungeeCord instance has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
                         attachment.color("good");
 
-                        Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                        dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                         break;
                     case DAEMON:
-                        Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN +
+                        dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
                                 "A new daemon has connected to Dashboard.");
 
                         attachment = new SlackAttachment("A new daemon has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
                         attachment.color("good");
 
-                        Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                        dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                         break;
                     case WEBCLIENT:
                         break;
                     case INSTANCE:
                         break;
                     case AUDIOSERVER:
-                        Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN +
+                        dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
                                 "The Audio Server has connected to Dashboard.");
 
                         attachment = new SlackAttachment("The Audio Server has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
                         attachment.color("good");
 
-                        Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                        dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                         break;
                 }
 
-                Launcher.getDashboard().getLogger().info("New " + type.name().toLowerCase() + " connection");
+                dashboard.getLogger().info("New " + type.name().toLowerCase() + " connection");
 
                 if (type.equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
-                    PacketUpdateMOTD motd = new PacketUpdateMOTD(Launcher.getDashboard().getMotd(), Launcher.getDashboard().getMotdMaintenance(),
-                            Launcher.getDashboard().getInfo());
-                    PacketOnlineCount count = new PacketOnlineCount(Launcher.getDashboard().getOnlinePlayers().size());
+                    PacketUpdateMOTD motd = new PacketUpdateMOTD(dashboard.getMotd(), dashboard.getMotdMaintenance(),
+                            dashboard.getInfo());
+                    PacketOnlineCount count = new PacketOnlineCount(dashboard.getOnlinePlayers().size());
 
                     List<String> servers = new ArrayList<>();
 
-                    for (Server server : Launcher.getDashboard().getServerUtil().getServers()) {
+                    for (Server server : dashboard.getServerUtil().getServers()) {
                         servers.add(server.getName() + ":" + server.getAddress() + ":" + server.getPort());
                     }
 
                     PacketServerList server = new PacketServerList(servers);
-                    PacketTargetLobby lobby = new PacketTargetLobby(Launcher.getDashboard().getTargetServer());
-                    PacketCommandList commands = new PacketCommandList(new ArrayList<>(Launcher.getDashboard().getCommandUtil().getCommandsAndAliases()));
-                    PacketMaintenance maintenance = new PacketMaintenance(Launcher.getDashboard().isMaintenance());
+                    PacketTargetLobby lobby = new PacketTargetLobby(dashboard.getTargetServer());
+                    PacketCommandList commands = new PacketCommandList(new ArrayList<>(dashboard.getCommandUtil().getCommandsAndAliases()));
+                    PacketMaintenance maintenance = new PacketMaintenance(dashboard.isMaintenance());
                     PacketBungeeID bungeeID = new PacketBungeeID(channel.getBungeeID());
 
                     channel.send(motd);
@@ -198,14 +202,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     channel.send(maintenance);
                     channel.send(bungeeID);
 
-                    if (Launcher.getDashboard().isMaintenance()) {
-                        PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(Launcher.getDashboard().getMaintenanceWhitelist());
+                    if (dashboard.isMaintenance()) {
+                        PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(dashboard.getMaintenanceWhitelist());
                         channel.send(whitelist);
                     }
                 }
 
                 if (type.equals(PacketConnectionType.ConnectionType.INSTANCE)) {
-                    PacketOnlineCount count = new PacketOnlineCount(Launcher.getDashboard().getOnlinePlayers().size());
+                    PacketOnlineCount count = new PacketOnlineCount(dashboard.getOnlinePlayers().size());
                     channel.send(count);
                 }
                 break;
@@ -217,7 +221,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 player = new Player(playerJoinPacket.getUuid(), playerJoinPacket.getUsername(), playerJoinPacket.getAddress(),
                         playerJoinPacket.getServer(), channel.getBungeeID());
 
-                Launcher.getDashboard().getSqlUtil().login(player);
+                dashboard.getSqlUtil().login(player);
                 break;
             /**
              * PlayerDisconnect
@@ -225,7 +229,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 24:
                 PacketPlayerDisconnect playerDisconnectPacket = new PacketPlayerDisconnect().fromJSON(object);
 
-                Launcher.getDashboard().logout(playerDisconnectPacket.getUuid());
+                dashboard.logout(playerDisconnectPacket.getUuid());
                 break;
             /**
              * PlayerChat
@@ -233,7 +237,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 25:
                 PacketPlayerChat playerChatPacket = new PacketPlayerChat().fromJSON(object);
 
-                Launcher.getDashboard().getChatUtil().chatEvent(playerChatPacket);
+                dashboard.getChatUtil().chatEvent(playerChatPacket);
                 break;
             /**
              * Message
@@ -243,7 +247,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 UUID uuid = messagePacket.getUuid();
                 String msg = messagePacket.getMessage();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) return;
 
@@ -257,21 +261,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 uuid = serverSwitchPacket.getUuid();
                 String target = serverSwitchPacket.getTarget();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) return;
 
                 // New connection
-                if (Launcher.getDashboard().getServerUtil().getServer(player.getServer()) == null) {
-                    Launcher.getDashboard().getServerUtil().getServer(target).changeCount(1);
+                if (dashboard.getServerUtil().getServer(player.getServer()) == null) {
+                    dashboard.getServerUtil().getServer(target).changeCount(1);
 
                     player.setServer(target);
 
-                    if (Launcher.getDashboard().getServer(target).isPark() && Launcher.getDashboard().getInstance(target) != null) {
+                    if (dashboard.getServer(target).isPark() && dashboard.getInstance(target) != null) {
                         player.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(player.getUuid(), 1);
                         try {
-                            Launcher.getDashboard().getInstance(target).send(update);
+                            dashboard.getInstance(target).send(update);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -343,7 +347,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                                 ChatColor.AQUA + "mcmagic.us/rules#chat");
                                         tutorialPlayer.mention();
                                         tutorialPlayer.setNewGuest(false);
-                                        Launcher.getDashboard().getSqlUtil().completeTutorial(tutorialPlayer.getUuid());
+                                        dashboard.getSqlUtil().completeTutorial(tutorialPlayer.getUuid());
                                         cancel();
                                 }
                                 i++;
@@ -356,13 +360,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
 
                 // Going to Park server
-                if (Launcher.getDashboard().getServer(target).isPark()) {
+                if (dashboard.getServer(target).isPark()) {
                     // Leaving non-Park server or inventory is uploaded from Park server
-                    if (!Launcher.getDashboard().getServer(player.getServer()).isPark() || player.isInventoryUploaded()) {
+                    if (!dashboard.getServer(player.getServer()).isPark() || player.isInventoryUploaded()) {
                         player.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(player.getUuid(), 1);
                         try {
-                            Launcher.getDashboard().getInstance(target).send(update);
+                            dashboard.getInstance(target).send(update);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -386,10 +390,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
 
                 if (!player.getServer().equalsIgnoreCase("unknown")) {
-                    Launcher.getDashboard().getServerUtil().getServer(player.getServer()).changeCount(-1);
+                    dashboard.getServerUtil().getServer(player.getServer()).changeCount(-1);
                 }
 
-                Launcher.getDashboard().getServerUtil().getServer(target).changeCount(1);
+                dashboard.getServerUtil().getServer(target).changeCount(1);
                 player.setServer(target);
                 break;
             /**
@@ -400,28 +404,28 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 uuid = sendToServerPacket.getUuid();
                 String serverName = sendToServerPacket.getServer();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) {
                     return;
                 }
 
-                Server targetServer = Launcher.getDashboard().getServer(serverName);
+                Server targetServer = dashboard.getServer(serverName);
 
                 if (targetServer == null) {
                     player.sendMessage(ChatColor.RED + "We are having trouble connecting you to that server! Try again soon.");
                     return;
                 }
 
-                if (Launcher.getDashboard().getServer(serverName + "1") != null) {
-                    targetServer = Launcher.getDashboard().getServerUtil().getServerByType(serverName);
+                if (dashboard.getServer(serverName + "1") != null) {
+                    targetServer = dashboard.getServerUtil().getServerByType(serverName);
                 }
 
                 if (!targetServer.isOnline()) {
                     player.sendMessage(ChatColor.RED + "We are having trouble connecting you to that server! Try again soon.");
                     return;
                 }
-                Launcher.getDashboard().getServerUtil().sendPlayer(player, targetServer.getName());
+                dashboard.getServerUtil().sendPlayer(player, targetServer.getName());
                 break;
             /**
              * Tab Complete
@@ -434,13 +438,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 List<String> args = tabCompletePacket.getArgs();
                 List<String> results = tabCompletePacket.getResults();
 
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) {
                     return;
                 }
 
-                Launcher.getDashboard().getCommandUtil().tabComplete(player, command, args, results);
+                dashboard.getCommandUtil().tabComplete(player, command, args, results);
                 break;
             /**
              * Set Player Resource Pack
@@ -449,7 +453,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketSetPack setPackPacket = new PacketSetPack().fromJSON(object);
                 uuid = setPackPacket.getUuid();
                 String pack = setPackPacket.getPack();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) {
                     return;
@@ -465,7 +469,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketGetPack getPackPacket = new PacketGetPack().fromJSON(object);
 
                 uuid = getPackPacket.getUuid();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) {
                     return;
@@ -484,7 +488,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 channel.setServerName(name);
 
-                Server s = Launcher.getDashboard().getServer(name);
+                Server s = dashboard.getServer(name);
                 s.setOnline(true);
 
                 String running = "";
@@ -494,7 +498,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
 
                 if (!name.matches("[a-z]\\d{1,3}")) {
-                    Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
+                    dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                             ") has connected to Dashboard.");
                 }
                 break;
@@ -505,7 +509,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketWDLProtect wdlPacket = new PacketWDLProtect().fromJSON(object);
 
                 uuid = wdlPacket.getUuid();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
                 Ban ban;
 
                 if (player != null) {
@@ -519,9 +523,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     ban = new Ban(uuid, "Unknown Username", false, System.currentTimeMillis() + 259200000,
                             "Attempting to use a World Downloader", "Dashboard");
                 }
-                Launcher.getDashboard().getSqlUtil().banPlayer(uuid, ban.getReason(), true, new Date(System.currentTimeMillis()),
+                dashboard.getSqlUtil().banPlayer(uuid, ban.getReason(), true, new Date(System.currentTimeMillis()),
                         ban.getSource());
-                Launcher.getDashboard().getModerationUtil().announceBan(ban);
+                dashboard.getModerationUtil().announceBan(ban);
                 break;
             /**
              * Rank Change
@@ -529,11 +533,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 55:
                 PacketRankChange rankChangePacket = new PacketRankChange().fromJSON(object);
 
-                Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+                dashboard.getSchedulerManager().runAsync(() -> {
                     String playerName;
 
                     UUID playerUUID = rankChangePacket.getUuid();
-                    Player changedPlayer = Launcher.getDashboard().getPlayer(playerUUID);
+                    Player changedPlayer = dashboard.getPlayer(playerUUID);
                     final Rank rank = rankChangePacket.getRank();
                     final String source = rankChangePacket.getSource();
 
@@ -544,9 +548,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         changedPlayer.setRank(rank);
                         playerName = changedPlayer.getUsername();
                     } else {
-                        playerName = Launcher.getDashboard().getSqlUtil().usernameFromUUID(playerUUID);
+                        playerName = dashboard.getSqlUtil().usernameFromUUID(playerUUID);
                     }
-                    Launcher.getDashboard().getModerationUtil().rankChange(playerName, rank, source);
+                    dashboard.getModerationUtil().rankChange(playerName, rank, source);
                 });
                 break;
             /**
@@ -558,7 +562,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 uuid = warpPacket.getUuid();
                 String warp = warpPacket.getWarp();
                 String serverType = warpPacket.getServer();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
                 if (player == null) {
                     return;
@@ -567,7 +571,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 player.setWarp(warp);
                 player.setPendingWarp(true);
 
-                Launcher.getDashboard().getServerUtil().sendPlayerByType(player, serverType);
+                dashboard.getServerUtil().sendPlayerByType(player, serverType);
                 break;
             /**
              * Empty Server
@@ -576,29 +580,29 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketEmptyServer emptyServerPacket = new PacketEmptyServer().fromJSON(object);
 
                 serverName = emptyServerPacket.getServer();
-                Server server = Launcher.getDashboard().getServer(serverName);
+                Server server = dashboard.getServer(serverName);
 
                 if (server == null) {
                     return;
                 }
 
-                for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
+                for (Player onlinePlayer : dashboard.getOnlinePlayers()) {
                     if (onlinePlayer.getServer().equals(server.getName())) {
-                        Server serverTarget = Launcher.getDashboard().getServerUtil().getServerByType(serverName.replaceAll("\\d*$", ""), server.getUuid());
+                        Server serverTarget = dashboard.getServerUtil().getServerByType(serverName.replaceAll("\\d*$", ""), server.getUuid());
                         if (serverTarget == null) {
                             if (server.getServerType().equalsIgnoreCase("hub")) {
-                                serverTarget = Launcher.getDashboard().getServerUtil().getServerByType("Arcade");
+                                serverTarget = dashboard.getServerUtil().getServerByType("Arcade");
                             } else {
-                                serverTarget = Launcher.getDashboard().getServerUtil().getServerByType("hub");
+                                serverTarget = dashboard.getServerUtil().getServerByType("hub");
                             }
                         }
                         if (serverTarget == null) {
-                            serverTarget = Launcher.getDashboard().getServerUtil().getEmptyParkServer(server.isPark() ? server.getUuid() : null);
+                            serverTarget = dashboard.getServerUtil().getEmptyParkServer(server.isPark() ? server.getUuid() : null);
                         }
                         if (!serverTarget.getName().toLowerCase().startsWith("hub") && !serverTarget.getName().toLowerCase().startsWith("arcade")) {
                             onlinePlayer.sendMessage(ChatColor.RED + "No fallback server available. Sending to parks.");
                         }
-                        Launcher.getDashboard().getServerUtil().sendPlayer(onlinePlayer, serverTarget.getName());
+                        dashboard.getServerUtil().sendPlayer(onlinePlayer, serverTarget.getName());
                     }
                 }
                 break;
@@ -611,17 +615,17 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 uuid = inventoryStatusPacket.getUuid();
                 int status = inventoryStatusPacket.getStatus();
                 serverName = channel.getServerName();
-                player = Launcher.getDashboard().getPlayer(uuid);
+                player = dashboard.getPlayer(uuid);
 
-                if (player == null || serverName.equals("") || status != 0 || !Launcher.getDashboard().getServer(player.getServer()).isPark()) {
+                if (player == null || serverName.equals("") || status != 0 || !dashboard.getServer(player.getServer()).isPark()) {
                     return;
                 }
 
                 if (!player.getServer().equals(serverName)) {
                     PacketInventoryStatus update = new PacketInventoryStatus(player.getUuid(), 1);
-                    DashboardSocketChannel socketChannel = Launcher.getDashboard().getInstance(player.getServer());
+                    DashboardSocketChannel socketChannel = dashboard.getInstance(player.getServer());
                     if (socketChannel == null) {
-                        Launcher.getDashboard().getLogger().warn("Target server " + player.getServer() +
+                        dashboard.getLogger().warn("Target server " + player.getServer() +
                                 " not connected, could not complete inventory update!");
                     } else {
                         socketChannel.send(update);
@@ -641,7 +645,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         continue;
                     }
                     try {
-                        if (Launcher.getDashboard().getServer(dash.getServerName()).isPark()) {
+                        if (dashboard.getServer(dash.getServerName()).isPark()) {
                             dash.send(refreshHotelsPacket);
                         }
                     } catch (Exception e) {
@@ -664,8 +668,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String staff = ChatColor.WHITE + "[" + ChatColor.AQUA + sourceServer + ChatColor.WHITE + "] " +
                         ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', broadcastMesage);
 
-                for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
-                    if (Launcher.getDashboard().getPlayer(onlinePlayer.getUuid()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
+                for (Player onlinePlayer : dashboard.getOnlinePlayers()) {
+                    if (dashboard.getPlayer(onlinePlayer.getUuid()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
                         onlinePlayer.sendMessage(staff);
                     } else {
                         onlinePlayer.sendMessage(finalMessage);
@@ -679,7 +683,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketMuteChat muteChatPacket = new PacketMuteChat().fromJSON(object);
 
                 serverName = muteChatPacket.getServer();
-                boolean muted = Launcher.getDashboard().getChatUtil().isChatMuted(serverName);
+                boolean muted = dashboard.getChatUtil().isChatMuted(serverName);
 
                 if (muteChatPacket.isMute() == muted) {
                     return;
@@ -688,17 +692,17 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String muteMessage;
 
                 if (!muteChatPacket.isMute()) {
-                    Launcher.getDashboard().getChatUtil().unmuteChat(serverName);
+                    dashboard.getChatUtil().unmuteChat(serverName);
                     muteMessage = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                             ChatColor.YELLOW + "Chat has been unmuted";
                 } else {
-                    Launcher.getDashboard().getChatUtil().muteChat(serverName);
+                    dashboard.getChatUtil().muteChat(serverName);
                     muteMessage = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                             ChatColor.YELLOW + "Chat has been muted";
                 }
 
-                for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
-                    if ((serverName.equals("ParkChat") && Launcher.getDashboard().getServer(onlinePlayer.getServer()).isPark()) || onlinePlayer.getServer().equals(serverName)) {
+                for (Player onlinePlayer : dashboard.getOnlinePlayers()) {
+                    if ((serverName.equals("ParkChat") && dashboard.getServer(onlinePlayer.getServer()).isPark()) || onlinePlayer.getServer().equals(serverName)) {
                         onlinePlayer.sendMessage(muteMessage);
                     }
                 }
@@ -717,7 +721,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
 
                     try {
-                        if (Launcher.getDashboard().getServer(dash.getServerName()).isPark()) {
+                        if (dashboard.getServer(dash.getServerName()).isPark()) {
                             dash.send(refreshWarpsPacket);
                         }
                     } catch (Exception e) {
@@ -734,9 +738,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 List<UUID> players = playerListPacket.getPlayers();
                 uuid = channel.getBungeeID();
 
-                for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
+                for (Player onlinePlayer : dashboard.getOnlinePlayers()) {
                     if (onlinePlayer.getBungeeID().equals(uuid) && !players.contains(onlinePlayer.getUuid())) {
-                        Launcher.getDashboard().logout(onlinePlayer.getUuid());
+                        dashboard.logout(onlinePlayer.getUuid());
                     }
                 }
                 break;
@@ -749,13 +753,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 UUID oldID = bungeeIDPacket.getBungeeID();
                 UUID newID = channel.getBungeeID();
 
-                for (Player onlinePlayer : Launcher.getDashboard().getOnlinePlayers()) {
+                for (Player onlinePlayer : dashboard.getOnlinePlayers()) {
                     if (onlinePlayer.getBungeeID().equals(oldID)) {
                         onlinePlayer.setBungeeID(newID);
                     }
                 }
 
-                Launcher.getDashboard().getLogger().info("Bungee UUID updated for Bungee on " +
+                dashboard.getLogger().info("Bungee UUID updated for Bungee on " +
                         channel.localAddress().getAddress().toString());
                 break;
             /**
@@ -776,8 +780,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
 
                 final List<Player> finalList = list;
-                Launcher.getDashboard().getSchedulerManager().runAsync(() ->
-                        finalList.forEach(listedPlayer -> Launcher.getDashboard().getSqlUtil().silentJoin(listedPlayer)));
+                dashboard.getSchedulerManager().runAsync(() ->
+                        finalList.forEach(listedPlayer -> dashboard.getSqlUtil().silentJoin(listedPlayer)));
                 break;
         }
     }
@@ -793,7 +797,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             return;
         }
         boolean devs = false;
-        for (Player player : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player player : dashboard.getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
                 devs = true;
                 break;
@@ -805,28 +809,28 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
         switch (dash.getType()) {
             case BUNGEECORD:
-                Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.RED +
+                dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                         "A BungeeCord instance has disconnected from Dashboard!" + addon);
 
                 attachment = new SlackAttachment("A BungeeCord Instance has disconnected from Dashboard! #devs");
                 attachment.color("danger");
 
-                Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                 break;
             case DAEMON:
-                Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.RED +
+                dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                         "A daemon has disconnected from Dashboard!" + addon);
 
                 attachment = new SlackAttachment("A daemon has disconnected from Dashboard! #devs");
                 attachment.color("danger");
 
-                Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                 break;
             case WEBCLIENT:
                 break;
             case INSTANCE:
                 String name = dash.getServerName();
-                Server s = Launcher.getDashboard().getServer(name);
+                Server s = dashboard.getServer(name);
                 String running = "";
 
                 if (!s.getServerType().equals(s.getName())) {
@@ -834,22 +838,22 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
 
                 if (!name.matches("[a-z]\\d{1,3}")) {
-                    Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.RED +
+                    dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
 
                     attachment = new SlackAttachment("A server instance (" + name + running +
                             ") has disconnected from Dashboard! #devs");
                     attachment.color("danger");
 
-                    Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                    dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                 }
                 break;
             case AUDIOSERVER:
-                Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.RED +
+                dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                         "The Audio Server has disconnected from Dashboard!" + addon);
                 attachment = new SlackAttachment("The Audio Server has disconnected from Dashboard! #devs");
                 attachment.color("danger");
-                Launcher.getDashboard().getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
                 break;
         }
     }
@@ -867,7 +871,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             try {
                 handleWebSocketFrame(ctx, (WebSocketFrame) msg);
             } catch (Exception e) {
-                Launcher.getDashboard().getLogger().warn(e.getMessage(), e);
+                dashboard.getLogger().warn(e.getMessage(), e);
             }
         }
     }

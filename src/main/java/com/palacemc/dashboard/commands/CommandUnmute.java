@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -9,6 +10,8 @@ import com.palacemc.dashboard.handlers.Rank;
 import java.util.UUID;
 
 public class CommandUnmute extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandUnmute() {
         super(Rank.KNIGHT);
@@ -23,11 +26,11 @@ public class CommandUnmute extends MagicCommand {
         }
 
         String username = args[0];
-        Player tp = Launcher.getDashboard().getPlayer(username);
+        Player tp = dashboard.getPlayer(username);
         UUID uuid;
 
         if (tp == null) {
-            uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
+            uuid = dashboard.getSqlUtil().uuidFromUsername(username);
         } else {
             uuid = tp.getUuid();
             username = tp.getUsername();
@@ -38,8 +41,8 @@ public class CommandUnmute extends MagicCommand {
             return;
         }
 
-        Launcher.getDashboard().getSqlUtil().unmutePlayer(uuid);
+        dashboard.getSqlUtil().unmutePlayer(uuid);
         tp.getMute().setMuted(false);
-        Launcher.getDashboard().getModerationUtil().announceUnmute(username, player.getUsername());
+        dashboard.getModerationUtil().announceUnmute(username, player.getUsername());
     }
 }

@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 import com.palacemc.dashboard.packets.dashboard.PacketAddServer;
@@ -14,6 +15,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class CommandServer extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandServer() {
         super(Rank.SQUIRE);
@@ -42,15 +45,15 @@ public class CommandServer extends MagicCommand {
                 return;
             }
 
-            if (Launcher.getDashboard().getServerUtil().getServer(name) != null) {
+            if (dashboard.getServerUtil().getServer(name) != null) {
                 player.sendMessage(ChatColor.RED + "A server already exists called '" + name + "'!");
                 return;
             }
 
             Server s = new Server(name, address, port, park, 0, type);
-            Launcher.getDashboard().getServerUtil().addServer(s);
-            Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-                try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+            dashboard.getServerUtil().addServer(s);
+            dashboard.getSchedulerManager().runAsync(() -> {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     //TODO Change this back to the regular table
                     PreparedStatement sql = connection.prepareStatement("INSERT INTO newservers (name,address,port,park,type) VALUES (?,?,?,?,?)");
                     sql.setString(1, name);
@@ -77,7 +80,7 @@ public class CommandServer extends MagicCommand {
             return;
         } else if (args.length == 2 && args[0].equalsIgnoreCase("remove") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
             final String name = args[1];
-            final Server s = Launcher.getDashboard().getServerUtil().getServer(name);
+            final Server s = dashboard.getServerUtil().getServer(name);
 
             if (s == null) {
                 player.sendMessage(ChatColor.RED + "No server exists called '" + name + "'!");
@@ -94,9 +97,9 @@ public class CommandServer extends MagicCommand {
                         player.sendMessage(ChatColor.GREEN + s.getName() + " has been emptied! Removing server...");
                         cancel();
 
-                        Launcher.getDashboard().getServerUtil().removeServer(name);
-                        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-                            try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+                        dashboard.getServerUtil().removeServer(name);
+                        dashboard.getSchedulerManager().runAsync(() -> {
+                            try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                                 //TODO Change this back to the regular table
                                 PreparedStatement sql = connection.prepareStatement("DELETE FROM newservers WHERE name=?");
                                 sql.setString(1, s.getName());
@@ -136,7 +139,7 @@ public class CommandServer extends MagicCommand {
                     return;
                 } else if (args[0].equalsIgnoreCase("list")) {
                     String msg = ChatColor.GREEN + "Server List:\n";
-                    List<Server> servers = Launcher.getDashboard().getServerUtil().getServers();
+                    List<Server> servers = dashboard.getServerUtil().getServers();
                     Collections.sort(servers, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
                     for (int i = 0; i < servers.size(); i++) {
@@ -154,18 +157,18 @@ public class CommandServer extends MagicCommand {
                 }
             }
 
-            Server server = Launcher.getDashboard().getServer(args[0]);
+            Server server = dashboard.getServer(args[0]);
             if (server == null) {
                 player.sendMessage(ChatColor.RED + "That server doesn't exist!");
                 return;
             }
 
-            Launcher.getDashboard().getServerUtil().sendPlayer(player, server.getName());
+            dashboard.getServerUtil().sendPlayer(player, server.getName());
             return;
         } else if (args.length == 0) {
             player.sendMessage(ChatColor.GREEN + "You are currently on " + player.getServer());
             String msg = "The following servers exist: ";
-            List<Server> servers = Launcher.getDashboard().getServerUtil().getServers();
+            List<Server> servers = dashboard.getServerUtil().getServers();
             List<String> names = new ArrayList<>();
 
             for (Server s : servers) {
@@ -187,7 +190,7 @@ public class CommandServer extends MagicCommand {
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         List<String> list = new ArrayList<>();
 
-        for (Server server : Launcher.getDashboard().getServerUtil().getServers()) {
+        for (Server server : dashboard.getServerUtil().getServers()) {
             list.add(server.getName());
         }
 

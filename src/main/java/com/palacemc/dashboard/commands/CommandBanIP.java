@@ -1,9 +1,12 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 
 public class CommandBanIP extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandBanIP() {
         super(Rank.KNIGHT);
@@ -25,10 +28,10 @@ public class CommandBanIP extends MagicCommand {
 
         String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
         reason = reason.trim();
-        Launcher.getDashboard().getSqlUtil().banIP(ip, reason, player.getUsername());
+        dashboard.getSqlUtil().banIP(ip, reason, player.getUsername());
 
         if (!ip.contains("*")) {
-            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getAddress().equals(ip)) {
                     try {
                         tp.kickPlayer(ChatColor.RED + "Your IP Has Been Banned For " + ChatColor.AQUA + reason);
@@ -37,7 +40,7 @@ public class CommandBanIP extends MagicCommand {
                 }
             }
         } else {
-            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 String[] list = tp.getAddress().split("\\.");
                 String range = list[0] + "." + list[1] + "." + list[2] + ".*";
 
@@ -49,6 +52,6 @@ public class CommandBanIP extends MagicCommand {
                 }
             }
         }
-        Launcher.getDashboard().getModerationUtil().announceBan(new AddressBan(ip, reason, player.getUsername()));
+        dashboard.getModerationUtil().announceBan(new AddressBan(ip, reason, player.getUsername()));
     }
 }

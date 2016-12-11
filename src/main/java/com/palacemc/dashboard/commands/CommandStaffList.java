@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
@@ -16,6 +17,8 @@ public class CommandStaffList extends MagicCommand {
         super(Rank.SQUIRE);
     }
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     @Override
     public void execute(Player player, String label, String[] args) {
         List<String> empress = new ArrayList<>();
@@ -25,7 +28,7 @@ public class CommandStaffList extends MagicCommand {
         List<String> knight = new ArrayList<>();
         List<String> squire = new ArrayList<>();
 
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             Rank r = tp.getRank();
             if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                 switch (r) {

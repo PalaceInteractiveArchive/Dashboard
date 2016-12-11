@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -9,6 +10,8 @@ import com.palacemc.dashboard.handlers.Rank;
 import java.util.Arrays;
 
 public class CommandUnbanIP extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandUnbanIP() {
         super(Rank.KNIGHT);
@@ -23,7 +26,7 @@ public class CommandUnbanIP extends MagicCommand {
         }
 
         String address = args[0];
-        Launcher.getDashboard().getSqlUtil().unbanIP(address);
-        Launcher.getDashboard().getModerationUtil().announceUnban("IP " + address, player.getUsername());
+        dashboard.getSqlUtil().unbanIP(address);
+        dashboard.getModerationUtil().announceUnban("IP " + address, player.getUsername());
     }
 }

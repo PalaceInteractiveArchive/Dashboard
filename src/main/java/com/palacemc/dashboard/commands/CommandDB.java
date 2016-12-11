@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -7,6 +8,8 @@ import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 
 public class CommandDB extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandDB() {
         super(Rank.KNIGHT);
@@ -30,8 +33,8 @@ public class CommandDB extends MagicCommand {
                     sname + ChatColor.WHITE + "] " + ChatColor.GREEN +
                     ChatColor.translateAlternateColorCodes('&', message);
 
-            for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-                if (Launcher.getDashboard().getPlayer(tp.getUuid()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
+                if (dashboard.getPlayer(tp.getUuid()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
                     tp.sendMessage(staff);
                 } else {
                     tp.sendMessage(msg);

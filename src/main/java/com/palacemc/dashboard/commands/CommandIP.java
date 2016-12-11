@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -7,6 +8,8 @@ import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 
 public class CommandIP extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandIP() {
         super(Rank.SQUIRE);
@@ -20,7 +23,7 @@ public class CommandIP extends MagicCommand {
             return;
         }
 
-        Player tp = Launcher.getDashboard().getPlayer(args[0]);
+        Player tp = dashboard.getPlayer(args[0]);
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "That player wasn't found!");
             return;

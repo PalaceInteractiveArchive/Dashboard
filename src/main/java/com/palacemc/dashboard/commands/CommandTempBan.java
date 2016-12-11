@@ -1,13 +1,15 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
-import com.palacemc.dashboard.utils.DateUtil;
 
 import java.sql.Date;
 import java.util.UUID;
 
 public class CommandTempBan extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandTempBan() {
         super(Rank.KNIGHT);
@@ -27,9 +29,9 @@ public class CommandTempBan extends MagicCommand {
         }
 
         final String username = args[0];
-        final long timestamp = DateUtil.parseDateDiff(args[1], true);
+        final long timestamp = dashboard.getDateUtil().parseDateDiff(args[1], true);
 
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+        dashboard.getSchedulerManager().runAsync(() -> {
             String reason;
             String r = "";
 
@@ -39,11 +41,11 @@ public class CommandTempBan extends MagicCommand {
 
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
             String source = player.getUsername();
-            Player tp = Launcher.getDashboard().getPlayer(username);
+            Player tp = dashboard.getPlayer(username);
             UUID uuid;
 
             if (tp == null) {
-                uuid = Launcher.getDashboard().getSqlUtil().uuidFromUsername(username);
+                uuid = dashboard.getSqlUtil().uuidFromUsername(username);
             } else {
                 uuid = tp.getUuid();
             }
@@ -53,11 +55,11 @@ public class CommandTempBan extends MagicCommand {
             if (tp != null) {
                 tp.kickPlayer(ChatColor.RED + "You Have Been Temporarily Banned For " + ChatColor.AQUA + reason +
                         ". " + ChatColor.RED + "Your Temporary Ban Will Expire in " + ChatColor.AQUA +
-                        DateUtil.formatDateDiff(timestamp));
+                        dashboard.getDateUtil().formatDateDiff(timestamp));
             }
 
-            Launcher.getDashboard().getSqlUtil().banPlayer(uuid, reason, false, new Date(timestamp), source);
-            Launcher.getDashboard().getModerationUtil().announceBan(ban);
+            dashboard.getSqlUtil().banPlayer(uuid, reason, false, new Date(timestamp), source);
+            dashboard.getModerationUtil().announceBan(ban);
         });
     }
 }

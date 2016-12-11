@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import lombok.Getter;
 
@@ -18,6 +19,8 @@ public class Party {
     public String headerMessage = ChatColor.GOLD + "-----------------------------------------------------";
     public String footerMessage = ChatColor.GOLD + "-----------------------------------------------------";
     public String warpMessage = ChatColor.GREEN + "Your Party Leader has warped you to their server.";
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public Party(UUID leader, List<UUID> members) {
         this.leader = leader;
@@ -50,7 +53,7 @@ public class Party {
 
     public void close() {
         String name = null;
-        Player lead = Launcher.getDashboard().getPlayer(leader);
+        Player lead = dashboard.getPlayer(leader);
 
         if (lead != null) {
             name = lead.getUsername();
@@ -59,7 +62,7 @@ public class Party {
         messageToAllMembers(ChatColor.RED + (name == null ? "The Party has been closed!" : name +
                 " has closed the Party!"), true);
         for (UUID uuid : members) {
-            Player tp = Launcher.getDashboard().getPlayer(uuid);
+            Player tp = dashboard.getPlayer(uuid);
             if (tp == null) {
                 continue;
             }
@@ -72,19 +75,19 @@ public class Party {
         }
 
         members.clear();
-        Launcher.getDashboard().getPartyUtil().removeParty(this);
+        dashboard.getPartyUtil().removeParty(this);
     }
 
     public void warpToLeader() {
         if (members.size() > 25) {
-            Launcher.getDashboard().getPlayer(leader).sendMessage(ChatColor.RED + "Parties larger than 25 players cannot be warped!");
+            dashboard.getPlayer(leader).sendMessage(ChatColor.RED + "Parties larger than 25 players cannot be warped!");
             return;
         }
 
-        String server = Launcher.getDashboard().getPlayer(leader).getServer();
+        String server = dashboard.getPlayer(leader).getServer();
 
         for (UUID memberUUID : members) {
-            Player member = Launcher.getDashboard().getPlayer(memberUUID);
+            Player member = dashboard.getPlayer(memberUUID);
             if (member == null) {
                 return;
             }
@@ -93,7 +96,7 @@ public class Party {
                 continue;
             }
 
-            Launcher.getDashboard().getServerUtil().sendPlayer(member, server);
+            dashboard.getServerUtil().sendPlayer(member, server);
         }
         messageToAllMembers(warpMessage, true);
     }
@@ -112,7 +115,7 @@ public class Party {
 
     public void messageToAllMembers(String message, boolean bars) {
         for (UUID tuuid : getMembers()) {
-            Player tp = Launcher.getDashboard().getPlayer(tuuid);
+            Player tp = dashboard.getPlayer(tuuid);
 
             if (tp == null) {
                 continue;
@@ -137,10 +140,10 @@ public class Party {
             boolean l = members.get(i).equals(leader);
 
             if (i == (members.size() - 1)) {
-                sb.append(l ? "*" : "").append(Launcher.getDashboard().getPlayer(members.get(i)).getUsername());
+                sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername());
                 continue;
             }
-            sb.append(l ? "*" : "").append(Launcher.getDashboard().getPlayer(members.get(i)).getUsername()).append(", ");
+            sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername()).append(", ");
         }
 
         String msg = ChatColor.YELLOW + "Members of your Party: " + sb.toString();
@@ -163,12 +166,12 @@ public class Party {
 
     public void remove(Player tp) {
         if (!getMembers().contains(tp.getUuid())) {
-            Launcher.getDashboard().getPlayer(leader).sendMessage(ChatColor.YELLOW + "That player is not in your Party!");
+            dashboard.getPlayer(leader).sendMessage(ChatColor.YELLOW + "That player is not in your Party!");
             return;
         }
 
         removeMember(tp);
-        messageToAllMembers(ChatColor.YELLOW + Launcher.getDashboard().getPlayer(leader).getUsername() + " has removed " +
+        messageToAllMembers(ChatColor.YELLOW + dashboard.getPlayer(leader).getUsername() + " has removed " +
                 tp.getUsername() + " from the Party!", true);
 
         if (tp.getChannel().equals("party")) {
@@ -189,14 +192,14 @@ public class Party {
                 continue;
             }
 
-            Player tp = Launcher.getDashboard().getPlayer(uuid);
+            Player tp = dashboard.getPlayer(uuid);
             if (tp != null && tp.isMentions()) {
                 tp.mention();
             }
         }
 
         messageToAllMembers(m, false);
-        Launcher.getDashboard().getChatUtil().socialSpyParty(player, this, msg, "pchat");
+        dashboard.getChatUtil().socialSpyParty(player, this, msg, "pchat");
     }
 
     public void promote(Player player, Player tp) {
@@ -215,6 +218,6 @@ public class Party {
     }
 
     public Player getLeader() {
-        return Launcher.getDashboard().getPlayer(uuid);
+        return dashboard.getPlayer(uuid);
     }
 }

@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -10,6 +11,8 @@ import java.util.*;
 
 public class CommandCharList extends MagicCommand {
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public CommandCharList() {
         super(Rank.CHARACTER);
     }
@@ -18,7 +21,7 @@ public class CommandCharList extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         HashMap<String, List<String>> servers = new HashMap<>();
 
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getRank().name().toLowerCase().contains("character")) {
                 String server = tp.getServer();
 

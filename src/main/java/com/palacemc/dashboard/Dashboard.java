@@ -40,6 +40,7 @@ public class Dashboard {
     @Getter @Setter private SiteUtil siteUtil;
     @Getter @Setter private AFKUtil afkUtil;
     @Getter @Setter private StatUtil statUtil;
+    @Getter @Setter private DateUtil dateUtil;
 
     @Getter @Setter private SchedulerManager schedulerManager = null;
 

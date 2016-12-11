@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import lombok.Getter;
 
@@ -11,6 +12,8 @@ public abstract class MagicCommand {
     @Getter protected List<String> aliases = new ArrayList<>();
     @Getter private Rank rank;
     @Getter public boolean tabCompletePlayers = false;
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public MagicCommand() {
         rank = Rank.SETTLER;
@@ -30,7 +33,7 @@ public abstract class MagicCommand {
         List<String> list = new ArrayList<>();
 
         if (tabCompletePlayers) {
-            for (Player player : Launcher.getDashboard().getOnlinePlayers()) {
+            for (Player player : dashboard.getOnlinePlayers()) {
                 list.add(player.getUsername());
             }
             if (args.size() > 0) {

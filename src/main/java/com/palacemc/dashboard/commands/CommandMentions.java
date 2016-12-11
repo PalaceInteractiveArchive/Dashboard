@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -11,6 +12,8 @@ import java.sql.SQLException;
 
 public class CommandMentions extends MagicCommand {
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     @Override
     public void execute(final Player player, String label, String[] args) {
         player.setMentions(!player.isMentions());
@@ -21,8 +24,8 @@ public class CommandMentions extends MagicCommand {
             player.mention();
         }
 
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+        dashboard.getSchedulerManager().runAsync(() -> {
+            try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET mentions=? WHERE uuid=?");
 
                 sql.setInt(1, player.isMentions() ? 1 : 0);

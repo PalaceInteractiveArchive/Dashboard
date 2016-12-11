@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -15,6 +16,8 @@ import java.util.TreeMap;
  */
 public class CommandCmds extends MagicCommand {
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public CommandCmds() {
         super(Rank.WIZARD);
     }
@@ -24,7 +27,7 @@ public class CommandCmds extends MagicCommand {
         player.sendMessage(ChatColor.GREEN + "Registered Commands:");
         String msg = null;
 
-        TreeMap<String, MagicCommand> map = Launcher.getDashboard().getCommandUtil().getCommands();
+        TreeMap<String, MagicCommand> map = dashboard.getCommandUtil().getCommands();
 
         for (Map.Entry<String, MagicCommand> entry : map.entrySet()) {
             if (msg != null) {

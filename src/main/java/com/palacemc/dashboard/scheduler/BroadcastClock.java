@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.scheduler;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.Player;
@@ -17,6 +18,8 @@ import java.util.TimerTask;
 public class BroadcastClock extends TimerTask {
     private List<String> announcements = new ArrayList<>();
     private int i = 0;
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public BroadcastClock() {
         reload();
@@ -48,7 +51,7 @@ public class BroadcastClock extends TimerTask {
     @Override
     public void run() {
         String msg = ChatColor.translateAlternateColorCodes('&', announcements.get(i));
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             tp.sendMessage(msg);
         }
 

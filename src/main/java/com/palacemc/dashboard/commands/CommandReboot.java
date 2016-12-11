@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -13,6 +14,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class CommandReboot extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandReboot() {
         super(Rank.WIZARD);
@@ -29,16 +32,16 @@ public class CommandReboot extends MagicCommand {
             bungee.send(packet);
         }
 
-        player.sendMessage(ChatColor.GREEN + "Bungees notified, disconnecting " + Launcher.getDashboard().getOnlinePlayers().size()
+        player.sendMessage(ChatColor.GREEN + "Bungees notified, disconnecting " + dashboard.getOnlinePlayers().size()
                 + " players...");
 
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             tp.kickPlayer(ChatColor.AQUA + "Mind the dust! We are restarting our servers right now.");
         }
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if (Launcher.getDashboard().getOnlinePlayers().isEmpty()) {
+                if (dashboard.getOnlinePlayers().isEmpty()) {
                     cancel();
                     System.exit(0);
                 }

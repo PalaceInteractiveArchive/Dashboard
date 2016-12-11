@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -8,6 +9,8 @@ import com.palacemc.dashboard.handlers.Player;
 import java.util.Arrays;
 
 public class CommandFriend extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandFriend() {
         aliases = Arrays.asList("f");
@@ -20,13 +23,13 @@ public class CommandFriend extends MagicCommand {
             case 1:
                 switch (args[0].toLowerCase()) {
                     case "help":
-                        Launcher.getDashboard().getFriendUtil().helpMenu(player);
+                        dashboard.getFriendUtil().helpMenu(player);
                         return;
                     case "list":
-                        Launcher.getDashboard().getFriendUtil().listFriends(player, 1);
+                        dashboard.getFriendUtil().listFriends(player, 1);
                         return;
                     case "toggle":
-                        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+                        dashboard.getSchedulerManager().runAsync(() -> {
                             player.setHasFriendToggled(!player.hasFriendToggledOff());
 
                             if (player.hasFriendToggledOff()) {
@@ -36,11 +39,11 @@ public class CommandFriend extends MagicCommand {
                                 player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
                                         ChatColor.GREEN + "ON");
                             }
-                            Launcher.getDashboard().getFriendUtil().toggleRequests(player);
+                            dashboard.getFriendUtil().toggleRequests(player);
                         });
                         return;
                     case "requests":
-                        Launcher.getDashboard().getFriendUtil().listRequests(player);
+                        dashboard.getFriendUtil().listRequests(player);
                         return;
                 }
                 return;
@@ -48,15 +51,15 @@ public class CommandFriend extends MagicCommand {
                 switch (args[0].toLowerCase()) {
                     case "list":
                         if (!isInt(args[1])) {
-                            Launcher.getDashboard().getFriendUtil().listFriends(player, 1);
+                            dashboard.getFriendUtil().listFriends(player, 1);
                             return;
                         }
 
-                        Launcher.getDashboard().getFriendUtil().listFriends(player, Integer.parseInt(args[1]));
+                        dashboard.getFriendUtil().listFriends(player, Integer.parseInt(args[1]));
                         return;
                     case "tp":
                         String user = args[1];
-                        Player tp = Launcher.getDashboard().getPlayer(user);
+                        Player tp = dashboard.getPlayer(user);
 
                         if (tp == null) {
                             player.sendMessage(ChatColor.RED + "Player not found!");
@@ -68,23 +71,23 @@ public class CommandFriend extends MagicCommand {
                                     " is not on your Friend List!");
                             return;
                         }
-                        Launcher.getDashboard().getFriendUtil().teleportPlayer(player, tp);
+                        dashboard.getFriendUtil().teleportPlayer(player, tp);
                         return;
                     case "add":
-                        Launcher.getDashboard().getFriendUtil().addFriend(player, args[1]);
+                        dashboard.getFriendUtil().addFriend(player, args[1]);
                         return;
                     case "remove":
-                        Launcher.getDashboard().getFriendUtil().removeFriend(player, args[1]);
+                        dashboard.getFriendUtil().removeFriend(player, args[1]);
                         return;
                     case "accept":
-                        Launcher.getDashboard().getFriendUtil().acceptFriend(player, args[1]);
+                        dashboard.getFriendUtil().acceptFriend(player, args[1]);
                         return;
                     case "deny":
-                        Launcher.getDashboard().getFriendUtil().denyFriend(player, args[1]);
+                        dashboard.getFriendUtil().denyFriend(player, args[1]);
                         return;
                 }
         }
-        Launcher.getDashboard().getFriendUtil().helpMenu(player);
+        dashboard.getFriendUtil().helpMenu(player);
     }
 
     private boolean isInt(String s) {

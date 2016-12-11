@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -14,6 +15,8 @@ import java.util.List;
  * Created by Marc on 9/25/16
  */
 public class CommandChat extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     @Override
     public void execute(Player player, String label, String[] args) {
@@ -50,7 +53,7 @@ public class CommandChat extends MagicCommand {
             return;
         }
 
-        if (channel.equals("party") && Launcher.getDashboard().getPartyUtil().findPartyForPlayer(player) == null) {
+        if (channel.equals("party") && dashboard.getPartyUtil().findPartyForPlayer(player) == null) {
             player.sendMessage(ChatColor.RED + "You aren't in a party! Invite a player with " + ChatColor.GREEN + "/party [Username]");
             return;
         }

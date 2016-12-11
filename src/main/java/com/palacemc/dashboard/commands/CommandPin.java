@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -19,6 +20,8 @@ import java.util.*;
 public class CommandPin extends MagicCommand {
     private Random r = new Random();
     private List<UUID> generating = new ArrayList<>();
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandPin() {
         aliases = Arrays.asList("mymcmagic");
@@ -68,8 +71,8 @@ public class CommandPin extends MagicCommand {
         player.sendMessage(ChatColor.GREEN + "Generating your PIN for MyMCMagic...");
         generating.add(player.getUuid());
 
-        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = Launcher.getDashboard().getActivityUtil().getConnection()) {
+        dashboard.getSchedulerManager().runAsync(() -> {
+            try (Connection connection = dashboard.getActivityUtil().getConnection()) {
                 PreparedStatement account = connection.prepareStatement("SELECT id FROM users WHERE uuid=?");
 
                 account.setString(1, player.getUuid().toString());

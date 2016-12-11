@@ -1,9 +1,12 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 
 public class CommandKick extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandKick() {
         super(Rank.SQUIRE);
@@ -17,7 +20,7 @@ public class CommandKick extends MagicCommand {
             return;
         }
 
-        Player tp = Launcher.getDashboard().getPlayer(args[0]);
+        Player tp = dashboard.getPlayer(args[0]);
 
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "I can't find that player!");
@@ -41,8 +44,8 @@ public class CommandKick extends MagicCommand {
         tp.kickPlayer(ChatColor.RED + "You have been disconnected for: " + ChatColor.AQUA + reason);
 
         try {
-            Launcher.getDashboard().getModerationUtil().announceKick(tp.getUsername(), reason, player.getUsername());
-            Launcher.getDashboard().getSqlUtil().logKick(new Kick(tp.getUuid(), reason, player.getUsername()));
+            dashboard.getModerationUtil().announceKick(tp.getUsername(), reason, player.getUsername());
+            dashboard.getSqlUtil().logKick(new Kick(tp.getUuid(), reason, player.getUsername()));
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "That player isn't online!");
         }

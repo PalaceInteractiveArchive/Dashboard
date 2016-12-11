@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -15,6 +16,8 @@ import com.palacemc.dashboard.server.WebSocketServerHandler;
  */
 public class CommandMotdrl extends MagicCommand {
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public CommandMotdrl() {
         super(Rank.KNIGHT);
     }
@@ -23,12 +26,12 @@ public class CommandMotdrl extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         player.sendMessage(ChatColor.GREEN + "Loading MOTD from file...");
 
-        Launcher.getDashboard().loadMOTD();
+        dashboard.loadMOTD();
 
         player.sendMessage(ChatColor.GREEN + "MOTD Loaded! Notifying Bungees...");
 
-        PacketUpdateMOTD packet = new PacketUpdateMOTD(Launcher.getDashboard().getMotd(), Launcher.getDashboard().getMotdMaintenance(),
-                Launcher.getDashboard().getInfo());
+        PacketUpdateMOTD packet = new PacketUpdateMOTD(dashboard.getMotd(), dashboard.getMotdMaintenance(),
+                dashboard.getInfo());
 
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;

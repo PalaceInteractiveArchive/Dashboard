@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.utils;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 
 import java.sql.Connection;
@@ -14,24 +15,26 @@ import java.util.TimerTask;
 public class StatUtil {
     private int playerCount = 0;
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public StatUtil() {
-        if (Launcher.getDashboard().isTestNetwork()) {
+        if (dashboard.isTestNetwork()) {
             return;
         }
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                int count = Launcher.getDashboard().getOnlinePlayers().size();
+                int count = dashboard.getOnlinePlayers().size();
                 if (count != playerCount) {
                     playerCount = count;
                 }
-                Launcher.getDashboard().getSchedulerManager().runAsync(() -> setValue(playerCount));
+                dashboard.getSchedulerManager().runAsync(() -> setValue(playerCount));
             }
         }, 0, 60000);
     }
 
     private void setValue(int value) {
-        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
                     (System.currentTimeMillis() / 1000) + "','count','" + value + "')");
             sql.execute();

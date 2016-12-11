@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.handlers;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,8 @@ public class Server {
     @Getter private String serverType;
     @Getter @Setter private boolean online = false;
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public Server(String name, String address, int port, boolean park, int count, String serverType) {
         this.name = name;
         this.address = address;
@@ -34,7 +37,7 @@ public class Server {
 
     public void emptyServer() {
         Server s = null;
-        for (Server server : Launcher.getDashboard().getServerUtil().getServers()) {
+        for (Server server : dashboard.getServerUtil().getServers()) {
             if (server.getUuid().equals(getUuid())) {
                 continue;
             }
@@ -48,9 +51,9 @@ public class Server {
                 }
             }
         }
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getServer().equals(getName())) {
-                Launcher.getDashboard().getServerUtil().sendPlayer(tp, s.getName());
+                dashboard.getServerUtil().sendPlayer(tp, s.getName());
             }
         }
     }

@@ -1,11 +1,14 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 
 import java.util.Arrays;
 
 public class CommandParty extends MagicCommand {
+
+    private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandParty() {
         aliases = Arrays.asList("p");
@@ -21,16 +24,16 @@ public class CommandParty extends MagicCommand {
             }
 
             if (args[0].equalsIgnoreCase("accept")) {
-                Launcher.getDashboard().getPartyUtil().acceptRequest(player);
+                dashboard.getPartyUtil().acceptRequest(player);
                 return;
             }
 
             if (args[0].equalsIgnoreCase("deny")) {
-                Launcher.getDashboard().getPartyUtil().denyRequest(player);
+                dashboard.getPartyUtil().denyRequest(player);
                 return;
             }
 
-            Party party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(player);
+            Party party = dashboard.getPartyUtil().findPartyForPlayer(player);
             if (args[0].equalsIgnoreCase("close")) {
                 if (party == null) {
                     player.sendMessage(ChatColor.RED + "You're not in a Party!");
@@ -84,7 +87,7 @@ public class CommandParty extends MagicCommand {
                 return;
             }
             if (party == null) {
-                party = Launcher.getDashboard().getPartyUtil().createParty(player);
+                party = dashboard.getPartyUtil().createParty(player);
             }
 
             if (!party.isLeader(player)) {
@@ -92,7 +95,7 @@ public class CommandParty extends MagicCommand {
                 return;
             }
 
-            Player tp = Launcher.getDashboard().getPlayer(args[0]);
+            Player tp = dashboard.getPlayer(args[0]);
             if (tp == null) {
                 player.sendMessage(ChatColor.RED + "That player wasn't found!");
                 return;
@@ -103,10 +106,10 @@ public class CommandParty extends MagicCommand {
                 return;
             }
 
-            Launcher.getDashboard().getPartyUtil().invitePlayer(party, tp);
+            dashboard.getPartyUtil().invitePlayer(party, tp);
             return;
         } else if (args.length == 2) {
-            Party party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(player);
+            Party party = dashboard.getPartyUtil().findPartyForPlayer(player);
 
             if (args[0].equalsIgnoreCase("takeover")) {
                 if (player.getRank().getRankId() < Rank.KNIGHT.getRankId()) {
@@ -114,7 +117,7 @@ public class CommandParty extends MagicCommand {
                     return;
                 }
 
-                Player tp = Launcher.getDashboard().getPlayer(args[1]);
+                Player tp = dashboard.getPlayer(args[1]);
                 if (tp == null) {
                     player.sendMessage("That player wasn't found!");
                     return;
@@ -128,7 +131,7 @@ public class CommandParty extends MagicCommand {
                     }
                 }
 
-                party = Launcher.getDashboard().getPartyUtil().findPartyForPlayer(tp.getUuid());
+                party = dashboard.getPartyUtil().findPartyForPlayer(tp.getUuid());
                 if (party == null) {
                     player.sendMessage(ChatColor.RED + "This player is not in a Party!");
                     return;
@@ -154,7 +157,7 @@ public class CommandParty extends MagicCommand {
                     return;
                 }
 
-                Player tp = Launcher.getDashboard().getPlayer(args[1]);
+                Player tp = dashboard.getPlayer(args[1]);
 
                 if (tp == null) {
                     player.sendMessage(ChatColor.RED + "That player wasn't found!");
@@ -170,7 +173,7 @@ public class CommandParty extends MagicCommand {
                     return;
                 }
 
-                Player tp = Launcher.getDashboard().getPlayer(args[1]);
+                Player tp = dashboard.getPlayer(args[1]);
                 if (tp == null) {
                     player.sendMessage("That player wasn't found!");
                     return;

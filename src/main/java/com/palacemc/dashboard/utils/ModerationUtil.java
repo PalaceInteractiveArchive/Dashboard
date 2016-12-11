@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.utils;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 
@@ -8,11 +9,13 @@ import com.palacemc.dashboard.handlers.*;
  */
 public class ModerationUtil {
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     public void announceBan(Ban ban) {
         sendMessage(ChatColor.GREEN + ban.getName() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
                 ban.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason() +
                 ChatColor.RED + " Expires: " + ChatColor.GREEN + (ban.isPermanent() ? "Permanent" :
-                DateUtil.formatDateDiff(ban.getRelease())));
+                dashboard.getDateUtil().formatDateDiff(ban.getRelease())));
     }
 
     public void announceBan(AddressBan ban) {
@@ -32,7 +35,7 @@ public class ModerationUtil {
     public void announceMute(Mute mute) {
         sendMessage(ChatColor.GREEN + mute.getName() + ChatColor.RED + " was muted by " + ChatColor.GREEN +
                 mute.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + mute.getReason() + ChatColor.RED +
-                " Expires: " + ChatColor.GREEN + DateUtil.formatDateDiff(mute.getRelease()));
+                " Expires: " + ChatColor.GREEN + dashboard.getDateUtil().formatDateDiff(mute.getRelease()));
     }
 
     public void announceUnmute(String name, String source) {
@@ -51,7 +54,7 @@ public class ModerationUtil {
 
     public void sendMessage(String message) {
         String msg = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + message;
-        for (Player player : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player player : dashboard.getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                 player.sendMessage(msg);
             }

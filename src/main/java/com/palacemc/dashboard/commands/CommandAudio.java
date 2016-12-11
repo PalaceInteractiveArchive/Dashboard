@@ -1,5 +1,6 @@
 package com.palacemc.dashboard.commands;
 
+import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
@@ -14,13 +15,15 @@ import java.util.List;
 
 public class CommandAudio extends MagicCommand {
 
+    private Dashboard dashboard = Launcher.getDashboard();
+
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length != 0) {
             switch (args[0].toLowerCase()) {
                 case "leave":
                 case "disconnect":
-                    List<DashboardSocketChannel> list = Launcher.getDashboard().getChannels(PacketConnectionType.ConnectionType.AUDIOSERVER);
+                    List<DashboardSocketChannel> list = dashboard.getChannels(PacketConnectionType.ConnectionType.AUDIOSERVER);
 
                     if (!list.isEmpty()) {
                         PacketKick packet = new PacketKick("You were disconnected!");

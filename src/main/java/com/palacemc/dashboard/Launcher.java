@@ -76,6 +76,7 @@ public class Launcher {
         dashboard.setPartyUtil(new PartyUtil());
         dashboard.setSlackUtil(new SlackUtil());
         dashboard.setWarningUtil(new WarningUtil());
+        dashboard.setDateUtil(new DateUtil());
 
         try {
             dashboard.setSiteUtil(new SiteUtil());
