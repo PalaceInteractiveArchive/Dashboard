@@ -106,10 +106,11 @@ public class SqlUtil {
                 player.setNewGuest(result.getInt("tutorial") != 1);
                 Dashboard.addPlayer(player);
                 Dashboard.addToCache(player.getUniqueId(), player.getName());
+                String u = result.getString("username");
                 result.close();
                 sql.close();
                 if (needsUpdate) {
-                    update(player, connection);
+                    update(player, connection, !player.getName().equals(u));
                 }
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
@@ -169,13 +170,16 @@ public class SqlUtil {
         Dashboard.addPlayer(player);
     }
 
-    private void update(Player player, Connection connection) throws SQLException {
+    private void update(Player player, Connection connection, boolean username) throws SQLException {
         PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET username=?,ipAddress=? WHERE uuid=?");
         sql.setString(1, player.getName());
         sql.setString(2, player.getAddress());
         sql.setString(3, player.getUniqueId().toString());
         sql.execute();
         sql.close();
+        if (username) {
+            Dashboard.forum.updatePlayerName(player.getUniqueId().toString(), player.getName());
+        }
     }
 
     public void silentJoin(final Player player) {

@@ -54,21 +54,19 @@ public class Forum {
 
     public void linkAccount(Player player) {
         try {
-            String key = addNewKey(player.getUniqueId().toString(), player.getName());
+            String key = addNewKey(player.getUniqueId().toString(), player.getName(), player.getRank().getName());
             String link = "https://palace.network/link-minecraft/?key=" + key + "&type=link";
             PacketLink packet = new PacketLink(player.getUniqueId(), link, "Click to link your Minecraft and Palace Forum accounts", ChatColor.YELLOW, true, true);
             player.send(packet);
-            _updatePlayer(player.getUniqueId().toString(), player.getName(), player.getRank().getSqlName());
         } catch (SQLException e) {
             e.printStackTrace();
             player.sendMessage(ChatColor.RED + "There was an error connecting your Forum account, try again soon!");
         }
     }
 
-    public String addNewKey(String uuid, String username) throws SQLException {
+    public String addNewKey(String uuid, String username, String rank) throws SQLException {
         String doesKeyExist = this._doesKeyExist(uuid);
-        System.out.println(doesKeyExist);
-        return !doesKeyExist.equalsIgnoreCase("false") ? doesKeyExist : this._addNewKey(uuid, username);
+        return !doesKeyExist.equalsIgnoreCase("false") ? doesKeyExist : this._addNewKey(uuid, username, rank);
     }
 
     private String _doesKeyExist(final String uuid) {
@@ -76,31 +74,28 @@ public class Forum {
         String existing = "";
         try {
             String e = (String) Database.getFirstColumn("SELECT token FROM apms2_key WHERE uuid = ? AND valid = 1 AND key_type = 1 LIMIT 1", uuid);
-            System.out.println("E");
             if (e != null) {
                 keyExists = true;
                 existing = e;
-                System.out.println("F");
             }
         } catch (SQLException var5) {
             var5.printStackTrace();
         }
-        System.out.println("G");
         return !keyExists ? String.valueOf(false) : existing;
     }
 
-    private String _addNewKey(final String uuid, String username) throws SQLException {
+    private String _addNewKey(final String uuid, String username, String rank) throws SQLException {
         String token = UUID.randomUUID().toString();
-        System.out.println("B");
         long unixTime = System.currentTimeMillis() / 1000L;
-        System.out.println("C - " + token);
-        Database.executeUpdate("INSERT INTO apms2_key (token, uuid, mc_username, valid, create_date, key_type) VALUES (?, ?, ?, ?, ?, ?)", token, uuid, username, 1, Long.toString(unixTime), 1);
-        System.out.println("D");
+        Database.executeUpdate("INSERT INTO apms2_key (token, uuid, mc_username, rank, valid, create_date, key_type) VALUES (?, ?, ?, ?, ?, ?, ?)", token, uuid, username, rank, 1, Long.toString(unixTime), 1);
         return token;
     }
 
-    public void _updatePlayer(String uuid, String username, String jsonGroups) throws SQLException {
-        System.out.println("A");
-        Database.executeUpdate("INSERT INTO apms2_updateplayercache (uuid, mc_username, groups) VALUES (?, ?, ?)", uuid, username, jsonGroups);
+    public void updatePlayerName(String uuid, String username) throws SQLException {
+        Database.executeUpdate("UPDATE xf_user SET apms2_username=? WHERE apms2_uuid=?", username, uuid);
+    }
+
+    public void updatePlayerRank(String uuid, String rank) throws SQLException {
+        Database.executeUpdate("UPDATE xf_user SET apms2_group=?,apms2_groups=? WHERE apms2_uuid=?", rank, rank, uuid);
     }
 }

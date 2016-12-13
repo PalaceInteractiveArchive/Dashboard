@@ -511,7 +511,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                     Dashboard.moderationUtil.rankChange(name, rank, source);
                 });
-                Dashboard.forum._updatePlayer(uuid.toString(), tp.getName(), rank.getSqlName());
+                Dashboard.forum.updatePlayerRank(uuid.toString(), rank.getSqlName());
                 break;
             }
             /**
