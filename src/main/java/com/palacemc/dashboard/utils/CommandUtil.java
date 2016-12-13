@@ -36,6 +36,7 @@ public class CommandUtil {
         register("join", new CommandJoin());
         register("kick", new CommandKick());
         register("kickall", new CommandKickAll());
+        register("link", new CommandLink());
         register("maintenance", new CommandMaintenance());
         register("mentions", new CommandMentions());
         register("modlog", new CommandModLog());

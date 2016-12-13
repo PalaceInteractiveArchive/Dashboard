@@ -499,21 +499,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 final Rank rank = packet.getRank();
                 final String source = packet.getSource();
                 final Player tp = Dashboard.getPlayer(uuid);
-                Dashboard.schedulerManager.runAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        String name = "";
-                        if (tp != null) {
-                            PacketPlayerRank packet = new PacketPlayerRank(uuid, rank);
-                            tp.send(packet);
-                            tp.setRank(rank);
-                            name = tp.getName();
-                        } else {
-                            name = Dashboard.sqlUtil.usernameFromUUID(uuid);
-                        }
-                        Dashboard.moderationUtil.rankChange(name, rank, source);
+                Dashboard.schedulerManager.runAsync(() -> {
+                    String name = "";
+                    if (tp != null) {
+                        PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
+                        tp.send(packet1);
+                        tp.setRank(rank);
+                        name = tp.getName();
+                    } else {
+                        name = Dashboard.sqlUtil.usernameFromUUID(uuid);
                     }
+                    Dashboard.moderationUtil.rankChange(name, rank, source);
                 });
+                Dashboard.forum._updatePlayer(uuid.toString(), tp.getName(), rank.getSqlName());
                 break;
             }
             /**
@@ -722,12 +720,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     list.add(tp);
                 }
                 final List<Player> finalList = list;
-                Dashboard.schedulerManager.runAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (Player p : finalList) {
-                            Dashboard.sqlUtil.silentJoin(p);
-                        }
+                Dashboard.schedulerManager.runAsync(() -> {
+                    for (Player p : finalList) {
+                        Dashboard.sqlUtil.silentJoin(p);
                     }
                 });
                 break;

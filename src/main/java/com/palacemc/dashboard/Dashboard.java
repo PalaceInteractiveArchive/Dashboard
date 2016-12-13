@@ -1,5 +1,6 @@
 package com.palacemc.dashboard;
 
+import com.palacemc.dashboard.forums.Forum;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 import com.palacemc.dashboard.handlers.Server;
@@ -48,6 +49,7 @@ public class Dashboard {
     public static SiteUtil siteUtil;
     public static AFKUtil afkUtil;
     public static StatUtil statUtil;
+    public static Forum forum;
     private static Logger logger = Logger.getLogger("Dashboard");
     private static List<String> serverTypes = new ArrayList<>();
     private static HashMap<UUID, Player> players = new HashMap<>();
@@ -68,13 +70,11 @@ public class Dashboard {
         logger.addAppender(new ConsoleAppender(layout));
         logger.addAppender(new FileAppender(layout, "dashboard.log", true));
         getLogger().info("Starting up Dashboard...");
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                Dashboard.getLogger().warn("Shutting down Dashboard...");
-                slackUtil.sendDashboardMessage(new SlackMessage(),
-                        Arrays.asList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Dashboard.getLogger().warn("Shutting down Dashboard...");
+            slackUtil.sendDashboardMessage(new SlackMessage(),
+                    Arrays.asList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
+        }));
         schedulerManager = new SchedulerManager();
         try {
             sqlUtil = new SqlUtil();
@@ -102,6 +102,7 @@ public class Dashboard {
         }
         afkUtil = new AFKUtil();
         statUtil = new StatUtil();
+        forum = new Forum();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
