@@ -12,18 +12,18 @@ import java.util.UUID;
 public class PacketPlayerInfo extends BasePacket {
     private UUID uuid;
     private String username;
-    private int auth;
+    private String token;
     private String server;
 
     public PacketPlayerInfo() {
-        this(null, "", 0, "");
+        this(null, "", "", "");
     }
 
-    public PacketPlayerInfo(UUID uuid, String username, int auth, String server) {
+    public PacketPlayerInfo(UUID uuid, String username, String token, String server) {
         this.id = PacketID.PLAYERINFO.getID();
         this.uuid = uuid;
         this.username = username;
-        this.auth = auth;
+        this.token = token;
         this.server = server;
     }
 
@@ -35,8 +35,8 @@ public class PacketPlayerInfo extends BasePacket {
         return username;
     }
 
-    public int getAuth() {
-        return auth;
+    public String getToken() {
+        return token;
     }
 
     public String getServer() {
@@ -50,7 +50,7 @@ public class PacketPlayerInfo extends BasePacket {
             this.uuid = null;
         }
         this.username = obj.get("username").getAsString();
-        this.auth = obj.get("auth").getAsInt();
+        this.token = obj.get("token").getAsString();
         this.server = obj.get("server").getAsString();
         return this;
     }
@@ -61,7 +61,7 @@ public class PacketPlayerInfo extends BasePacket {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", uuid != null ? uuid.toString() : null);
             obj.addProperty("username", this.username);
-            obj.addProperty("auth", this.auth);
+            obj.addProperty("token", this.token);
             obj.addProperty("server", this.server);
         } catch (Exception e) {
             return null;

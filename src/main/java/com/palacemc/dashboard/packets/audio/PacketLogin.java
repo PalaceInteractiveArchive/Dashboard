@@ -9,37 +9,29 @@ import com.palacemc.dashboard.packets.PacketID;
  */
 public class PacketLogin extends BasePacket {
     private int version = 7;
-    private String playername = "";
-    private String auth = "";
+    private String token = "";
 
     public PacketLogin() {
-        this(0, "", "");
+        this(0, "");
     }
 
-    public PacketLogin(int version, String playername, String auth) {
+    public PacketLogin(int version, String token) {
         this.id = PacketID.LOGIN.getID();
-
         this.version = version;
-        this.playername = playername;
-        this.auth = auth;
+        this.token = token;
     }
 
     public int getProtocolVersion() {
         return this.version;
     }
 
-    public String getPlayerName() {
-        return this.playername;
-    }
-
-    public String getAuth() {
-        return this.auth;
+    public String getToken() {
+        return token;
     }
 
     public PacketLogin fromJSON(JsonObject obj) {
         this.version = obj.get("version").getAsInt();
-        this.playername = obj.get("playername").getAsString();
-        this.auth = obj.get("auth").getAsString();
+        this.token = obj.get("token").getAsString();
         return this;
     }
 
@@ -48,8 +40,7 @@ public class PacketLogin extends BasePacket {
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("version", this.version);
-            obj.addProperty("playername", this.playername);
-            obj.addProperty("auth", this.auth);
+            obj.addProperty("token", this.token);
         } catch (Exception e) {
             return null;
         }

@@ -7,8 +7,8 @@ import com.palacemc.dashboard.packets.dashboard.PacketMessage;
 import com.palacemc.dashboard.packets.dashboard.PacketPlayerChat;
 import com.palacemc.dashboard.packets.dashboard.PacketPlayerDisconnect;
 
+import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.Timer;
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public class Player {
     private HashMap<UUID, String> friends;
     private HashMap<UUID, String> requests;
     private boolean kicking;
-    private int audioAuth = -1;
+    private String audioToken = null;
     private boolean recieveMessages = true;
     private String pack = "none";
     private String warp = "";
@@ -183,17 +183,17 @@ public class Player {
         return kicking;
     }
 
-    public int setAudioAuth() {
-        this.audioAuth = new Random().nextInt(100000);
-        return audioAuth;
+    public String setAudioToken() {
+        this.audioToken = new BigInteger(130, Dashboard.getSecureRandom()).toString(32);
+        return audioToken;
     }
 
-    public int getAudioAuth() {
-        return audioAuth;
+    public String getAudioToken() {
+        return audioToken;
     }
 
-    public void resetAudioAuth() {
-        this.audioAuth = -1;
+    public void resetAudioToken() {
+        this.audioToken = null;
     }
 
     public boolean canRecieveMessages() {

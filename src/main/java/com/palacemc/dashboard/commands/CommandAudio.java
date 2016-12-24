@@ -38,7 +38,7 @@ public class CommandAudio extends MagicCommand {
             }
             return;
         }
-        PacketAudioCommand packet = new PacketAudioCommand(player.getUniqueId(), player.setAudioAuth());
+        PacketAudioCommand packet = new PacketAudioCommand(player.getUniqueId(), player.setAudioToken());
         player.send(packet);
     }
 }

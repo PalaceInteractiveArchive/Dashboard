@@ -11,24 +11,24 @@ import java.util.UUID;
  */
 public class PacketAudioCommand extends BasePacket {
     private UUID uuid;
-    private int auth;
+    private String token;
 
     public PacketAudioCommand() {
-        this(null, 0);
+        this(null, "");
     }
 
-    public PacketAudioCommand(UUID uuid, int auth) {
+    public PacketAudioCommand(UUID uuid, String token) {
         this.id = PacketID.Dashboard.AUDIOCOMMAND.getID();
         this.uuid = uuid;
-        this.auth = auth;
+        this.token = token;
     }
 
     public UUID getUniqueId() {
         return uuid;
     }
 
-    public int getAuth() {
-        return auth;
+    public String getToken() {
+        return token;
     }
 
     public PacketAudioCommand fromJSON(JsonObject obj) {
@@ -38,7 +38,7 @@ public class PacketAudioCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
-        this.auth = obj.get("auth").getAsInt();
+        this.token = obj.get("token").getAsString();
         return this;
     }
 
@@ -47,7 +47,7 @@ public class PacketAudioCommand extends BasePacket {
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("auth", this.auth);
+            obj.addProperty("token", this.token);
         } catch (Exception e) {
             return null;
         }

@@ -27,6 +27,7 @@ import org.apache.log4j.PatternLayout;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,6 +51,7 @@ public class Dashboard {
     public static AFKUtil afkUtil;
     public static StatUtil statUtil;
     public static Forum forum;
+    private static SecureRandom secureRandom;
     private static Logger logger = Logger.getLogger("Dashboard");
     private static List<String> serverTypes = new ArrayList<>();
     private static HashMap<UUID, Player> players = new HashMap<>();
@@ -75,6 +77,7 @@ public class Dashboard {
             slackUtil.sendDashboardMessage(new SlackMessage(),
                     Arrays.asList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
         }));
+        secureRandom = new SecureRandom();
         schedulerManager = new SchedulerManager();
         try {
             sqlUtil = new SqlUtil();
@@ -121,6 +124,10 @@ public class Dashboard {
             workerGroup.shutdownGracefully();
         }
 
+    }
+
+    public static SecureRandom getSecureRandom() {
+        return secureRandom;
     }
 
     private static void loadConfiguration() {

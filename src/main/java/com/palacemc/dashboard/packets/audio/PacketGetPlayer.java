@@ -8,23 +8,24 @@ import com.palacemc.dashboard.packets.PacketID;
  * Created by Marc on 6/15/15
  */
 public class PacketGetPlayer extends BasePacket {
-    private String playername = "";
+    private String token = "";
 
     public PacketGetPlayer() {
         this("");
     }
 
-    public PacketGetPlayer(String playername) {
+    public PacketGetPlayer(String token) {
         this.id = PacketID.GETPLAYER.getID();
-        this.playername = playername;
+        this.token = token;
     }
 
-    public String getPlayerName() {
-        return this.playername;
+    public String getToken() {
+        return this.token;
     }
 
     public PacketGetPlayer fromJSON(JsonObject obj) {
-        this.playername = obj.get("playername").getAsString();
+        this.id = obj.get("id").getAsInt();
+        this.token = obj.get("token").getAsString();
         return this;
     }
 
@@ -32,7 +33,7 @@ public class PacketGetPlayer extends BasePacket {
         JsonObject obj = new JsonObject();
         try {
             obj.addProperty("id", this.id);
-            obj.addProperty("playername", this.playername);
+            obj.addProperty("token", this.token);
         } catch (Exception e) {
             return null;
         }

@@ -88,17 +88,22 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 13: {
                 PacketGetPlayer packet = new PacketGetPlayer().fromJSON(object);
-                String username = packet.getPlayerName();
-                Player tp = Dashboard.getPlayer(username);
+                String token = packet.getToken();
+                Player player = null;
+                for (Player tp : Dashboard.getOnlinePlayers()) {
+                    if (tp.getAudioToken().equals(token)) {
+                        player = tp;
+                    }
+                }
                 PacketPlayerInfo info;
-                if (tp == null || tp.getAudioAuth() == -1) {
-                    info = new PacketPlayerInfo(null, username, 0, "");
+                if (player == null || player.getAudioToken() == null) {
+                    info = new PacketPlayerInfo(null, "", token, "");
                 } else {
-                    info = new PacketPlayerInfo(tp.getUniqueId(), username, tp.getAudioAuth(), tp.getServer());
-                    tp.resetAudioAuth();
+                    info = new PacketPlayerInfo(player.getUniqueId(), token, player.getAudioToken(), player.getServer());
+                    player.resetAudioToken();
                     try {
-                        PacketAudioConnect connect = new PacketAudioConnect(tp.getUniqueId());
-                        Dashboard.getInstance(tp.getServer()).send(connect);
+                        PacketAudioConnect connect = new PacketAudioConnect(player.getUniqueId());
+                        Dashboard.getInstance(player.getServer()).send(connect);
                     } catch (Exception ignored) {
                     }
                 }
@@ -282,19 +287,22 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                     }
                                     case 7: {
                                         tp.sendMessage(ChatColor.GREEN + "\nRight now you're at the " + ChatColor.AQUA +
-                                                "Transportation and Ticket Center. " + ChatColor.GREEN +
-                                                "From here, you can board a monorail, bus or ferryboat to all Parks and Resorts.");
+                                                "Hub. " + ChatColor.GREEN + "From here, you can get to all of the different parts of our network.");
                                         tp.mention();
                                         break;
                                     }
                                     case 15: {
-                                        tp.sendMessage(ChatColor.GREEN + "\nYou can also use your " + ChatColor.AQUA +
-                                                "MagicBand " + ChatColor.GREEN + "to navigate to different parts of " +
-                                                "our server such as Creative or the Arcade");
+                                        tp.sendMessage(ChatColor.GREEN + "\nArcade Games, Theme Parks, a Creative server and a Role Play server to name a few.");
                                         tp.mention();
                                         break;
                                     }
-                                    case 22: {
+                                    case 21: {
+                                        tp.sendMessage(ChatColor.GREEN + "\nYou can also use your " + ChatColor.AQUA +
+                                                "Navigation Star " + ChatColor.GREEN + "to get to the different parts of our server.");
+                                        tp.mention();
+                                        break;
+                                    }
+                                    case 28: {
                                         tp.sendMessage(ChatColor.GREEN + "\nInstall our Resource Pack for the " +
                                                 ChatColor.AQUA + "best " + ChatColor.GREEN +
                                                 "experience possible! All you have to do is type " + ChatColor.AQUA +
@@ -304,7 +312,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                         tp.mention();
                                         break;
                                     }
-                                    case 32: {
+                                    case 36: {
                                         tp.sendMessage(ChatColor.GREEN + "\nAlso, connect to our " + ChatColor.BLUE +
                                                 "Audio Server " + ChatColor.GREEN + "for an immersive experience! You will hear the " +
                                                 ChatColor.AQUA + "sounds from rides, music from shows, and so much more! " +
@@ -314,21 +322,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                         tp.mention();
                                         break;
                                     }
-                                    case 43: {
+                                    case 49: {
                                         tp.sendMessage(ChatColor.GREEN + "\nBefore you start exploring, please take a " +
                                                 "few minutes to review our rules: " + ChatColor.AQUA +
-                                                "mcmagic.us/rules " + ChatColor.GREEN + "\nWe are a " +
+                                                "palace.network/rules " + ChatColor.GREEN + "\nWe are a " +
                                                 "family-friendly server with a goal of providing a safe, fun experience " +
-                                                "to all of our Guests.");
+                                                "to all of our settlers.");
                                         tp.mention();
                                         break;
                                     }
-                                    case 52: {
+                                    case 58: {
                                         tp.sendMessage(ChatColor.GREEN + "\nAfter you finish reviewing our rules, " +
                                                 "you're finished with the tutorial! " + ChatColor.DARK_AQUA +
-                                                "Note: New Guests must wait " + ChatColor.BOLD + "15 minutes " +
+                                                "Note: New settlers must wait " + ChatColor.BOLD + "15 minutes " +
                                                 ChatColor.DARK_AQUA + "before using chat. Read why: " +
-                                                ChatColor.AQUA + "mcmagic.us/rules#chat");
+                                                ChatColor.AQUA + "palace.network/rules#chat");
                                         tp.mention();
                                         tp.setNewGuest(false);
                                         Dashboard.sqlUtil.completeTutorial(tp.getUniqueId());
@@ -485,8 +493,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     ban = new Ban(uuid, "Unknown Username", false, System.currentTimeMillis() + 259200000,
                             "Attempting to use a World Downloader", "Dashboard");
                 }
-                Dashboard.sqlUtil.banPlayer(uuid, ban.getReason(), true, new Date(System.currentTimeMillis()),
-                        ban.getSource());
+                Dashboard.sqlUtil.banPlayer(uuid, ban.getReason(), false, new Date(ban.getRelease()), ban.getSource());
                 Dashboard.moderationUtil.announceBan(ban);
                 break;
             }
