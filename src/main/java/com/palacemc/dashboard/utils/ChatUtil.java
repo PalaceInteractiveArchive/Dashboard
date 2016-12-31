@@ -29,7 +29,7 @@ public class ChatUtil {
     private List<String> specificList = new ArrayList<>();
     private List<String> whitelist = new ArrayList<>();
     private List<String> allowedChars = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
+            "n", "o", "p", "q", "r", "slackService", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
             "8", "9", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "=", "_", "+", "[", "]", "{", "}", "/",
             "\\", "?", "|", ",", ".", "<", ">", "`", "~", ";", ":", "'", "\"", "√", "˚", "≤", "≥", "™", "£", "¢", "∞",
             "•", " ");
@@ -354,11 +354,11 @@ public class ChatUtil {
         final String omsg = msg.replace(".", "").replace("-", "")
                 .replace(",", "").replace("/", "").replace("()", "o")
                 .replace("0", "o").replace("_", "").replace("@", "a")
-                .replace("$", "s").replace(";", "");
+                .replace("$", "slackService").replace(";", "");
         final String m = msg.replace(" ", "").replace(".", "")
                 .replace("-", "").replace(",", "").replace("/", "")
                 .replace("()", "o").replace("0", "o").replace("_", "")
-                .replace("@", "a").replace("$", "s").replace(";", "");
+                .replace("@", "a").replace("$", "slackService").replace(";", "");
 
         for (String s : swearList) {
             if (m.toLowerCase().contains(s)) {
@@ -398,7 +398,7 @@ public class ChatUtil {
 
         if (!blocked.isEmpty()) {
             String text = "Your message contains blocked characters! Click to read more about why your message was blocked.\n\nThe following character" +
-                    (blocked.size() > 1 ? "s were" : " was") + " blocked:";
+                    (blocked.size() > 1 ? "slackService were" : " was") + " blocked:";
             for (Character c : blocked) {
                 text += "\n- '" + c.toString() + "'";
             }

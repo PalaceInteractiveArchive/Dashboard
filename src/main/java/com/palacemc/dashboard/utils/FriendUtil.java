@@ -322,7 +322,7 @@ public class FriendUtil {
         }
         player.getRequests().remove(tuuid);
         player.getFriends().put(tuuid, name);
-        player.sendMessage(ChatColor.YELLOW + "You have accepted " + ChatColor.GREEN + name + "'s " + ChatColor.YELLOW +
+        player.sendMessage(ChatColor.YELLOW + "You have accepted " + ChatColor.GREEN + name + "'slackService " + ChatColor.YELLOW +
                 "Friend Request!");
         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("UPDATE friends SET status=1 WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
@@ -357,7 +357,7 @@ public class FriendUtil {
             return;
         }
         player.getRequests().remove(tuuid);
-        player.sendMessage(ChatColor.RED + "You have denied " + ChatColor.GREEN + name + "'s " + ChatColor.RED +
+        player.sendMessage(ChatColor.RED + "You have denied " + ChatColor.GREEN + name + "'slackService " + ChatColor.RED +
                 "Friend Request!");
         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
@@ -399,11 +399,11 @@ public class FriendUtil {
 
         player.sendMessage(y + "Friend Commands:\n" + dash + "/friend help " + y + "- Shows this help menu\n" + dash +
                 "/friend list [Page]" + y + "- Lists all of your friends\n" + dash + "/friend tp [player] " + y +
-                "- Brings you to your friend's server\n" + dash + "/friend toggle " + y + "- Toggles friend requests\n"
+                "- Brings you to your friend'slackService server\n" + dash + "/friend toggle " + y + "- Toggles friend requests\n"
                 + dash + "/friend add [player] " + y + "- Asks a player to be your friend\n" + dash +
                 "/friend remove [player] " + y + "- Removes a player as your friend\n" + dash +
-                "/friend accept [player] " + y + "- Accepts someone's friend request\n" + dash +
-                "/friend deny [player] " + y + "- Denies someone's friend request\n" + dash + "/friend requests " +
+                "/friend accept [player] " + y + "- Accepts someone'slackService friend request\n" + dash +
+                "/friend deny [player] " + y + "- Denies someone'slackService friend request\n" + dash + "/friend requests " +
                 y + "- Lists all of your friend requests");
     }
 }

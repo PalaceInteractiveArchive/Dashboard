@@ -76,9 +76,9 @@ public class PartyUtil {
                         .equals(party.getUuid())) {
                     timerList.remove(tp.getUuid());
 
-                    tp.sendMessage(ChatColor.YELLOW + party.getLeader().getUsername() + "'s party request has expired!");
+                    tp.sendMessage(ChatColor.YELLOW + party.getLeader().getUsername() + "'slackService party request has expired!");
 
-                    party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + "'s request to " +
+                    party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + "'slackService request to " +
                             tp.getUsername() + " has expired!", true);
                 }
             }

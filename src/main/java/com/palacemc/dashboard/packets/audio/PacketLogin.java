@@ -10,7 +10,7 @@ import lombok.Getter;
  */
 public class PacketLogin extends BasePacket {
     @Getter private int version = 7;
-    @Getter private String playername = "";
+    @Getter private String playerName = "";
     @Getter private String auth = "";
 
     public PacketLogin() {
@@ -21,13 +21,13 @@ public class PacketLogin extends BasePacket {
         this.id = PacketID.LOGIN.getID();
 
         this.version = version;
-        this.playername = playername;
+        this.playerName = playername;
         this.auth = auth;
     }
 
     public PacketLogin fromJSON(JsonObject object) {
         this.version = object.get("version").getAsInt();
-        this.playername = object.get("playername").getAsString();
+        this.playerName = object.get("playername").getAsString();
         this.auth = object.get("auth").getAsString();
         return this;
     }
@@ -38,7 +38,7 @@ public class PacketLogin extends BasePacket {
         try {
             object.addProperty("id", this.id);
             object.addProperty("version", this.version);
-            object.addProperty("playername", this.playername);
+            object.addProperty("playername", this.playerName);
             object.addProperty("auth", this.auth);
         } catch (Exception e) {
             return null;

@@ -38,7 +38,7 @@ public class CommandParties extends MagicCommand {
                 } else {
                     msg = "";
                 }
-                msg += "- " + leader + " " + p.getMembers().size() + " Member" + (p.getMembers().size() > 1 ? "s" : "");
+                msg += "- " + leader + " " + p.getMembers().size() + " Member" + (p.getMembers().size() > 1 ? "slackService" : "");
             }
 
             player.sendMessage(ChatColor.GREEN + msg);

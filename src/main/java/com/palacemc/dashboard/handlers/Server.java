@@ -36,25 +36,25 @@ public class Server {
     }
 
     public void emptyServer() {
-        Server s = null;
+        Server destination = null;
         for (Server server : dashboard.getServerUtil().getServers()) {
             if (server.getUuid().equals(getUuid())) {
                 continue;
             }
             if (server.getServerType().equalsIgnoreCase("hub")) {
-                if (s == null) {
-                    s = server;
+                if (server == null) {
+                    destination = server;
                     continue;
                 }
-                if (server.getCount() < s.getCount()) {
-                    s = server;
+                if (server.getCount() < server.getCount()) {
+                    destination = server;
                 }
             }
         }
         for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getServer().equals(getName())) {
-                if (s == null) return;
-                dashboard.getServerUtil().sendPlayer(tp, s.getName());
+                if (destination == null) return;
+                dashboard.getServerUtil().sendPlayer(tp, destination.getName());
             }
         }
     }

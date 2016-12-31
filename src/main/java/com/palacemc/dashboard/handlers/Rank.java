@@ -40,9 +40,8 @@ public enum Rank {
         return rankId;
     }
 
-    public static Rank fromString(String string) {
-        String rankName = string.toLowerCase();
-        switch (rankName) {
+    public static Rank fromString(String rankName) {
+        switch (rankName.toLowerCase()) {
             case "empress":
                 return EMPRESS;
             case "emperor":

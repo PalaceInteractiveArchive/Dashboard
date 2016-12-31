@@ -19,17 +19,13 @@ public class PacketAreaStart extends BasePacket {
         this(-1, "", 1.0F, 0, true);
     }
 
-    public PacketAreaStart(int audioid, String name, float volume, int fadetime, boolean repeat) {
+    public PacketAreaStart(int audioId, String name, float volume, int fadeTime, boolean repeat) {
         this.id = PacketID.AREA_START.getID();
-        this.audioid = audioid;
+        this.audioid = audioId;
         this.name = name;
         this.volume = volume;
-        this.fadetime = fadetime;
+        this.fadetime = fadeTime;
         this.repeat = repeat;
-    }
-
-    public String getUsername() {
-        return this.name;
     }
 
     public PacketAreaStart fromJSON(JsonObject object) {

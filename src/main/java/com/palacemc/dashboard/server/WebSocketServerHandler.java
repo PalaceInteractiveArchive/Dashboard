@@ -71,7 +71,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         } else if (frame instanceof PongWebSocketFrame) {
             return;
         } else if (!(frame instanceof TextWebSocketFrame)) {
-            throw new UnsupportedOperationException(String.format("%s frame types not supported",
+            throw new UnsupportedOperationException(String.format("%slackService frame types not supported",
                     frame.getClass().getName()));
         }
 
@@ -678,7 +678,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 65:
                 PacketBungeeID bungeeIDPacket = new PacketBungeeID().fromJSON(object);
 
-                UUID oldID = bungeeIDPacket.getBungeeID();
+                UUID oldID = bungeeIDPacket.getBungeeId();
                 UUID newID = channel.getBungeeID();
 
                 for (Player onlinePlayer : dashboard.getOnlinePlayers()) {

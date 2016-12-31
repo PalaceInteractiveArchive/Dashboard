@@ -50,7 +50,7 @@ public enum ChatColor {
      */
     private final char code;
     /**
-     * This colour's colour char prefixed by the {@link #COLOR_CHAR}.
+     * This colour'slackService colour char prefixed by the {@link #COLOR_CHAR}.
      */
     private final String toString;
 

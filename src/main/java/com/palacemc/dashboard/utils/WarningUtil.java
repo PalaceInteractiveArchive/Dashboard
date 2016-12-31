@@ -22,7 +22,7 @@ public class WarningUtil {
             public void run() {
                 for (Warning w : new ArrayList<>(warnings.values())) {
                     if (w.getExpiration() < System.currentTimeMillis()) {
-                        warnings.remove(w.getId());
+                        warnings.remove(w.getUuid());
                     }
                 }
             }
@@ -34,30 +34,35 @@ public class WarningUtil {
     }
 
     public void trackWarning(Warning w) {
-        warnings.put(w.getId(), w);
+        warnings.put(w.getUuid(), w);
     }
 
     public void handle(Player player, String msg) {
         try {
             UUID id = UUID.fromString(msg.replace(":warn-", ""));
             Warning warning = getWarning(id);
+
             if (warning == null) {
                 player.sendMessage(ChatColor.RED + "The warning token you used has expired or never existed!");
                 return;
             }
-            warnings.remove(warning.getId());
+
+            warnings.remove(warning.getUuid());
             if (dashboard.getPlayer(warning.getName()) == null) {
                 player.sendMessage(ChatColor.RED + "That player has logged off!");
                 return;
             }
-            List<String> list = new ArrayList<>();
-            list.add(warning.getName());
-            Collections.addAll(list, warning.getResponse().split(" "));
-            String[] args = new String[list.size()];
-            list.toArray(args);
+
+            List<String> warnings = new ArrayList<>();
+            warnings.add(warning.getName());
+            Collections.addAll(warnings, warning.getResponse().split(" "));
+
+            String[] args = new String[warnings.size()];
+            warnings.toArray(args);
+
             dashboard.getCommandUtil().getCommand("msg").execute(player, "msg", args);
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             player.sendMessage(ChatColor.RED + "There was an error processing that warning!");
         }
     }

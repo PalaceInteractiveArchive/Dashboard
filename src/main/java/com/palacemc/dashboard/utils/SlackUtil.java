@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Marc on 9/12/16
  */
 public class SlackUtil {
-    public SlackService s = new SlackService();
+    public SlackService slackService = new SlackService();
 
     private Dashboard dashboard = Launcher.getDashboard();
 
@@ -28,7 +28,7 @@ public class SlackUtil {
         String webhook = "https://hooks.slack.com/services/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";
 
         try {
-            s.push(webhook, msg, attachments);
+            slackService.push(webhook, msg, attachments);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -16,8 +16,8 @@ public class Party {
     @Getter  private List<UUID> members;
     @Getter private UUID uuid = UUID.randomUUID();
 
-    public String headerMessage = ChatColor.GOLD + "-----------------------------------------------------";
-    public String footerMessage = ChatColor.GOLD + "-----------------------------------------------------";
+    @Getter public String headerMessage = ChatColor.GOLD + "-----------------------------------------------------";
+    @Getter public String footerMessage = ChatColor.GOLD + "-----------------------------------------------------";
     public String warpMessage = ChatColor.GREEN + "Your Party Leader has warped you to their server.";
 
     private Dashboard dashboard = Launcher.getDashboard();
@@ -52,25 +52,24 @@ public class Party {
     }
 
     public void close() {
-        String name = null;
-        Player lead = dashboard.getPlayer(leader);
+        String username = null;
+        Player leader = dashboard.getPlayer(this.leader);
 
-        if (lead != null) {
-            name = lead.getUsername();
+        if (leader != null) {
+            username = leader.getUsername();
         }
 
-        messageToAllMembers(ChatColor.RED + (name == null ? "The Party has been closed!" : name +
+        messageToAllMembers(ChatColor.RED + (username == null ? "The Party has been closed!" : username +
                 " has closed the Party!"), true);
-        for (UUID uuid : members) {
-            Player tp = dashboard.getPlayer(uuid);
-            if (tp == null) {
-                continue;
-            }
 
-            if (tp.getChannel().equals("party")) {
-                tp.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
+        for (UUID uuid : members) {
+            Player player = dashboard.getPlayer(uuid);
+            if (player == null) continue;
+
+            if (player.getChannel().equals("party")) {
+                player.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
                         ChatColor.GREEN + "channel");
-                tp.setChannel("all");
+                player.setChannel("all");
             }
         }
 
@@ -88,6 +87,7 @@ public class Party {
 
         for (UUID memberUUID : members) {
             Player member = dashboard.getPlayer(memberUUID);
+
             if (member == null) {
                 return;
             }
@@ -103,14 +103,6 @@ public class Party {
 
     public boolean isLeader(Player player) {
         return leader.equals(player.getUuid());
-    }
-
-    public String getHeaderMessage() {
-        return headerMessage;
-    }
-
-    public String getFooterMessage() {
-        return footerMessage;
     }
 
     public void messageToAllMembers(String message, boolean bars) {
@@ -134,21 +126,21 @@ public class Party {
     }
 
     public void listMembersToMember(Player player) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 0; i < members.size(); i++) {
             boolean l = members.get(i).equals(leader);
 
             if (i == (members.size() - 1)) {
-                sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername());
+                stringBuilder.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername());
                 continue;
             }
-            sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername()).append(", ");
+            stringBuilder.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername()).append(", ");
         }
 
-        String msg = ChatColor.YELLOW + "Members of your Party: " + sb.toString();
+        String message = ChatColor.YELLOW + "Members of your Party: " + stringBuilder.toString();
         player.sendMessage(headerMessage);
-        player.sendMessage(msg);
+        player.sendMessage(message);
         player.sendMessage(footerMessage);
     }
 
@@ -164,48 +156,48 @@ public class Party {
         }
     }
 
-    public void remove(Player tp) {
-        if (!getMembers().contains(tp.getUuid())) {
+    public void remove(Player player) {
+        if (!getMembers().contains(player.getUuid())) {
             dashboard.getPlayer(leader).sendMessage(ChatColor.YELLOW + "That player is not in your Party!");
             return;
         }
 
-        removeMember(tp);
+        removeMember(player);
         messageToAllMembers(ChatColor.YELLOW + dashboard.getPlayer(leader).getUsername() + " has removed " +
-                tp.getUsername() + " from the Party!", true);
+                player.getUsername() + " from the Party!", true);
 
-        if (tp.getChannel().equals("party")) {
-            tp.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
+        if (player.getChannel().equals("party")) {
+            player.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
                     ChatColor.GREEN + "channel");
-            tp.setChannel("all");
+            player.setChannel("all");
         }
     }
 
     public void chat(Player player, String msg) {
-        Rank r = player.getRank();
-        String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUuid()) ? ChatColor.YELLOW + "* " : "") +
-                r.getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
-                (r.getRankId() >= Rank.SQUIRE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
+        Rank rank = player.getRank();
+
+        String message = ChatColor.BLUE + "[Party] " + (
+                leader.equals(player.getUuid()) ? ChatColor.YELLOW + "* " : "") +
+                rank.getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
+                (rank.getRankId() >= Rank.SQUIRE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
 
         for (UUID uuid : getMembers()) {
-            if (uuid.equals(player.getUuid())) {
-                continue;
-            }
+            if (uuid.equals(player.getUuid())) continue;
 
-            Player tp = dashboard.getPlayer(uuid);
-            if (tp != null && tp.isMentions()) {
-                tp.mention();
+            Player member = dashboard.getPlayer(uuid);
+            if (member != null && member.isMentions()) {
+                member.mention();
             }
         }
 
-        messageToAllMembers(m, false);
+        messageToAllMembers(message, false);
         dashboard.getChatUtil().socialSpyParty(player, this, msg, "pchat");
     }
 
-    public void promote(Player player, Player tp) {
-        messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " promoted " + tp.getUsername() +
+    public void promote(Player leader, Player newLeader) {
+        messageToAllMembers(ChatColor.YELLOW + leader.getUsername() + " promoted " + newLeader.getUsername() +
                 " to Party Leader!", true);
-        leader = tp.getUuid();
+        this.leader = newLeader.getUuid();
     }
 
     public void takeover(Player player) {

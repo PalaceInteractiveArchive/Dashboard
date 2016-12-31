@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
-import java.util.Random;
 import java.util.Timer;
 import java.util.UUID;
 
@@ -61,11 +60,6 @@ public class Player {
         send(packet);
     }
 
-    /**
-     * Send packet to player's BungeeCord
-     *
-     * @param packet Packet to send
-     */
     public void send(BasePacket packet) {
         if (packet == null) {
             return;
@@ -78,23 +72,10 @@ public class Player {
         send(packet);
     }
 
-    public void setReply(UUID uuid) {
-        this.reply = uuid;
-    }
-
-    public UUID getReply() {
-        return reply;
-    }
-
     public void kickPlayer(String reason) {
         kicking = true;
         PacketPlayerDisconnect packet = new PacketPlayerDisconnect(uuid, reason);
         send(packet);
-    }
-
-    public int setAudioAuth() {
-        this.audioAuth = new Random().nextInt(100000);
-        return audioAuth;
     }
 
     public void resetAudioAuth() {

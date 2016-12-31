@@ -9,17 +9,17 @@ import lombok.Getter;
  * Created by Marc on 6/15/15
  */
 public class PacketServerSwitch extends BasePacket {
-    @Getter private String servername = "";
+    @Getter private String serverName = "";
 
     public PacketServerSwitch(String servername) {
         this.id = PacketID.SERVER_SWITCH.getID();
 
-        this.servername = servername;
+        this.serverName = servername;
     }
 
     public PacketServerSwitch fromJSON(JsonObject object) {
         try {
-            this.servername = object.get("servername").getAsString();
+            this.serverName = object.get("servername").getAsString();
         } catch (Exception e) {
             return null;
         }
@@ -31,7 +31,7 @@ public class PacketServerSwitch extends BasePacket {
 
         try {
             object.addProperty("id", this.id);
-            object.addProperty("servername", this.servername);
+            object.addProperty("servername", this.serverName);
         } catch (Exception e) {
             return null;
         }

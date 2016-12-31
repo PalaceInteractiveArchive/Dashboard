@@ -3,12 +3,13 @@ package com.palacemc.dashboard.packets.audio;
 import com.google.gson.JsonObject;
 import com.palacemc.dashboard.packets.BasePacket;
 import com.palacemc.dashboard.packets.PacketID;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
 public class PacketGetPlayer extends BasePacket {
-    private String playerName = "";
+    @Getter private String playerName = "";
 
     public PacketGetPlayer() {
         this("");
@@ -17,10 +18,6 @@ public class PacketGetPlayer extends BasePacket {
     public PacketGetPlayer(String playerName) {
         this.id = PacketID.GETPLAYER.getID();
         this.playerName = playerName;
-    }
-
-    public String getPlayerName() {
-        return this.playerName;
     }
 
     public PacketGetPlayer fromJSON(JsonObject object) {

@@ -45,7 +45,7 @@ public class ModerationUtil {
     }
 
     public void rankChange(String name, Rank rank, String source) {
-        sendMessage(ChatColor.GREEN + name + "'s rank has been changed to " + rank.getNameWithBrackets() +
+        sendMessage(ChatColor.GREEN + name + "'slackService rank has been changed to " + rank.getNameWithBrackets() +
                 ChatColor.GREEN + " by " + source);
     }
 

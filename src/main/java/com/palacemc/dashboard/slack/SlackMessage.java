@@ -62,7 +62,7 @@ public class SlackMessage {
     }
 
     public String rawText() {
-        // We're not removing link because it's readable the way it is.
+        // We're not removing link because it'slackService readable the way it is.
         return textBuffer.toString()
                 .replaceAll("(.*)\\*(.*)\\*(.*)", "$1$2$3") // Remove bold formatting
                 .replaceAll("(.*)_(.*)_(.*)", "$1$2$3")     // Remove italic formatting

@@ -16,7 +16,6 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.PatternLayout;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Collections;
 
 /**

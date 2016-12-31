@@ -11,7 +11,7 @@ import java.util.UUID;
  * Created by Marc on 11/25/16
  */
 public class PacketBungeeID extends BasePacket {
-    @Getter private UUID bungeeID;
+    @Getter private UUID bungeeId;
 
     public PacketBungeeID() {
         this(null);
@@ -19,14 +19,14 @@ public class PacketBungeeID extends BasePacket {
 
     public PacketBungeeID(UUID bungeeID) {
         this.id = PacketID.Bungee.BUNGEEID.getId();
-        this.bungeeID = bungeeID;
+        this.bungeeId = bungeeID;
     }
 
     public PacketBungeeID fromJSON(JsonObject object) {
         try {
-            this.bungeeID = UUID.fromString(object.get("bid").getAsString());
+            this.bungeeId = UUID.fromString(object.get("bid").getAsString());
         } catch (Exception e) {
-            this.bungeeID = null;
+            this.bungeeId = null;
         }
         return this;
     }
@@ -36,7 +36,7 @@ public class PacketBungeeID extends BasePacket {
 
         try {
             object.addProperty("id", this.id);
-            object.addProperty("bid", this.bungeeID.toString());
+            object.addProperty("bid", this.bungeeId.toString());
         } catch (Exception e) {
             return null;
         }

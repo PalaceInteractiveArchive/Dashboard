@@ -9,7 +9,7 @@ import lombok.Getter;
  * Created by Marc on 6/15/15
  */
 public class PacketPlayOnceGlobal extends BasePacket {
-    @Getter private int audioid = 0;
+    @Getter private int audioId = 0;
     @Getter private String name = "";
     @Getter private float volume = 1.0F;
 
@@ -17,21 +17,21 @@ public class PacketPlayOnceGlobal extends BasePacket {
         this(-1, "", 1.0F);
     }
 
-    public PacketPlayOnceGlobal(int audioid, String name) {
-        this(audioid, name, 1.0F);
+    public PacketPlayOnceGlobal(int audioId, String name) {
+        this(audioId, name, 1.0F);
     }
 
-    public PacketPlayOnceGlobal(int audioid, String name, float volume) {
+    public PacketPlayOnceGlobal(int audioId, String name, float volume) {
         this.id = PacketID.GLOBAL_PLAY_ONCE.getID();
 
-        this.audioid = audioid;
+        this.audioId = audioId;
         this.name = name;
         this.volume = volume;
     }
 
     public PacketPlayOnceGlobal fromJSON(JsonObject object) {
         try {
-            this.audioid = object.get("audioid").getAsInt();
+            this.audioId = object.get("audioid").getAsInt();
             this.name = object.get("name").getAsString();
             this.volume = object.get("volume").getAsFloat();
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public class PacketPlayOnceGlobal extends BasePacket {
 
         try {
             object.addProperty("id", this.id);
-            object.addProperty("audioid", this.audioid);
+            object.addProperty("audioid", this.audioId);
             object.addProperty("name", this.name);
             object.addProperty("volume", this.volume);
         } catch (Exception e) {

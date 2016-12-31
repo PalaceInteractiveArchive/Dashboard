@@ -112,6 +112,7 @@ public class Dashboard {
                 } else if (isInfo) {
                     info.add(line);
                 }
+
                 line = br.readLine();
             }
 
@@ -243,6 +244,7 @@ public class Dashboard {
         if (!player.getServer().equalsIgnoreCase("unknown")) {
             getServerUtil().getServer(player.getServer()).changeCount(-1);
         }
+
         if (player.getTutorial() != null) {
             player.getTutorial().cancel();
         }

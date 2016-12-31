@@ -10,7 +10,7 @@ import lombok.Setter;
  * Created by Marc on 6/15/15
  */
 public class PacketAudioSync extends BasePacket {
-    private int audioid = 0;
+    private int audioId = 0;
     @Getter @Setter private double seconds = 1.0D;
     @Getter @Setter private double margin = 0.0D;
 
@@ -18,21 +18,21 @@ public class PacketAudioSync extends BasePacket {
         this(-1, 0.0F);
     }
 
-    public PacketAudioSync(int audioid, float volume) {
+    public PacketAudioSync(int audioId, float volume) {
         this.id = PacketID.AUDIO_SYNC.getID();
 
-        this.audioid = audioid;
+        this.audioId = audioId;
         this.seconds = volume;
     }
 
-    public PacketAudioSync(int audioid, float volume, double margin) {
-        this(audioid, volume);
+    public PacketAudioSync(int audioId, float volume, double margin) {
+        this(audioId, volume);
         this.margin = margin;
     }
 
     public PacketAudioSync fromJSON(JsonObject object) {
         try {
-            this.audioid = object.get("audioid").getAsInt();
+            this.audioId = object.get("audioId").getAsInt();
             this.seconds = object.get("volume").getAsDouble();
             this.margin = object.get("margin").getAsDouble();
         } catch (Exception e) {
@@ -46,7 +46,7 @@ public class PacketAudioSync extends BasePacket {
 
         try {
             object.addProperty("id", this.id);
-            object.addProperty("audioid", this.audioid);
+            object.addProperty("audioId", this.audioId);
             object.addProperty("seconds", this.seconds);
             object.addProperty("margin", this.margin);
         } catch (Exception e) {

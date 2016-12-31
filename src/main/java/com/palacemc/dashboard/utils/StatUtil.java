@@ -35,10 +35,11 @@ public class StatUtil {
 
     private void setValue(int value) {
         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
                     (System.currentTimeMillis() / 1000) + "','count','" + value + "')");
-            sql.execute();
-            sql.close();
+
+            statement.execute();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

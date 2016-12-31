@@ -50,7 +50,6 @@ public class CommandUtil {
         register("party", new CommandParty());
         register("parties", new CommandParties());
         register("pchat", new CommandPChat());
-        //register("pin", new CommandPin());
         register("pmtoggle", new CommandPmToggle());
         register("processes", new CommandProcesses());
         register("reboot", new CommandReboot());

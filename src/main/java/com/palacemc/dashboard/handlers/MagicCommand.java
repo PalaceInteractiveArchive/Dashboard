@@ -30,26 +30,27 @@ public abstract class MagicCommand {
     }
 
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
-        List<String> list = new ArrayList<>();
+        List<String> players = new ArrayList<>();
 
         if (tabCompletePlayers) {
             for (Player player : dashboard.getOnlinePlayers()) {
-                list.add(player.getUsername());
+                players.add(player.getUsername());
             }
+
             if (args.size() > 0) {
                 String arg2 = args.get(args.size() - 1);
-                List<String> l2 = new ArrayList<>();
+                List<String> autocompleted = new ArrayList<>();
 
-                for (String s : list) {
-                    if (s.toLowerCase().startsWith(arg2.toLowerCase())) {
-                        l2.add(s);
+                for (String username : players) {
+                    if (username.toLowerCase().startsWith(arg2.toLowerCase())) {
+                        autocompleted.add(username);
                     }
                 }
-                Collections.sort(l2);
-                return l2;
+                Collections.sort(autocompleted);
+                return autocompleted;
             }
         }
-        Collections.sort(list);
-        return list;
+        Collections.sort(players);
+        return players;
     }
 }
