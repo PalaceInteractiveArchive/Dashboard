@@ -54,7 +54,7 @@ public class CommandMute extends MagicCommand {
                 uuid = tp.getUuid();
             }
 
-            Mute mute = new Mute(uuid, username, true, muteTimestamp, reason, source);
+            Mute mute = new Mute(uuid, username, reason, source, true, muteTimestamp);
 
             if (tp != null) {
                 tp.setMute(mute);

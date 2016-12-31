@@ -30,7 +30,7 @@ public class ModerationUtil {
     }
 
     public void announceMute(Mute mute) {
-        sendMessage(ChatColor.GREEN + mute.getName() + ChatColor.RED + " was muted by " + ChatColor.GREEN +
+        sendMessage(ChatColor.GREEN + mute.getUsername() + ChatColor.RED + " was muted by " + ChatColor.GREEN +
                 mute.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + mute.getReason() + ChatColor.RED +
                 " Expires: " + ChatColor.GREEN + Launcher.getDashboard().getDateUtil().formatDateDiff(mute.getRelease()));
     }

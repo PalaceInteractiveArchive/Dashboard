@@ -12,6 +12,7 @@ import com.palacemc.dashboard.packets.dashboard.PacketConnectionType;
 import com.palacemc.dashboard.server.DashboardSocketChannel;
 
 import java.util.List;
+import java.util.Random;
 
 public class CommandAudio extends MagicCommand {
 
@@ -44,7 +45,8 @@ public class CommandAudio extends MagicCommand {
             return;
         }
 
-        PacketAudioCommand packet = new PacketAudioCommand(player.getUuid(), player.setAudioAuth());
+        player.setAudioAuth(new Random().nextInt(100000));
+        PacketAudioCommand packet = new PacketAudioCommand(player.getUuid(), player.getAudioAuth());
         player.send(packet);
     }
 }

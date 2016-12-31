@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Mute {
     @Getter private UUID uuid;
 
-    @Getter private String name;
+    @Getter private String username;
     @Getter private String reason;
     @Getter private String source;
 
