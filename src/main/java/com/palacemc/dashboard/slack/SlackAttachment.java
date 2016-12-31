@@ -1,6 +1,8 @@
 package com.palacemc.dashboard.slack;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,60 +11,36 @@ import java.util.List;
  * Created by Marc on 9/12/16
  */
 public class SlackAttachment {
-    @SerializedName("fallback")
     private String fallback;
-    @SerializedName("color")
     private String color;
-    @SerializedName("pretext")
     private String pretext;
+    private String title;
+    private String text;
+    private List<Field> fields = new ArrayList<>();
+
+    @SerializedName("mrkdwn_in")
+    private List<String> markdown = new ArrayList<>();
+    @SerializedName("title_link")
+    private String titleLink;
     @SerializedName("author_name")
     private String authorName;
     @SerializedName("author_link")
     private String authorLink;
     @SerializedName("author_icon")
     private String authorIcon;
-    @SerializedName("title")
-    private String title;
-    @SerializedName("title_link")
-    private String titleLink;
-    @SerializedName("text")
-    private String text;
     @SerializedName("image_url")
     private String imageUrl;
-    @SerializedName("fields")
-    private List<Field> fields = new ArrayList<>();
-    @SerializedName("mrkdwn_in")
-    private List<String> markdown = new ArrayList<>();
 
     public SlackAttachment(String text) {
         text(text);
     }
 
+    @AllArgsConstructor
     public static class Field {
-        @SerializedName("title")
-        private String title;
-        @SerializedName("value")
-        private String value;
+        @Getter private String title;
+        @Getter private String value;
         @SerializedName("short")
-        private boolean isShort;
-
-        public Field(String title, String value, boolean isShort) {
-            this.title = title;
-            this.value = value;
-            this.isShort = isShort;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public boolean isShort() {
-            return isShort;
-        }
+        @Getter private boolean isShort;
     }
 
     public SlackAttachment fallback(String fallbackText) {

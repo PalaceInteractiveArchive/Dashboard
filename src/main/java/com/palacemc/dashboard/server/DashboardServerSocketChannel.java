@@ -15,7 +15,7 @@ public class DashboardServerSocketChannel extends NioServerSocketChannel {
 
     private Dashboard dashboard = Launcher.getDashboard();
 
-    protected int readMessagesFromBuffer(List<Object> buffer) {
+    protected int doReadMessages(List<Object> buffer) {
         SocketChannel socketChannel = null;
 
         try {

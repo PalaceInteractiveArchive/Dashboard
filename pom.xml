@@ -2,32 +2,50 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.palacemc</groupId>
     <artifactId>Dashboard</artifactId>
     <version>1.4</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
     <repositories>
         <repository>
             <id>mcmagic</id>
             <url>http://198.24.160.106:81/nexus/content/repositories/releases/</url>
         </repository>
+
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
+
         <repository>
             <id>bungee</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+
         <repository>
             <id>md_5</id>
             <url>http://repo.md-5.net/content/groups/public/</url>
         </repository>
+
         <repository>
             <id>mvn-repo</id>
             <url>http://central.maven.org/maven2/</url>
         </repository>
+
+        <repository>
+            <id>dmulloy2-releases</id>
+            <url>http://repo.dmulloy2.net/content/repositories/releases/</url>
+        </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -121,6 +139,19 @@
             <version>1.16.10</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20140107</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -142,7 +173,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.palacemc.dashboard.Dashboard</mainClass>
+                            <mainClass>com.palacemc.dashboard.Start</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -150,7 +181,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.0</version>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -158,8 +189,11 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <shadedArtifactAttached>false</shadedArtifactAttached>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.googlecode.json-simple</include>
+                                </includes>
+                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>

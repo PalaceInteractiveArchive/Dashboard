@@ -17,7 +17,7 @@ import org.apache.log4j.PatternLayout;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author Innectic
@@ -27,7 +27,7 @@ public class Launcher {
 
     @Getter private static Dashboard dashboard;
 
-    public static void main(String[] args) {
+    public Launcher() {
         dashboard = new Dashboard();
 
         PatternLayout layout = new PatternLayout("[%d{HH:mm:ss}] [%p] - %m%n");
@@ -44,7 +44,7 @@ public class Launcher {
             dashboard.setStartTime(System.currentTimeMillis());
             dashboard.getLogger().warn("Shutting down Dashboard...");
             dashboard.getSlackUtil().sendDashboardMessage(new SlackMessage(),
-                    Arrays.asList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
+                    Collections.singletonList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
         }));
 
         dashboard.setSchedulerManager(new SchedulerManager());
@@ -100,7 +100,7 @@ public class Launcher {
             dashboard.getLogger().info("Dashboard started on port " + dashboard.getPORT());
 
             dashboard.getSlackUtil().sendDashboardMessage(new SlackMessage(),
-                    Arrays.asList(new SlackAttachment("Dashboard has successfully started up!").color("good")));
+                    Collections.singletonList(new SlackAttachment("Dashboard has successfully started up!").color("good")));
             channel.closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();

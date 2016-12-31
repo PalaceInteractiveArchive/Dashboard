@@ -57,6 +57,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
+            final DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
         }
     }
 
@@ -82,7 +83,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         int id = object.get("id").getAsInt();
-//        dashboard.getLogger().info(object.toString());
         DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
 
         Player player;
@@ -141,7 +141,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 switch (type) {
                     case BUNGEECORD:
                         dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
-                                "A new BungeeCord instance has connected to Dashboard.");
+                                "A new BungeeCord instance has connected to dashboard.");
 
                         attachment = new SlackAttachment("A new BungeeCord instance has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
