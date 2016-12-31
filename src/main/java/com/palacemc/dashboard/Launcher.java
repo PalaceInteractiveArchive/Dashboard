@@ -49,12 +49,7 @@ public class Launcher {
 
         dashboard.setSchedulerManager(new SchedulerManager());
 
-        try {
-            dashboard.setSqlUtil(new SqlUtil());
-        } catch (SQLException | ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
+        dashboard.setSqlUtil(new SqlUtil());
 
         dashboard.loadConfiguration();
         dashboard.loadMOTD();
@@ -65,11 +60,7 @@ public class Launcher {
             dashboard.getLogger().info("Test network detected, disabling statistics collection!");
         }
 
-        try {
-            dashboard.setServerUtil(new ServerUtil());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        dashboard.setServerUtil(new ServerUtil());
 
         dashboard.setChatUtil(new ChatUtil());
         dashboard.setCommandUtil(new CommandUtil());
