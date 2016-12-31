@@ -52,9 +52,7 @@ public class WarningUtil {
             }
             List<String> list = new ArrayList<>();
             list.add(warning.getName());
-            for (String s : warning.getResponse().split(" ")) {
-                list.add(s);
-            }
+            Collections.addAll(list, warning.getResponse().split(" "));
             String[] args = new String[list.size()];
             list.toArray(args);
             dashboard.getCommandUtil().getCommand("msg").execute(player, "msg", args);

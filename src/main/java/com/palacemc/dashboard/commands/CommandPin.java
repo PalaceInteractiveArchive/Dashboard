@@ -24,7 +24,7 @@ public class CommandPin extends MagicCommand {
     private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandPin() {
-        aliases = Arrays.asList("mymcmagic");
+        aliases = Collections.singletonList("mymcmagic");
     }
 
     @Override

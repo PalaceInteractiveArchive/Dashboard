@@ -53,6 +53,7 @@ public class Server {
         }
         for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getServer().equals(getName())) {
+                if (s == null) return;
                 dashboard.getServerUtil().sendPlayer(tp, s.getName());
             }
         }

@@ -32,9 +32,10 @@ public class CommandSC extends MagicCommand {
                     ChatColor.translateAlternateColorCodes('&', message);
 
             dashboard.getChatUtil().staffChatMessage(msg);
-            if (player != null) {
-                dashboard.getChatUtil().logMessage(player.getUuid(), "/sc " + player.getUsername() + " " + message);
-            }
+
+            if (player == null) return;
+            dashboard.getChatUtil().logMessage(player.getUuid(), "/sc " + player.getUsername() + " " + message);
+
             return;
         }
         player.sendMessage(ChatColor.RED + "/sc [Message]");

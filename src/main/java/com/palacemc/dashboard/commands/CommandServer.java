@@ -140,7 +140,7 @@ public class CommandServer extends MagicCommand {
                 } else if (args[0].equalsIgnoreCase("list")) {
                     String msg = ChatColor.GREEN + "Server List:\n";
                     List<Server> servers = dashboard.getServerUtil().getServers();
-                    Collections.sort(servers, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+                    servers.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
                     for (int i = 0; i < servers.size(); i++) {
                         Server s = servers.get(i);
@@ -164,7 +164,6 @@ public class CommandServer extends MagicCommand {
             }
 
             dashboard.getServerUtil().sendPlayer(player, server.getName());
-            return;
         } else if (args.length == 0) {
             player.sendMessage(ChatColor.GREEN + "You are currently on " + player.getServer());
             String msg = "The following servers exist: ";

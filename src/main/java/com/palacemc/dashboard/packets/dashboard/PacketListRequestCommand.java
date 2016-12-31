@@ -18,7 +18,7 @@ public class PacketListRequestCommand extends BasePacket {
     @Getter private List<String> requestlist = new ArrayList<>();
 
     public PacketListRequestCommand() {
-        this(null, new ArrayList<String>());
+        this(null, new ArrayList<>());
     }
 
     public PacketListRequestCommand(UUID uuid, List<String> requestlist) {

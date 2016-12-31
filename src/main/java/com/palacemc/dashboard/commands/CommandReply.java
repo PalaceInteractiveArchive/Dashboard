@@ -7,14 +7,14 @@ import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public class CommandReply extends MagicCommand {
 
     private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandReply() {
-        aliases = Arrays.asList("r");
+        aliases = Collections.singletonList("r");
     }
 
     @Override

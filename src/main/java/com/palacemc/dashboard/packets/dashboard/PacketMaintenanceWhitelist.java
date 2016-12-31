@@ -19,7 +19,7 @@ public class PacketMaintenanceWhitelist extends BasePacket {
     @Getter private List<UUID> allowed = new ArrayList<>();
 
     public PacketMaintenanceWhitelist() {
-        this(new ArrayList<UUID>());
+        this(new ArrayList<>());
     }
 
     public PacketMaintenanceWhitelist(List<UUID> allowed) {

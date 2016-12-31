@@ -104,7 +104,7 @@ public class CommandModLog extends MagicCommand {
                         }
 
                         player.sendMessage(message);
-                        return;
+                        break;
                     case "mutes":
                         msgs = new ArrayList<>();
 
@@ -197,7 +197,7 @@ public class CommandModLog extends MagicCommand {
                         }
 
                         player.sendMessage(message);
-                        return;
+                        break;
                 }
             } else if (args.length == 1) {
                 int banCount = 0;

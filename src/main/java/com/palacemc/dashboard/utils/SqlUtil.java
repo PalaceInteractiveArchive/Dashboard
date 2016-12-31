@@ -8,6 +8,7 @@ import com.palacemc.dashboard.handlers.*;
 import com.palacemc.dashboard.packets.dashboard.PacketPlayerRank;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
@@ -24,13 +25,19 @@ public class SqlUtil {
 
     private Dashboard dashboard = Launcher.getDashboard();
 
-    public SqlUtil() throws SQLException, IOException, ClassNotFoundException {
-        DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+    public SqlUtil() {
+        try {
+            DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         BoneCPConfig config = new BoneCPConfig();
         String address = "";
         String database = "";
         String username = "";
         String password = "";
+
         try (BufferedReader br = new BufferedReader(new FileReader("sql.txt"))) {
             String line = br.readLine();
             while (line != null) {
@@ -48,6 +55,10 @@ public class SqlUtil {
                 }
                 line = br.readLine();
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
         config.setUsername(username);
@@ -56,7 +67,13 @@ public class SqlUtil {
         config.setMaxConnectionsPerPartition(300);
         config.setPartitionCount(3);
         config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
-        connectionPool = new BoneCP(config);
+
+        try {
+            connectionPool = new BoneCP(config);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         BoneCPConfig mymcm = new BoneCPConfig();
         mymcm.setJdbcUrl("jdbc:mysql://" + address + ":3306/mymcmagic");
         mymcm.setUsername(username);
@@ -65,7 +82,12 @@ public class SqlUtil {
         mymcm.setMaxConnectionsPerPartition(300);
         mymcm.setPartitionCount(2);
         mymcm.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
-        dashboard.setActivityUtil(new ActivityUtil(new BoneCP(mymcm)));
+
+        try {
+            dashboard.setActivityUtil(new ActivityUtil(new BoneCP(mymcm)));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public Connection getConnection() throws SQLException {

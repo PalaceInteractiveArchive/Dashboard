@@ -12,7 +12,6 @@ import com.palacemc.dashboard.packets.dashboard.PacketTargetLobby;
 import com.palacemc.dashboard.server.DashboardSocketChannel;
 import com.palacemc.dashboard.server.WebSocketServerHandler;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,11 +28,8 @@ public class ServerUtil {
 
     private Dashboard dashboard = Launcher.getDashboard();
 
-    public ServerUtil() throws IOException {
+    public ServerUtil() {
         loadServers();
-        /**
-         * Online Player Count Timer
-         */
         new Timer().schedule(new TimerTask() {
             int i = 0;
 
@@ -72,9 +68,6 @@ public class ServerUtil {
                 }
             }
         }, 0L, 1000L);
-        /**
-         * Empty Lobby Timer
-         */
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -86,7 +79,7 @@ public class ServerUtil {
                     }
                 }
 
-                Collections.sort(lobbies, (s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+                lobbies.sort((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
                 Server server = null;
 
                 for (Server s : lobbies) {

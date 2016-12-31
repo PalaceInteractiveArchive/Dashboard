@@ -16,7 +16,7 @@ public class PacketServerList extends BasePacket {
     @Getter private List<String> servers = new ArrayList<>();
 
     public PacketServerList() {
-        this(new ArrayList<String>());
+        this(new ArrayList<>());
     }
 
     public PacketServerList(List<String> servers) {

@@ -7,7 +7,7 @@ import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 public class CommandUnban extends MagicCommand {
@@ -16,7 +16,7 @@ public class CommandUnban extends MagicCommand {
 
     public CommandUnban() {
         super(Rank.KNIGHT);
-        aliases = Arrays.asList("pardon");
+        aliases = Collections.singletonList("pardon");
     }
 
     @Override

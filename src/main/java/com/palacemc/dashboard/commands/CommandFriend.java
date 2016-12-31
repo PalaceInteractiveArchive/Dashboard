@@ -6,14 +6,14 @@ import com.palacemc.dashboard.handlers.ChatColor;
 import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public class CommandFriend extends MagicCommand {
 
     private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandFriend() {
-        aliases = Arrays.asList("f");
+        aliases = Collections.singletonList("f");
         tabCompletePlayers = true;
     }
 

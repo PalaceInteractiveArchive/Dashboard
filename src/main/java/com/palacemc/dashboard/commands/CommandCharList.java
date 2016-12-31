@@ -28,7 +28,7 @@ public class CommandCharList extends MagicCommand {
                 if (servers.containsKey(server)) {
                     servers.get(server).add(tp.getUsername());
                 } else {
-                    servers.put(server, Arrays.asList(tp.getUsername()));
+                    servers.put(server, Collections.singletonList(tp.getUsername()));
                 }
             }
         }

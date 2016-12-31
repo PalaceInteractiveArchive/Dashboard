@@ -213,9 +213,6 @@ public class FriendUtil {
                 }
                 player.sendMessage(ChatColor.YELLOW + "You have sent " + ChatColor.AQUA + name + ChatColor.YELLOW +
                         " a Friend Request!");
-                /**
-                 * Add request to database
-                 */
                 try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     PreparedStatement sql = connection.prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
                     sql.setString(1, player.getUuid().toString());
@@ -246,9 +243,6 @@ public class FriendUtil {
                 " a Friend Request!");
         PacketFriendRequest packet = new PacketFriendRequest(tp.getUuid(), player.getUsername());
         tp.send(packet);
-        /**
-         * Add request to database
-         */
         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
             sql.setString(1, player.getUuid().toString());

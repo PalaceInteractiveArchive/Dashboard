@@ -61,7 +61,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
-    private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) throws Exception {
+    private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
             return;
@@ -91,9 +91,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         SlackAttachment attachment;
 
         switch (id) {
-            /**
-             * GetPlayer (Audio)
-             */
             case 13:
                 PacketGetPlayer packet = new PacketGetPlayer().fromJSON(object);
                 String username = packet.getPlayerName();
@@ -115,9 +112,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 channel.send(info);
                 break;
-            /**
-             * AudioServer Packet (Container)
-             */
             case 17:
                 PacketContainer audioContainer = new PacketContainer().fromJSON(object);
 
@@ -130,9 +124,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
 
-            /**
-             * ConnectionType
-             */
             case 22:
                 PacketConnectionType connectionTypePacket = new PacketConnectionType().fromJSON(object);
                 PacketConnectionType.ConnectionType type = connectionTypePacket.getType();
@@ -147,7 +138,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 channel.remoteAddress().getAddress().toString());
                         attachment.color("good");
 
-                        dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                        dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                         break;
                     case DAEMON:
                         dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
@@ -157,7 +148,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 channel.remoteAddress().getAddress().toString());
                         attachment.color("good");
 
-                        dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                        dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                         break;
                     case WEBCLIENT:
                         break;
@@ -171,7 +162,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 channel.remoteAddress().getAddress().toString());
                         attachment.color("good");
 
-                        dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                        dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                         break;
                 }
 
@@ -213,9 +204,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     channel.send(count);
                 }
                 break;
-            /**
-             * PlayerJoin
-             */
             case 23:
                 PacketPlayerJoin playerJoinPacket = new PacketPlayerJoin().fromJSON(object);
                 player = new Player(playerJoinPacket.getUuid(), playerJoinPacket.getUsername(), playerJoinPacket.getAddress(),
@@ -223,25 +211,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 dashboard.getSqlUtil().login(player);
                 break;
-            /**
-             * PlayerDisconnect
-             */
             case 24:
                 PacketPlayerDisconnect playerDisconnectPacket = new PacketPlayerDisconnect().fromJSON(object);
 
                 dashboard.logout(playerDisconnectPacket.getUuid());
                 break;
-            /**
-             * PlayerChat
-             */
             case 25:
                 PacketPlayerChat playerChatPacket = new PacketPlayerChat().fromJSON(object);
 
                 dashboard.getChatUtil().chatEvent(playerChatPacket);
                 break;
-            /**
-             * Message
-             */
             case 26:
                 PacketMessage messagePacket = new PacketMessage().fromJSON(object);
 
@@ -253,9 +232,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
                 break;
-            /**
-             * Server Switch
-             */
             case 27:
                 PacketServerSwitch serverSwitchPacket = new PacketServerSwitch().fromJSON(object);
 
@@ -396,9 +372,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getServerUtil().getServer(target).changeCount(1);
                 player.setServer(target);
                 break;
-            /**
-             * Send To Server
-             */
             case 32:
                 PacketSendToServer sendToServerPacket = new PacketSendToServer().fromJSON(object);
 
@@ -427,9 +400,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 dashboard.getServerUtil().sendPlayer(player, targetServer.getName());
                 break;
-            /**
-             * Tab Complete
-             */
             case 43:
                 PacketTabComplete tabCompletePacket = new PacketTabComplete().fromJSON(object);
 
@@ -446,9 +416,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 dashboard.getCommandUtil().tabComplete(player, command, args, results);
                 break;
-            /**
-             * Set Player Resource Pack
-             */
             case 48: {
                 PacketSetPack setPackPacket = new PacketSetPack().fromJSON(object);
                 uuid = setPackPacket.getUuid();
@@ -462,9 +429,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 player.setPack(pack);
                 break;
             }
-            /**
-             * Get Player Resource Pack
-             */
             case 49:
                 PacketGetPack getPackPacket = new PacketGetPack().fromJSON(object);
 
@@ -478,9 +442,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketGetPack send = new PacketGetPack(uuid, player.getPack());
                 channel.send(send);
                 break;
-            /**
-             * Set Server Name
-             */
             case 52:
                 PacketServerName serverNamePacket = new PacketServerName().fromJSON(object);
 
@@ -502,9 +463,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             ") has connected to Dashboard.");
                 }
                 break;
-            /**
-             * WDL Protect
-             */
             case 54:
                 PacketWDLProtect wdlPacket = new PacketWDLProtect().fromJSON(object);
 
@@ -527,9 +485,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         ban.getSource());
                 dashboard.getModerationUtil().announceBan(ban);
                 break;
-            /**
-             * Rank Change
-             */
             case 55:
                 PacketRankChange rankChangePacket = new PacketRankChange().fromJSON(object);
 
@@ -553,9 +508,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getModerationUtil().rankChange(playerName, rank, source);
                 });
                 break;
-            /**
-             * Cross-server Warp
-             */
             case 56:
                 com.palacemc.dashboard.packets.park.PacketWarp warpPacket = new com.palacemc.dashboard.packets.park.PacketWarp().fromJSON(object);
 
@@ -573,9 +525,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 dashboard.getServerUtil().sendPlayerByType(player, serverType);
                 break;
-            /**
-             * Empty Server
-             */
             case 57:
                 PacketEmptyServer emptyServerPacket = new PacketEmptyServer().fromJSON(object);
 
@@ -606,9 +555,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
-            /**
-             * Inventory Status
-             */
             case 58:
                 PacketInventoryStatus inventoryStatusPacket = new PacketInventoryStatus().fromJSON(object);
 
@@ -634,9 +580,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     player.setInventoryUploaded(true);
                 }
                 break;
-            /**
-             * Refresh Hotel Rooms
-             */
             case 59:
                 PacketRefreshHotels refreshHotelsPacket = new PacketRefreshHotels().fromJSON(object);
                 for (Object o : WebSocketServerHandler.getGroup()) {
@@ -653,9 +596,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
-            /**
-             * Broadcast
-             */
             case 60:
                 PacketBroadcast broadcastPacket = new PacketBroadcast().fromJSON(object);
 
@@ -676,9 +616,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
-            /**
-             * Mute Chat
-             */
             case 61:
                 PacketMuteChat muteChatPacket = new PacketMuteChat().fromJSON(object);
 
@@ -707,9 +644,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
-            /**
-             * Refresh Warps
-             */
             case 62:
                 PacketRefreshWarps refreshWarpsPacket = new PacketRefreshWarps().fromJSON(object);
 
@@ -729,9 +663,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
-            /**
-             * Player List
-             */
             case 63:
                 PacketPlayerList playerListPacket = new PacketPlayerList().fromJSON(object);
 
@@ -744,9 +675,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
-            /**
-             * Bungee ID (Sent when a bungee changes IDs)
-             */
             case 65:
                 PacketBungeeID bungeeIDPacket = new PacketBungeeID().fromJSON(object);
 
@@ -762,9 +690,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getLogger().info("Bungee UUID updated for Bungee on " +
                         channel.localAddress().getAddress().toString());
                 break;
-            /**
-             * Player List Info (Import players from Bungee on Dashboard reboot)
-             */
             case 66:
                 PacketPlayerListInfo playerListInfoPacket = new PacketPlayerListInfo().fromJSON(object);
 
@@ -815,7 +740,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 attachment = new SlackAttachment("A BungeeCord Instance has disconnected from Dashboard! #devs");
                 attachment.color("danger");
 
-                dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                 break;
             case DAEMON:
                 dashboard.getModerationUtil().sendMessage(ChatColor.RED +
@@ -824,7 +749,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 attachment = new SlackAttachment("A daemon has disconnected from Dashboard! #devs");
                 attachment.color("danger");
 
-                dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                 break;
             case WEBCLIENT:
                 break;
@@ -845,7 +770,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             ") has disconnected from Dashboard! #devs");
                     attachment.color("danger");
 
-                    dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                    dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                 }
                 break;
             case AUDIOSERVER:
@@ -853,7 +778,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         "The Audio Server has disconnected from Dashboard!" + addon);
                 attachment = new SlackAttachment("The Audio Server has disconnected from Dashboard! #devs");
                 attachment.color("danger");
-                dashboard.getSlackUtil().sendDashboardMessage(message, Arrays.asList(attachment));
+                dashboard.getSlackUtil().sendDashboardMessage(message, Collections.singletonList(attachment));
                 break;
         }
     }

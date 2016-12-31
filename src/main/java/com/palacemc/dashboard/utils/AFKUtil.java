@@ -7,7 +7,6 @@ import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 import com.palacemc.dashboard.packets.dashboard.PacketTitle;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -33,20 +32,16 @@ public class AFKUtil {
                         if (tp.isAFK()) {
                             continue;
                         }
-                        try {
-                            warn(tp);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        warn(tp);
                     }
                 }
             }
         }, 0, 5000);
     }
 
-    public void warn(final Player player) throws IOException {
+    public void warn(final Player player){
         final UUID uuid = player.getUuid();
-        String afk = ChatColor.RED + "" + ChatColor.BOLD + "                      AFK Timer:";
+        String afk = ChatColor.RED + "" + ChatColor.BOLD + "AFK Timer:";
         String blank = "";
         String msg = ChatColor.YELLOW + "" + ChatColor.BOLD + "Type anything in chat (it won't be seen by others)";
         final List<String> msgs = Arrays.asList(blank, blank, afk, blank, msg, blank, blank, blank, blank, blank);
@@ -57,8 +52,10 @@ public class AFKUtil {
 
             @Override
             public void run() {
+                if (player == null) return;
+
                 try {
-                    if (player != null && player.isAFK()) {
+                    if (player.isAFK()) {
                         PacketTitle packet = new PacketTitle(player.getUuid(), ChatColor.RED + "" + ChatColor.BOLD +
                                 "Are you AFK?", ChatColor.RED + "AFK kick in " + ChatColor.DARK_RED + (5 - i) + " " +
                                 ChatColor.RED + "minutes!", 10, 1200, 20);
@@ -78,8 +75,10 @@ public class AFKUtil {
             @Override
             public void run() {
                 id.cancel();
+                if (player == null) return;
+
                 try {
-                    if (player != null && player.isAFK()) {
+                    if (player.isAFK()) {
                         player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
                         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +

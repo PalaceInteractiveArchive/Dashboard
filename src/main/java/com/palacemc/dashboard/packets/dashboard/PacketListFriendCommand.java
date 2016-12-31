@@ -20,7 +20,7 @@ public class PacketListFriendCommand extends BasePacket {
     @Getter private List<String> friendlist = new ArrayList<>();
 
     public PacketListFriendCommand() {
-        this(null, 0, 0, new ArrayList<String>());
+        this(null, 0, 0, new ArrayList<>());
     }
 
     public PacketListFriendCommand(UUID uuid, int page, int maxpage, List<String> friendlist) {

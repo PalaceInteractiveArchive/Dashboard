@@ -33,7 +33,7 @@ public class PartyUtil {
                 p.close();
             }
 
-            if (p.getMembers().contains(uuid) || p.getLeader().equals(uuid)) {
+            if (p.getMembers().contains(uuid) || p.getLeader().getUuid().equals(uuid)) {
                 return p;
             }
         }
@@ -112,7 +112,7 @@ public class PartyUtil {
     }
 
     public Party createParty(Player player) {
-        Party party = new Party(player.getUuid(), new ArrayList<UUID>());
+        Party party = new Party(player.getUuid(), new ArrayList<>());
         partyList.add(party);
 
         return party;

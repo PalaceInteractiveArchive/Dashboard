@@ -7,7 +7,7 @@ import com.palacemc.dashboard.handlers.MagicCommand;
 import com.palacemc.dashboard.handlers.Player;
 import com.palacemc.dashboard.handlers.Rank;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public class CommandMuteChat extends MagicCommand {
 
@@ -15,7 +15,7 @@ public class CommandMuteChat extends MagicCommand {
 
     public CommandMuteChat() {
         super(Rank.SQUIRE);
-        aliases = Arrays.asList("chatmute");
+        aliases = Collections.singletonList("chatmute");
     }
 
     @Override

@@ -64,7 +64,7 @@ public class Player {
     /**
      * Send packet to player's BungeeCord
      *
-     * @param packet
+     * @param packet Packet to send
      */
     public void send(BasePacket packet) {
         if (packet == null) {

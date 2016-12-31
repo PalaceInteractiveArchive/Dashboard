@@ -38,10 +38,6 @@ public class PacketConnectionType extends BasePacket {
         return object;
     }
 
-    public ConnectionType getType() {
-        return type;
-    }
-
     public enum ConnectionType {
         BUNGEECORD, DAEMON, WEBCLIENT, INSTANCE, AUDIOSERVER, UNKNOWN;
 

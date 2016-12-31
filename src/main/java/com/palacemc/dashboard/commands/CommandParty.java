@@ -4,14 +4,14 @@ import com.palacemc.dashboard.Dashboard;
 import com.palacemc.dashboard.Launcher;
 import com.palacemc.dashboard.handlers.*;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public class CommandParty extends MagicCommand {
 
     private Dashboard dashboard = Launcher.getDashboard();
 
     public CommandParty() {
-        aliases = Arrays.asList("p");
+        aliases = Collections.singletonList("p");
         tabCompletePlayers = true;
     }
 
