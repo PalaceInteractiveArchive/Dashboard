@@ -13,6 +13,7 @@ import com.palacemc.dashboard.packets.dashboard.*;
 import com.palacemc.dashboard.packets.park.*;
 import com.palacemc.dashboard.slack.SlackAttachment;
 import com.palacemc.dashboard.slack.SlackMessage;
+import com.palacemc.dashboard.utils.DateUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -473,20 +474,18 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketWDLProtect packet = new PacketWDLProtect().fromJSON(object);
                 UUID uuid = packet.getUniqueId();
                 Player tp = Dashboard.getPlayer(uuid);
-                Ban ban;
+                final long timestamp = DateUtil.parseDateDiff("3d", true);
+                String username = "Unknown Username";
                 if (tp != null) {
-                    ban = new Ban(tp.getUniqueId(), tp.getName(), false, System.currentTimeMillis() + 259200000,
-                            "Attempting to use a World Downloader", "Dashboard");
-                    tp.kickPlayer(ChatColor.RED + "MCMagic does not authorize the use of World Downloader Mods!\n" +
+                    username = tp.getName();
+                    uuid = tp.getUniqueId();
+                    tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods!\n" +
                             ChatColor.AQUA + "You have been temporarily banned for 3 Days.\n" + ChatColor.YELLOW +
                             "If you believe this was a mistake, send an appeal at " +
-                            "mcmagic.us/appeal.");
-                } else {
-                    ban = new Ban(uuid, "Unknown Username", false, System.currentTimeMillis() + 259200000,
-                            "Attempting to use a World Downloader", "Dashboard");
+                            "palace.network/forums/ban-appeal.8/.");
                 }
-                Dashboard.sqlUtil.banPlayer(uuid, ban.getReason(), true, new Date(System.currentTimeMillis()),
-                        ban.getSource());
+                Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "Dashboard");
+                Dashboard.sqlUtil.banPlayer(ban);
                 Dashboard.moderationUtil.announceBan(ban);
                 break;
             }

@@ -455,6 +455,21 @@ public class SqlUtil {
     /**
      * Ban Methods
      */
+    public void banPlayer(final Ban ban) {
+        Dashboard.schedulerManager.runAsync(() -> {
+            try (Connection connection = getConnection()) {
+                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_players (uuid,reason,permanent,`release`,source) VALUES (?,?,?,?,?)");
+                sql.setString(1, ban.getUniqueId().toString());
+                sql.setString(2, ban.getReason());
+                sql.setInt(3, ban.isPermanent() ? 1 : 0);
+                sql.setTimestamp(4, new Timestamp(new Date(ban.getRelease()).getTime()));
+                sql.setString(5, ban.getSource());
+                sql.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
     public void banPlayer(final UUID uuid, final String reason, final boolean permanent, final Date date, final String source) {
         Dashboard.schedulerManager.runAsync(() -> {
