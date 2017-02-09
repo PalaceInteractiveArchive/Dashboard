@@ -2,15 +2,6 @@ package network.palace.dashboard.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.packets.audio.PacketContainer;
-import network.palace.dashboard.packets.audio.PacketGetPlayer;
-import network.palace.dashboard.packets.audio.PacketPlayerInfo;
-import network.palace.dashboard.packets.bungee.PacketBungeeID;
-import network.palace.dashboard.packets.bungee.PacketPlayerListInfo;
-import network.palace.dashboard.slack.SlackAttachment;
-import network.palace.dashboard.slack.SlackMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -18,10 +9,18 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.packets.audio.PacketContainer;
+import network.palace.dashboard.packets.audio.PacketGetPlayer;
+import network.palace.dashboard.packets.audio.PacketPlayerInfo;
+import network.palace.dashboard.packets.bungee.PacketBungeeID;
+import network.palace.dashboard.packets.bungee.PacketPlayerListInfo;
 import network.palace.dashboard.packets.dashboard.*;
-import network.palace.dashboard.packets.dashboard.PacketServerSwitch;
 import network.palace.dashboard.packets.park.*;
-import network.palace.dashboard.packets.park.PacketWarp;
+import network.palace.dashboard.slack.SlackAttachment;
+import network.palace.dashboard.slack.SlackMessage;
+import network.palace.dashboard.utils.DateUtil;
 
 import java.util.*;
 
@@ -145,8 +144,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         break;
                     }
                     case DAEMON: {
-                        Dashboard.moderationUtil.sendMessage(ChatColor.GREEN +
-                                "A new daemon has connected to Dashboard.");
+                        Dashboard.moderationUtil.sendMessage(ChatColor.GREEN + "A new daemon has connected to Dashboard.");
                         SlackMessage m = new SlackMessage("");
                         SlackAttachment a = new SlackAttachment("A new daemon has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
@@ -483,19 +481,18 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketWDLProtect packet = new PacketWDLProtect().fromJSON(object);
                 UUID uuid = packet.getUniqueId();
                 Player tp = Dashboard.getPlayer(uuid);
-                Ban ban;
+                final long timestamp = DateUtil.parseDateDiff("3d", true);
+                String username = "Unknown Username";
                 if (tp != null) {
-                    ban = new Ban(tp.getUniqueId(), tp.getName(), false, System.currentTimeMillis() + 259200000,
-                            "Attempting to use a World Downloader", "Dashboard");
-                    tp.kickPlayer(ChatColor.RED + "MCMagic does not authorize the use of World Downloader Mods!\n" +
+                    username = tp.getName();
+                    uuid = tp.getUniqueId();
+                    tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods!\n" +
                             ChatColor.AQUA + "You have been temporarily banned for 3 Days.\n" + ChatColor.YELLOW +
                             "If you believe this was a mistake, send an appeal at " +
-                            "mcmagic.us/appeal.");
-                } else {
-                    ban = new Ban(uuid, "Unknown Username", false, System.currentTimeMillis() + 259200000,
-                            "Attempting to use a World Downloader", "Dashboard");
+                            "https://palnet.us/appeal.");
                 }
-                Dashboard.sqlUtil.banPlayer(uuid, ban.getReason(), false, new Date(ban.getRelease()), ban.getSource());
+                Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "Dashboard");
+                Dashboard.sqlUtil.banPlayer(ban);
                 Dashboard.moderationUtil.announceBan(ban);
                 break;
             }

@@ -2,13 +2,13 @@ package network.palace.dashboard.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -212,16 +212,16 @@ public class SiteUtil implements HttpHandler {
         switch (rank) {
             case EMPRESS:
             case EMPEROR:
-                return "#FFAA00";
+                return "#FF5050";
             case WIZARD:
                 return "#FFAA00";
             case PALADIN:
-                return "#FFAA00";
+                return "#FFFF00";
             case ARCHITECT:
             case KNIGHT:
-                return "#FFAA00";
+                return "#00FF00";
             case SQUIRE:
-                return "#55FF55";
+                return "#009933";
         }
         return "good";
     }

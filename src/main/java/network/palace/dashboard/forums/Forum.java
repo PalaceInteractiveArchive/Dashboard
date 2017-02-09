@@ -96,6 +96,51 @@ public class Forum {
     }
 
     public void updatePlayerRank(String uuid, String rank) throws SQLException {
-        Database.executeUpdate("UPDATE xf_user SET apms2_group=?,apms2_groups=? WHERE apms2_uuid=?", rank, rank, uuid);
+        int rankid = 0;
+        switch (rank) {
+            case "settler":
+                rankid = 1;
+                break;
+            case "dweller":
+                rankid = 2;
+                break;
+            case "noble":
+                rankid = 3;
+                break;
+            case "majestic":
+                rankid = 4;
+                break;
+            case "honorable":
+                rankid = 5;
+                break;
+            case "specialguest":
+                rankid = 6;
+                break;
+            case "mcprohosting":
+                rankid = 7;
+                break;
+            case "squire":
+                rankid = 8;
+                break;
+            case "knight":
+                rankid = 9;
+                break;
+            case "architect":
+                rankid = 10;
+                break;
+            case "paladin":
+                rankid = 11;
+                break;
+            case "wizard":
+                rankid = 12;
+                break;
+            case "emperor":
+                rankid = 13;
+                break;
+            case "empress":
+                rankid = 14;
+                break;
+        }
+        Database.executeUpdate("UPDATE xf_user SET apms2_group=?,apms2_groups=? WHERE apms2_uuid=?", rankid, rankid, uuid);
     }
 }
