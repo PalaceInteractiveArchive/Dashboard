@@ -30,7 +30,7 @@ public class Commandcmds extends MagicCommand {
             } else {
                 msg = "";
             }
-            msg += "- /" + entry.getKey() + " ";
+            msg += ChatColor.YELLOW + "- /" + entry.getKey() + " ";
             List<String> aliases = entry.getValue().getAliases();
             if (!aliases.isEmpty()) {
                 msg += "(";
@@ -44,6 +44,6 @@ public class Commandcmds extends MagicCommand {
             }
             msg += entry.getValue().getRank().getTagColor() + entry.getValue().getRank().getName();
         }
-        player.sendMessage(ChatColor.YELLOW + msg);
+        player.sendMessage(msg);
     }
 }
