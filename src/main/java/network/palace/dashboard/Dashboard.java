@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import network.palace.dashboard.forums.Forum;
+import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
@@ -449,23 +450,23 @@ public class Dashboard {
         long d8 = Duration.between(zonedNow, zonedNext21_2).getSeconds();
         long d9 = Duration.between(zonedNow, zonedNext21_3).getSeconds();
         ScheduledExecutorService sch = Executors.newScheduledThreadPool(1);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 11am Show in 40 minutes!"), d1,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 11am Show in 40 minutes!"), d1,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 11am Show in 30 minutes!"), d2,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 11am Show in 30 minutes!"), d2,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 11am Show in 20 minutes!"), d3,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 11am Show in 20 minutes!"), d3,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 4pm Show in 40 minutes!"), d4,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 4pm Show in 40 minutes!"), d4,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 4pm Show in 30 minutes!"), d5,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 4pm Show in 30 minutes!"), d5,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 4pm Show in 20 minutes!"), d6,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 4pm Show in 20 minutes!"), d6,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 9pm Show in 40 minutes!"), d7,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 9pm Show in 40 minutes!"), d7,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 9pm Show in 30 minutes!"), d8,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 9pm Show in 30 minutes!"), d8,
                 24 * 60 * 60, TimeUnit.SECONDS);
-        sch.scheduleAtFixedRate(new ShowReminder("Please get ready to run the 9pm Show in 20 minutes!"), d9,
+        sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 9pm Show in 20 minutes!"), d9,
                 24 * 60 * 60, TimeUnit.SECONDS);
     }
 }
