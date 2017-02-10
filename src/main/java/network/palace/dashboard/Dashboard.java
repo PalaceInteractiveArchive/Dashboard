@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import lombok.Getter;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
@@ -29,7 +30,6 @@ import org.apache.log4j.PatternLayout;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,7 +61,7 @@ public class Dashboard {
     public static StatUtil statUtil;
     public static VoteUtil voteUtil;
     public static Forum forum;
-    private static SecureRandom secureRandom;
+    @Getter private static Random random;
     private static Logger logger = Logger.getLogger("Dashboard");
     private static List<String> serverTypes = new ArrayList<>();
     private static HashMap<UUID, Player> players = new HashMap<>();
@@ -88,7 +88,7 @@ public class Dashboard {
             slackUtil.sendDashboardMessage(new SlackMessage(),
                     Arrays.asList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
         }));
-        secureRandom = new SecureRandom();
+        random = new Random();
         schedulerManager = new SchedulerManager();
         try {
             sqlUtil = new SqlUtil();
@@ -137,10 +137,6 @@ public class Dashboard {
             workerGroup.shutdownGracefully();
         }
 
-    }
-
-    public static SecureRandom getSecureRandom() {
-        return secureRandom;
     }
 
     private static void loadConfiguration() {
@@ -468,5 +464,15 @@ public class Dashboard {
                 24 * 60 * 60, TimeUnit.SECONDS);
         sch.scheduleAtFixedRate(new ShowReminder(ChatColor.GREEN + "Please get ready to run the 9pm Show in 20 minutes!"), d9,
                 24 * 60 * 60, TimeUnit.SECONDS);
+    }
+
+    public static String getRandomToken() {
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".toCharArray();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            char c = chars[getRandom().nextInt(chars.length)];
+            sb.append(c);
+        }
+        return sb.toString();
     }
 }

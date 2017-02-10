@@ -7,7 +7,6 @@ import network.palace.dashboard.packets.dashboard.PacketMessage;
 import network.palace.dashboard.packets.dashboard.PacketPlayerChat;
 import network.palace.dashboard.packets.dashboard.PacketPlayerDisconnect;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.UUID;
@@ -184,7 +183,7 @@ public class Player {
     }
 
     public String setAudioToken() {
-        this.audioToken = new BigInteger(130, Dashboard.getSecureRandom()).toString(32);
+        this.audioToken = Dashboard.getRandomToken();
         return audioToken;
     }
 

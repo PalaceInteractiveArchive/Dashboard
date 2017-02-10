@@ -92,7 +92,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String token = packet.getToken();
                 Player player = null;
                 for (Player tp : Dashboard.getOnlinePlayers()) {
-                    if (tp.getAudioToken().equals(token)) {
+                    if (tp.getAudioToken() != null && tp.getAudioToken().equals(token)) {
                         player = tp;
                     }
                 }
