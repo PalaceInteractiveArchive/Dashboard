@@ -11,6 +11,7 @@ import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
 import network.palace.dashboard.packets.audio.PacketContainer;
+import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.scheduler.SchedulerManager;
@@ -30,6 +31,7 @@ import org.apache.log4j.PatternLayout;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
     public static final int PORT = 7892;
+    public static String HOST;
     public static SqlUtil sqlUtil = null;
     public static ServerUtil serverUtil = null;
     public static ChatUtil chatUtil = null;
@@ -119,13 +122,23 @@ public class Dashboard {
         voteUtil = new VoteUtil();
         forum = new Forum();
         setupShowReminder();
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                PacketHeartbeat packet = new PacketHeartbeat();
+                for (Object o : WebSocketServerHandler.getGroup()) {
+                    DashboardSocketChannel dash = (DashboardSocketChannel) o;
+                    dash.send(packet);
+                }
+            }
+        }, 10 * 1000, 30 * 1000);
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(DashboardServerSocketChannel.class)
                     .childHandler(new WebSocketServerInitializer());
-            Channel ch = b.bind(PORT).sync().channel();
+            Channel ch = b.bind(new InetSocketAddress(HOST, PORT)).sync().channel();
             getLogger().info("Dashboard started on port " + PORT);
             slackUtil.sendDashboardMessage(new SlackMessage(),
                     Arrays.asList(new SlackAttachment("Dashboard has successfully started up!").color("good")));
@@ -136,13 +149,15 @@ public class Dashboard {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-
     }
 
     private static void loadConfiguration() {
         try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
             String line = br.readLine();
             while (line != null) {
+                if (line.startsWith("host:")) {
+                    HOST = line.split("host:")[1];
+                }
                 if (line.startsWith("maintenance:")) {
                     maintenance = Boolean.parseBoolean(line.split("maintenance:")[1]);
                 }

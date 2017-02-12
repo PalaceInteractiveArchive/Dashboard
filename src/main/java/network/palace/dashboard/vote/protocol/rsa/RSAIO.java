@@ -33,8 +33,8 @@ public class RSAIO {
                 publicKey.getEncoded());
         PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(
                 privateKey.getEncoded());
-        try (FileOutputStream publicOut = new FileOutputStream(directory + "vote/public.key");
-             FileOutputStream privateOut = new FileOutputStream(directory + "vote/private.key")) {
+        try (FileOutputStream publicOut = new FileOutputStream(directory + "/public.key");
+             FileOutputStream privateOut = new FileOutputStream(directory + "/private.key")) {
             publicOut.write(DatatypeConverter.printBase64Binary(publicSpec.getEncoded())
                     .getBytes(StandardCharsets.UTF_8));
             privateOut.write(DatatypeConverter.printBase64Binary(privateSpec.getEncoded())
