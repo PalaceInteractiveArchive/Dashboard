@@ -733,6 +733,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 });
                 break;
             }
+            /**
+             * Confirm Player (return true if player is connected to Dashboard, false if not)
+             */
+            case 68: {
+                PacketConfirmPlayer packet = new PacketConfirmPlayer().fromJSON(object);
+                UUID uuid = packet.getUniqueId();
+                Player tp = Dashboard.getPlayer(uuid);
+                boolean exists = tp != null;
+                channel.send(new PacketConfirmPlayer(uuid, exists));
+            }
         }
     }
 
