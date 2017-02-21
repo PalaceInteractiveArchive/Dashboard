@@ -175,10 +175,15 @@ public class ServerUtil {
 
     public void sendPlayer(Player player, String server) {
         PacketSendToServer packet = new PacketSendToServer(player.getUniqueId(), server);
-        player.send(packet);
+        if (player != null) {
+            player.send(packet);
+        }
     }
 
     public void sendPlayerByType(Player player, String type) {
+        if (player == null) {
+            return;
+        }
         Server s = getServerByType(type);
         if (s == null) {
             if (player.isPendingWarp()) {

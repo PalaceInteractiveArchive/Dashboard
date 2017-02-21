@@ -94,8 +94,9 @@ public class Dashboard {
         random = new Random();
         schedulerManager = new SchedulerManager();
         try {
+            logger.info("Initializing SQL Connections");
             sqlUtil = new SqlUtil();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             System.exit(0);
         }
@@ -120,7 +121,11 @@ public class Dashboard {
         afkUtil = new AFKUtil();
         statUtil = new StatUtil();
         voteUtil = new VoteUtil();
-        forum = new Forum();
+        try {
+            forum = new Forum();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setupShowReminder();
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
