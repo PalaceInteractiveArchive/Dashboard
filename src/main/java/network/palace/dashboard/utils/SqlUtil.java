@@ -3,6 +3,8 @@ package network.palace.dashboard.utils;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.discordSocket.DiscordCacheInfo;
+import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
 
@@ -681,6 +683,52 @@ public class SqlUtil {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        });
+    }
+
+    /**
+     * Discord Methods
+     */
+
+    public void insertDiscord(final DiscordCacheInfo cacheInfo) {
+        Dashboard.schedulerManager.runAsync(() -> {
+            try (Connection connection = getConnection()) {
+                PreparedStatement sql = connection.prepareStatement("INSERT INTO discord (minecraftUsername, minecraftUUID, discordUsername) VALUES (?,?,?)");
+                sql.setString(1, cacheInfo.getMinecraft().getUsername());
+                sql.setString(2, cacheInfo.getMinecraft().getUuid());
+                sql.setString(3, cacheInfo.getDiscord().getUsername());
+                Dashboard.getLogger().info("insert");
+                sql.execute();
+                sql.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            SocketConnection.sendDelink(cacheInfo);
+        });
+    }
+
+    public void removeDiscord(final DiscordCacheInfo cacheInfo) {
+        Dashboard.schedulerManager.runAsync(() -> {
+            try (Connection connection = getConnection()) {
+                PreparedStatement deleteUUID = connection.prepareStatement("DELETE FROM discord WHERE minecraftUUID=?");
+                deleteUUID.setString(1, cacheInfo.getMinecraft().getUuid());
+                Dashboard.getLogger().info("Delete 1");
+                deleteUUID.execute();
+                deleteUUID.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try (Connection connection = getConnection()) {
+                PreparedStatement deleteUsername = connection.prepareStatement("DELETE FROM discord WHERE discordUsername=?");
+                deleteUsername.setString(1, cacheInfo.getDiscord().getUsername());
+                Dashboard.getLogger().info("Delete 2");
+                deleteUsername.execute();
+                deleteUsername.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            Dashboard.getLogger().info("insert cache");
+            insertDiscord(cacheInfo);
         });
     }
 }

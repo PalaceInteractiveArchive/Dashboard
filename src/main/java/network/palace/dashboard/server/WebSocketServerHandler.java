@@ -513,7 +513,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 final String source = packet.getSource();
                 final Player tp = Dashboard.getPlayer(uuid);
                 Dashboard.schedulerManager.runAsync(() -> {
-                    String name = "";
+                    String name;
                     if (tp != null) {
                         PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
                         tp.send(packet1);

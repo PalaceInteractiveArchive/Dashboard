@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
+import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
@@ -79,6 +80,9 @@ public class Dashboard {
     private static List<UUID> maintenanceWhitelist = new ArrayList<>();
     private static boolean testNetwork = false;
 
+    @Getter private static String socketURL = "";
+    @Getter private static SocketConnection socketConnection;
+
     public static void main(String[] args) throws IOException {
         startTime = System.currentTimeMillis();
         PatternLayout layout = new PatternLayout("[%d{HH:mm:ss}] [%p] - %m%n");
@@ -106,6 +110,8 @@ public class Dashboard {
         if (testNetwork) {
             getLogger().info("Test network detected, disabling statistics collection!");
         }
+        socketConnection = new SocketConnection();
+
         serverUtil = new ServerUtil();
         chatUtil = new ChatUtil();
         commandUtil = new CommandUtil();
@@ -157,12 +163,12 @@ public class Dashboard {
             while (line != null) {
                 if (line.startsWith("host:")) {
                     HOST = line.split("host:")[1];
-                }
-                if (line.startsWith("maintenance:")) {
+                } else if (line.startsWith("maintenance:")) {
                     maintenance = Boolean.parseBoolean(line.split("maintenance:")[1]);
-                }
-                if (line.startsWith("test-network:")) {
+                } else if (line.startsWith("test-network:")) {
                     testNetwork = Boolean.parseBoolean(line.split("test-network:")[1]);
+                } else if (line.startsWith("socketURL:")) {
+                    socketURL = line.split("socketURL:")[1];
                 }
                 line = br.readLine();
             }
