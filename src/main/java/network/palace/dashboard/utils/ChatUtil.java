@@ -3,8 +3,8 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.*;
-import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.server.DashboardSocketChannel;
+import network.palace.dashboard.server.WebSocketServerHandler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -171,6 +171,15 @@ public class ChatUtil {
         }
         if (command) {
             if (!Dashboard.commandUtil.handleCommand(player, msg.replaceFirst("/", ""))) {
+                String s = msg.toLowerCase().replaceFirst("/", "");
+                if (rank.getRankId() < Rank.KNIGHT.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
+                        s.startsWith("/eval") || s.startsWith("/evaluate") || s.startsWith("/solve") ||
+                        s.startsWith("worldedit:/calc") || s.startsWith("worldedit:/calculate") ||
+                        s.startsWith("worldedit:/eval") || s.startsWith("worldedit:/evaluate") ||
+                        s.startsWith("worldedit:/solve"))) {
+                    player.sendMessage(ChatColor.RED + "That command is disabled.");
+                    return;
+                }
                 player.chat(msg);
             }
             return;

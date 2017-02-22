@@ -215,6 +215,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketPlayerJoin packet = new PacketPlayerJoin().fromJSON(object);
                 Player player = new Player(packet.getUniqueId(), packet.getUsername(), packet.getAddress(),
                         packet.getServer(), channel.getBungeeID());
+                if (Dashboard.getPlayer(player.getUniqueId()) != null) {
+                    player.kickPlayer("You are already connected to The Palace Network!");
+                    return;
+                }
                 Dashboard.sqlUtil.login(player);
                 break;
             }

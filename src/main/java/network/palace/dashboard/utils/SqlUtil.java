@@ -23,7 +23,7 @@ public class SqlUtil {
     BoneCP connectionPool = null;
     public String myMCMagicConnString;
 
-    public SqlUtil() throws SQLException, IOException, ClassNotFoundException {
+    public SqlUtil() throws SQLException, IOException {
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
         BoneCPConfig config = new BoneCPConfig();
         String address = "";
