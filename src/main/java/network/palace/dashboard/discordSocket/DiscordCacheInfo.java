@@ -2,6 +2,7 @@ package network.palace.dashboard.discordSocket;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 public class DiscordCacheInfo {
@@ -10,14 +11,14 @@ public class DiscordCacheInfo {
     @Getter private Discord discord;
 
     @AllArgsConstructor
-    public class Minecraft {
+    public static class Minecraft {
         @Getter private String username = "";
         @Getter private String uuid = "";
-        @Getter private String rank = "";
+        @Getter @Setter private String rank = "";
     }
 
     @AllArgsConstructor
-    public class Discord {
+    public static class Discord {
         @Getter private String username = "";
     }
 }

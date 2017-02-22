@@ -4,6 +4,7 @@ import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
+import network.palace.dashboard.discordSocket.DiscordDatabaseInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
@@ -703,16 +704,68 @@ public class SqlUtil {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            SocketConnection.sendDelink(cacheInfo);
+            SocketConnection.sendNewlink(cacheInfo);
         });
     }
 
-    public void removeDiscord(final DiscordCacheInfo cacheInfo) {
+    public void selectAndRemoveDiscord(final DiscordCacheInfo cacheInfo) {
+        Dashboard.schedulerManager.runAsync(() -> {
+            SocketConnection.sendRemove(cacheInfo);
+            try (Connection connection = getConnection()) {
+                PreparedStatement deleteUUID = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
+                deleteUUID.setString(1, cacheInfo.getMinecraft().getUuid());
+                ResultSet result = deleteUUID.executeQuery();
+                DiscordDatabaseInfo databaseInfo = null;
+                while (result.next()) {
+                    if (result.getString("minecraftUsername") == null) return;
+                    if (result.getString("minecraftUUID") == null) return;
+                    if (result.getString("discordUsername") == null) return;
+                    databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+                    break;
+                }
+                result.close();
+                deleteUUID.close();
+                if (databaseInfo != null) {
+                    removeDiscord(databaseInfo);
+                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+                                                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                    SocketConnection.sendRemove(info);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try (Connection connection = getConnection()) {
+                PreparedStatement deleteUsername = connection.prepareStatement("SELECT * FROM discord WHERE discordUsername=?");
+                deleteUsername.setString(1, cacheInfo.getDiscord().getUsername());
+                ResultSet result = deleteUsername.executeQuery();
+                DiscordDatabaseInfo databaseInfo = null;
+                while (result.next()) {
+                    if (result.getString("minecraftUsername") == null) return;
+                    if (result.getString("minecraftUUID") == null) return;
+                    if (result.getString("discordUsername") == null) return;
+                    databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+                    break;
+                }
+                result.close();
+                deleteUsername.close();
+                if (databaseInfo != null) {
+                    removeDiscord(databaseInfo);
+                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+                            new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                    SocketConnection.sendRemove(info);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            insertDiscord(cacheInfo);
+        });
+    }
+
+    public void removeDiscord(final DiscordDatabaseInfo databaseInfo) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement deleteUUID = connection.prepareStatement("DELETE FROM discord WHERE minecraftUUID=?");
-                deleteUUID.setString(1, cacheInfo.getMinecraft().getUuid());
-                Dashboard.getLogger().info("Delete 1");
+                deleteUUID.setString(1, databaseInfo.getMinecraftUUID());
                 deleteUUID.execute();
                 deleteUUID.close();
             } catch (SQLException e) {
@@ -720,15 +773,36 @@ public class SqlUtil {
             }
             try (Connection connection = getConnection()) {
                 PreparedStatement deleteUsername = connection.prepareStatement("DELETE FROM discord WHERE discordUsername=?");
-                deleteUsername.setString(1, cacheInfo.getDiscord().getUsername());
-                Dashboard.getLogger().info("Delete 2");
+                deleteUsername.setString(1, databaseInfo.getDiscordUsername());
                 deleteUsername.execute();
                 deleteUsername.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            Dashboard.getLogger().info("insert cache");
-            insertDiscord(cacheInfo);
         });
+    }
+
+    public DiscordCacheInfo getUserFromPlayer(final Player player) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement useruuid = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
+            useruuid.setString(1, player.getUniqueId().toString());
+            ResultSet result = useruuid.executeQuery();
+            DiscordCacheInfo info;
+            while (result.next()) {
+                if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
+                    info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
+                            new DiscordCacheInfo.Discord(result.getString("discordUsername")));
+                    result.close();
+                    useruuid.close();
+                    return info;
+                }
+                break;
+            }
+            result.close();
+            useruuid.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

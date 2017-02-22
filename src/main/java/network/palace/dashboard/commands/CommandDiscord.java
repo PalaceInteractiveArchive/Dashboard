@@ -20,7 +20,7 @@ public class CommandDiscord extends MagicCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length >= 1) {
-            if (args[0].contains("#") && args[0].matches("([a-zA-Z-0-9]+)#(\\d+)")) {
+            if (args[0].contains("#") && args[0].matches("(.+)#(\\d+)")) {
                 DiscordUserInfo userInfo = new DiscordUserInfo(args[0], player.getName(), player.getUniqueId().toString(), player.getRank().toString());
                 SocketConnection.sendLink(userInfo);
             } else {

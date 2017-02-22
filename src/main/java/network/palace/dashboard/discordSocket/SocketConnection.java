@@ -32,7 +32,7 @@ public class SocketConnection {
         socket.on("discord:delinkrequest", args -> {
             Dashboard.getLogger().info("Got delink request");
             DiscordCacheInfo json = gson.fromJson(args[0].toString(), DiscordCacheInfo.class);
-            Dashboard.sqlUtil.removeDiscord(json);
+            Dashboard.sqlUtil.selectAndRemoveDiscord(json);
         });
         socket.on(Socket.EVENT_CONNECT, args ->
                 Dashboard.getLogger().info(ChatColor.DARK_GREEN + "Discord link socket connected"))
@@ -41,19 +41,28 @@ public class SocketConnection {
         socket.connect();
     }
 
+    public static void sendRemove(DiscordCacheInfo info) {
+        if (socket == null) return;
+        if (!socket.connected()) return;
+        socket.emit("discord:remove", gson.toJson(info));
+    }
+
     public static void sendLink(DiscordUserInfo info) {
         if (socket == null) return;
         if (!socket.connected()) return;
         socket.emit("discord:link", gson.toJson(info));
     }
 
-    public static void sendDelink(DiscordCacheInfo info) {
+    public static void sendNewlink(DiscordCacheInfo info) {
         if (socket == null) return;
         if (!socket.connected()) return;
-        Dashboard.getLogger().info("emit delink");
-        String test = gson.toJson(info);
-        Dashboard.getLogger().info(test);
-        socket.emit("discord:delink", test);
+        socket.emit("discord:newlink", gson.toJson(info));
+    }
+
+    public static void sendUpdate(DiscordCacheInfo info) {
+        if (socket == null) return;
+        if (!socket.connected()) return;
+        socket.emit("discord:update", gson.toJson(info));
     }
 }
 

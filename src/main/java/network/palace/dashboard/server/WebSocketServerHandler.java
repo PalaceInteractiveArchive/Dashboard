@@ -10,6 +10,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.discordSocket.DiscordCacheInfo;
+import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketGetPlayer;
@@ -527,8 +529,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         name = Dashboard.sqlUtil.usernameFromUUID(uuid);
                     }
                     Dashboard.moderationUtil.rankChange(name, rank, source);
+
+                    DiscordCacheInfo info = Dashboard.sqlUtil.getUserFromPlayer(tp);
+                    info.getMinecraft().setRank(rank.toString());
+                    if (info != null) {
+                        SocketConnection.sendUpdate(info);
+                    }
                 });
+
                 Dashboard.forum.updatePlayerRank(uuid.toString(), rank.getSqlName());
+
                 break;
             }
             /**
