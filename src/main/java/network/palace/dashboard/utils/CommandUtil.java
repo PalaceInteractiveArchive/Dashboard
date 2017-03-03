@@ -28,6 +28,7 @@ public class CommandUtil {
         register("chatdelay", new Commandchatdelay());
         register("chatreload", new Commandchatreload());
         register("cmds", new Commandcmds());
+        register("discord", new CommandDiscord());
         register("find", new Commandfind());
         register("friend", new Commandfriend());
         register("ho", new Commandho());

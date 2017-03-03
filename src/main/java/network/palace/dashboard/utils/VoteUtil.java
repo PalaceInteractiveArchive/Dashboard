@@ -85,7 +85,7 @@ public class VoteUtil {
                     public void operationComplete(ChannelFuture future) throws Exception {
                         if (future.isSuccess()) {
                             serverChannel = future.channel();
-                            Dashboard.getLogger().info("Votifier enabled on socket " + serverChannel.localAddress() + ".");
+                            Dashboard.getLogger().info("Votifier enabled on discordSocket " + serverChannel.localAddress() + ".");
                         } else {
                             SocketAddress socketAddress = future.channel().localAddress();
                             if (socketAddress == null) {
