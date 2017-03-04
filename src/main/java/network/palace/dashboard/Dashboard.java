@@ -150,7 +150,7 @@ public class Dashboard {
             b.group(bossGroup, workerGroup).channel(DashboardServerSocketChannel.class)
                     .childHandler(new WebSocketServerInitializer());
             Channel ch = b.bind(new InetSocketAddress(HOST, PORT)).sync().channel();
-            getLogger().info("Dashboard started on port " + PORT);
+            getLogger().info("Dashboard started at " + HOST + ":" + PORT);
             slackUtil.sendDashboardMessage(new SlackMessage(),
                     Arrays.asList(new SlackAttachment("Dashboard has successfully started up!").color("good")));
             ch.closeFuture().sync();
