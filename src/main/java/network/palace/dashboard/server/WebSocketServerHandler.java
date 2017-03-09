@@ -23,6 +23,7 @@ import network.palace.dashboard.packets.park.*;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
+import network.palace.dashboard.utils.IPUtil;
 
 import java.util.*;
 
@@ -221,6 +222,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     player.kickPlayer("You are already connected to The Palace Network!");
                     return;
                 }
+                Dashboard.schedulerManager.runAsync(new Runnable() {
+                    @Override
+                    public void run() {
+                        IPUtil.ProviderData data = IPUtil.getProviderData(packet.getAddress());
+                        Dashboard.sqlUtil.updateProviderData(player.getUniqueId(), data);
+                    }
+                });
                 Dashboard.sqlUtil.login(player);
                 break;
             }

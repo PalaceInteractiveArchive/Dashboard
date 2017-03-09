@@ -716,19 +716,27 @@ public class SqlUtil {
                 deleteUUID.setString(1, cacheInfo.getMinecraft().getUuid());
                 ResultSet result = deleteUUID.executeQuery();
                 DiscordDatabaseInfo databaseInfo = null;
-                while (result.next()) {
-                    if (result.getString("minecraftUsername") == null) return;
-                    if (result.getString("minecraftUUID") == null) return;
-                    if (result.getString("discordUsername") == null) return;
-                    databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                    break;
+                if (!result.next()) {
+                    result.close();
+                    deleteUUID.close();
+                    return;
                 }
+                boolean failed = false;
+                if (result.getString("minecraftUsername") == null) failed = true;
+                if (result.getString("minecraftUUID") == null) failed = true;
+                if (result.getString("discordUsername") == null) failed = true;
+                if (failed) {
+                    result.close();
+                    deleteUUID.close();
+                    return;
+                }
+                databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
                 result.close();
                 deleteUUID.close();
                 if (databaseInfo != null) {
                     removeDiscord(databaseInfo);
                     DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                                                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                            new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
                     SocketConnection.sendRemove(info);
                 }
             } catch (SQLException e) {
@@ -739,13 +747,21 @@ public class SqlUtil {
                 deleteUsername.setString(1, cacheInfo.getDiscord().getUsername());
                 ResultSet result = deleteUsername.executeQuery();
                 DiscordDatabaseInfo databaseInfo = null;
-                while (result.next()) {
-                    if (result.getString("minecraftUsername") == null) return;
-                    if (result.getString("minecraftUUID") == null) return;
-                    if (result.getString("discordUsername") == null) return;
-                    databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                    break;
+                if (!result.next()) {
+                    result.close();
+                    deleteUsername.close();
+                    return;
                 }
+                boolean failed = false;
+                if (result.getString("minecraftUsername") == null) failed = true;
+                if (result.getString("minecraftUUID") == null) failed = true;
+                if (result.getString("discordUsername") == null) failed = true;
+                if (failed) {
+                    result.close();
+                    deleteUsername.close();
+                    return;
+                }
+                databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
                 result.close();
                 deleteUsername.close();
                 if (databaseInfo != null) {
@@ -787,16 +803,17 @@ public class SqlUtil {
             PreparedStatement useruuid = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
             useruuid.setString(1, player.getUniqueId().toString());
             ResultSet result = useruuid.executeQuery();
-            DiscordCacheInfo info;
-            while (result.next()) {
-                if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
-                    info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
-                            new DiscordCacheInfo.Discord(result.getString("discordUsername")));
-                    result.close();
-                    useruuid.close();
-                    return info;
-                }
-                break;
+            if (!result.next()) {
+                result.close();
+                useruuid.close();
+                return null;
+            }
+            if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
+                DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
+                        new DiscordCacheInfo.Discord(result.getString("discordUsername")));
+                result.close();
+                useruuid.close();
+                return info;
             }
             result.close();
             useruuid.close();
@@ -804,5 +821,21 @@ public class SqlUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void updateProviderData(UUID uuid, IPUtil.ProviderData data) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET isp=?,country=?,region=?,regionName=?,timezone=? WHERE uuid=?");
+            sql.setString(1, data.getIsp());
+            sql.setString(2, data.getCountry());
+            sql.setString(3, data.getRegion());
+            sql.setString(4, data.getRegionName());
+            sql.setString(5, data.getTimezone());
+            sql.setString(6, uuid.toString());
+            sql.execute();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
