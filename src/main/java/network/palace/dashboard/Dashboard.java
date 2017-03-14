@@ -439,28 +439,28 @@ public class Dashboard {
             zonedNext11 = zonedNext11.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext11_2) > 0) {
-            zonedNext11_2 = zonedNext11.plusDays(1);
+            zonedNext11_2 = zonedNext11_2.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext11_3) > 0) {
-            zonedNext11_3 = zonedNext11.plusDays(1);
+            zonedNext11_3 = zonedNext11_3.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext16) > 0) {
             zonedNext16 = zonedNext16.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext16_2) > 0) {
-            zonedNext16_2 = zonedNext16.plusDays(1);
+            zonedNext16_2 = zonedNext16_2.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext16_3) > 0) {
-            zonedNext16_3 = zonedNext16.plusDays(1);
+            zonedNext16_3 = zonedNext16_3.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext21) > 0) {
             zonedNext21 = zonedNext21.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext21_2) > 0) {
-            zonedNext21_2 = zonedNext21.plusDays(1);
+            zonedNext21_2 = zonedNext21_2.plusDays(1);
         }
         if (zonedNow.compareTo(zonedNext21_3) > 0) {
-            zonedNext21_3 = zonedNext21.plusDays(1);
+            zonedNext21_3 = zonedNext21_3.plusDays(1);
         }
         long d1 = Duration.between(zonedNow, zonedNext11).getSeconds();
         long d2 = Duration.between(zonedNow, zonedNext11_2).getSeconds();
