@@ -6,6 +6,7 @@ import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.packets.dashboard.PacketLink;
 
 /**
  * @author Innectic
@@ -19,15 +20,21 @@ public class CommandDiscord extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        if (args.length >= 1) {
-            if (args[0].contains("#") && args[0].matches("(.+)#(\\d+)")) {
-                DiscordUserInfo userInfo = new DiscordUserInfo(args[0], player.getName(), player.getUniqueId().toString(), player.getRank().toString());
+        if (args.length < 2) {
+            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palace.network/Discord",
+                    "Click for more information about Discord!", ChatColor.YELLOW, true);
+            player.send(packet);
+        } else if (args.length == 2 && args[0].equals("link")) {
+            if (args[1].contains("#") && args[1].matches("(.*)#(\\d+)")) {
+                DiscordUserInfo userInfo = new DiscordUserInfo(args[1], player.getName(), player.getUniqueId().toString(), player.getRank().toString());
                 SocketConnection.sendLink(userInfo);
             } else {
-                player.sendMessage(ChatColor.DARK_RED + "Please specify a discord id!");
+                player.sendMessage(ChatColor.DARK_RED + "Please specify a valid Discord ID!");
             }
         } else {
-            player.sendMessage(ChatColor.DARK_RED + "Please specify a discord id!");
+            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palace.network/Discord",
+                    "Click for more information about Discord!", ChatColor.YELLOW, true);
+            player.send(packet);
         }
     }
 }
