@@ -44,24 +44,28 @@ public class SocketConnection {
     public static void sendRemove(DiscordCacheInfo info) {
         if (socket == null) return;
         if (!socket.connected()) return;
+        Dashboard.getLogger().info("send remove");
         socket.emit("discord:remove", gson.toJson(info));
     }
 
     public static void sendLink(DiscordUserInfo info) {
         if (socket == null) return;
         if (!socket.connected()) return;
+        Dashboard.getLogger().info("send link");
         socket.emit("discord:link", gson.toJson(info));
     }
 
     public static void sendNewlink(DiscordCacheInfo info) {
         if (socket == null) return;
         if (!socket.connected()) return;
+        Dashboard.getLogger().info("send newlink");
         socket.emit("discord:newlink", gson.toJson(info));
     }
 
     public static void sendUpdate(DiscordCacheInfo info) {
         if (socket == null) return;
         if (!socket.connected()) return;
+        Dashboard.getLogger().info("send update");
         socket.emit("discord:update", gson.toJson(info));
     }
 }
