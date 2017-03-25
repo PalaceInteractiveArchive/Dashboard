@@ -693,6 +693,7 @@ public class SqlUtil {
 
     public void insertDiscord(final DiscordCacheInfo cacheInfo) {
         Dashboard.schedulerManager.runAsync(() -> {
+            Dashboard.getLogger().info("discord insert");
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("INSERT INTO discord (minecraftUsername, minecraftUUID, discordUsername) VALUES (?,?,?)");
                 sql.setString(1, cacheInfo.getMinecraft().getUsername());
@@ -701,10 +702,10 @@ public class SqlUtil {
                 Dashboard.getLogger().info("insert");
                 sql.execute();
                 sql.close();
+                SocketConnection.sendNewlink(cacheInfo);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            SocketConnection.sendNewlink(cacheInfo);
         });
     }
 
@@ -719,25 +720,25 @@ public class SqlUtil {
                 if (!result.next()) {
                     result.close();
                     deleteUUID.close();
-                    return;
-                }
-                boolean failed = false;
-                if (result.getString("minecraftUsername") == null) failed = true;
-                if (result.getString("minecraftUUID") == null) failed = true;
-                if (result.getString("discordUsername") == null) failed = true;
-                if (failed) {
-                    result.close();
-                    deleteUUID.close();
-                    return;
-                }
-                databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                result.close();
-                deleteUUID.close();
-                if (databaseInfo != null) {
-                    removeDiscord(databaseInfo);
-                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                            new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
-                    SocketConnection.sendRemove(info);
+                } else {
+                    boolean failed = false;
+                    if (result.getString("minecraftUsername") == null) failed = true;
+                    if (result.getString("minecraftUUID") == null) failed = true;
+                    if (result.getString("discordUsername") == null) failed = true;
+                    if (failed) {
+                        result.close();
+                        deleteUUID.close();
+                    } else {
+                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+                        result.close();
+                        deleteUUID.close();
+                        if (databaseInfo != null) {
+                            removeDiscord(databaseInfo);
+                            DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+                                    new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                            SocketConnection.sendRemove(info);
+                        }
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -750,25 +751,25 @@ public class SqlUtil {
                 if (!result.next()) {
                     result.close();
                     deleteUsername.close();
-                    return;
-                }
-                boolean failed = false;
-                if (result.getString("minecraftUsername") == null) failed = true;
-                if (result.getString("minecraftUUID") == null) failed = true;
-                if (result.getString("discordUsername") == null) failed = true;
-                if (failed) {
-                    result.close();
-                    deleteUsername.close();
-                    return;
-                }
-                databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                result.close();
-                deleteUsername.close();
-                if (databaseInfo != null) {
-                    removeDiscord(databaseInfo);
-                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                            new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
-                    SocketConnection.sendRemove(info);
+                } else {
+                    boolean failed = false;
+                    if (result.getString("minecraftUsername") == null) failed = true;
+                    if (result.getString("minecraftUUID") == null) failed = true;
+                    if (result.getString("discordUsername") == null) failed = true;
+                    if (failed) {
+                        result.close();
+                        deleteUsername.close();
+                    } else {
+                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+                        result.close();
+                        deleteUsername.close();
+                        if (databaseInfo != null) {
+                            removeDiscord(databaseInfo);
+                            DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+                                    new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                            SocketConnection.sendRemove(info);
+                        }
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -806,17 +807,17 @@ public class SqlUtil {
             if (!result.next()) {
                 result.close();
                 useruuid.close();
-                return null;
-            }
-            if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
-                DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
-                        new DiscordCacheInfo.Discord(result.getString("discordUsername")));
+            } else {
+                if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
+                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
+                            new DiscordCacheInfo.Discord(result.getString("discordUsername")));
+                    result.close();
+                    useruuid.close();
+                    return info;
+                }
                 result.close();
                 useruuid.close();
-                return info;
             }
-            result.close();
-            useruuid.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
