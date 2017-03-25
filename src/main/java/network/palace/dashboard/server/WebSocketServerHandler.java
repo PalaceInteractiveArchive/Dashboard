@@ -676,11 +676,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String msg = "";
                 if (!packet.isMute()) {
                     Dashboard.chatUtil.unmuteChat(server);
-                    msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "MCMagic Chat" + ChatColor.WHITE + "] " +
+                    msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                             ChatColor.YELLOW + "Chat has been unmuted";
                 } else {
                     Dashboard.chatUtil.muteChat(server);
-                    msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "MCMagic Chat" + ChatColor.WHITE + "] " +
+                    msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                             ChatColor.YELLOW + "Chat has been muted";
                 }
                 String msgname = msg + " by " + packet.getSource();
@@ -753,6 +753,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             channel.getBungeeID());
                     tp.setRank(Rank.fromString(p.getRank()));
                     list.add(tp);
+                    Dashboard.getServer(p.getServer()).changeCount(1);
                 }
                 final List<Player> finalList = list;
                 Dashboard.schedulerManager.runAsync(() -> {
@@ -822,6 +823,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (!s.getServerType().equals(s.getName())) {
                     running = " running " + s.getServerType();
                 }
+                s.setOnline(false);
                 if (!name.matches("[a-z]\\d{1,3}")) {
                     Dashboard.moderationUtil.sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);

@@ -51,7 +51,7 @@ public class CommandPin extends MagicCommand {
                     "MyMCMagic will release to the public " + ChatColor.YELLOW + "Tuesday, November 1st at 3:00pm EST.");
             player.sendMessage(ChatColor.GREEN + "Purchase " + Rank.DVCMEMBER.getNameWithBrackets() + ChatColor.GREEN +
                     " or " + Rank.SHAREHOLDER.getNameWithBrackets() + ChatColor.GREEN + " for early access! " +
-                    ChatColor.YELLOW + "https://store.mcmagic.us");
+                    ChatColor.YELLOW + "https://store.palace.network");
             return;
         }
         // Is after 10/28 @ 10pm, before 11/1 @ 3pm

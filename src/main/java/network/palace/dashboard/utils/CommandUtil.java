@@ -27,6 +27,7 @@ public class CommandUtil {
         register("chat", new Commandchat());
         register("chatdelay", new Commandchatdelay());
         register("chatreload", new Commandchatreload());
+        register("chatstatus", new Commandchatstatus());
         register("cmds", new Commandcmds());
         register("discord", new CommandDiscord());
         register("find", new Commandfind());
@@ -154,9 +155,7 @@ public class CommandUtil {
         }
         if (!list.isEmpty()) {
             results.clear();
-            for (String s : list) {
-                results.add(s);
-            }
+            results.addAll(list);
         }
         PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), command, args, results);
         player.send(packet);
@@ -166,9 +165,7 @@ public class CommandUtil {
         List<String> list = new ArrayList<>();
         for (Map.Entry<String, MagicCommand> entry : commands.entrySet()) {
             list.add(entry.getKey());
-            for (String s : entry.getValue().getAliases()) {
-                list.add(s);
-            }
+            list.addAll(entry.getValue().getAliases());
         }
         return list;
     }

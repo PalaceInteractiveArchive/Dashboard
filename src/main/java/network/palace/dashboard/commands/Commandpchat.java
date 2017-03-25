@@ -21,7 +21,7 @@ public class Commandpchat extends MagicCommand {
         }
         if (!enoughTime(player)) {
             player.sendMessage(ChatColor.RED + "New Guests must be on the server for at least 15 minutes before talking in chat. " +
-                    ChatColor.DARK_AQUA + "Learn more at mcmagic.us/rules#chat");
+                    ChatColor.DARK_AQUA + "Learn more at palnet.us/rules");
             return;
         }
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
@@ -54,25 +54,25 @@ public class Commandpchat extends MagicCommand {
                 return;
             }
         }
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         for (String arg : args) {
-            msg += arg + " ";
+            msg.append(arg).append(" ");
         }
-        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Dashboard.chatUtil.removeCaps(player,
-                msg.trim()) : msg.trim();
+        msg = new StringBuilder(player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Dashboard.chatUtil.removeCaps(player,
+                msg.toString().trim()) : msg.toString().trim());
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.containsSwear(player, msg) || Dashboard.chatUtil.isAdvert(player, msg)
-                    || Dashboard.chatUtil.spamCheck(player, msg) || Dashboard.chatUtil.containsUnicode(player, msg)) {
+            if (Dashboard.chatUtil.containsSwear(player, msg.toString()) || Dashboard.chatUtil.isAdvert(player, msg.toString())
+                    || Dashboard.chatUtil.spamCheck(player, msg.toString()) || Dashboard.chatUtil.containsUnicode(player, msg.toString())) {
                 return;
             }
-            String mm = msg.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
+            String mm = msg.toString().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
                 player.sendMessage(ChatColor.RED + "Please do not ask for Skype information!");
                 return;
             }
         }
-        party.chat(player, msg);
+        party.chat(player, msg.toString());
         Dashboard.chatUtil.logMessage(player.getUniqueId(), "/pchat " + party.getLeader().getName() + " " + msg);
     }
 

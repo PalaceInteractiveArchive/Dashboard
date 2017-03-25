@@ -35,11 +35,11 @@ public class ChatUtil {
     private Pattern linkPattern = Pattern.compile("((\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?)|(([0-9a-z:/]+(\\.|\\(dot\\)\\(\\.\\" +
             ")))+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|" +
             "af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc" +
-            "|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|f" +
+            "|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|f" +
             "r|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|" +
-            "je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mn|mn" +
+            "je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml" +
             "|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|" +
-            "pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj" +
+            "pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj" +
             "|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-" +
             "9]+)?((/([~0-9a-zA-Z#+%@./_-]+))?(/[0-9a-zA-Z+%@/&\\[\\];=_-]+)?)?)\\b");
     private HashMap<UUID, List<String>> messages = new HashMap<>();
@@ -61,7 +61,7 @@ public class ChatUtil {
                             amount++;
                         }
                     }
-                    String statement = "INSERT INTO chat (user, message) VALUES ";
+                    StringBuilder statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
                     int i = 0;
                     HashMap<Integer, String> lastList = new HashMap<>();
                     for (Map.Entry<UUID, List<String>> entry : new HashSet<>(messages.entrySet())) {
@@ -69,16 +69,16 @@ public class ChatUtil {
                             continue;
                         }
                         for (String s : new ArrayList<>(messages.remove(entry.getKey()))) {
-                            statement += "(?, ?)";
+                            statement.append("(?, ?)");
                             if (((i / 2) + 1) < amount) {
-                                statement += ", ";
+                                statement.append(", ");
                             }
                             lastList.put(i += 1, entry.getKey().toString());
                             lastList.put(i += 1, s);
                         }
                     }
-                    statement += ";";
-                    PreparedStatement sql = connection.prepareStatement(statement);
+                    statement.append(";");
+                    PreparedStatement sql = connection.prepareStatement(statement.toString());
                     for (Map.Entry<Integer, String> entry : new HashSet<>(lastList.entrySet())) {
                         sql.setString(entry.getKey(), entry.getValue());
                     }
@@ -157,21 +157,21 @@ public class ChatUtil {
             player.afkAction();
         }
         boolean command = packet.getMessage().startsWith("/");
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         String[] l = packet.getMessage().split(" ");
         for (int i = 0; i < l.length; i++) {
             if (l[i].equals("") || l[i].equals(" ")) {
                 continue;
             }
             if (i < (l.length - 1)) {
-                msg += l[i] + " ";
+                msg.append(l[i]).append(" ");
                 continue;
             }
-            msg += l[i];
+            msg.append(l[i]);
         }
         if (command) {
-            if (!Dashboard.commandUtil.handleCommand(player, msg.replaceFirst("/", ""))) {
-                String s = msg.toLowerCase().replaceFirst("/", "");
+            if (!Dashboard.commandUtil.handleCommand(player, msg.toString().replaceFirst("/", ""))) {
+                String s = msg.toString().toLowerCase().replaceFirst("/", "");
                 if (rank.getRankId() < Rank.KNIGHT.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
                         s.startsWith("/eval") || s.startsWith("/evaluate") || s.startsWith("/solve") ||
                         s.startsWith("worldedit:/calc") || s.startsWith("worldedit:/calculate") ||
@@ -180,13 +180,13 @@ public class ChatUtil {
                     player.sendMessage(ChatColor.RED + "That command is disabled.");
                     return;
                 }
-                player.chat(msg);
+                player.chat(msg.toString());
             }
             return;
         }
         if (!enoughTime(player)) {
             player.sendMessage(ChatColor.DARK_AQUA + "New Guests must be on the server for at least 15 minutes before " +
-                    "talking in chat. Learn more at mcmagic.us/rules#chat");
+                    "talking in chat. Learn more at palnet.us/rules");
             return;
         }
         if (isMuted(player)) {
@@ -208,7 +208,7 @@ public class ChatUtil {
                 return;
             }
             time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
-            msg = removeCaps(player, msg);
+            msg = new StringBuilder(removeCaps(player, msg.toString()));
             if (containsSwear(player, packet.getMessage()) || isAdvert(player, packet.getMessage()) ||
                     spamCheck(player, packet.getMessage()) || containsUnicode(player, packet.getMessage())) {
                 return;
@@ -221,15 +221,15 @@ public class ChatUtil {
             }
             //Duplicate Message Check
             if (messageCache.containsKey(player.getUniqueId())) {
-                if (msg.equalsIgnoreCase(messageCache.get(player.getUniqueId()))) {
+                if (msg.toString().equalsIgnoreCase(messageCache.get(player.getUniqueId()))) {
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Please do not repeat the same message!");
                     return;
                 }
             }
-            messageCache.put(player.getUniqueId(), msg);
+            messageCache.put(player.getUniqueId(), msg.toString());
         } else {
-            if (msg.startsWith(":warn-")) {
-                Dashboard.warningUtil.handle(player, msg);
+            if (msg.toString().startsWith(":warn-")) {
+                Dashboard.warningUtil.handle(player, msg.toString());
                 return;
             }
         }
@@ -246,7 +246,7 @@ public class ChatUtil {
                     return;
             }
         }
-        sendChat(player, msg);
+        sendChat(player, msg.toString());
     }
 
     private boolean enoughTime(Player player) {
@@ -364,12 +364,12 @@ public class ChatUtil {
             }
         }
         if (!blocked.isEmpty()) {
-            String text = "Your message contains blocked characters! Click to read more about why your message was blocked.\n\nThe following character" +
-                    (blocked.size() > 1 ? "s were" : " was") + " blocked:";
+            StringBuilder text = new StringBuilder("Your message contains blocked characters! Click to read more about why your message was blocked.\n\nThe following character" +
+                    (blocked.size() > 1 ? "s were" : " was") + " blocked:");
             for (Character c : blocked) {
-                text += "\n- '" + c.toString() + "'";
+                text.append("\n- '").append(c.toString()).append("'");
             }
-            PacketLink packet = new PacketLink(player.getUniqueId(), "https://mcmagic.us/help/faq#blocked-chars", text,
+            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palnet.us/help/faq#blocked-chars", text.toString(),
                     ChatColor.AQUA, false);
             player.send(packet);
             return true;
@@ -429,15 +429,15 @@ public class ChatUtil {
         }
         if (Math.floor((double) (100 * (((float) amount) / size))) >= 50.0) {
             player.sendMessage(ChatColor.RED + "Please do not use a lot of capitals in your messages.");
-            String s = "";
+            StringBuilder s = new StringBuilder();
             for (int i = 0; i < msg.length(); i++) {
                 if (i == 0) {
-                    s += msg.charAt(0);
+                    s.append(msg.charAt(0));
                     continue;
                 }
-                s += Character.toLowerCase(msg.charAt(i));
+                s.append(Character.toLowerCase(msg.charAt(i)));
             }
-            return s;
+            return s.toString();
         }
         return msg;
     }
@@ -448,7 +448,7 @@ public class ChatUtil {
         }
         Character last = null;
         int amount = 0;
-        String word = "";
+        StringBuilder word = new StringBuilder();
         boolean spam = false;
         for (char c : msg.toCharArray()) {
             if (last == null) {
@@ -456,10 +456,10 @@ public class ChatUtil {
                 continue;
             }
             if (c == ' ') {
-                if (Dashboard.getPlayer(word.trim()) != null) {
+                if (Dashboard.getPlayer(word.toString().trim()) != null) {
                     spam = false;
                 }
-                word = "";
+                word = new StringBuilder();
                 continue;
             }
             if (c == last) {
@@ -471,9 +471,9 @@ public class ChatUtil {
                 spam = true;
             }
             last = c;
-            word += c;
+            word.append(c);
         }
-        if (Dashboard.getPlayer(word.trim()) != null) {
+        if (Dashboard.getPlayer(word.toString().trim()) != null) {
             spam = false;
         }
         if (spam) {
@@ -482,13 +482,13 @@ public class ChatUtil {
         }
         int numamount = 0;
         spam = false;
-        word = "";
+        word = new StringBuilder();
         for (char c : msg.toCharArray()) {
             if (c == ' ') {
-                if (Dashboard.getPlayer(word.trim()) != null) {
+                if (Dashboard.getPlayer(word.toString().trim()) != null) {
                     spam = false;
                 }
-                word = "";
+                word = new StringBuilder();
                 continue;
             }
             if (isInt(c)) {
@@ -497,9 +497,9 @@ public class ChatUtil {
             if (numamount >= 8) {
                 spam = true;
             }
-            word += c;
+            word.append(c);
         }
-        if (Dashboard.getPlayer(word.trim()) != null) {
+        if (Dashboard.getPlayer(word.toString().trim()) != null) {
             spam = false;
         }
         if (spam) {

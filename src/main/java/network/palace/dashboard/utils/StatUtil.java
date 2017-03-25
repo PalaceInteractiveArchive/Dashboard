@@ -27,7 +27,7 @@ public class StatUtil {
                 }
                 Dashboard.schedulerManager.runAsync(() -> setValue(playerCount));
             }
-        }, 0, 60000);
+        }, 600000, 60000);
     }
 
     private void setValue(int value) {
