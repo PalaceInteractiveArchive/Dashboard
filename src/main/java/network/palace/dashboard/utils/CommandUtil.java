@@ -68,6 +68,7 @@ public class CommandUtil {
         register("unban", new Commandunban());
         register("unbanip", new Commandunbanip());
         register("unmute", new Commandunmute());
+        register("updatehashes", new Commandupdatehashes());
         register("uptime", new Commanduptime());
         register("whereami", new Commandwhereami());
     }
