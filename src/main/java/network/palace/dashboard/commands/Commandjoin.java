@@ -1,11 +1,11 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.packets.dashboard.PacketJoinCommand;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.packets.dashboard.PacketJoinCommand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,36 +67,34 @@ public class Commandjoin extends MagicCommand {
     }
 
     private String formatName(String s) {
-        String ns = "";
+        StringBuilder ns = new StringBuilder();
         if (s.replaceAll("\\d", "").length() < 4) {
             for (char c : s.toCharArray()) {
-                ns += Character.toString(Character.toUpperCase(c));
+                ns.append(Character.toString(Character.toUpperCase(c)));
             }
-            return ns;
+            return ns.toString();
         }
         Character last = null;
         for (char c : s.toCharArray()) {
             if (last == null) {
                 last = c;
-                ns += Character.toString(Character.toUpperCase(c));
+                ns.append(Character.toString(Character.toUpperCase(c)));
                 continue;
             }
             if (Character.toString(last).equals(" ")) {
-                ns += Character.toString(Character.toUpperCase(c));
+                ns.append(Character.toString(Character.toUpperCase(c)));
             } else {
-                ns += Character.toString(c);
+                ns.append(Character.toString(c));
             }
             last = c;
         }
-        return ns;
+        return ns.toString();
     }
 
     @Override
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         List<String> list = new ArrayList<>();
-        for (String s : Dashboard.getJoinServers()) {
-            list.add(s);
-        }
+        list.addAll(Dashboard.getJoinServers());
         Collections.sort(list);
         if (args.size() == 0) {
             return list;

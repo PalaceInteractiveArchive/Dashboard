@@ -27,21 +27,24 @@ public class Commandban extends MagicCommand {
             banner.sendMessage(ChatColor.RED + "I can't find that player!");
             return;
         }
-        String r = "";
+        StringBuilder r = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            r += args[i] + " ";
+            r.append(args[i]).append(" ");
         }
         String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
-        reason = reason.trim();
-        if (Dashboard.sqlUtil.isBannedPlayer(uuid)) {
-            banner.sendMessage(ChatColor.RED + "This player is already banned! Unban them to change the reason.");
-            return;
-        }
-        Dashboard.sqlUtil.banPlayer(uuid, reason, true, new Date(System.currentTimeMillis()), banner.getName());
-        Player tp = Dashboard.getPlayer(uuid);
-        if (tp != null) {
-            tp.kickPlayer(ChatColor.RED + "You Have Been Banned For " + ChatColor.AQUA + reason);
-        }
-        Dashboard.moderationUtil.announceBan(new Ban(uuid, playername, true, System.currentTimeMillis(), reason, banner.getName()));
+        String finalReason = reason.trim();
+        Dashboard.schedulerManager.runAsync(() -> {
+            if (Dashboard.sqlUtil.isBannedPlayer(uuid)) {
+                banner.sendMessage(ChatColor.RED + "This player is already banned! Unban them to change the reason.");
+                return;
+            }
+            Dashboard.sqlUtil.banPlayer(uuid, finalReason, true, new Date(System.currentTimeMillis()), banner.getName());
+            Player tp = Dashboard.getPlayer(uuid);
+            if (tp != null) {
+                tp.kickPlayer(ChatColor.RED + "You Have Been Banned For " + ChatColor.AQUA + finalReason);
+            }
+            Dashboard.moderationUtil.announceBan(new Ban(uuid, playername, true, System.currentTimeMillis(),
+                    finalReason, banner.getName()));
+        });
     }
 }

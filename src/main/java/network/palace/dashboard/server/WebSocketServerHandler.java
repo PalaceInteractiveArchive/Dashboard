@@ -818,7 +818,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             }
             case INSTANCE: {
                 String name = dash.getServerName();
-                Server s = Dashboard.getServer(name);
+                Server s = Dashboard.getServer(name, true);
+                if (s == null) {
+                    return;
+                }
                 String running = "";
                 if (!s.getServerType().equals(s.getName())) {
                     running = " running " + s.getServerType();

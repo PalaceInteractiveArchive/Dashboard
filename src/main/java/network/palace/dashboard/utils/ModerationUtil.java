@@ -3,10 +3,66 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.handlers.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Created by Marc on 8/20/16
  */
 public class ModerationUtil {
+
+    public ModerationUtil() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                    PreparedStatement bans = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE active=1 AND permanent=0 AND `release`<=NOW();");
+                    int banCount = bans.executeUpdate();
+                    bans.close();
+//                    PreparedStatement bans = connection.prepareStatement("SELECT count(*) FROM banned_players WHERE active=1 AND permanent=0 AND `release`<=NOW();");
+//                    ResultSet result1 = bans.executeQuery();
+//                    int banCount = 0;
+//                    if (result1.next()) {
+//                        banCount = result1.getInt("count(*)");
+//                    }
+//                    result1.close();
+                    bans.close();
+                    if (banCount != 0) {
+                        sendMessage(ChatColor.YELLOW + "" + banCount + ChatColor.GREEN +
+                                (banCount == 1 ? " ban that expired was removed" : " bans that expired were removed"));
+                    }
+
+                    PreparedStatement mutes = connection.prepareStatement("UPDATE muted_players SET active=0 WHERE active=1 AND `release`<=NOW();");
+                    int muteCount = mutes.executeUpdate();
+                    mutes.close();
+//                    PreparedStatement mutes = connection.prepareStatement("SELECT count(*) FROM muted_players WHERE active=1 AND `release`<=NOW();");
+//                    ResultSet result2 = mutes.executeQuery();
+//                    int muteCount = 0;
+//                    if (result2.next()) {
+//                        muteCount = result2.getInt("count(*)");
+//                    }
+//                    result2.close();
+//                    mutes.close();
+                    if (muteCount != 0) {
+                        sendMessage(ChatColor.YELLOW + "" + muteCount + ChatColor.GREEN +
+                                (muteCount == 1 ? " mute that expired was removed" : " mutes that expired were removed"));
+                        for (Player tp : Dashboard.getOnlinePlayers()) {
+                            Mute m = tp.getMute();
+                            if (m.isMuted() && m.getRelease() <= System.currentTimeMillis()) {
+                                m.setMuted(false);
+                            }
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 60000L, 600000L);
+    }
 
     public void announceBan(Ban ban) {
         sendMessage(ChatColor.GREEN + ban.getName() + ChatColor.RED + " was banned by " + ChatColor.GREEN +

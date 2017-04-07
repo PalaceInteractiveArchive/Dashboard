@@ -31,9 +31,9 @@ public class Commandmute extends MagicCommand {
         }
         Dashboard.schedulerManager.runAsync(() -> {
             String reason = "";
-            String r = "";
+            StringBuilder r = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                r += args[i] + " ";
+                r.append(args[i]).append(" ");
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
             String source = player.getName();
@@ -43,6 +43,10 @@ public class Commandmute extends MagicCommand {
                 uuid = Dashboard.sqlUtil.uuidFromUsername(username);
             } else {
                 uuid = tp.getUniqueId();
+                if (tp.getMute().isMuted()) {
+                    player.sendMessage(ChatColor.RED + "This player is already muted! Unmute them to change the reason/duration.");
+                    return;
+                }
             }
             Mute mute = new Mute(uuid, username, true, muteTimestamp, reason, source);
             if (tp != null) {

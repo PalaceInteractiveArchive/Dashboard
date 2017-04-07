@@ -185,9 +185,7 @@ public class Dashboard {
             HashMap<Rank, List<UUID>> staff = Dashboard.sqlUtil.getPlayersByRanks(Rank.SQUIRE, Rank.ARCHITECT,
                     Rank.KNIGHT, Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
-                for (UUID uuid : entry.getValue()) {
-                    maintenanceWhitelist.add(uuid);
-                }
+                maintenanceWhitelist.addAll(entry.getValue());
             }
         }
     }
@@ -290,8 +288,12 @@ public class Dashboard {
     }
 
     public static Server getServer(String server) {
+        return getServer(server, false);
+    }
+
+    public static Server getServer(String server, boolean noTarget) {
         Server s = serverUtil.getServer(server);
-        if (s == null) {
+        if (s == null && !noTarget) {
             return serverUtil.getServer(targetServer);
         }
         return s;
