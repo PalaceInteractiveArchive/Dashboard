@@ -5,7 +5,6 @@ import network.palace.dashboard.handlers.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,6 +18,9 @@ public class ModerationUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
+                if (Dashboard.isTestNetwork()) {
+                    return;
+                }
                 try (Connection connection = Dashboard.sqlUtil.getConnection()) {
                     PreparedStatement bans = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE active=1 AND permanent=0 AND `release`<=NOW();");
                     int banCount = bans.executeUpdate();
