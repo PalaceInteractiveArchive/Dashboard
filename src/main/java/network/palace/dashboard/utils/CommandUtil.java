@@ -62,6 +62,7 @@ public class CommandUtil {
         register("send", new Commandsend());
         register("server", new Commandserver());
         register("social", new Commandsocial());
+        register("staff", new Commandstaff());
         register("stafflist", new Commandstafflist());
         register("store", new Commandstore());
         register("tempban", new Commandtempban());

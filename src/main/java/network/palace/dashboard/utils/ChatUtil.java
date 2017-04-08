@@ -157,6 +157,15 @@ public class ChatUtil {
             player.afkAction();
         }
         boolean command = packet.getMessage().startsWith("/");
+        if (player.isDisabled()) {
+            if (command) {
+                String m = packet.getMessage().replaceFirst("/", "");
+                if (m.startsWith("staff")) {
+                    Dashboard.commandUtil.handleCommand(player, m);
+                }
+            }
+            return;
+        }
         StringBuilder msg = new StringBuilder();
         String[] l = packet.getMessage().split(" ");
         for (int i = 0; i < l.length; i++) {
@@ -288,7 +297,7 @@ public class ChatUtil {
             String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getName() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : Dashboard.getOnlinePlayers()) {
-                if (tp.isNewGuest()) {
+                if (tp.isNewGuest() || tp.isDisabled()) {
                     continue;
                 }
                 if (Dashboard.getServer(tp.getServer()).isPark()) {
@@ -550,7 +559,7 @@ public class ChatUtil {
 
     public void staffChatMessage(String msg) {
         for (Player player : Dashboard.getOnlinePlayers()) {
-            if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId() && !player.isDisabled()) {
                 try {
                     player.sendMessage(msg);
                 } catch (Exception ignored) {
@@ -564,7 +573,7 @@ public class ChatUtil {
             String msg = ChatColor.WHITE + from.getName() + ": /" + command + " " + to.getName() + " " + message;
             for (Player tp : Dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId())) {
+                        tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
                 if (Dashboard.getServer(tp.getServer()).isPark()) {
@@ -575,7 +584,7 @@ public class ChatUtil {
             String server = from.getServer();
             for (Player tp : Dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId())) {
+                        tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
                 if (tp.getServer().equals(server)) {
@@ -591,7 +600,7 @@ public class ChatUtil {
                     " " + message;
             for (Player tp : Dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        party.getMembers().contains(tp.getUniqueId())) {
+                        party.getMembers().contains(tp.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
                 if (Dashboard.getServer(tp.getServer()).isPark()) {
@@ -602,7 +611,7 @@ public class ChatUtil {
             String server = player.getServer();
             for (Player tp : Dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
-                        party.getMembers().contains(tp.getUniqueId())) {
+                        party.getMembers().contains(tp.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
                 if (tp.getServer().equals(server)) {

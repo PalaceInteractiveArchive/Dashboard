@@ -277,6 +277,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (Dashboard.serverUtil.getServer(tp.getServer()) == null) {
                     Dashboard.serverUtil.getServer(target).changeCount(1);
                     tp.setServer(target);
+                    if (tp.isDisabled()) {
+                        PacketDisablePlayer dis = new PacketDisablePlayer(tp.getUniqueId(), true);
+                        Dashboard.getInstance(target).send(dis);
+                        /**
+                         * /staff login pw
+                         * /staff change oldpw newpw
+                         */
+                    }
                     if (Dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
                         tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
@@ -772,6 +780,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 Player tp = Dashboard.getPlayer(uuid);
                 boolean exists = tp != null;
                 channel.send(new PacketConfirmPlayer(uuid, exists));
+                break;
             }
         }
     }

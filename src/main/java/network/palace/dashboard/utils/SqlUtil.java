@@ -8,6 +8,8 @@ import network.palace.dashboard.discordSocket.DiscordDatabaseInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
+import network.palace.dashboard.slack.SlackAttachment;
+import network.palace.dashboard.slack.SlackMessage;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -99,9 +101,13 @@ public class SqlUtil {
                     player.send(packet);
                 }
                 boolean needsUpdate = false;
-                if (!player.getAddress().equals(result.getString("ipAddress")) || !player.getName().equals(result.getString("username"))) {
+                boolean ipUpdate = !player.getAddress().equals(result.getString("ipAddress"));
+                boolean disable = ipUpdate && rank.getRankId() >= Rank.SQUIRE.getRankId();
+                final String oldIP = result.getString("ipAddress");
+                if (ipUpdate || !player.getName().equals(result.getString("username"))) {
                     needsUpdate = true;
                 }
+                player.setDisabled(disable);
                 player.setRank(rank);
                 player.setToggled(result.getInt("toggled") == 1);
                 player.setMentions(result.getInt("mentions") == 1);
@@ -155,6 +161,16 @@ public class SqlUtil {
                 }
                 Mute mute = getMute(player.getUniqueId(), player.getName());
                 player.setMute(mute);
+                if (disable) {
+                    SlackMessage m = new SlackMessage("");
+                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getName() +
+                            " connected from a new IP address " + player.getAddress());
+                    a.color("warning");
+                    Dashboard.slackUtil.sendDashboardMessage(m, Arrays.asList(a), false);
+                    player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
+                            "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
+                            "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -359,15 +375,15 @@ public class SqlUtil {
             if (uuids.isEmpty()) {
                 return map;
             }
-            String query = "SELECT username,uuid FROM player_data WHERE uuid=";
+            StringBuilder query = new StringBuilder("SELECT username,uuid FROM player_data WHERE uuid=");
             for (int i = 0; i < uuids.size(); i++) {
                 if (i >= (uuids.size() - 1)) {
-                    query += "?";
+                    query.append("?");
                 } else {
-                    query += "? or uuid=";
+                    query.append("? or uuid=");
                 }
             }
-            PreparedStatement sql2 = connection.prepareStatement(query);
+            PreparedStatement sql2 = connection.prepareStatement(query.toString());
             for (int i = 1; i < (uuids.size() + 1); i++) {
                 sql2.setString(i, uuids.get(i - 1).toString());
             }
@@ -406,11 +422,11 @@ public class SqlUtil {
     public HashMap<Rank, List<UUID>> getPlayersByRanks(Rank... ranks) {
         HashMap<Rank, List<UUID>> map = new HashMap<>();
         try (Connection connection = getConnection()) {
-            String q = "SELECT uuid,rank FROM player_data WHERE rank=?";
+            StringBuilder q = new StringBuilder("SELECT uuid,rank FROM player_data WHERE rank=?");
             for (int i = 1; i < ranks.length; i++) {
-                q += " OR rank=?";
+                q.append(" OR rank=?");
             }
-            PreparedStatement sql = connection.prepareStatement(q);
+            PreparedStatement sql = connection.prepareStatement(q.toString());
             for (int i = 1; i <= ranks.length; i++) {
                 sql.setString(i, ranks[i - 1].getSqlName());
             }
@@ -833,6 +849,56 @@ public class SqlUtil {
             sql.setString(4, data.getRegionName());
             sql.setString(5, data.getTimezone());
             sql.setString(6, uuid.toString());
+            sql.execute();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Password Methods
+     */
+
+    public boolean verifyPassword(UUID uuid, String pass) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT password FROM staffpasswords WHERE uuid=?");
+            sql.setString(1, uuid.toString());
+            ResultSet result = sql.executeQuery();
+            if (!result.next()) {
+                result.close();
+                sql.close();
+                return false;
+            }
+            String hashed = result.getString("password");
+            result.close();
+            sql.close();
+            return Dashboard.passwordUtil.validPassword(pass, hashed);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void changePassword(UUID uuid, String pass) {
+        String salt = Dashboard.passwordUtil.getNewSalt();
+        String hashed = Dashboard.passwordUtil.hashPassword(pass, salt);
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("UPDATE staffpasswords SET password=? WHERE uuid=?");
+            sql.setString(1, hashed);
+            sql.setString(2, uuid.toString());
+            sql.execute();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setPassword(UUID uuid, String pass) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("INSERT INTO staffpasswords (uuid,password) VALUES (?,?)");
+            sql.setString(1, uuid.toString());
+            sql.setString(2, pass);
             sql.execute();
             sql.close();
         } catch (SQLException e) {

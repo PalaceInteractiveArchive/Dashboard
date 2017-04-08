@@ -41,6 +41,7 @@ public class Player {
     private String channel = "all";
     private long afkTime = System.currentTimeMillis();
     private boolean isAFK = false;
+    private boolean disabled = false;
 
     public Player(UUID uuid, String username, String address, String server, UUID bungeeID) {
         this.uuid = uuid;
@@ -289,5 +290,13 @@ public class Player {
 
     public boolean isAFK() {
         return isAFK;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
     }
 }

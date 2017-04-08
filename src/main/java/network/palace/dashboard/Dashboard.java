@@ -82,6 +82,7 @@ public class Dashboard {
 
     @Getter private static String socketURL = "";
     @Getter private static SocketConnection socketConnection;
+    public static PasswordUtil passwordUtil;
 
     public static void main(String[] args) throws IOException {
         startTime = System.currentTimeMillis();
@@ -119,6 +120,7 @@ public class Dashboard {
         partyUtil = new PartyUtil();
         slackUtil = new SlackUtil();
         warningUtil = new WarningUtil();
+        passwordUtil = new PasswordUtil();
         try {
             siteUtil = new SiteUtil();
         } catch (Exception e) {

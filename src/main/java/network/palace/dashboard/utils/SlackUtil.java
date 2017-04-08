@@ -20,10 +20,22 @@ public class SlackUtil {
     }
 
     public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments) {
+        sendDashboardMessage(msg, attachments, true);
+    }
+
+    public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments, boolean status) {
         if (Dashboard.isTestNetwork()) {
             return;
         }
-        String webhook = "https://hooks.slack.com/services/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";
+        for (SlackAttachment a : attachments) {
+            a.addMarkdownIn("text");
+        }
+        String webhook;
+        if (status) {
+            webhook = "https://hooks.slack.com/services/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";
+        } else {
+            webhook = "https://hooks.slack.com/services/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";
+        }
         try {
             s.push(webhook, msg, attachments);
         } catch (IOException e) {
