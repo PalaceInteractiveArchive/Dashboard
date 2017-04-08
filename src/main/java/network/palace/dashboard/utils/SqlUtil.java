@@ -68,19 +68,32 @@ public class SqlUtil {
         Dashboard.activityUtil = new ActivityUtil(new BoneCP(mymcm));
     }
 
+
+    /**
+     * Get a mysql connection from the connection pool
+     * @return A new connection
+     * @throws SQLException
+     */
     public Connection getConnection() throws SQLException {
         return connectionPool.getConnection();
     }
 
+    /**
+     * Stop all mysql connections
+     */
     public void stop() {
         connectionPool.shutdown();
         Dashboard.activityUtil.stop();
     }
 
-    /**
-     * Player Methods
-     */
+    //
+    // Player login methods
+    //
 
+    /**
+     * Register a player
+     * @param player The player to register
+     */
     public void login(final Player player) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -98,9 +111,9 @@ public class SqlUtil {
                     PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
                     player.send(packet);
                 }
-                boolean needsUpdate = false;
+                boolean shouldUpdate = false;
                 if (!player.getAddress().equals(result.getString("ipAddress")) || !player.getName().equals(result.getString("username"))) {
-                    needsUpdate = true;
+                    shouldUpdate = true;
                 }
                 player.setRank(rank);
                 player.setToggled(result.getInt("toggled") == 1);
@@ -109,10 +122,10 @@ public class SqlUtil {
                 player.setNewGuest(result.getInt("tutorial") != 1);
                 Dashboard.addPlayer(player);
                 Dashboard.addToCache(player.getUniqueId(), player.getName());
-                String u = result.getString("username");
+                String u= result.getString("username");
                 result.close();
                 sql.close();
-                if (needsUpdate) {
+                if (shouldUpdate) {
                     update(player, connection, !player.getName().equals(u));
                 }
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
@@ -426,6 +439,8 @@ public class SqlUtil {
                     map.get(rank).add(uuid);
                 }
             }
+            sql.close();
+            result.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -546,6 +561,12 @@ public class SqlUtil {
         }
     }
 
+    /**
+     * Get an ip ban
+     *
+     * @param address ip to find
+     * @return the ban
+     */
     public AddressBan getAddressBan(String address) {
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("SELECT ipAddress,reason,source FROM banned_ips WHERE ipAddress=? AND active=1;");
@@ -565,6 +586,11 @@ public class SqlUtil {
         }
     }
 
+    /**
+     * Unban a player
+     *
+     * @param uuid the uuid of the player to unban
+     */
     public void unbanPlayer(final UUID uuid) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -578,6 +604,11 @@ public class SqlUtil {
         });
     }
 
+    /**
+     * Unban an IP
+     *
+     * @param address ip to unban
+     */
     public void unbanIP(final String address) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -591,10 +622,17 @@ public class SqlUtil {
         });
     }
 
-    /**
-     * Mute Methods
+    /*
+      Mute Methods
      */
 
+    /**
+     * Get a player's mute information
+     *
+     * @param uuid the uuid of the player to get information from
+     * @param username the username of the player
+     * @return mute information for the player
+     */
     public Mute getMute(UUID uuid, String username) {
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
@@ -621,6 +659,11 @@ public class SqlUtil {
         }
     }
 
+    /**
+     * Mute a player
+     *
+     * @param mute the mute information
+     */
     public void mutePlayer(Mute mute) {
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO muted_players (uuid,`release`,source,reason) VALUES (?,?,?,?)");
@@ -635,6 +678,12 @@ public class SqlUtil {
         }
     }
 
+    /**
+     * Is a player muted?
+     *
+     * @param uuid uuid of the player to check
+     * @return mute status
+     */
     public boolean isMuted(UUID uuid) {
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("SELECT active FROM muted_players WHERE uuid=? AND active=1");
@@ -656,6 +705,11 @@ public class SqlUtil {
         return false;
     }
 
+    /**
+     * Unmute a player
+     *
+     * @param uuid uuid of the player to unmute
+     */
     public void unmutePlayer(final UUID uuid) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -672,6 +726,11 @@ public class SqlUtil {
      * Kick Methods
      */
 
+    /**
+     * Log a new kick
+     *
+     * @param kick player kick information
+     */
     public void logKick(final Kick kick) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -691,6 +750,10 @@ public class SqlUtil {
      * Discord Methods
      */
 
+    /**
+     * Create a new discord link
+     * @param cacheInfo cached player
+     */
     public void insertDiscord(final DiscordCacheInfo cacheInfo) {
         Dashboard.schedulerManager.runAsync(() -> {
             Dashboard.getLogger().info("discord insert");
@@ -709,6 +772,10 @@ public class SqlUtil {
         });
     }
 
+    /**
+     * Remove a user from discord.
+     * @param cacheInfo Cached user
+     */
     public void selectAndRemoveDiscord(final DiscordCacheInfo cacheInfo) {
         Dashboard.schedulerManager.runAsync(() -> {
             SocketConnection.sendRemove(cacheInfo);
@@ -778,6 +845,11 @@ public class SqlUtil {
         });
     }
 
+    /**
+     * Remove a player from linked discords
+     *
+     * @param databaseInfo information about the player
+     */
     public void removeDiscord(final DiscordDatabaseInfo databaseInfo) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -799,24 +871,30 @@ public class SqlUtil {
         });
     }
 
+    /**
+     * Get a discord user from a player
+     *
+     * @param player The minecraft player
+     * @return the discord user
+     */
     public DiscordCacheInfo getUserFromPlayer(final Player player) {
         try (Connection connection = getConnection()) {
-            PreparedStatement useruuid = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
-            useruuid.setString(1, player.getUniqueId().toString());
-            ResultSet result = useruuid.executeQuery();
+            PreparedStatement uuid = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
+            uuid.setString(1, player.getUniqueId().toString());
+            ResultSet result = uuid.executeQuery();
             if (!result.next()) {
                 result.close();
-                useruuid.close();
+                uuid.close();
             } else {
                 if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
                     DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
                             new DiscordCacheInfo.Discord(result.getString("discordUsername")));
                     result.close();
-                    useruuid.close();
+                    uuid.close();
                     return info;
                 }
                 result.close();
-                useruuid.close();
+                uuid.close();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -824,6 +902,12 @@ public class SqlUtil {
         return null;
     }
 
+    /**
+     * Update a player's provider data
+     *
+     * @param uuid UUID of the player to update
+     * @param data the new provider data
+     */
     public void updateProviderData(UUID uuid, IPUtil.ProviderData data) {
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET isp=?,country=?,region=?,regionName=?,timezone=? WHERE uuid=?");
