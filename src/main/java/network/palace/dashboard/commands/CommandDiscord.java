@@ -25,8 +25,12 @@ public class CommandDiscord extends MagicCommand {
                     "Click for more information about Discord!", ChatColor.YELLOW, true);
             player.send(packet);
         } else if (args.length == 2 && args[0].equals("link")) {
-            if (args[1].contains("#") && args[1].matches("(.*)#(\\d+)")) {
-                DiscordUserInfo userInfo = new DiscordUserInfo(args[1], player.getName(), player.getUniqueId().toString(), player.getRank().toString());
+            StringBuilder fullName = new StringBuilder();
+            for (int i = 1; i < args.length; i++) {
+                fullName.append(args[i]);
+            }
+            if (fullName.toString().contains("#") && fullName.toString().matches("(.*)#(\\d+)")) {
+                DiscordUserInfo userInfo = new DiscordUserInfo(fullName.toString(), player.getName(), player.getUniqueId().toString(), player.getRank().toString());
                 SocketConnection.sendLink(userInfo);
             } else {
                 player.sendMessage(ChatColor.DARK_RED + "Please specify a valid Discord ID!");
