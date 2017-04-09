@@ -7,13 +7,8 @@ import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,27 +36,6 @@ public class Commandstaff extends MagicCommand {
         Dashboard.schedulerManager.runAsync(new Runnable() {
             @Override
             public void run() {
-                if (args.length == 1 && player.getName().equals("Legobuilder0813") && args[0].equals("temporary")) {
-                    HashMap<UUID, String> map = new HashMap<>();
-                    try (Connection connection = Dashboard.sqlUtil.getConnection()) {
-                        PreparedStatement sql = connection.prepareStatement("SELECT username,uuid FROM player_data WHERE rank='squire' OR rank='knight' OR rank='paladin' OR rank='wizard' OR rank='emperor' OR rank='empress' ORDER BY username DESC;");
-                        ResultSet result = sql.executeQuery();
-                        while (result.next()) {
-                            map.put(UUID.fromString(result.getString("uuid")), result.getString("username"));
-                        }
-                        result.close();
-                        sql.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    for (Map.Entry<UUID, String> entry : map.entrySet()) {
-                        String pass = randomString(8);
-                        System.out.println(entry.getValue() + " - " + pass);
-                        String hashed = Dashboard.passwordUtil.hashPassword(pass, Dashboard.passwordUtil.getNewSalt());
-                        Dashboard.sqlUtil.setPassword(entry.getKey(), hashed);
-                    }
-                    return;
-                }
                 if (args.length == 2 && args[0].equalsIgnoreCase("login")) {
                     if (!player.isDisabled()) {
                         player.sendMessage(ChatColor.GREEN + "You're already logged in!");
