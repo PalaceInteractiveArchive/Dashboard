@@ -111,8 +111,9 @@ public class Dashboard {
         loadJoinServers();
         if (testNetwork) {
             getLogger().info("Test network detected, disabling statistics collection!");
+        } else {
+            socketConnection = new SocketConnection();
         }
-        socketConnection = new SocketConnection();
 
         serverUtil = new ServerUtil();
         chatUtil = new ChatUtil();
