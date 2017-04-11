@@ -152,6 +152,9 @@ public class Player {
     }
 
     public Mute getMute() {
+        if (mute == null) {
+            return new Mute(uuid, username, false, System.currentTimeMillis(), "", "");
+        }
         return mute;
     }
 
