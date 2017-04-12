@@ -78,18 +78,23 @@ public class Party {
             Dashboard.getPlayer(leader).sendMessage(ChatColor.RED + "Parties larger than 25 players cannot be warped!");
             return;
         }
+
         String server = Dashboard.getPlayer(leader).getServer();
-        for (UUID tuuid : members) {
-            Player tp = Dashboard.getPlayer(tuuid);
-            if (tp == null) {
-                continue;
+        for (UUID uuid : members) {
+            if (uuid != leader) {
+                Player player = Dashboard.getPlayer(uuid);
+                if (player == null) {
+                    continue;
+                }
+                if (player.getUniqueId().equals(leader)) {
+                    continue;
+                }
+                Dashboard.serverUtil.sendPlayer(player, server);
+                messageMember(uuid, warpMessage, true);
+            } else {
+                messageMember(uuid, ChatColor.GOLD + "Warping your party to you...", false);
             }
-            if (tp.getUniqueId().equals(leader)) {
-                continue;
-            }
-            Dashboard.serverUtil.sendPlayer(tp, server);
         }
-        messageToAllMembers(warpMessage, true);
     }
 
     public boolean isLeader(Player player) {
@@ -117,6 +122,20 @@ public class Party {
             if (bars) {
                 tp.sendMessage(footerMessage);
             }
+        }
+    }
+
+    public void messageMember(UUID uuid, String message, boolean bars) {
+        Player player = Dashboard.getPlayer(uuid);
+        if (player == null) {
+            return;
+        }
+        if (bars) {
+            player.sendMessage(headerMessage);
+        }
+        player.sendMessage(message);
+        if (bars) {
+            player.sendMessage(footerMessage);
         }
     }
 
