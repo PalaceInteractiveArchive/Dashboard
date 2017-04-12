@@ -45,7 +45,6 @@ public class CommandUtil {
         register("motdrl", new Commandmotdrl());
         register("msg", new Commandmsg());
         register("msgtoggle", new Commandmsgtoggle());
-        register("mumble", new Commandmumble());
         register("mute", new Commandmute());
         register("mutechat", new Commandmutechat());
         register("namecheck", new Commandnamecheck());
@@ -53,7 +52,6 @@ public class CommandUtil {
         register("party", new Commandparty());
         register("parties", new Commandparties());
         register("pchat", new Commandpchat());
-        //register("pin", new CommandPin());
         register("pmtoggle", new Commandpmtoggle());
         register("processes", new Commandprocesses());
         register("reboot", new Commandreboot());
@@ -106,7 +104,7 @@ public class CommandUtil {
             execute(player, cmd, command, args);
             return true;
         } catch (Exception e) {
-            player.sendMessage(ChatColor.RED + "An internal error occured whilst executing this command.");
+            player.sendMessage(ChatColor.RED + "An internal error occurred whilst executing this command.");
             e.printStackTrace();
             return true;
         }

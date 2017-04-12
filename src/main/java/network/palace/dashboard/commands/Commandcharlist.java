@@ -24,9 +24,11 @@ public class Commandcharlist extends MagicCommand {
             if (tp.getRank().name().toLowerCase().contains("character")) {
                 String server = tp.getServer();
                 if (servers.containsKey(server)) {
-                    servers.get(server).add(tp.getName());
+                    List<String> characters = servers.get(server);
+                    characters.add(tp.getName());
+                    servers.replace(server, characters);
                 } else {
-                    servers.put(server, Arrays.asList(tp.getName()));
+                    servers.put(server, Collections.singletonList(tp.getName()));
                 }
             }
         }
@@ -35,16 +37,16 @@ public class Commandcharlist extends MagicCommand {
         } else {
             List<String> msgs = new ArrayList<>();
             for (Map.Entry<String, List<String>> entry : servers.entrySet()) {
-                String msg = ChatColor.GREEN + entry.getKey() + ": " + ChatColor.BLUE;
+                StringBuilder msg = new StringBuilder(ChatColor.GREEN + entry.getKey() + ": " + ChatColor.BLUE);
                 List<String> list = new ArrayList<>(entry.getValue());
                 for (int i = 0; i < list.size(); i++) {
                     String tp = list.get(i);
-                    msg += tp;
+                    msg.append(tp);
                     if (i < (list.size() - 1)) {
-                        msg += ",";
+                        msg.append(",");
                     }
                 }
-                msgs.add(msg);
+                msgs.add(msg.toString());
             }
             player.sendMessage(ChatColor.BLUE + "Online Characters:");
             for (String s : msgs) {
