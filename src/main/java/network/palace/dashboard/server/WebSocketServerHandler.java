@@ -275,19 +275,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (tp == null) {
                     return;
                 }
-                // Check if the destination is a minigame server
-                if (target.matches(minigameRegex)) {
-                    Party party = Dashboard.partyUtil.findPartyForPlayer(tp);
-                    // Are they the leader?
-                    if (!party.getLeader().getUniqueId().equals(tp.getUniqueId())) {
-                        // Yup, so send all the party members.
-                        party.getMembers().forEach(memberUUID -> {
-                            Player member = Dashboard.getPlayer(memberUUID);
-                            PacketSendToServer sendToServerPacket = new PacketSendToServer(memberUUID, target);
-                            member.send(sendToServerPacket);
-                        });
-                    }
-                }
                 // New connection
                 if (Dashboard.serverUtil.getServer(tp.getServer()) == null) {
                     Dashboard.serverUtil.getServer(target).changeCount(1);
@@ -426,6 +413,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 Dashboard.serverUtil.getServer(target).changeCount(1);
                 tp.setServer(target);
+
+                // Check if the destination is a minigame server
+                if (target.matches(minigameRegex)) {
+                    Party party = Dashboard.partyUtil.findPartyForPlayer(tp);
+                    if (party != null) {
+                        // Are they the leader?
+                        if (party.getLeader().getUniqueId().equals(tp.getUniqueId())) {
+                            // Yup, so send all the party members.
+                            party.warpToLeader();
+                        }
+                    }
+                }
+
                 break;
             }
             /**
