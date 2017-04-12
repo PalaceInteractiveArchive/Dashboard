@@ -91,8 +91,7 @@ public class Commandparty extends MagicCommand {
             }
             Dashboard.partyUtil.invitePlayer(party, tp);
             return;
-        }
-        if (args.length == 2) {
+        } else if (args.length == 2) {
             Party party = Dashboard.partyUtil.findPartyForPlayer(player);
             if (args[0].equalsIgnoreCase("takeover")) {
                 if (player.getRank().getRankId() < Rank.KNIGHT.getRankId()) {

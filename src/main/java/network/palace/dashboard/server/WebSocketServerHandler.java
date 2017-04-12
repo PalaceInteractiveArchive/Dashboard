@@ -36,6 +36,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private WebSocketServerHandshaker handshaker;
 
+    private final String minigameRegex = "mini-(\\w+)([1-9])";
+
     public static ChannelGroup getGroup() {
         return channels;
     }
@@ -280,7 +282,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (tp.isDisabled()) {
                         PacketDisablePlayer dis = new PacketDisablePlayer(tp.getUniqueId(), true);
                         Dashboard.getInstance(target).send(dis);
-                        /**
+                        /*
                          * /staff login pw
                          * /staff change oldpw newpw
                          */
@@ -411,6 +413,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 Dashboard.serverUtil.getServer(target).changeCount(1);
                 tp.setServer(target);
+
+                // Check if the destination is a minigame server
+                if (target.matches(minigameRegex)) {
+                    Party party = Dashboard.partyUtil.findPartyForPlayer(tp);
+                    if (party != null) {
+                        // Are they the leader?
+                        if (party.getLeader().getUniqueId().equals(tp.getUniqueId())) {
+                            // Yup, so send all the party members.
+                            party.warpToLeader();
+                        }
+                    }
+                }
+
                 break;
             }
             /**
@@ -497,7 +512,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (!s.getServerType().equals(s.getName())) {
                     running = " running " + s.getServerType();
                 }
-                if (!name.matches("[a-z]\\d{1,3}")) {
+                if (!name.matches(minigameRegex)) {
                     Dashboard.moderationUtil.sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                             ") has connected to Dashboard.");
                 }
@@ -836,7 +851,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     running = " running " + s.getServerType();
                 }
                 s.setOnline(false);
-                if (!name.matches("[a-z]\\d{1,3}")) {
+                if (!name.matches(minigameRegex)) {
                     Dashboard.moderationUtil.sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
                     SlackMessage m = new SlackMessage("");
