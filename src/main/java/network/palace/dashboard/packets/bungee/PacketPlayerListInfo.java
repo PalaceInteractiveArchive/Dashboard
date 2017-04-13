@@ -88,6 +88,9 @@ public class PacketPlayerListInfo extends BasePacket {
                         case "rank":
                             p.setRank(str);
                             break;
+                        case "mcversion":
+                            p.setMcVersion(Integer.parseInt(str));
+                            break;
                     }
                 }
             }
@@ -101,13 +104,15 @@ public class PacketPlayerListInfo extends BasePacket {
         private String address;
         private String server;
         private String rank;
+        private int mcVersion;
 
-        public Player(UUID uuid, String username, String address, String server, String rank) {
+        public Player(UUID uuid, String username, String address, String server, String rank, int mcVersion) {
             this.uuid = uuid;
             this.username = username;
             this.address = address;
             this.server = server;
             this.rank = rank;
+            this.mcVersion = mcVersion;
         }
 
         public Player() {
@@ -153,10 +158,18 @@ public class PacketPlayerListInfo extends BasePacket {
             this.rank = rank;
         }
 
+        public int getMcVersion() {
+            return mcVersion;
+        }
+
+        public void setMcVersion(int mcVersion) {
+            this.mcVersion = mcVersion;
+        }
+
         @Override
         public String toString() {
             return "Player{uuid=" + uuid.toString() + ",username=" + username + ",address=" + address + ",server=" +
-                    server + ",rank=" + rank + "}";
+                    server + ",rank=" + rank + ",mcversion=" + mcVersion + "}";
         }
     }
 }

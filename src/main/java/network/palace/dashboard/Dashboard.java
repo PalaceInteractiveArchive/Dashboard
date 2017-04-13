@@ -5,12 +5,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
+import network.palace.dashboard.commands.Commandstaff;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.packets.audio.PacketKick;
@@ -29,9 +27,7 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -92,6 +88,25 @@ public class Dashboard {
         getLogger().info("Starting up Dashboard...");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Dashboard.getLogger().warn("Shutting down Dashboard...");
+            for (Player p : getOnlinePlayers()) {
+                if (!p.getChannel().equalsIgnoreCase("all")) {
+                    p.setChannel("all");
+                    p.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
+                            ChatColor.GREEN + "channel");
+                }
+            }
+            File f = new File("parties.txt");
+            try {
+                f.createNewFile();
+                BufferedWriter bw = new BufferedWriter(new FileWriter(f, false));
+                for (Party p : partyUtil.getParties()) {
+                    bw.write(p.toString());
+                    bw.newLine();
+                }
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             voteUtil.stop();
             slackUtil.sendDashboardMessage(new SlackMessage(),
                     Arrays.asList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
@@ -341,6 +356,7 @@ public class Dashboard {
     }
 
     public static void logout(UUID uuid) {
+        Commandstaff.logout(uuid);
         Player player = getPlayer(uuid);
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {

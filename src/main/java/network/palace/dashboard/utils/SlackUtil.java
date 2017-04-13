@@ -24,7 +24,7 @@ public class SlackUtil {
     }
 
     public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments, boolean status) {
-        if (Dashboard.isTestNetwork()) {
+        if (Dashboard.isTestNetwork() && status) {
             return;
         }
         for (SlackAttachment a : attachments) {

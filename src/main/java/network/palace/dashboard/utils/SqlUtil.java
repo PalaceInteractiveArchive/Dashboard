@@ -86,7 +86,7 @@ public class SqlUtil {
     public void login(final Player player) {
         Dashboard.schedulerManager.runAsync(() -> {
             try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial FROM player_data WHERE uuid=?");
+                PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
                 sql.setString(1, player.getUniqueId().toString());
                 ResultSet result = sql.executeQuery();
                 if (!result.next()) {
@@ -104,7 +104,8 @@ public class SqlUtil {
                 boolean ipUpdate = !player.getAddress().equals(result.getString("ipAddress"));
                 boolean disable = ipUpdate && rank.getRankId() >= Rank.SQUIRE.getRankId();
                 final String oldIP = result.getString("ipAddress");
-                if (ipUpdate || !player.getName().equals(result.getString("username"))) {
+                if (ipUpdate || !player.getName().equals(result.getString("username")) ||
+                        player.getMcVersion() != result.getInt("mcversion")) {
                     needsUpdate = true;
                 }
                 player.setDisabled(disable);
@@ -116,10 +117,11 @@ public class SqlUtil {
                 Dashboard.addPlayer(player);
                 Dashboard.addToCache(player.getUniqueId(), player.getName());
                 String u = result.getString("username");
+                int v = result.getInt("mcversion");
                 result.close();
                 sql.close();
                 if (needsUpdate) {
-                    update(player, connection, !player.getName().equals(u));
+                    update(player, connection, !player.getName().equals(u), player.getMcVersion() != v);
                 }
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
@@ -177,7 +179,6 @@ public class SqlUtil {
         });
     }
 
-    //TODO Look into this problem
     private void newPlayer(Player player, Connection connection) throws SQLException {
         player.setNewGuest(true);
         PreparedStatement sql = connection.prepareStatement("INSERT INTO player_data (uuid, username, ipAddress) VALUES(?,?,?)");
@@ -189,16 +190,46 @@ public class SqlUtil {
         Dashboard.addPlayer(player);
     }
 
-    private void update(Player player, Connection connection, boolean username) throws SQLException {
-        PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET username=?,ipAddress=? WHERE uuid=?");
-        sql.setString(1, player.getName());
-        sql.setString(2, player.getAddress());
-        sql.setString(3, player.getUniqueId().toString());
-        sql.execute();
-        sql.close();
+    private void update(Player player, Connection connection, boolean username, boolean mcversion) throws SQLException {
+        if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (!username && !mcversion) {
+                return;
+            }
+            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET username=?,mcversion=? WHERE uuid=?");
+            sql.setString(1, player.getName());
+            sql.setInt(2, player.getMcVersion());
+            sql.setString(3, player.getUniqueId().toString());
+            sql.execute();
+            sql.close();
+        } else {
+            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET username=?,mcversion=?,ipAddress=? WHERE uuid=?");
+            sql.setString(1, player.getName());
+            sql.setInt(2, player.getMcVersion());
+            sql.setString(3, player.getAddress());
+            sql.setString(4, player.getUniqueId().toString());
+            sql.execute();
+            sql.close();
+        }
         if (username) {
             Dashboard.forum.updatePlayerName(player.getUniqueId().toString(), player.getName());
         }
+    }
+
+    public void updateStaffIP(Player player) {
+        Dashboard.schedulerManager.runAsync(new Runnable() {
+            @Override
+            public void run() {
+                try (Connection connection = getConnection()) {
+                    PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET ipAddress=? WHERE uuid=?");
+                    sql.setString(1, player.getAddress());
+                    sql.setString(2, player.getUniqueId().toString());
+                    sql.execute();
+                    sql.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void silentJoin(final Player player) {
@@ -874,6 +905,21 @@ public class SqlUtil {
             result.close();
             sql.close();
             return Dashboard.passwordUtil.validPassword(pass, hashed);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean hasPassword(UUID uuid) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT password FROM staffpasswords WHERE uuid=?");
+            sql.setString(1, uuid.toString());
+            ResultSet result = sql.executeQuery();
+            boolean has = result.next();
+            result.close();
+            sql.close();
+            return has;
         } catch (SQLException e) {
             e.printStackTrace();
         }

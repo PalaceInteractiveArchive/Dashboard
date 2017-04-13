@@ -68,7 +68,8 @@ public class Commandjoin extends MagicCommand {
 
     private String formatName(String s) {
         StringBuilder ns = new StringBuilder();
-        if (s.replaceAll("\\d", "").length() < 4) {
+        String t = s.replaceAll("\\d", "");
+        if (t.length() < 4 && !t.equalsIgnoreCase("hub")) {
             for (char c : s.toCharArray()) {
                 ns.append(Character.toString(Character.toUpperCase(c)));
             }

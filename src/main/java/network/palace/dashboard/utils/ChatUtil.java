@@ -415,6 +415,7 @@ public class ChatUtil {
         UUID id = UUID.randomUUID();
         String response = "Please to not attempt to advertise or share links.";
         Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
+        Dashboard.warningUtil.trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "advertises");
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;

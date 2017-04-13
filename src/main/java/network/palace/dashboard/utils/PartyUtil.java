@@ -1,10 +1,14 @@
 package network.palace.dashboard.utils;
 
+import com.google.gson.JsonParser;
+import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Party;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketPartyRequest;
 
+import java.io.File;
+import java.io.FileReader;
 import java.util.*;
 
 /**
@@ -13,6 +17,24 @@ import java.util.*;
 public class PartyUtil {
     public List<Party> partyList = new ArrayList<>();
     public HashMap<UUID, Party> timerList = new HashMap<>();
+
+    public PartyUtil() {
+        File f = new File("parties.txt");
+        if (!f.exists()) {
+            return;
+        }
+        try {
+            Scanner scanner = new Scanner(new FileReader(f));
+            while (scanner.hasNextLine()) {
+                String json = scanner.nextLine();
+                partyList.add(new Party(new JsonParser().parse(json).getAsJsonObject()));
+            }
+        } catch (Exception e) {
+            Dashboard.getLogger().error("An exception occurred while parsing parties.txt - " + e.getMessage());
+            e.printStackTrace();
+        }
+        f.delete();
+    }
 
     public Party findPartyForPlayer(Player player) {
         return findPartyForPlayer(player.getUniqueId());

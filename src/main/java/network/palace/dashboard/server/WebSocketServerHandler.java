@@ -219,7 +219,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 23: {
                 PacketPlayerJoin packet = new PacketPlayerJoin().fromJSON(object);
                 Player player = new Player(packet.getUniqueId(), packet.getUsername(), packet.getAddress(),
-                        packet.getServer(), channel.getBungeeID());
+                        packet.getServer(), channel.getBungeeID(), packet.getMcVersion());
                 if (Dashboard.getPlayer(player.getUniqueId()) != null) {
                     player.kickPlayer("You are already connected to The Palace Network!");
                     return;
@@ -606,7 +606,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             if (server.getServerType().equalsIgnoreCase("hub")) {
                                 target = Dashboard.serverUtil.getServerByType("Arcade");
                             } else {
-                                target = Dashboard.serverUtil.getServerByType("hub");
+                                target = Dashboard.serverUtil.getServerByType("Hub");
                             }
                         }
                         if (target == null) {
@@ -773,7 +773,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 List<Player> list = new ArrayList<>();
                 for (PacketPlayerListInfo.Player p : players) {
                     Player tp = new Player(p.getUniqueId(), p.getUsername(), p.getAddress(), p.getServer(),
-                            channel.getBungeeID());
+                            channel.getBungeeID(), p.getMcVersion());
                     tp.setRank(Rank.fromString(p.getRank()));
                     list.add(tp);
                     Dashboard.getServer(p.getServer()).changeCount(1);

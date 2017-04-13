@@ -21,6 +21,7 @@ public class Player {
     private String address;
     private String server;
     private UUID bungeeID;
+    private int mcVersion;
     private boolean newGuest = false;
     private Timer tutorial = null;
     private boolean toggled = true;
@@ -43,12 +44,13 @@ public class Player {
     private boolean isAFK = false;
     private boolean disabled = false;
 
-    public Player(UUID uuid, String username, String address, String server, UUID bungeeID) {
+    public Player(UUID uuid, String username, String address, String server, UUID bungeeID, int mcVersion) {
         this.uuid = uuid;
         this.username = username;
         this.address = address;
         this.server = server;
         this.bungeeID = bungeeID;
+        this.mcVersion = mcVersion;
     }
 
     public void sendMessage(String msg) {
@@ -301,5 +303,9 @@ public class Player {
 
     public boolean isDisabled() {
         return disabled;
+    }
+
+    public int getMcVersion() {
+        return mcVersion;
     }
 }

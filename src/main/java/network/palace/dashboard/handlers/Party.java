@@ -1,5 +1,8 @@
 package network.palace.dashboard.handlers;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import network.palace.dashboard.Dashboard;
 
 import java.util.ArrayList;
@@ -16,6 +19,20 @@ public class Party {
     public String footerMessage = ChatColor.GOLD + "-----------------------------------------------------";
     public String warpMessage = ChatColor.GREEN + "Your Party Leader has warped you to their server.";
     private UUID uuid = UUID.randomUUID();
+
+    public Party(JsonObject obj) {
+        UUID leader = UUID.fromString(obj.get("leader").getAsString());
+        List<UUID> members = new ArrayList<>();
+        JsonArray arr = obj.get("members").getAsJsonArray();
+        for (JsonElement e : arr) {
+            members.add(UUID.fromString(e.getAsString()));
+        }
+        this.leader = leader;
+        this.members = members;
+        if (!members.contains(leader)) {
+            members.add(leader);
+        }
+    }
 
     public Party(UUID leader, List<UUID> members) {
         this.leader = leader;
@@ -215,5 +232,17 @@ public class Party {
         }
         leader = player.getUniqueId();
         messageToAllMembers(ChatColor.YELLOW + player.getName() + " has taken over the Party!", true);
+    }
+
+    @Override
+    public String toString() {
+        JsonObject o = new JsonObject();
+        JsonArray arr = new JsonArray();
+        for (UUID uuid : getMembers()) {
+            arr.add(uuid.toString());
+        }
+        o.addProperty("leader", leader.toString());
+        o.add("members", arr);
+        return o.toString();
     }
 }

@@ -14,12 +14,14 @@ public class PacketPlayerJoin extends BasePacket {
     private String username;
     private String server;
     private String address;
+    private int mcVersion;
 
     public PacketPlayerJoin() {
-        this(null, "", "", "");
+        this(null, "", "", "", 0);
     }
 
-    public PacketPlayerJoin(UUID uuid, String username, String server, String address) {
+    public PacketPlayerJoin(UUID uuid, String username, String server, String address, int mcVersion) {
+        this.mcVersion = mcVersion;
         this.id = PacketID.Dashboard.PLAYERJOIN.getID();
         this.uuid = uuid;
         this.username = username;
@@ -43,8 +45,11 @@ public class PacketPlayerJoin extends BasePacket {
         return address;
     }
 
+    public int getMcVersion() {
+        return mcVersion;
+    }
+
     public PacketPlayerJoin fromJSON(JsonObject obj) {
-        this.id = obj.get("id").getAsInt();
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
@@ -53,6 +58,7 @@ public class PacketPlayerJoin extends BasePacket {
         this.username = obj.get("username").getAsString();
         this.server = obj.get("server").getAsString();
         this.address = obj.get("address").getAsString();
+        this.mcVersion = obj.get("mcVersion").getAsInt();
         return this;
     }
 
@@ -64,13 +70,10 @@ public class PacketPlayerJoin extends BasePacket {
             obj.addProperty("username", this.username);
             obj.addProperty("server", this.server);
             obj.addProperty("address", this.address);
+            obj.addProperty("mcVersion", this.mcVersion);
         } catch (Exception e) {
             return null;
         }
         return obj;
-    }
-
-    public String getRank() {
-        return null;
     }
 }
