@@ -4,7 +4,6 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.handlers.*;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 public class Commandparty extends MagicCommand {
 
@@ -155,41 +154,6 @@ public class Commandparty extends MagicCommand {
                     player.sendMessage("You're already the Leader!");
                 }
                 party.promote(player, tp);
-                return;
-            } else if (args[0].equalsIgnoreCase("info")) {
-                if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
-                    Player search = Dashboard.getPlayer(args[1]);
-                    if (search == null) {
-                        player.sendMessage(ChatColor.RED + "Cannot find the player: " + args[1]);
-                        return;
-                    }
-                    Party searchParty = Dashboard.partyUtil.findPartyForPlayer(search);
-                    if (searchParty == null) {
-                        player.sendMessage(ChatColor.YELLOW + args[1] + ChatColor.RED + " is not in a party!");
-                        return;
-                    }
-
-                    player.sendMessage(ChatColor.RED + "Party information for: " + search.getName());
-                    player.sendMessage(ChatColor.YELLOW + "Party leader: " + ChatColor.BLUE + searchParty.getLeader().getName());
-                    StringBuilder members = new StringBuilder();
-
-                    for (int i = 0; i < searchParty.getMembers().size(); i++) {
-                        UUID uuid = searchParty.getMembers().get(i);
-                        if (uuid == null) continue;
-                        Player member = Dashboard.getPlayer(uuid);
-                        if (member == null) continue;
-
-                        if (i != searchParty.getMembers().size() - 1) {
-                            members.append(ChatColor.GREEN).append(member.getName()).append(", ");
-                        } else {
-                            members.append(ChatColor.GREEN).append(member.getName()).append(".");
-                        }
-                    }
-
-                    player.sendMessage(ChatColor.YELLOW + "Members: " + members);
-                    return;
-                }
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You don't have permission to use this command!");
                 return;
             }
         }
