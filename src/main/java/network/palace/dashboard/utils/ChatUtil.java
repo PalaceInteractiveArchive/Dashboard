@@ -26,6 +26,7 @@ public class ChatUtil {
     private HashMap<Character, ChatColor> chars = new HashMap<>();
     private List<String> swearList = new ArrayList<>();
     private List<String> specificList = new ArrayList<>();
+    private List<String> spacesList = new ArrayList<>();
     private List<String> whitelist = new ArrayList<>();
     private List<String> allowedChars = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
@@ -96,19 +97,35 @@ public class ChatUtil {
             String line = br.readLine();
             boolean swears = false;
             boolean specific = false;
+            boolean spaces = false;
             while (line != null) {
+                boolean header = false;
                 if (line.startsWith("swears:")) {
                     swears = true;
                     specific = false;
+                    spaces = false;
+                    header = true;
                 }
                 if (line.startsWith("specific:")) {
                     swears = false;
                     specific = true;
+                    spaces = false;
+                    header = true;
                 }
-                if (swears) {
-                    swearList.add(line);
-                } else if (specific) {
-                    specificList.add(line);
+                if (line.startsWith("spaces:")) {
+                    swears = false;
+                    specific = false;
+                    spaces = true;
+                    header = true;
+                }
+                if (!header) {
+                    if (swears) {
+                        swearList.add(line);
+                    } else if (specific) {
+                        specificList.add(line);
+                    } else if (spaces) {
+                        spacesList.add(line);
+                    }
                 }
                 line = br.readLine();
             }
@@ -143,8 +160,8 @@ public class ChatUtil {
         }
         Rank rank = player.getRank();
         boolean special = rank.getRankId() >= Rank.SPECIALGUEST.getRankId();
-        boolean eme = rank.getRankId() >= Rank.SQUIRE.getRankId();
-        if (eme) {
+        boolean squire = rank.getRankId() >= Rank.SQUIRE.getRankId();
+        if (squire) {
             if (player.isAFK()) {
                 player.setAFK(false);
                 player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Your AFK Timer has been reset!");
@@ -201,7 +218,7 @@ public class ChatUtil {
         if (isMuted(player)) {
             return;
         }
-        if (!eme) {
+        if (!squire) {
             //Muted Chat Check
             String server = player.getServer();
             if (Dashboard.getServer(server).isPark()) {
@@ -330,10 +347,12 @@ public class ChatUtil {
 
     public boolean containsSwear(Player player, String msg) {
         boolean bool = false;
+        //omsg is the player's message with spaces
         final String omsg = msg.replace(".", "").replace("-", "")
                 .replace(",", "").replace("/", "").replace("()", "o")
                 .replace("0", "o").replace("_", "").replace("@", "a")
                 .replace("$", "s").replace(";", "");
+        //m is the player's message without spaces
         final String m = msg.replace(" ", "").replace(".", "")
                 .replace("-", "").replace(",", "").replace("/", "")
                 .replace("()", "o").replace("0", "o").replace("_", "")
@@ -344,9 +363,14 @@ public class ChatUtil {
                 break;
             }
         }
-        if (omsg.equalsIgnoreCase("ass") || omsg.toLowerCase().startsWith("ass ") || omsg.toLowerCase().endsWith(" ass")
-                || omsg.contains(" ass ")) {
-            bool = true;
+        if (!bool) {
+            for (String s : spacesList) {
+                if (omsg.equalsIgnoreCase(s) || omsg.toLowerCase().startsWith(s + " ") || omsg.toLowerCase().endsWith(" " + s)
+                        || omsg.contains(" " + s + " ")) {
+                    bool = true;
+                    break;
+                }
+            }
         }
         if (!bool) {
             for (String s : specificList) {
