@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.utils.DateUtil;
 
@@ -15,6 +16,7 @@ public class Commandmute extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, final String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 3) {
             player.sendMessage(ChatColor.RED + "/mute [Player] [Time] [Reason]");
             player.sendMessage(ChatColor.RED + "Time Examples:");
@@ -29,18 +31,18 @@ public class Commandmute extends MagicCommand {
             player.sendMessage(ChatColor.RED + "The maximum mute length is 1 hour!");
             return;
         }
-        Dashboard.schedulerManager.runAsync(() -> {
-            String reason = "";
+        dashboard.getSchedulerManager().runAsync(() -> {
+            String reason;
             StringBuilder r = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
                 r.append(args[i]).append(" ");
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
             String source = player.getName();
-            Player tp = Dashboard.getPlayer(username);
+            Player tp = dashboard.getPlayer(username);
             UUID uuid;
             if (tp == null) {
-                uuid = Dashboard.sqlUtil.uuidFromUsername(username);
+                uuid = dashboard.getSqlUtil().uuidFromUsername(username);
             } else {
                 uuid = tp.getUniqueId();
                 if (tp.getMute().isMuted()) {
@@ -52,8 +54,8 @@ public class Commandmute extends MagicCommand {
             if (tp != null) {
                 tp.setMute(mute);
             }
-            Dashboard.sqlUtil.mutePlayer(mute);
-            Dashboard.moderationUtil.announceMute(mute);
+            dashboard.getSqlUtil().mutePlayer(mute);
+            dashboard.getModerationUtil().announceMute(mute);
         });
     }
 }

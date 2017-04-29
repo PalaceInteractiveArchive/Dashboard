@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
@@ -20,6 +21,7 @@ public class Commandkickall extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length <= 0) {
             player.sendMessage(ChatColor.RED + "/kickall [Message]");
             return;
@@ -30,7 +32,7 @@ public class Commandkickall extends MagicCommand {
         }
         r = ChatColor.translateAlternateColorCodes('&', r.trim());
         player.sendMessage(ChatColor.GREEN + "Disconnecting all players for " + r);
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
                 continue;
             }
@@ -40,7 +42,7 @@ public class Commandkickall extends MagicCommand {
             @Override
             public void run() {
                 boolean empty = true;
-                for (Player tp : Dashboard.getOnlinePlayers()) {
+                for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getRank().getRankId() < Rank.WIZARD.getRankId()) {
                         empty = false;
                         break;

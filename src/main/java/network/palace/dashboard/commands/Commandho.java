@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
@@ -15,14 +16,15 @@ public class Commandho extends MagicCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length > 0) {
-            String message = "";
+            StringBuilder message = new StringBuilder();
             for (String arg : args) {
-                message += arg + " ";
+                message.append(arg).append(" ");
             }
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            Dashboard dashboard = Launcher.getDashboard();
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId() && !tp.isDisabled()) {
                     tp.sendMessage(ChatColor.RED + "[ADMIN CHAT] " + ChatColor.GRAY + player.getName() + ": " +
-                            ChatColor.WHITE + ChatColor.translateAlternateColorCodes('&', message));
+                            ChatColor.WHITE + ChatColor.translateAlternateColorCodes('&', message.toString()));
                 }
             }
             return;

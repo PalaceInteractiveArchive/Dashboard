@@ -1,6 +1,7 @@
 package network.palace.dashboard.handlers;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,8 @@ public abstract class MagicCommand {
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         List<String> list = new ArrayList<>();
         if (tabCompletePlayers) {
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            Dashboard dashboard = Launcher.getDashboard();
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 list.add(tp.getName());
             }
             if (args.size() > 0) {

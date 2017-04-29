@@ -1,6 +1,6 @@
 package network.palace.dashboard.forums.db;
 
-import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.sql.SQLException;
 
@@ -27,7 +27,7 @@ public abstract class AsyncDbStatement {
     protected abstract void run(DbStatement var1) throws SQLException;
 
     public void onError(SQLException e) {
-        Dashboard.getLogger().warn("Exception in AsyncDbStatement" + this.query);
+        Launcher.getDashboard().getLogger().warn("Exception in AsyncDbStatement" + this.query);
         e.printStackTrace();
     }
 

@@ -1,9 +1,11 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.utils.FriendUtil;
 
 import java.util.Arrays;
 
@@ -16,17 +18,18 @@ public class Commandfriend extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         switch (args.length) {
             case 1:
                 switch (args[0].toLowerCase()) {
                     case "help":
-                        Dashboard.friendUtil.helpMenu(player);
+                        FriendUtil.helpMenu(player);
                         return;
                     case "list":
-                        Dashboard.friendUtil.listFriends(player, 1);
+                        FriendUtil.listFriends(player, 1);
                         return;
                     case "toggle":
-                        Dashboard.schedulerManager.runAsync(() -> {
+                        dashboard.getSchedulerManager().runAsync(() -> {
                             player.setHasFriendToggled(!player.hasFriendToggledOff());
                             if (player.hasFriendToggledOff()) {
                                 player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
@@ -35,11 +38,11 @@ public class Commandfriend extends MagicCommand {
                                 player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
                                         ChatColor.GREEN + "ON");
                             }
-                            Dashboard.friendUtil.toggleRequests(player);
+                            FriendUtil.toggleRequests(player);
                         });
                         return;
                     case "requests":
-                        Dashboard.friendUtil.listRequests(player);
+                        FriendUtil.listRequests(player);
                         return;
                 }
                 return;
@@ -47,14 +50,14 @@ public class Commandfriend extends MagicCommand {
                 switch (args[0].toLowerCase()) {
                     case "list":
                         if (!isInt(args[1])) {
-                            Dashboard.friendUtil.listFriends(player, 1);
+                            FriendUtil.listFriends(player, 1);
                             return;
                         }
-                        Dashboard.friendUtil.listFriends(player, Integer.parseInt(args[1]));
+                        FriendUtil.listFriends(player, Integer.parseInt(args[1]));
                         return;
                     case "tp":
                         String user = args[1];
-                        Player tp = Dashboard.getPlayer(user);
+                        Player tp = dashboard.getPlayer(user);
                         if (tp == null) {
                             player.sendMessage(ChatColor.RED + "Player not found!");
                             return;
@@ -64,23 +67,23 @@ public class Commandfriend extends MagicCommand {
                                     " is not on your Friend List!");
                             return;
                         }
-                        Dashboard.friendUtil.teleportPlayer(player, tp);
+                        FriendUtil.teleportPlayer(player, tp);
                         return;
                     case "add":
-                        Dashboard.friendUtil.addFriend(player, args[1]);
+                        FriendUtil.addFriend(player, args[1]);
                         return;
                     case "remove":
-                        Dashboard.friendUtil.removeFriend(player, args[1]);
+                        FriendUtil.removeFriend(player, args[1]);
                         return;
                     case "accept":
-                        Dashboard.friendUtil.acceptFriend(player, args[1]);
+                        FriendUtil.acceptFriend(player, args[1]);
                         return;
                     case "deny":
-                        Dashboard.friendUtil.denyFriend(player, args[1]);
+                        FriendUtil.denyFriend(player, args[1]);
                         return;
                 }
         }
-        Dashboard.friendUtil.helpMenu(player);
+        FriendUtil.helpMenu(player);
     }
 
     private boolean isInt(String s) {

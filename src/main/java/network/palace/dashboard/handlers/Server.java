@@ -1,6 +1,7 @@
 package network.palace.dashboard.handlers;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.util.UUID;
 
@@ -64,7 +65,8 @@ public class Server {
 
     public void emptyServer() {
         Server s = null;
-        for (Server server : Dashboard.serverUtil.getServers()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        for (Server server : dashboard.getServerUtil().getServers()) {
             if (server.getUniqueId().equals(getUniqueId())) {
                 continue;
             }
@@ -78,9 +80,9 @@ public class Server {
                 }
             }
         }
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getServer().equals(getName())) {
-                Dashboard.serverUtil.sendPlayer(tp, s.getName());
+                dashboard.getServerUtil().sendPlayer(tp, s.getName());
             }
         }
     }

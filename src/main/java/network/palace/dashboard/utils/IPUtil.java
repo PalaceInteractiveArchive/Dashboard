@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.io.*;
 import java.net.URL;
@@ -20,23 +21,24 @@ public class IPUtil {
     private static long lastReset = System.currentTimeMillis();
 
     public static ProviderData getProviderData(String address) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (address.isEmpty()) {
-            Dashboard.getLogger().info("Empty address!");
+            dashboard.getLogger().info("Empty address!");
             return null;
         }
         if (System.currentTimeMillis() - (60 * 1000) > lastReset) {
             lastReset = System.currentTimeMillis();
             count = 0;
-            Dashboard.getLogger().info("Over one minute");
+            dashboard.getLogger().info("Over one minute");
         }
         if (count >= 149) {
-            Dashboard.getLogger().info("count >= 149");
+            dashboard.getLogger().info("count >= 149");
             return null;
         }
         if (cache.containsKey(address)) {
             Match m = cache.get(address);
             if (System.currentTimeMillis() - (6 * 60 * 60 * 1000) < m.getTime()) {
-                Dashboard.getLogger().info("Cached value: " + address + " -> " + m.getData().toString());
+                dashboard.getLogger().info("Cached value: " + address + " -> " + m.getData().toString());
                 return m.getData();
             }
             cache.remove(address);
@@ -44,7 +46,7 @@ public class IPUtil {
         count++;
         Match m = new Match(request(address));
         cache.put(address, m);
-        Dashboard.getLogger().info("New request: " + address + " -> " + m.getData().toString());
+        dashboard.getLogger().info("New request: " + address + " -> " + m.getData().toString());
         return m.getData();
     }
 

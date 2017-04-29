@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.server.DashboardSocketChannel;
@@ -48,19 +49,18 @@ public class ChatUtil {
     private boolean privateMessages = true;
 
     public ChatUtil() {
+        Dashboard dashboard = Launcher.getDashboard();
         reload();
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     if (messages.isEmpty()) {
                         return;
                     }
                     int amount = 0;
                     for (Map.Entry<UUID, List<String>> entry : new HashSet<>(messages.entrySet())) {
-                        for (String s : entry.getValue()) {
-                            amount++;
-                        }
+                        amount += entry.getValue().size();
                     }
                     StringBuilder statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
                     int i = 0;
@@ -120,11 +120,11 @@ public class ChatUtil {
                 }
                 if (!header) {
                     if (swears) {
-                        swearList.add(line);
+                        swearList.add(line.trim());
                     } else if (specific) {
-                        specificList.add(line);
+                        specificList.add(line.trim());
                     } else if (spaces) {
-                        spacesList.add(line);
+                        spacesList.add(line.trim());
                     }
                 }
                 line = br.readLine();
@@ -150,8 +150,9 @@ public class ChatUtil {
     }
 
     public void chatEvent(PacketPlayerChat packet) {
+        Dashboard dashboard = Launcher.getDashboard();
         UUID uuid = packet.getUniqueId();
-        Player player = Dashboard.getPlayer(uuid);
+        Player player = dashboard.getPlayer(uuid);
         if (player == null) {
             return;
         }
@@ -178,7 +179,7 @@ public class ChatUtil {
             if (command) {
                 String m = packet.getMessage().replaceFirst("/", "");
                 if (m.startsWith("staff")) {
-                    Dashboard.commandUtil.handleCommand(player, m);
+                    dashboard.getCommandUtil().handleCommand(player, m);
                 }
             }
             return;
@@ -196,7 +197,7 @@ public class ChatUtil {
             msg.append(l[i]);
         }
         if (command) {
-            if (!Dashboard.commandUtil.handleCommand(player, msg.toString().replaceFirst("/", ""))) {
+            if (!dashboard.getCommandUtil().handleCommand(player, msg.toString().replaceFirst("/", ""))) {
                 String s = msg.toString().toLowerCase().replaceFirst("/", "");
                 if (rank.getRankId() < Rank.KNIGHT.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
                         s.startsWith("/eval") || s.startsWith("/evaluate") || s.startsWith("/solve") ||
@@ -221,7 +222,7 @@ public class ChatUtil {
         if (!squire) {
             //Muted Chat Check
             String server = player.getServer();
-            if (Dashboard.getServer(server).isPark()) {
+            if (dashboard.getServer(server).isPark()) {
                 server = "ParkChat";
             }
             if (mutedChats.contains(server)) {
@@ -255,20 +256,20 @@ public class ChatUtil {
             messageCache.put(player.getUniqueId(), msg.toString());
         } else {
             if (msg.toString().startsWith(":warn-")) {
-                Dashboard.warningUtil.handle(player, msg.toString());
+                dashboard.getWarningUtil().handle(player, msg.toString());
                 return;
             }
         }
         if (!player.getChannel().equals("all")) {
             switch (player.getChannel()) {
                 case "party":
-                    Dashboard.commandUtil.handleCommand(player, "pchat " + msg);
+                    dashboard.getCommandUtil().handleCommand(player, "pchat " + msg);
                     return;
                 case "staff":
-                    Dashboard.commandUtil.handleCommand(player, "sc " + msg);
+                    dashboard.getCommandUtil().handleCommand(player, "sc " + msg);
                     return;
                 case "admin":
-                    Dashboard.commandUtil.handleCommand(player, "ho " + msg);
+                    dashboard.getCommandUtil().handleCommand(player, "ho " + msg);
                     return;
             }
         }
@@ -280,12 +281,13 @@ public class ChatUtil {
     }
 
     public boolean isMuted(Player player) {
+        Dashboard dashboard = Launcher.getDashboard();
         Mute mute = player.getMute();
         if (mute != null && mute.isMuted()) {
             long releaseTime = mute.getRelease();
             Date currentTime = new Date();
             if (currentTime.getTime() > releaseTime) {
-                Dashboard.sqlUtil.unmutePlayer(player.getUniqueId());
+                dashboard.getSqlUtil().unmutePlayer(player.getUniqueId());
                 player.getMute().setMuted(false);
             } else {
                 String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
@@ -301,23 +303,24 @@ public class ChatUtil {
     }
 
     public void sendChat(Player player, String msg) {
+        Dashboard dashboard = Launcher.getDashboard();
         logMessage(player.getUniqueId(), msg);
-        String sname = Dashboard.getServer(player.getServer()).getServerType();
+        String sname = dashboard.getServer(player.getServer()).getServerType();
         if (sname.startsWith("New")) {
             sname = sname.replaceAll("New", "");
         }
-        if (Dashboard.getServer(player.getServer()).isPark()) {
+        if (dashboard.getServer(player.getServer()).isPark()) {
             Rank rank = player.getRank();
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
             String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getName() + ": " +
                     rank.getChatColor() + msg;
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled()) {
                     continue;
                 }
-                if (Dashboard.getServer(tp.getServer()).isPark()) {
+                if (dashboard.getServer(tp.getServer()).isPark()) {
                     String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + message;
                     boolean mention = false;
                     if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
@@ -421,10 +424,11 @@ public class ChatUtil {
     }
 
     private void swearMessage(String name, String msg) {
+        Dashboard dashboard = Launcher.getDashboard();
         UUID id = UUID.randomUUID();
         String response = "Please keep chat appropriate.";
         Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
-        Dashboard.warningUtil.trackWarning(warning);
+        dashboard.getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "possibly swears");
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
@@ -436,10 +440,11 @@ public class ChatUtil {
     }
 
     private void advertMessage(String name, String msg) {
+        Dashboard dashboard = Launcher.getDashboard();
         UUID id = UUID.randomUUID();
         String response = "Please to not attempt to advertise or share links.";
         Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
-        Dashboard.warningUtil.trackWarning(warning);
+        dashboard.getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "advertises");
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
@@ -477,7 +482,8 @@ public class ChatUtil {
     }
 
     public boolean spamCheck(Player player, String msg) {
-        if (Dashboard.getPlayer(msg) != null) {
+        Dashboard dashboard = Launcher.getDashboard();
+        if (dashboard.getPlayer(msg) != null) {
             return false;
         }
         Character last = null;
@@ -490,7 +496,7 @@ public class ChatUtil {
                 continue;
             }
             if (c == ' ') {
-                if (Dashboard.getPlayer(word.toString().trim()) != null) {
+                if (dashboard.getPlayer(word.toString().trim()) != null) {
                     spam = false;
                 }
                 word = new StringBuilder();
@@ -507,7 +513,7 @@ public class ChatUtil {
             last = c;
             word.append(c);
         }
-        if (Dashboard.getPlayer(word.toString().trim()) != null) {
+        if (dashboard.getPlayer(word.toString().trim()) != null) {
             spam = false;
         }
         if (spam) {
@@ -519,7 +525,7 @@ public class ChatUtil {
         word = new StringBuilder();
         for (char c : msg.toCharArray()) {
             if (c == ' ') {
-                if (Dashboard.getPlayer(word.toString().trim()) != null) {
+                if (dashboard.getPlayer(word.toString().trim()) != null) {
                     spam = false;
                 }
                 word = new StringBuilder();
@@ -533,7 +539,7 @@ public class ChatUtil {
             }
             word.append(c);
         }
-        if (Dashboard.getPlayer(word.toString().trim()) != null) {
+        if (dashboard.getPlayer(word.toString().trim()) != null) {
             spam = false;
         }
         if (spam) {
@@ -583,7 +589,8 @@ public class ChatUtil {
     }
 
     public void staffChatMessage(String msg) {
-        for (Player player : Dashboard.getOnlinePlayers()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        for (Player player : dashboard.getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId() && !player.isDisabled()) {
                 try {
                     player.sendMessage(msg);
@@ -594,20 +601,21 @@ public class ChatUtil {
     }
 
     public void socialSpyMessage(Player from, Player to, String message, String command) {
-        if (Dashboard.getServer(from.getServer()).isPark()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        if (dashboard.getServer(from.getServer()).isPark()) {
             String msg = ChatColor.WHITE + from.getName() + ": /" + command + " " + to.getName() + " " + message;
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
-                if (Dashboard.getServer(tp.getServer()).isPark()) {
+                if (dashboard.getServer(tp.getServer()).isPark()) {
                     tp.sendMessage(msg);
                 }
             }
         } else {
             String server = from.getServer();
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
                     continue;
@@ -620,21 +628,22 @@ public class ChatUtil {
     }
 
     public void socialSpyParty(Player player, Party party, String message, String command) {
-        if (Dashboard.getServer(player.getServer()).isPark()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        if (dashboard.getServer(player.getServer()).isPark()) {
             String msg = ChatColor.WHITE + player.getName() + ": /" + command + " " + party.getLeader().getName() +
                     " " + message;
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         party.getMembers().contains(tp.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
-                if (Dashboard.getServer(tp.getServer()).isPark()) {
+                if (dashboard.getServer(tp.getServer()).isPark()) {
                     tp.sendMessage(msg);
                 }
             }
         } else {
             String server = player.getServer();
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         party.getMembers().contains(tp.getUniqueId()) || tp.isDisabled()) {
                     continue;

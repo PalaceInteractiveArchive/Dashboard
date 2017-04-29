@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
@@ -16,8 +17,9 @@ public class Commandpmtoggle extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        boolean enabled = Dashboard.chatUtil.privateMessagesEnabled();
-        Dashboard.chatUtil.setPrivateMessages(!enabled);
-        Dashboard.moderationUtil.togglePrivate(Dashboard.chatUtil.privateMessagesEnabled(), player.getName());
+        Dashboard dashboard = Launcher.getDashboard();
+        boolean enabled = dashboard.getChatUtil().privateMessagesEnabled();
+        dashboard.getChatUtil().setPrivateMessages(!enabled);
+        dashboard.getModerationUtil().togglePrivate(dashboard.getChatUtil().privateMessagesEnabled(), player.getName());
     }
 }

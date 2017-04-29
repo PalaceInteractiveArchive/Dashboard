@@ -1,7 +1,8 @@
 package network.palace.dashboard.server;
 
-import network.palace.dashboard.Dashboard;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.nio.channels.SocketChannel;
 import java.util.List;
@@ -20,12 +21,13 @@ public class DashboardServerSocketChannel extends NioServerSocketChannel {
                 return 1;
             }
         } catch (Throwable t) {
-            Dashboard.getLogger().error("Failed to create a new channel from an accepted discordSocket.");
+            Dashboard dashboard = Launcher.getDashboard();
+            dashboard.getLogger().error("Failed to create a new channel from an accepted discordSocket.");
             t.printStackTrace();
             try {
                 ch.close();
             } catch (Throwable t2) {
-                Dashboard.getLogger().error("Failed to close a discordSocket.");
+                dashboard.getLogger().error("Failed to close a discordSocket.");
                 t2.printStackTrace();
             }
         }

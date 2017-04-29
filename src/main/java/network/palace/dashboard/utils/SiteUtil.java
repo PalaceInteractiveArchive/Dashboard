@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
@@ -37,6 +38,7 @@ public class SiteUtil implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        Dashboard dashboard = Launcher.getDashboard();
         try {
             List<String> empress = new ArrayList<>();
             List<String> emperors = new ArrayList<>();
@@ -45,7 +47,7 @@ public class SiteUtil implements HttpHandler {
             List<String> architects = new ArrayList<>();
             List<String> knights = new ArrayList<>();
             List<String> squires = new ArrayList<>();
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 Rank r = tp.getRank();
                 if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                     switch (r) {

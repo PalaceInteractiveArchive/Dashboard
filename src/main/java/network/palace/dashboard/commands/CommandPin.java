@@ -1,9 +1,10 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.packets.dashboard.PacketMyMCMagicRegister;
 
@@ -26,6 +27,7 @@ public class CommandPin extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (generating.contains(player.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "We're already generating your PIN!");
             return;
@@ -62,8 +64,8 @@ public class CommandPin extends MagicCommand {
         }
         player.sendMessage(ChatColor.GREEN + "Generating your PIN for MyMCMagic...");
         generating.add(player.getUniqueId());
-        Dashboard.schedulerManager.runAsync(() -> {
-            try (Connection connection = Dashboard.activityUtil.getConnection()) {
+        dashboard.getSchedulerManager().runAsync(() -> {
+            try (Connection connection = dashboard.getActivityUtil().getConnection()) {
                 PreparedStatement account = connection.prepareStatement("SELECT id FROM users WHERE uuid=?");
                 account.setString(1, player.getUniqueId().toString());
                 ResultSet hasAccount = account.executeQuery();

@@ -2,6 +2,7 @@ package network.palace.dashboard.utils;
 
 import com.google.gson.JsonParser;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Party;
 import network.palace.dashboard.handlers.Player;
@@ -19,6 +20,7 @@ public class PartyUtil {
     public HashMap<UUID, Party> timerList = new HashMap<>();
 
     public PartyUtil() {
+        Dashboard dashboard = Launcher.getDashboard();
         File f = new File("parties.txt");
         if (!f.exists()) {
             return;
@@ -30,7 +32,7 @@ public class PartyUtil {
                 partyList.add(new Party(new JsonParser().parse(json).getAsJsonObject()));
             }
         } catch (Exception e) {
-            Dashboard.getLogger().error("An exception occurred while parsing parties.txt - " + e.getMessage());
+            dashboard.getLogger().error("An exception occurred while parsing parties.txt - " + e.getMessage());
             e.printStackTrace();
         }
         f.delete();
@@ -42,14 +44,7 @@ public class PartyUtil {
 
     public Party findPartyForPlayer(UUID uuid) {
         for (Party p : new ArrayList<>(partyList)) {
-            if (p == null) {
-                try {
-                    partyList.remove(p);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                continue;
-            }
+            if (p == null) continue;
             if (p.getLeader() == null) {
                 p.close();
             }

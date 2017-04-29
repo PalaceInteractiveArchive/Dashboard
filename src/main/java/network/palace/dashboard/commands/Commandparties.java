@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
 import java.util.ArrayList;
@@ -16,8 +17,9 @@ public class Commandparties extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length != 2 || !args[0].equalsIgnoreCase("info")) {
-            List<Party> parties = Dashboard.partyUtil.getParties();
+            List<Party> parties = dashboard.getPartyUtil().getParties();
             if (parties.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "There are no Parties right now!");
                 return;
@@ -37,12 +39,12 @@ public class Commandparties extends MagicCommand {
             player.sendMessage(ChatColor.YELLOW + "/parties info [Party Leader] " + ChatColor.GREEN + "- Display info on that Party");
             return;
         }
-        Player tp = Dashboard.getPlayer(args[1]);
+        Player tp = dashboard.getPlayer(args[1]);
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
-        Party p = Dashboard.partyUtil.findPartyForPlayer(tp.getUniqueId());
+        Party p = dashboard.getPartyUtil().findPartyForPlayer(tp.getUniqueId());
         if (p == null) {
             player.sendMessage(ChatColor.RED + "This player is not in a Party!");
             return;
@@ -50,7 +52,7 @@ public class Commandparties extends MagicCommand {
         List<UUID> members = p.getMembers();
         List<String> names = new ArrayList<>();
         for (UUID uuid : members) {
-            names.add(Dashboard.getPlayer(uuid).getName());
+            names.add(dashboard.getPlayer(uuid).getName());
         }
         String msg = "Party Leader: " + p.getLeader().getName() + "\nParty Members: ";
         for (int i = 0; i < names.size(); i++) {

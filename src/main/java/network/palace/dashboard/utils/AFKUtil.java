@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
@@ -18,10 +19,11 @@ import java.util.*;
 public class AFKUtil {
 
     public AFKUtil() {
+        Dashboard dashboard = Launcher.getDashboard();
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                for (Player tp : Dashboard.getOnlinePlayers()) {
+                for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getRank().getRankId() >=
                             Rank.WIZARD.getRankId()) {
                         continue;
@@ -42,6 +44,7 @@ public class AFKUtil {
     }
 
     public void warn(final Player player) throws IOException {
+        Dashboard dashboard = Launcher.getDashboard();
         final UUID uuid = player.getUniqueId();
         String afk = ChatColor.RED + "" + ChatColor.BOLD + "                      AFK Timer:";
         String blank = "";
@@ -78,7 +81,7 @@ public class AFKUtil {
                 try {
                     if (player != null && player.isAFK()) {
                         player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
-                        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +
                                     uuid + "')");
                             sql.execute();

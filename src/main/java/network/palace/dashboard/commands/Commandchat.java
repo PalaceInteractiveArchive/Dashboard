@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
@@ -17,6 +18,7 @@ public class Commandchat extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         List<String> list = new ArrayList<>();
         list.add("all");
         list.add("party");
@@ -41,7 +43,7 @@ public class Commandchat extends MagicCommand {
             player.sendMessage(ChatColor.RED + "You can't join that channel, or it doesn't exist!");
             return;
         }
-        if (channel.equals("party") && Dashboard.partyUtil.findPartyForPlayer(player) == null) {
+        if (channel.equals("party") && dashboard.getPartyUtil().findPartyForPlayer(player) == null) {
             player.sendMessage(ChatColor.RED + "You aren't in a party! Invite a player with " + ChatColor.GREEN + "/party [Username]");
             return;
         }

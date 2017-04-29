@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketAddServer;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -21,6 +22,7 @@ public class Commandserver extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length == 6 && args[0].equalsIgnoreCase("add") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
             final String name = args[1];
             final String address = args[2];
@@ -39,15 +41,15 @@ public class Commandserver extends MagicCommand {
                 player.sendMessage(ChatColor.RED + "Please use true or false to state if it is a Park server or not!");
                 return;
             }
-            if (Dashboard.serverUtil.getServer(name) != null) {
+            if (dashboard.getServerUtil().getServer(name) != null) {
                 player.sendMessage(ChatColor.RED + "A server already exists called '" + name + "'!");
                 return;
             }
             Server s = new Server(name, address, port, park, 0, type);
-            Dashboard.serverUtil.addServer(s);
-            Dashboard.schedulerManager.runAsync(() -> {
-                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
-                    PreparedStatement sql = connection.prepareStatement("INSERT INTO " + (Dashboard.isTestNetwork() ?
+            dashboard.getServerUtil().addServer(s);
+            dashboard.getSchedulerManager().runAsync(() -> {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
+                    PreparedStatement sql = connection.prepareStatement("INSERT INTO " + (dashboard.isTestNetwork() ?
                             "playground" : "") + "servers (name,address,port,park,type) VALUES (?,?,?,?,?)");
                     sql.setString(1, name);
                     sql.setString(2, address);
@@ -74,7 +76,7 @@ public class Commandserver extends MagicCommand {
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("remove") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
             final String name = args[1];
-            final Server s = Dashboard.serverUtil.getServer(name);
+            final Server s = dashboard.getServerUtil().getServer(name);
             if (s == null) {
                 player.sendMessage(ChatColor.RED + "No server exists called '" + name + "'!");
                 return;
@@ -87,12 +89,12 @@ public class Commandserver extends MagicCommand {
                     if (s.getCount() <= 0) {
                         player.sendMessage(ChatColor.GREEN + s.getName() + " has been emptied! Removing server...");
                         cancel();
-                        Dashboard.serverUtil.removeServer(name);
-                        Dashboard.schedulerManager.runAsync(() -> {
-                            try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                        dashboard.getServerUtil().removeServer(name);
+                        dashboard.getSchedulerManager().runAsync(() -> {
+                            try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                                 //TODO Change this back to the regular table
                                 PreparedStatement sql = connection.prepareStatement("DELETE FROM " +
-                                        (Dashboard.isTestNetwork() ? "playground" : "") + "servers WHERE name=?");
+                                        (dashboard.isTestNetwork() ? "playground" : "") + "servers WHERE name=?");
                                 sql.setString(1, s.getName());
                                 sql.execute();
                                 sql.close();
@@ -128,7 +130,7 @@ public class Commandserver extends MagicCommand {
                     return;
                 } else if (args[0].equalsIgnoreCase("list")) {
                     String msg = ChatColor.GREEN + "Server List:\n";
-                    List<Server> servers = Dashboard.getServers();
+                    List<Server> servers = dashboard.getServers();
                     servers.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
                     for (int i = 0; i < servers.size(); i++) {
                         Server s = servers.get(i);
@@ -143,18 +145,18 @@ public class Commandserver extends MagicCommand {
                     return;
                 }
             }
-            Server server = Dashboard.serverUtil.getServer(args[0]);
+            Server server = dashboard.getServerUtil().getServer(args[0]);
             if (server == null) {
                 player.sendMessage(ChatColor.RED + "That server doesn't exist!");
                 return;
             }
-            Dashboard.serverUtil.sendPlayer(player, server.getName());
+            dashboard.getServerUtil().sendPlayer(player, server.getName());
             return;
         }
         if (args.length == 0) {
             player.sendMessage(ChatColor.GREEN + "You are currently on " + player.getServer());
             String msg = "The following servers exist: ";
-            List<Server> servers = Dashboard.getServers();
+            List<Server> servers = dashboard.getServers();
             List<String> names = new ArrayList<>();
             for (Server s : servers) {
                 names.add(s.getName());
@@ -172,8 +174,9 @@ public class Commandserver extends MagicCommand {
 
     @Override
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
+        Dashboard dashboard = Launcher.getDashboard();
         List<String> list = new ArrayList<>();
-        for (Server server : Dashboard.getServers()) {
+        for (Server server : dashboard.getServers()) {
             list.add(server.getName());
         }
         Collections.sort(list);

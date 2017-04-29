@@ -2,7 +2,6 @@ package network.palace.dashboard.utils;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -10,6 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -53,6 +53,7 @@ public class VoteUtil {
     private int port = 8192;
 
     public VoteUtil() {
+        Dashboard dashboard = Launcher.getDashboard();
         File rsaDirectory = new File("vote/");
         try {
             if (!rsaDirectory.exists()) {
@@ -80,19 +81,16 @@ public class VoteUtil {
                     }
                 })
                 .bind(host, port)
-                .addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        if (future.isSuccess()) {
-                            serverChannel = future.channel();
-                            Dashboard.getLogger().info("Votifier enabled on socket " + serverChannel.localAddress() + ".");
-                        } else {
-                            SocketAddress socketAddress = future.channel().localAddress();
-                            if (socketAddress == null) {
-                                socketAddress = new InetSocketAddress(host, port);
-                            }
-                            Dashboard.getLogger().error("Votifier was not able to bind to " + socketAddress, future.cause());
+                .addListener((ChannelFutureListener) future -> {
+                    if (future.isSuccess()) {
+                        serverChannel = future.channel();
+                        dashboard.getLogger().info("Votifier enabled on socket " + serverChannel.localAddress() + ".");
+                    } else {
+                        SocketAddress socketAddress = future.channel().localAddress();
+                        if (socketAddress == null) {
+                            socketAddress = new InetSocketAddress(host, port);
                         }
+                        dashboard.getLogger().error("Votifier was not able to bind to " + socketAddress, future.cause());
                     }
                 });
     }
@@ -102,18 +100,19 @@ public class VoteUtil {
     }
 
     public void onVoteReceived(Channel channel, final Vote vote, VotifierSession.ProtocolVersion protocolVersion) throws Exception {
+        Dashboard dashboard = Launcher.getDashboard();
         if (debug) {
             if (protocolVersion == VotifierSession.ProtocolVersion.ONE) {
-                Dashboard.getLogger().info("Got a protocol v1 vote record from " + channel.remoteAddress() + " -> " + vote);
+                dashboard.getLogger().info("Got a protocol v1 vote record from " + channel.remoteAddress() + " -> " + vote);
             } else {
-                Dashboard.getLogger().info("Got a protocol v2 vote record from " + channel.remoteAddress() + " -> " + vote);
+                dashboard.getLogger().info("Got a protocol v2 vote record from " + channel.remoteAddress() + " -> " + vote);
             }
         }
         String username = vote.getUsername();
-        Player player = Dashboard.getPlayer(username);
+        Player player = dashboard.getPlayer(username);
         final UUID uuid;
         if (player == null) {
-            UUID temp = Dashboard.sqlUtil.uuidFromUsername(username);
+            UUID temp = dashboard.getSqlUtil().uuidFromUsername(username);
             if (temp == null) {
                 return;
             } else {
@@ -133,19 +132,15 @@ public class VoteUtil {
             }
         }
         final int finalId = id;
-        Dashboard.schedulerManager.runAsync(new Runnable() {
-            @Override
-            public void run() {
-                vote(uuid, finalId);
-            }
-        });
+        dashboard.getSchedulerManager().runAsync(() -> vote(uuid, finalId));
     }
 
     public void onError(Channel channel, Throwable throwable) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (debug) {
-            Dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress(), throwable);
+            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress(), throwable);
         } else {
-            Dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
+            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
         }
     }
 
@@ -166,7 +161,8 @@ public class VoteUtil {
     }
 
     private void vote(UUID uuid, int serverId) {
-        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             PreparedStatement q = connection.prepareStatement("SELECT vote FROM player_data WHERE uuid=?");
             q.setString(1, uuid.toString());
             ResultSet qres = q.executeQuery();
@@ -179,7 +175,7 @@ public class VoteUtil {
             }
             qres.close();
             q.close();
-            Player p = Dashboard.getPlayer(uuid);
+            Player p = dashboard.getPlayer(uuid);
             if (cancel) {
                 if (p != null) {
                     p.sendMessage(ChatColor.RED + "You already claimed a reward for voting in the past 6 hours!");
@@ -208,7 +204,7 @@ public class VoteUtil {
                     continue;
                 }
                 try {
-                    if (Dashboard.getServer(dash.getServerName()).getUniqueId().equals(Dashboard.getServer(p.getServer()).getUniqueId())) {
+                    if (dashboard.getServer(dash.getServerName()).getUniqueId().equals(dashboard.getServer(p.getServer()).getUniqueId())) {
                         dash.send(packet);
                         return;
                     }
@@ -223,7 +219,8 @@ public class VoteUtil {
 
     public void reload() {
         voteServices.clear();
-        try (Connection connection = Dashboard.activityUtil.getConnection()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        try (Connection connection = dashboard.getActivityUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("SELECT siteid,name FROM vote");
             ResultSet result = sql.executeQuery();
             while (result.next()) {

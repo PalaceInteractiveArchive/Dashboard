@@ -1,6 +1,6 @@
 package network.palace.dashboard.commands;
 
-import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
@@ -24,7 +24,7 @@ public class Commandstafflist extends MagicCommand {
         List<String> paladin = new ArrayList<>();
         List<String> knight = new ArrayList<>();
         List<String> squire = new ArrayList<>();
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             Rank r = tp.getRank();
             if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
                 switch (r) {

@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
@@ -16,8 +17,9 @@ public class Commandcharlist extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         HashMap<String, List<String>> servers = new HashMap<>();
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp == null || tp.getRank() == null || tp.getServer() == null) {
                 continue;
             }

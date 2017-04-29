@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
 /**
@@ -14,14 +15,15 @@ public class Commandchatstatus extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        Server s = Dashboard.getServer(player.getServer());
+        Dashboard dashboard = Launcher.getDashboard();
+        Server s = dashboard.getServer(player.getServer());
         boolean park = s.isPark();
-        String name = "";
+        String name;
         int count = 0;
-        boolean muted = false;
+        boolean muted;
         if (park) {
             int c = 0;
-            for (Server sr : Dashboard.getServers()) {
+            for (Server sr : dashboard.getServers()) {
                 if (!sr.isPark()) {
                     continue;
                 }
@@ -31,11 +33,11 @@ public class Commandchatstatus extends MagicCommand {
                 }
             }
             name = "ParkChat (" + c + " servers)";
-            muted = Dashboard.chatUtil.isChatMuted("ParkChat");
+            muted = dashboard.getChatUtil().isChatMuted("ParkChat");
         } else {
             name = s.getName();
             count = s.getCount();
-            muted = Dashboard.chatUtil.isChatMuted(s.getName());
+            muted = dashboard.getChatUtil().isChatMuted(s.getName());
         }
         player.sendMessage(ChatColor.GREEN + "Name: " + ChatColor.YELLOW + name + "\n" + ChatColor.GREEN +
                 "Players: " + ChatColor.YELLOW + count + "\n" + ChatColor.GREEN + "Status: " +

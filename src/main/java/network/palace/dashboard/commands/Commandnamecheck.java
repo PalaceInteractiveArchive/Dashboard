@@ -1,11 +1,11 @@
 package network.palace.dashboard.commands;
 
-import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.utils.NameUtil;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.utils.NameUtil;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class Commandnamecheck extends MagicCommand {
         }
         player.sendMessage(ChatColor.GREEN + "Requesting name history for " + ChatColor.AQUA + args[0] +
                 ChatColor.GREEN + " from Mojang...");
-        Dashboard.schedulerManager.runAsync(() -> {
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             List<String> names = NameUtil.getNames(args[0]);
             if (names.size() < 2 || names.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "That user could not be found!");

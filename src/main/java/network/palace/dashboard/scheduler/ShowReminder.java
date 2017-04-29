@@ -1,6 +1,6 @@
 package network.palace.dashboard.scheduler;
 
-import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 /**
  * Created by Marc on 1/15/17.
@@ -14,6 +14,6 @@ public class ShowReminder implements Runnable {
 
     @Override
     public void run() {
-        Dashboard.moderationUtil.sendMessage(msg);
+        Launcher.getDashboard().getModerationUtil().sendMessage(msg);
     }
 }

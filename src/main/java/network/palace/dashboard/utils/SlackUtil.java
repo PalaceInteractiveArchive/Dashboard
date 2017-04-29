@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.slack.SlackService;
@@ -24,7 +25,8 @@ public class SlackUtil {
     }
 
     public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments, boolean status) {
-        if (Dashboard.isTestNetwork() && status) {
+        Dashboard dashboard = Launcher.getDashboard();
+        if (dashboard.isTestNetwork() && status) {
             return;
         }
         for (SlackAttachment a : attachments) {

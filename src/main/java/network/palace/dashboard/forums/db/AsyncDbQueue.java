@@ -1,6 +1,6 @@
 package network.palace.dashboard.forums.db;
 
-import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.sql.SQLException;
 import java.util.Queue;
@@ -21,14 +21,14 @@ public class AsyncDbQueue implements Runnable {
 
     public static void processQueue() {
         if (!queue.isEmpty() && lock.tryLock()) {
-            AsyncDbStatement stm = null;
+            AsyncDbStatement stm;
 
             DbStatement dbStatement;
             try {
                 dbStatement = new DbStatement();
             } catch (Exception var4) {
                 lock.unlock();
-                Dashboard.getLogger().warn("Exception getting DbStatement in AsyncDbQueue");
+                Launcher.getDashboard().getLogger().warn("Exception getting DbStatement in AsyncDbQueue");
                 var4.printStackTrace();
                 return;
             }

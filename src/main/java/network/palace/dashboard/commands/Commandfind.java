@@ -1,9 +1,9 @@
 package network.palace.dashboard.commands;
 
-import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
 public class Commandfind extends MagicCommand {
@@ -19,7 +19,7 @@ public class Commandfind extends MagicCommand {
             player.sendMessage(ChatColor.RED + "/find [Player]");
             return;
         }
-        Player tp = Dashboard.getPlayer(args[0]);
+        Player tp = Launcher.getDashboard().getPlayer(args[0]);
         if (tp == null) {
             player.sendMessage(ChatColor.RED + args[0] + " is not online!");
             return;

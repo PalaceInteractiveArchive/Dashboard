@@ -5,7 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>network.palace</groupId>
     <artifactId>Dashboard</artifactId>
-    <version>1.4.1</version>
+    <version>1.5.0</version>
+
     <repositories>
         <repository>
             <id>palace</id>
@@ -28,6 +29,7 @@
             <url>http://central.maven.org/maven2/</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -36,12 +38,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.10</version>
-            <type>jar</type>
-        </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -49,11 +46,13 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-gson</artifactId>
             <version>1.19.0</version>
         </dependency>
+
         <dependency>
             <groupId>javax.websocket</groupId>
             <artifactId>javax.websocket-api</artifactId>
@@ -61,6 +60,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -68,6 +68,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>
@@ -75,6 +76,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
@@ -82,6 +84,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>com.jolbox</groupId>
             <artifactId>bonecp</artifactId>
@@ -89,6 +92,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -96,6 +100,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -103,6 +108,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -110,6 +116,20 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.10</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
         <dependency>
             <groupId>io.socket</groupId>
             <artifactId>socket.io-client</artifactId>
@@ -124,18 +144,18 @@
     </properties>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>2.3.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -144,15 +164,16 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>network.palace.dashboard.Dashboard</mainClass>
+                            <mainClass>network.palace.dashboard.Start</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.0</version>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -160,8 +181,11 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <shadedArtifactAttached>false</shadedArtifactAttached>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.googlecode.json-simple</include>
+                                </includes>
+                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>

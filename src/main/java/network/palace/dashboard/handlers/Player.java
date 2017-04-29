@@ -1,6 +1,7 @@
 package network.palace.dashboard.handlers;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.PacketMention;
 import network.palace.dashboard.packets.dashboard.PacketMessage;
@@ -189,7 +190,7 @@ public class Player {
     }
 
     public String setAudioToken() {
-        this.audioToken = Dashboard.getRandomToken();
+        this.audioToken = Launcher.getDashboard().getRandomToken();
         return audioToken;
     }
 

@@ -3,6 +3,7 @@ package network.palace.dashboard.forums.db;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,7 +45,8 @@ public final class Database {
             ds = new HikariDataSource(ex);*/
         } catch (Exception var6) {
             connectionPool = null;
-            Dashboard.getLogger().warn("No database connection, shutting down MineSync");
+            Dashboard dashboard = Launcher.getDashboard();
+            dashboard.getLogger().warn("No database connection, shutting down MineSync");
         }
 
     }

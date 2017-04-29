@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.utils.DateUtil;
 
@@ -27,18 +28,19 @@ public class Commandtempban extends MagicCommand {
         }
         final String username = args[0];
         final long timestamp = DateUtil.parseDateDiff(args[1], true);
-        Dashboard.schedulerManager.runAsync(() -> {
-            String reason = "";
+        Dashboard dashboard = Launcher.getDashboard();
+        dashboard.getSchedulerManager().runAsync(() -> {
+            String reason;
             String r = "";
             for (int i = 2; i < args.length; i++) {
                 r += args[i] + " ";
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
             String source = player.getName();
-            Player tp = Dashboard.getPlayer(username);
+            Player tp = dashboard.getPlayer(username);
             UUID uuid;
             if (tp == null) {
-                uuid = Dashboard.sqlUtil.uuidFromUsername(username);
+                uuid = dashboard.getSqlUtil().uuidFromUsername(username);
             } else {
                 uuid = tp.getUniqueId();
             }
@@ -48,8 +50,8 @@ public class Commandtempban extends MagicCommand {
                         ". " + ChatColor.RED + "Your Temporary Ban Will Expire in " + ChatColor.AQUA +
                         DateUtil.formatDateDiff(timestamp));
             }
-            Dashboard.sqlUtil.banPlayer(uuid, reason, false, new Date(timestamp), source);
-            Dashboard.moderationUtil.announceBan(ban);
+            dashboard.getSqlUtil().banPlayer(uuid, reason, false, new Date(timestamp), source);
+            dashboard.getModerationUtil().announceBan(ban);
         });
     }
 }

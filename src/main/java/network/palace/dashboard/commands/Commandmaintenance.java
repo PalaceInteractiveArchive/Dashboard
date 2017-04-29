@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
@@ -24,10 +25,11 @@ public class Commandmaintenance extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, String[] args) {
-        Dashboard.setMaintenance(!Dashboard.isMaintenance());
-        PacketMaintenance packet = new PacketMaintenance(Dashboard.isMaintenance());
-        if (Dashboard.isMaintenance()) {
-            HashMap<Rank, List<UUID>> staff = Dashboard.sqlUtil.getPlayersByRanks(Rank.SQUIRE, Rank.KNIGHT,
+        Dashboard dashboard = Launcher.getDashboard();
+        dashboard.setMaintenance(!dashboard.isMaintenance());
+        PacketMaintenance packet = new PacketMaintenance(dashboard.isMaintenance());
+        if (dashboard.isMaintenance()) {
+            HashMap<Rank, List<UUID>> staff = dashboard.getSqlUtil().getPlayersByRanks(Rank.SQUIRE, Rank.KNIGHT,
                     Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
             List<UUID> list = new ArrayList<>();
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
@@ -35,7 +37,7 @@ public class Commandmaintenance extends MagicCommand {
                     list.add(uuid);
                 }
             }
-            Dashboard.setMaintenanceWhitelist(list);
+            dashboard.setMaintenanceWhitelist(list);
             PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(list);
             player.sendMessage(ChatColor.GREEN + "Maintenance Mode enabled! Notifying Bungees...");
             for (Object o : WebSocketServerHandler.getGroup()) {
@@ -47,7 +49,7 @@ public class Commandmaintenance extends MagicCommand {
                 bungee.send(whitelist);
             }
             player.sendMessage(ChatColor.GREEN + "Bungees notified! Disconnecting all Guests...");
-            for (Player tp : Dashboard.getOnlinePlayers()) {
+            for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                     continue;
                 }
@@ -58,7 +60,7 @@ public class Commandmaintenance extends MagicCommand {
                 @Override
                 public void run() {
                     boolean guests = false;
-                    for (Player tp : Dashboard.getOnlinePlayers()) {
+                    for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
                             guests = true;
                             return;

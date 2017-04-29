@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
 public class Commandkick extends MagicCommand {
@@ -12,11 +13,12 @@ public class Commandkick extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 2) {
             player.sendMessage(ChatColor.RED + "/kick [Player] [Reason]");
             return;
         }
-        Player tp = Dashboard.getPlayer(args[0]);
+        Player tp = dashboard.getPlayer(args[0]);
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "I can't find that player!");
             return;
@@ -33,8 +35,8 @@ public class Commandkick extends MagicCommand {
         reason = reason.trim();
         tp.kickPlayer(ChatColor.RED + "You have been disconnected for: " + ChatColor.AQUA + reason);
         try {
-            Dashboard.moderationUtil.announceKick(tp.getName(), reason, player.getName());
-            Dashboard.sqlUtil.logKick(new Kick(tp.getUniqueId(), reason, player.getName()));
+            dashboard.getModerationUtil().announceKick(tp.getName(), reason, player.getName());
+            dashboard.getSqlUtil().logKick(new Kick(tp.getUniqueId(), reason, player.getName()));
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "That player isn't online!");
         }

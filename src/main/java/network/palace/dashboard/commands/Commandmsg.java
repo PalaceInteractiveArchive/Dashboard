@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
@@ -17,6 +18,7 @@ public class Commandmsg extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 2) {
             player.sendMessage(ChatColor.RED + "/msg [Player] [Message]");
             return;
@@ -27,20 +29,20 @@ public class Commandmsg extends MagicCommand {
             return;
         }
         String target = args[0];
-        Player tp = Dashboard.getPlayer(args[0]);
+        Player tp = dashboard.getPlayer(args[0]);
         if (tp == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.isMuted(player)) {
+            if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
             if (!tp.canRecieveMessages()) {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
             }
-            if (!Dashboard.chatUtil.privateMessagesEnabled()) {
+            if (!dashboard.getChatUtil().privateMessagesEnabled()) {
                 player.sendMessage(ChatColor.RED + "Private messages are currently disabled.");
                 return;
             }
@@ -49,11 +51,11 @@ public class Commandmsg extends MagicCommand {
         for (int i = 1; i < args.length; i++) {
             msg.append(args[i]).append(" ");
         }
-        msg = new StringBuilder(player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Dashboard.chatUtil.removeCaps(player,
+        msg = new StringBuilder(player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
                 msg.toString().trim()) : msg.toString().trim());
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.containsSwear(player, msg.toString()) || Dashboard.chatUtil.isAdvert(player, msg.toString())
-                    || Dashboard.chatUtil.spamCheck(player, msg.toString()) || Dashboard.chatUtil.containsUnicode(player, msg.toString())) {
+            if (dashboard.getChatUtil().containsSwear(player, msg.toString()) || dashboard.getChatUtil().isAdvert(player, msg.toString())
+                    || dashboard.getChatUtil().spamCheck(player, msg.toString()) || dashboard.getChatUtil().containsUnicode(player, msg.toString())) {
                 return;
             }
             String mm = msg.toString().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
@@ -73,8 +75,8 @@ public class Commandmsg extends MagicCommand {
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUniqueId());
         player.setReply(tp.getUniqueId());
-        Dashboard.chatUtil.socialSpyMessage(player, tp, msg.toString(), "msg");
-        Dashboard.chatUtil.logMessage(player.getUniqueId(), "/msg " + tp.getName() + " " + msg);
+        dashboard.getChatUtil().socialSpyMessage(player, tp, msg.toString(), "msg");
+        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/msg " + tp.getName() + " " + msg);
     }
 
     private boolean enoughTime(Player player) {

@@ -1,9 +1,10 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
 import java.util.Arrays;
@@ -16,24 +17,25 @@ public class Commandreply extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 1) {
             player.sendMessage(ChatColor.RED + "/reply [Message]");
             return;
         }
-        Player tp = Dashboard.getPlayer(player.getReply());
+        Player tp = dashboard.getPlayer(player.getReply());
         if (player.getReply() == null || tp == null) {
             player.sendMessage(ChatColor.RED + "You don't have anyone to respond to!");
             return;
         }
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.isMuted(player)) {
+            if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
             if (!tp.canRecieveMessages()) {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
             }
-            if (!Dashboard.chatUtil.privateMessagesEnabled()) {
+            if (!dashboard.getChatUtil().privateMessagesEnabled()) {
                 player.sendMessage(ChatColor.RED + "Private messages are currently disabled.");
                 return;
             }
@@ -42,11 +44,11 @@ public class Commandreply extends MagicCommand {
         for (String arg : args) {
             msg += arg + " ";
         }
-        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? Dashboard.chatUtil.removeCaps(player,
+        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
                 msg.trim()) : msg.trim();
         if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (Dashboard.chatUtil.containsSwear(player, msg) || Dashboard.chatUtil.isAdvert(player, msg)
-                    || Dashboard.chatUtil.spamCheck(player, msg) || Dashboard.chatUtil.containsUnicode(player, msg)) {
+            if (dashboard.getChatUtil().containsSwear(player, msg) || dashboard.getChatUtil().isAdvert(player, msg)
+                    || dashboard.getChatUtil().spamCheck(player, msg) || dashboard.getChatUtil().containsUnicode(player, msg)) {
                 return;
             }
             String mm = msg.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
@@ -65,7 +67,7 @@ public class Commandreply extends MagicCommand {
                 tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getName() + ": " +
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUniqueId());
-        Dashboard.chatUtil.socialSpyMessage(player, tp, msg, "reply");
-        Dashboard.chatUtil.logMessage(player.getUniqueId(), "/reply " + tp.getName() + " " + msg);
+        dashboard.getChatUtil().socialSpyMessage(player, tp, msg, "reply");
+        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/reply " + tp.getName() + " " + msg);
     }
 }

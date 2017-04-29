@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketBseenCommand;
 import network.palace.dashboard.utils.DateUtil;
@@ -20,19 +21,20 @@ public class Commandbseen extends MagicCommand {
 
     @Override
     public void execute(final Player player, String label, final String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 1) {
             player.sendMessage(ChatColor.RED + "/bseen [Username]");
             return;
         }
-        Dashboard.schedulerManager.runAsync(() -> {
-            Player tp = Dashboard.getPlayer(args[0]);
+        dashboard.getSchedulerManager().runAsync(() -> {
+            Player tp = dashboard.getPlayer(args[0]);
             boolean online = tp != null;
             String name = online ? tp.getName() : args[0];
             UUID uuid;
             if (online) {
                 uuid = tp.getUniqueId();
             } else {
-                uuid = Dashboard.sqlUtil.uuidFromUsername(args[0]);
+                uuid = dashboard.getSqlUtil().uuidFromUsername(args[0]);
             }
             if (uuid == null) {
                 player.sendMessage(ChatColor.RED + "That player can't be found!");
@@ -50,7 +52,7 @@ public class Commandbseen extends MagicCommand {
                 mute = tp.getMute();
                 server = tp.getServer();
             } else {
-                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
                     sql.setString(1, uuid.toString());
                     ResultSet result = sql.executeQuery();
@@ -65,14 +67,14 @@ public class Commandbseen extends MagicCommand {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                Ban ban = Dashboard.sqlUtil.getBan(uuid, name);
+                Ban ban = dashboard.getSqlUtil().getBan(uuid, name);
                 if (ban != null) {
                     String type = ban.isPermanent() ? "Permanently" : ("Temporarily (Expires: " +
                             DateUtil.formatDateDiff(ban.getRelease()) + ")");
                     player.sendMessage(ChatColor.RED + name + " is Banned " + type + " for " + ban.getReason() +
                             " by " + ban.getSource());
                 }
-                mute = Dashboard.sqlUtil.getMute(uuid, name);
+                mute = dashboard.getSqlUtil().getMute(uuid, name);
             }
             if (mute != null && mute.isMuted()) {
                 player.sendMessage(ChatColor.RED + name + " is Muted for " +

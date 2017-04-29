@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
 import java.util.Arrays;
@@ -14,20 +15,21 @@ public class Commandparty extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("help")) {
                 helpMenu(player);
                 return;
             }
             if (args[0].equalsIgnoreCase("accept")) {
-                Dashboard.partyUtil.acceptRequest(player);
+                dashboard.getPartyUtil().acceptRequest(player);
                 return;
             }
             if (args[0].equalsIgnoreCase("deny")) {
-                Dashboard.partyUtil.denyRequest(player);
+                dashboard.getPartyUtil().denyRequest(player);
                 return;
             }
-            Party party = Dashboard.partyUtil.findPartyForPlayer(player);
+            Party party = dashboard.getPartyUtil().findPartyForPlayer(player);
             if (args[0].equalsIgnoreCase("close")) {
                 if (party == null) {
                     player.sendMessage(ChatColor.RED + "You're not in a Party!");
@@ -74,13 +76,13 @@ public class Commandparty extends MagicCommand {
                 return;
             }
             if (party == null) {
-                party = Dashboard.partyUtil.createParty(player);
+                party = dashboard.getPartyUtil().createParty(player);
             }
             if (!party.isLeader(player)) {
                 player.sendMessage(ChatColor.RED + "Only the Party Leader can invite players!");
                 return;
             }
-            Player tp = Dashboard.getPlayer(args[0]);
+            Player tp = dashboard.getPlayer(args[0]);
             if (tp == null) {
                 player.sendMessage(ChatColor.RED + "That player wasn't found!");
                 return;
@@ -89,16 +91,16 @@ public class Commandparty extends MagicCommand {
                 player.sendMessage(ChatColor.RED + "You cannot invite yourself!");
                 return;
             }
-            Dashboard.partyUtil.invitePlayer(party, tp);
+            dashboard.getPartyUtil().invitePlayer(party, tp);
             return;
         } else if (args.length == 2) {
-            Party party = Dashboard.partyUtil.findPartyForPlayer(player);
+            Party party = dashboard.getPartyUtil().findPartyForPlayer(player);
             if (args[0].equalsIgnoreCase("takeover")) {
                 if (player.getRank().getRankId() < Rank.KNIGHT.getRankId()) {
                     helpMenu(player);
                     return;
                 }
-                Player tp = Dashboard.getPlayer(args[1]);
+                Player tp = dashboard.getPlayer(args[1]);
                 if (tp == null) {
                     player.sendMessage("That player wasn't found!");
                     return;
@@ -110,7 +112,7 @@ public class Commandparty extends MagicCommand {
                         return;
                     }
                 }
-                party = Dashboard.partyUtil.findPartyForPlayer(tp.getUniqueId());
+                party = dashboard.getPartyUtil().findPartyForPlayer(tp.getUniqueId());
                 if (party == null) {
                     player.sendMessage(ChatColor.RED + "This player is not in a Party!");
                     return;
@@ -129,7 +131,7 @@ public class Commandparty extends MagicCommand {
                     player.sendMessage(ChatColor.RED + "Only the Party Leader can use this!");
                     return;
                 }
-                Player tp = Dashboard.getPlayer(args[1]);
+                Player tp = dashboard.getPlayer(args[1]);
                 if (tp == null) {
                     player.sendMessage(ChatColor.RED + "That player wasn't found!");
                     return;
@@ -141,7 +143,7 @@ public class Commandparty extends MagicCommand {
                     player.sendMessage(ChatColor.RED + "Only the Party Leader can use this!");
                     return;
                 }
-                Player tp = Dashboard.getPlayer(args[1]);
+                Player tp = dashboard.getPlayer(args[1]);
                 if (tp == null) {
                     player.sendMessage("That player wasn't found!");
                     return;

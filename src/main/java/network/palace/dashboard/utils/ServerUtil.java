@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Server;
@@ -27,6 +28,7 @@ public class ServerUtil {
     private int lastServerCount = 0;
 
     public ServerUtil() throws IOException {
+        Dashboard dashboard = Launcher.getDashboard();
         loadServers();
         /**
          * Online Player Count Timer
@@ -38,7 +40,7 @@ public class ServerUtil {
             public void run() {
                 try {
                     i++;
-                    int count = Dashboard.getOnlinePlayers().size();
+                    int count = dashboard.getOnlinePlayers().size();
                     PacketOnlineCount packet = new PacketOnlineCount(count);
                     if (count != lastCount) {
                         lastCount = count;
@@ -92,10 +94,10 @@ public class ServerUtil {
                         server = s;
                     }
                 }
-                if (server == null || Dashboard.getTargetServer().equals(server.getName())) {
+                if (server == null || dashboard.getTargetServer().equals(server.getName())) {
                     return;
                 }
-                Dashboard.setTargetServer(server.getName());
+                dashboard.setTargetServer(server.getName());
                 PacketTargetLobby packet = new PacketTargetLobby(server.getName());
                 for (Object o : WebSocketServerHandler.getGroup()) {
                     DashboardSocketChannel dash = (DashboardSocketChannel) o;
@@ -127,10 +129,11 @@ public class ServerUtil {
 
     private void loadServers() {
         servers.clear();
-        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+        Dashboard dashboard = Launcher.getDashboard();
+        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             //TODO Change this back to the regular table
             PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
-                    (Dashboard.isTestNetwork() ? "playground" : "") + "servers;");
+                    (dashboard.isTestNetwork() ? "playground" : "") + "servers;");
             ResultSet result = sql.executeQuery();
             while (result.next()) {
                 servers.put(result.getString("name"), new Server(result.getString("name"), result.getString("address"),
@@ -140,7 +143,7 @@ public class ServerUtil {
             sql.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            Dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
+            dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
             System.exit(0);
         }
     }

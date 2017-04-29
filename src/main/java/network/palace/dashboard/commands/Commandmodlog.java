@@ -1,11 +1,12 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.utils.DateUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,17 +27,18 @@ public class Commandmodlog extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         try {
             if (args.length < 1 || args.length > 2) {
                 player.sendMessage(ChatColor.RED + "/modlog [Username] [Bans/Mutes/Kicks]");
                 return;
             }
             String playername = args[0];
-            Player tp = Dashboard.getPlayer(playername);
-            UUID uuid = null;
+            Player tp = dashboard.getPlayer(playername);
+            UUID uuid;
             if (tp == null) {
                 try {
-                    uuid = Dashboard.sqlUtil.uuidFromUsername(playername);
+                    uuid = dashboard.getSqlUtil().uuidFromUsername(playername);
                 } catch (Exception e) {
                     player.sendMessage(ChatColor.RED + "Player not found!");
                     return;
@@ -50,7 +52,7 @@ public class Commandmodlog extends MagicCommand {
                 switch (action) {
                     case "bans": {
                         List<String> msgs = new ArrayList<>();
-                        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("SELECT reason,permanent,`release`,source,active FROM banned_players WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
@@ -90,7 +92,7 @@ public class Commandmodlog extends MagicCommand {
                     }
                     case "mutes": {
                         List<String> msgs = new ArrayList<>();
-                        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
@@ -129,7 +131,7 @@ public class Commandmodlog extends MagicCommand {
                     case "kicks": {
                         DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                         List<String> msgs = new ArrayList<>();
-                        try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                             PreparedStatement sql = connection.prepareStatement("SELECT reason,source,time FROM kicks WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
@@ -166,7 +168,7 @@ public class Commandmodlog extends MagicCommand {
                 int banCount = 0;
                 int muteCount = 0;
                 int kickCount = 0;
-                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     PreparedStatement bans = connection.prepareStatement("SELECT count(*) FROM banned_players WHERE uuid=?");
                     bans.setString(1, uuid.toString());
                     ResultSet bansresult = bans.executeQuery();

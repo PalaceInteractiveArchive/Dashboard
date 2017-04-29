@@ -1,6 +1,7 @@
 package network.palace.dashboard.forums.db;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class DbStatement implements AutoCloseable {
 
     public DbStatement() throws SQLException {
         if (Database.connectionPool == null) {
-            Dashboard.getLogger().warn("No database connection");
+            Launcher.getDashboard().getLogger().warn("No database connection");
         } else {
             this.dbConn = Database.connectionPool.getConnection();
         }
@@ -201,10 +202,11 @@ public class DbStatement implements AutoCloseable {
     }
 
     public void close() {
+        Dashboard dashboard = Launcher.getDashboard();
         try {
             if (this.dbConn != null) {
                 if (!this.dbConn.getAutoCommit() && this.isDirty) {
-                    Dashboard.getLogger().warn("Statement was not finalized: " + this.query);
+                    dashboard.getLogger().warn("Statement was not finalized: " + this.query);
                 }
 
                 this.dbConn.close();
@@ -214,7 +216,7 @@ public class DbStatement implements AutoCloseable {
             this.resultSet = null;
             this.dbConn = null;
         } catch (SQLException var2) {
-            Dashboard.getLogger().warn("Failed to close DB connection: " + this.query);
+            dashboard.getLogger().warn("Failed to close DB connection: " + this.query);
             var2.printStackTrace();
         }
 

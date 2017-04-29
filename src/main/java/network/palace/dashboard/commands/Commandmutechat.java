@@ -1,6 +1,7 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
@@ -17,24 +18,25 @@ public class Commandmutechat extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
         String server = player.getServer();
-        if (Dashboard.getServer(server).isPark()) {
+        if (dashboard.getServer(server).isPark()) {
             server = "ParkChat";
         }
-        boolean muted = Dashboard.chatUtil.isChatMuted(server);
-        String msg = "";
+        boolean muted = dashboard.getChatUtil().isChatMuted(server);
+        String msg;
         if (muted) {
-            Dashboard.chatUtil.unmuteChat(server);
+            dashboard.getChatUtil().unmuteChat(server);
             msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                     ChatColor.YELLOW + "Chat has been unmuted";
         } else {
-            Dashboard.chatUtil.muteChat(server);
+            dashboard.getChatUtil().muteChat(server);
             msg = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "Palace Chat" + ChatColor.WHITE + "] " +
                     ChatColor.YELLOW + "Chat has been muted";
         }
         String msgname = msg + " by " + player.getName();
-        for (Player tp : Dashboard.getOnlinePlayers()) {
-            if ((server.equals("ParkChat") && Dashboard.getServer(tp.getServer()).isPark()) || tp.getServer().equals(server)) {
+        for (Player tp : dashboard.getOnlinePlayers()) {
+            if ((server.equals("ParkChat") && dashboard.getServer(tp.getServer()).isPark()) || tp.getServer().equals(server)) {
                 tp.sendMessage(tp.getRank().getRankId() >= Rank.SQUIRE.getRankId() ? msgname : msg);
             }
         }

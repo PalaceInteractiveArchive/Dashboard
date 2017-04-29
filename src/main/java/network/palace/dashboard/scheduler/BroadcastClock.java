@@ -1,6 +1,6 @@
 package network.palace.dashboard.scheduler;
 
-import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 
@@ -48,7 +48,7 @@ public class BroadcastClock extends TimerTask {
     @Override
     public void run() {
         String msg = ChatColor.translateAlternateColorCodes('&', announcements.get(i));
-        for (Player tp : Dashboard.getOnlinePlayers()) {
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             tp.sendMessage(msg);
         }
         i++;

@@ -1,8 +1,9 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Warning;
 
 import java.util.*;
@@ -35,6 +36,7 @@ public class WarningUtil {
     }
 
     public void handle(Player player, String msg) {
+        Dashboard dashboard = Launcher.getDashboard();
         try {
             UUID id = UUID.fromString(msg.replace(":warn-", ""));
             Warning warning = getWarning(id);
@@ -43,7 +45,7 @@ public class WarningUtil {
                 return;
             }
             warnings.remove(warning.getId());
-            if (Dashboard.getPlayer(warning.getName()) == null) {
+            if (dashboard.getPlayer(warning.getName()) == null) {
                 player.sendMessage(ChatColor.RED + "That player has logged off!");
                 return;
             }
@@ -52,7 +54,7 @@ public class WarningUtil {
             Collections.addAll(list, warning.getResponse().split(" "));
             String[] args = new String[list.size()];
             list.toArray(args);
-            Dashboard.commandUtil.getCommand("msg").execute(player, "msg", args);
+            dashboard.getCommandUtil().getCommand("msg").execute(player, "msg", args);
         } catch (Exception ignored) {
             ignored.printStackTrace();
             player.sendMessage(ChatColor.RED + "There was an error processing that warning!");

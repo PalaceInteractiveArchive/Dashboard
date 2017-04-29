@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
 import java.sql.Connection;
@@ -18,10 +19,11 @@ public class ModerationUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if (Dashboard.isTestNetwork()) {
+                Dashboard dashboard = Launcher.getDashboard();
+                if (dashboard.isTestNetwork()) {
                     return;
                 }
-                try (Connection connection = Dashboard.sqlUtil.getConnection()) {
+                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
                     PreparedStatement bans = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE active=1 AND permanent=0 AND `release`<=NOW();");
                     int banCount = bans.executeUpdate();
                     bans.close();
@@ -52,7 +54,7 @@ public class ModerationUtil {
                     if (muteCount != 0) {
                         sendMessage(ChatColor.YELLOW + "" + muteCount + ChatColor.GREEN +
                                 (muteCount == 1 ? " mute that expired was removed" : " mutes that expired were removed"));
-                        for (Player tp : Dashboard.getOnlinePlayers()) {
+                        for (Player tp : dashboard.getOnlinePlayers()) {
                             Mute m = tp.getMute();
                             if (m.isMuted() && m.getRelease() <= System.currentTimeMillis()) {
                                 m.setMuted(false);
@@ -108,8 +110,9 @@ public class ModerationUtil {
     }
 
     public void sendMessage(String message) {
+        Dashboard dashboard = Launcher.getDashboard();
         String msg = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + message;
-        for (Player player : Dashboard.getOnlinePlayers()) {
+        for (Player player : dashboard.getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                 player.sendMessage(msg);
             }
