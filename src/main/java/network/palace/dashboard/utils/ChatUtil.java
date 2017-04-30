@@ -93,6 +93,10 @@ public class ChatUtil {
     }
 
     public void reload() {
+        swearList.clear();
+        specificList.clear();
+        spacesList.clear();
+        whitelist.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("swears.txt"))) {
             String line = br.readLine();
             boolean swears = false;
@@ -120,11 +124,11 @@ public class ChatUtil {
                 }
                 if (!header) {
                     if (swears) {
-                        swearList.add(line.trim());
+                        swearList.add(line);
                     } else if (specific) {
-                        specificList.add(line.trim());
+                        specificList.add(line);
                     } else if (spaces) {
-                        spacesList.add(line.trim());
+                        spacesList.add(line);
                     }
                 }
                 line = br.readLine();
@@ -236,8 +240,9 @@ public class ChatUtil {
             }
             time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
             msg = new StringBuilder(removeCaps(player, msg.toString()));
-            if (containsSwear(player, packet.getMessage()) || isAdvert(player, packet.getMessage()) ||
-                    spamCheck(player, packet.getMessage()) || containsUnicode(player, packet.getMessage())) {
+            String temp = packet.getMessage().trim();
+            if (containsSwear(player, temp) || isAdvert(player, temp) ||
+                    spamCheck(player, temp) || containsUnicode(player, temp)) {
                 return;
             }
             String mm = packet.getMessage().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
