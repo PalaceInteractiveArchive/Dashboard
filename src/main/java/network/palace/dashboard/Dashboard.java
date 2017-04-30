@@ -73,7 +73,7 @@ public class Dashboard {
 
     @Getter private String socketURL = "";
     @Getter @Setter private SocketConnection socketConnection;
-    public PasswordUtil passwordUtil;
+    @Getter @Setter private PasswordUtil passwordUtil;
 
     public void loadConfiguration() {
         try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
@@ -274,7 +274,7 @@ public class Dashboard {
         return new ArrayList<>(joinServers);
     }
 
-    private static void setupShowReminder() {
+    public void setupShowReminder() {
         LocalDateTime localNow = LocalDateTime.now();
         ZoneId currentZone = ZoneId.of("America/New_York");
         ZonedDateTime zonedNow = ZonedDateTime.of(localNow, currentZone);

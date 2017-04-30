@@ -8,6 +8,7 @@ import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -80,7 +81,7 @@ public class Commandstaff extends MagicCommand {
                         player.sendMessage(ChatColor.RED + "Passwords cannot be larger than 256 characters!");
                         return;
                     }
-                    if (!dashboard.passwordUtil.isStrongEnough(newp)) {
+                    if (!dashboard.getPasswordUtil().isStrongEnough(newp)) {
                         player.sendMessage(ChatColor.RED + "This password is not secure enough! Make sure it has:\n- at least 8 characters\n- a lowercase letter\n- an uppercase letter\n- a number");
                         return;
                     }
@@ -120,7 +121,7 @@ public class Commandstaff extends MagicCommand {
                         player.sendMessage(ChatColor.RED + "Passwords cannot be larger than 256 characters!");
                         return;
                     }
-                    if (!dashboard.passwordUtil.isStrongEnough(pass)) {
+                    if (!dashboard.getPasswordUtil().isStrongEnough(pass)) {
                         player.sendMessage(ChatColor.RED + "This password is not secure enough! Make sure it has:\n- at least 8 characters\n- a lowercase letter\n- an uppercase letter\n- a number");
                         return;
                     }
@@ -134,7 +135,7 @@ public class Commandstaff extends MagicCommand {
                     SlackAttachment a = new SlackAttachment("[PW Force-Changed] *" + username +
                             "* changed by *" + player.getName() + "* " + player.getAddress());
                     a.color("good");
-                    dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                    dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     return;
                 }
             }

@@ -911,7 +911,7 @@ public class SqlUtil {
             String hashed = result.getString("password");
             result.close();
             sql.close();
-            return Launcher.getDashboard().passwordUtil.validPassword(pass, hashed);
+            return Launcher.getDashboard().getPasswordUtil().validPassword(pass, hashed);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -935,8 +935,8 @@ public class SqlUtil {
 
     public void changePassword(UUID uuid, String pass) {
         Dashboard dashboard = Launcher.getDashboard();
-        String salt = dashboard.passwordUtil.getNewSalt();
-        String hashed = dashboard.passwordUtil.hashPassword(pass, salt);
+        String salt = dashboard.getPasswordUtil().getNewSalt();
+        String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("UPDATE staffpasswords SET password=? WHERE uuid=?");
             sql.setString(1, hashed);
