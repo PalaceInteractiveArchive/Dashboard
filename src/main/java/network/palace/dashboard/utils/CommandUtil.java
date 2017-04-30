@@ -55,6 +55,7 @@ public class CommandUtil {
         register("pmtoggle", new Commandpmtoggle());
         register("processes", new Commandprocesses());
         register("reboot", new Commandreboot());
+        register("reloadicon", new Commandreloadicon());
         register("reply", new Commandreply());
         register("sc", new Commandsc());
         register("send", new Commandsend());

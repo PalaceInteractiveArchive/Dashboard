@@ -184,6 +184,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.googlecode.json-simple</include>
+                                    <include>io.socket</include>
                                 </includes>
                             </artifactSet>
                         </configuration>

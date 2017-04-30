@@ -29,7 +29,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author Innectic
@@ -77,7 +80,7 @@ public class Launcher {
                     Collections.singletonList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
         }));
         dashboard.setRandom(new Random());
-        dashboard.setSchedulerManager( new SchedulerManager());
+        dashboard.setSchedulerManager(new SchedulerManager());
         try {
             dashboard.getLogger().info("Initializing SQL Connections");
             dashboard.setSqlUtil(new SqlUtil());

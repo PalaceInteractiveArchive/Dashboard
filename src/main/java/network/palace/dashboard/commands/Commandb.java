@@ -17,16 +17,16 @@ public class Commandb extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length > 0) {
-            String message = "";
+            StringBuilder message = new StringBuilder();
             for (String arg : args) {
-                message += arg + " ";
+                message.append(arg).append(" ");
             }
             String sname = player.getName();
             String msg = ChatColor.WHITE + "[" + ChatColor.AQUA + "Information" +
-                    ChatColor.WHITE + "] " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message);
+                    ChatColor.WHITE + "] " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message.toString());
             String staff = ChatColor.WHITE + "[" + ChatColor.AQUA +
                     sname + ChatColor.WHITE + "] " + ChatColor.GREEN +
-                    ChatColor.translateAlternateColorCodes('&', message);
+                    ChatColor.translateAlternateColorCodes('&', message.toString());
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
                     tp.sendMessage(staff);

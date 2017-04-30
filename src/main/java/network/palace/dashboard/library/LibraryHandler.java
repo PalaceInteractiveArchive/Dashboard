@@ -1,8 +1,8 @@
 package network.palace.dashboard.library;
 
 import lombok.Getter;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -106,7 +106,7 @@ public final class LibraryHandler {
 
     private static void addURL(URL url) throws IOException {
         // Check if this is already loaded
-        URLClassLoader sysLoader = (URLClassLoader)ClassLoader.getSystemClassLoader();
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         Class<URLClassLoader> sysClass = URLClassLoader.class;
         try {
             Method method = sysClass.getDeclaredMethod("addURL", URL.class);

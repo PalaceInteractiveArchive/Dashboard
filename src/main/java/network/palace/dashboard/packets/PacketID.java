@@ -68,7 +68,7 @@ public enum PacketID {
     }
 
     public enum Bungee {
-        BUNGEEID(65), PLAYERLISTINFO(66);
+        BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70);
 
         final int id;
 

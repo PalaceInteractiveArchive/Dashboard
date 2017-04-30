@@ -19,6 +19,7 @@ import network.palace.dashboard.packets.audio.PacketGetPlayer;
 import network.palace.dashboard.packets.audio.PacketPlayerInfo;
 import network.palace.dashboard.packets.bungee.PacketBungeeID;
 import network.palace.dashboard.packets.bungee.PacketPlayerListInfo;
+import network.palace.dashboard.packets.bungee.PacketServerIcon;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.packets.park.*;
 import network.palace.dashboard.slack.SlackAttachment;
@@ -198,6 +199,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketCommandList commands = new PacketCommandList(new ArrayList<>(dashboard.getCommandUtil().getCommandsAndAliases()));
                     PacketMaintenance maintenance = new PacketMaintenance(dashboard.isMaintenance());
                     PacketBungeeID bungeeID = new PacketBungeeID(channel.getBungeeID());
+                    String base64 = Launcher.getDashboard().getServerIconBase64();
+                    PacketServerIcon serverIcon = new PacketServerIcon(base64);
                     channel.send(motd);
                     channel.send(count);
                     channel.send(server);
@@ -205,6 +208,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     channel.send(commands);
                     channel.send(maintenance);
                     channel.send(bungeeID);
+                    channel.send(serverIcon);
                     if (dashboard.isMaintenance()) {
                         PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(dashboard.getMaintenanceWhitelist());
                         channel.send(whitelist);
@@ -795,6 +799,17 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 Player tp = dashboard.getPlayer(uuid);
                 boolean exists = tp != null;
                 channel.send(new PacketConfirmPlayer(uuid, exists));
+                break;
+            }
+            /**
+             * Server Icon Request from BungeeCord
+             */
+            case 70: {
+                if (!channel.getType().equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
+                    break;
+                }
+                PacketServerIcon packet = new PacketServerIcon(Launcher.getDashboard().getServerIconBase64());
+                channel.send(packet);
                 break;
             }
         }

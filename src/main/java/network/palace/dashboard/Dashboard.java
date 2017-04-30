@@ -19,9 +19,7 @@ import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.utils.*;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -352,5 +350,22 @@ public class Dashboard {
             sb.append(c);
         }
         return sb.toString();
+    }
+
+    public String getServerIconBase64() {
+        String encodedfile = "";
+        File serverIcon = new File("server-icon.png");
+        if (!serverIcon.exists()) {
+            return encodedfile;
+        }
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(serverIcon);
+            byte[] bytes = new byte[(int) serverIcon.length()];
+            fileInputStreamReader.read(bytes);
+            encodedfile = new String(Base64.getEncoder().encode(bytes), "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return encodedfile;
     }
 }
