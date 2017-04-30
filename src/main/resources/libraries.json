@@ -68,5 +68,20 @@
     "groupId": "io.socket",
     "artifactId": "socket.io-client",
     "version": "0.8.3"
+  },
+  {
+    "groupId": "io.socket",
+    "artifactId": "engine.io-client",
+    "version": "0.8.3"
+  },
+  {
+    "groupId": "com.squareup.okhttp3",
+    "artifactId": "okhttp",
+    "version": "3.5.0"
+  },
+  {
+    "groupId": "com.squareup.okio",
+    "artifactId": "okio",
+    "version": "1.11.0"
   }
 ]
