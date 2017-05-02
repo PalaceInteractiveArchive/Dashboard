@@ -1,5 +1,7 @@
 package network.palace.dashboard.handlers;
 
+import lombok.Getter;
+import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.packets.BasePacket;
@@ -7,6 +9,7 @@ import network.palace.dashboard.packets.dashboard.PacketMention;
 import network.palace.dashboard.packets.dashboard.PacketMessage;
 import network.palace.dashboard.packets.dashboard.PacketPlayerChat;
 import network.palace.dashboard.packets.dashboard.PacketPlayerDisconnect;
+import network.palace.dashboard.server.DashboardSocketChannel;
 
 import java.util.HashMap;
 import java.util.Timer;
@@ -16,34 +19,34 @@ import java.util.UUID;
  * Created by Marc on 7/14/16
  */
 public class Player {
-    private UUID uuid;
-    private String username;
-    private Rank rank = Rank.SETTLER;
-    private String address;
-    private String server;
-    private UUID bungeeID;
-    private int mcVersion;
-    private boolean newGuest = false;
-    private Timer tutorial = null;
-    private boolean toggled = true;
-    private boolean mentions = true;
-    private long loginTime = System.currentTimeMillis();
-    private UUID reply;
-    private Mute mute;
-    private HashMap<UUID, String> friends;
-    private HashMap<UUID, String> requests;
-    private boolean kicking;
-    private String audioToken = null;
-    private boolean recieveMessages = true;
-    private String pack = "none";
-    private String warp = "";
-    private boolean pendingWarp = false;
-    private boolean inventoryUploaded;
-    private long onlineTime = 0;
-    private String channel = "all";
-    private long afkTime = System.currentTimeMillis();
-    private boolean isAFK = false;
-    private boolean disabled = false;
+    @Getter @Setter private UUID uuid;
+    @Setter private String username = "";
+    @Getter @Setter private Rank rank = Rank.SETTLER;
+    @Getter private String address = "";
+    @Getter @Setter private String server = "";
+    @Getter @Setter private UUID bungeeID;
+    @Getter private int mcVersion = 0;
+    @Getter @Setter private boolean newGuest = false;
+    @Getter @Setter private Timer tutorial = null;
+    @Getter @Setter private boolean toggled = true;
+    @Setter private boolean mentions = true;
+    @Getter private long loginTime = System.currentTimeMillis();
+    @Getter @Setter private UUID reply;
+    @Setter private Mute mute;
+    @Getter @Setter private HashMap<UUID, String> friends = new HashMap<>();
+    @Getter @Setter private HashMap<UUID, String> requests = new HashMap<>();
+    @Getter private boolean kicking = false;
+    @Getter private String audioToken = "";
+    @Setter private boolean recieveMessages = true;
+    @Getter @Setter private String pack = "none";
+    @Getter @Setter private String warp = "";
+    @Getter @Setter private boolean pendingWarp = false;
+    @Getter @Setter private boolean inventoryUploaded = false;
+    @Getter @Setter private long onlineTime = 0;
+    @Getter @Setter private String channel = "all";
+    @Getter private long afkTime = System.currentTimeMillis();
+    @Getter @Setter private boolean isAFK = false;
+    @Getter @Setter private boolean disabled = false;
 
     public Player(UUID uuid, String username, String address, String server, UUID bungeeID, int mcVersion) {
         this.uuid = uuid;
@@ -62,73 +65,19 @@ public class Player {
     /**
      * Send packet to player's BungeeCord
      *
-     * @param packet
+     * @param packet the packet to send
      */
     public void send(BasePacket packet) {
         if (packet == null) {
             return;
         }
-        Dashboard.getBungee(bungeeID).send(packet.getJSON().toString());
+        DashboardSocketChannel bungee = Dashboard.getBungee(bungeeID);
+        if (bungee == null) return;
+        bungee.send(packet.getJSON().toString());
     }
 
     public UUID getUniqueId() {
         return uuid;
-    }
-
-    public String getName() {
-        return username;
-    }
-
-    public Rank getRank() {
-        return rank;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public UUID getBungeeID() {
-        return bungeeID;
-    }
-
-    public void setBungeeID(UUID bungeeID) {
-        this.bungeeID = bungeeID;
-    }
-
-    public boolean isToggled() {
-        return toggled;
-    }
-
-    public boolean hasMentions() {
-        return mentions;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setRank(Rank rank) {
-        this.rank = rank;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
-    }
-
-    public void setToggled(boolean b) {
-        this.toggled = b;
-    }
-
-    public void setMentions(boolean b) {
-        this.mentions = b;
-    }
-
-    public long getLoginTime() {
-        return loginTime;
     }
 
     public void chat(String msg) {
@@ -136,22 +85,10 @@ public class Player {
         send(packet);
     }
 
-    public void setReply(UUID uuid) {
-        this.reply = uuid;
-    }
-
-    public UUID getReply() {
-        return reply;
-    }
-
     public void kickPlayer(String reason) {
         kicking = true;
         PacketPlayerDisconnect packet = new PacketPlayerDisconnect(uuid, reason);
         send(packet);
-    }
-
-    public void setMute(Mute mute) {
-        this.mute = mute;
     }
 
     public Mute getMute() {
@@ -161,61 +98,13 @@ public class Player {
         return mute;
     }
 
-    public void setFriends(HashMap<UUID, String> friends) {
-        this.friends = friends;
-    }
-
-    public void setRequests(HashMap<UUID, String> requests) {
-        this.requests = requests;
-    }
-
-    public HashMap<UUID, String> getFriends() {
-        return friends;
-    }
-
-    public HashMap<UUID, String> getRequests() {
-        return requests;
-    }
-
-    public boolean hasFriendToggledOff() {
-        return toggled;
-    }
-
-    public void setHasFriendToggled(boolean bool) {
-        toggled = bool;
-    }
-
-    public boolean isKicking() {
-        return kicking;
-    }
-
     public String setAudioToken() {
         this.audioToken = Launcher.getDashboard().getRandomToken();
         return audioToken;
     }
 
-    public String getAudioToken() {
-        return audioToken;
-    }
-
     public void resetAudioToken() {
-        this.audioToken = null;
-    }
-
-    public boolean canRecieveMessages() {
-        return recieveMessages;
-    }
-
-    public void setRecieveMessages(boolean recieveMessages) {
-        this.recieveMessages = recieveMessages;
-    }
-
-    public void setPack(String pack) {
-        this.pack = pack;
-    }
-
-    public String getPack() {
-        return pack;
+        this.audioToken = "";
     }
 
     public void mention() {
@@ -226,87 +115,30 @@ public class Player {
         }
     }
 
-    public String getWarp() {
-        return warp;
+    /**
+     * Get the name of the player
+     *
+     * @deprecated Use `getUsername` instead.
+     *
+     * @return the name of the player
+     */
+    public String getName() {
+        return username;
     }
 
-    public void setWarp(String warp) {
-        this.warp = warp;
-    }
-
-    public boolean isPendingWarp() {
-        return pendingWarp;
-    }
-
-    public void setPendingWarp(boolean pendingWarp) {
-        this.pendingWarp = pendingWarp;
-    }
-
-    public void setInventoryUploaded(boolean b) {
-        this.inventoryUploaded = b;
-    }
-
-    public boolean isInventoryUploaded() {
-        return inventoryUploaded;
-    }
-
-    public void setOnlineTime(long onlineTime) {
-        this.onlineTime = onlineTime;
-    }
-
-    public long getOnlineTime() {
-        return onlineTime;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
-    public void setChannel(String channel) {
-        this.channel = channel;
-    }
-
-    public boolean isNewGuest() {
-        return newGuest;
-    }
-
-    public void setNewGuest(boolean newGuest) {
-        this.newGuest = newGuest;
-    }
-
-    public Timer getTutorial() {
-        return tutorial;
-    }
-
-    public void setTutorial(Timer tutorial) {
-        this.tutorial = tutorial;
-    }
-
-    public long getAfkTime() {
-        return afkTime;
+    public boolean hasMentions() {
+        return mentions;
     }
 
     public void afkAction() {
         afkTime = System.currentTimeMillis();
     }
 
-    public void setAFK(boolean AFK) {
-        isAFK = AFK;
+    public boolean hasFriendToggledOff() {
+        return toggled;
     }
 
-    public boolean isAFK() {
-        return isAFK;
-    }
-
-    public void setDisabled(boolean disabled) {
-        this.disabled = disabled;
-    }
-
-    public boolean isDisabled() {
-        return disabled;
-    }
-
-    public int getMcVersion() {
-        return mcVersion;
+    public boolean canRecieveMessages() {
+        return recieveMessages;
     }
 }

@@ -28,9 +28,7 @@ public class NameUtil {
             }
             if (!uuid.equals("")) {
                 List<String> list = getNames(name, uuid);
-                for (String s : list) {
-                    names.add(s);
-                }
+                names.addAll(list);
             }
         } catch (Exception e) {
             e.printStackTrace();

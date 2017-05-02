@@ -88,6 +88,10 @@ public class SqlUtil {
 
     public void login(final Player player) {
         Dashboard dashboard = Launcher.getDashboard();
+
+        // Check if the uuid is from MCLeaks before we continue.
+
+
         dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
@@ -105,13 +109,12 @@ public class SqlUtil {
                     player.send(packet);
                 }
                 boolean needsUpdate = false;
-                boolean ipUpdate = !player.getAddress().equals(result.getString("ipAddress"));
-                boolean disable = ipUpdate && rank.getRankId() >= Rank.SQUIRE.getRankId();
-                final String oldIP = result.getString("ipAddress");
-                if (ipUpdate || !player.getName().equals(result.getString("username")) ||
-                        player.getMcVersion() != result.getInt("mcversion")) {
-                    needsUpdate = true;
-                }
+                boolean isSameIP = !player.getAddress().equals(result.getString("ipAddress"));
+                boolean disable = isSameIP && rank.getRankId() >= Rank.SQUIRE.getRankId();
+
+                if (isSameIP || !player.getName().equals(result.getString("username")) ||
+                        player.getMcVersion() != result.getInt("mcversion")) needsUpdate = true;
+
                 player.setDisabled(disable);
                 player.setRank(rank);
                 player.setToggled(result.getInt("toggled") == 1);
@@ -120,13 +123,12 @@ public class SqlUtil {
                 player.setNewGuest(result.getInt("tutorial") != 1);
                 dashboard.addPlayer(player);
                 dashboard.addToCache(player.getUniqueId(), player.getName());
-                String u = result.getString("username");
-                int v = result.getInt("mcversion");
+
+                String username = result.getString("username");
+                int protocolVersion = result.getInt("mcversion");
                 result.close();
                 sql.close();
-                if (needsUpdate) {
-                    update(player, connection, !player.getName().equals(u), player.getMcVersion() != v);
-                }
+                if (needsUpdate) update(player, connection, !player.getName().equals(username), player.getMcVersion() != protocolVersion);
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getName() + " has clocked in.";
@@ -144,11 +146,12 @@ public class SqlUtil {
                 HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
                 player.setFriends(friends);
                 player.setRequests(requests);
-                HashMap<UUID, String> flist = player.getFriends();
-                if (!flist.isEmpty()) {
+                HashMap<UUID, String> friendList = player.getFriends();
+                if (friendList == null) return;
+                if (!friendList.isEmpty()) {
                     String joinMessage = rank.getTagColor() + player.getName() + ChatColor.LIGHT_PURPLE + " has joined.";
                     if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
-                        for (Map.Entry<UUID, String> entry : flist.entrySet()) {
+                        for (Map.Entry<UUID, String> entry : friendList.entrySet()) {
                             Player tp = dashboard.getPlayer(entry.getKey());
                             if (tp != null) {
                                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
@@ -157,7 +160,7 @@ public class SqlUtil {
                             }
                         }
                     } else {
-                        for (Map.Entry<UUID, String> entry : flist.entrySet()) {
+                        for (Map.Entry<UUID, String> entry : friendList.entrySet()) {
                             Player tp = dashboard.getPlayer(entry.getKey());
                             if (tp != null) {
                                 tp.sendMessage(joinMessage);

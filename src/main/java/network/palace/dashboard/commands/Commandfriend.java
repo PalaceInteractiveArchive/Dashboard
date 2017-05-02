@@ -30,7 +30,7 @@ public class Commandfriend extends MagicCommand {
                         return;
                     case "toggle":
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            player.setHasFriendToggled(!player.hasFriendToggledOff());
+                            player.setToggled(!player.hasFriendToggledOff());
                             if (player.hasFriendToggledOff()) {
                                 player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
                                         ChatColor.RED + "OFF");

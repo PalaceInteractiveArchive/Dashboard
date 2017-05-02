@@ -33,9 +33,7 @@ public class Commandmaintenance extends MagicCommand {
                     Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
             List<UUID> list = new ArrayList<>();
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
-                for (UUID uuid : entry.getValue()) {
-                    list.add(uuid);
-                }
+                list.addAll(entry.getValue());
             }
             dashboard.setMaintenanceWhitelist(list);
             PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(list);
