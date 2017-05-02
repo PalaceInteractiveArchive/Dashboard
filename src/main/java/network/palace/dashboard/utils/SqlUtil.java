@@ -90,7 +90,13 @@ public class SqlUtil {
         Dashboard dashboard = Launcher.getDashboard();
 
         // Check if the uuid is from MCLeaks before we continue.
-
+        boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
+        if (isMCLeaks) {
+            // UUID is in MCLeaks, temp ban the account
+            long timestamp = DateUtil.parseDateDiff("4d", true);
+            banPlayer(player.getUuid(), "MCLeaks Account", false, new Date(timestamp), "Dashboard");
+            return;
+        }
 
         dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
