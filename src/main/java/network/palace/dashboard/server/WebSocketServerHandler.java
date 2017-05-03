@@ -532,7 +532,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 final long timestamp = DateUtil.parseDateDiff("3d", true);
                 String username = "Unknown Username";
                 if (tp != null) {
-                    username = tp.getName();
+                    username = tp.getUsername();
                     uuid = tp.getUniqueId();
                     tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods!\n" +
                             ChatColor.AQUA + "You have been temporarily banned for 3 Days.\n" + ChatColor.YELLOW +
@@ -559,7 +559,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
                         tp.send(packet1);
                         tp.setRank(rank);
-                        name = tp.getName();
+                        name = tp.getUsername();
                     } else {
                         name = dashboard.getSqlUtil().usernameFromUUID(uuid);
                     }

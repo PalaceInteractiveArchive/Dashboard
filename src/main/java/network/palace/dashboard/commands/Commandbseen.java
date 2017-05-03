@@ -29,7 +29,7 @@ public class Commandbseen extends MagicCommand {
         dashboard.getSchedulerManager().runAsync(() -> {
             Player tp = dashboard.getPlayer(args[0]);
             boolean online = tp != null;
-            String name = online ? tp.getName() : args[0];
+            String name = online ? tp.getUsername() : args[0];
             UUID uuid;
             if (online) {
                 uuid = tp.getUniqueId();

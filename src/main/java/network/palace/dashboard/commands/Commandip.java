@@ -24,6 +24,6 @@ public class Commandip extends MagicCommand {
             player.sendMessage(ChatColor.RED + "That player wasn't found!");
             return;
         }
-        player.sendMessage(ChatColor.GREEN + "IP of " + tp.getName() + " is " + tp.getAddress());
+        player.sendMessage(ChatColor.GREEN + "IP of " + tp.getUsername() + " is " + tp.getAddress());
     }
 }

@@ -40,13 +40,13 @@ public class Commandban extends MagicCommand {
                 banner.sendMessage(ChatColor.RED + "This player is already banned! Unban them to change the reason.");
                 return;
             }
-            dashboard.getSqlUtil().banPlayer(uuid, finalReason, true, new Date(System.currentTimeMillis()), banner.getName());
+            dashboard.getSqlUtil().banPlayer(uuid, finalReason, true, new Date(System.currentTimeMillis()), banner.getUsername());
             Player tp = dashboard.getPlayer(uuid);
             if (tp != null) {
                 tp.kickPlayer(ChatColor.RED + "You Have Been Banned For " + ChatColor.AQUA + finalReason);
             }
             dashboard.getModerationUtil().announceBan(new Ban(uuid, playername, true, System.currentTimeMillis(),
-                    finalReason, banner.getName()));
+                    finalReason, banner.getUsername()));
         });
     }
 }

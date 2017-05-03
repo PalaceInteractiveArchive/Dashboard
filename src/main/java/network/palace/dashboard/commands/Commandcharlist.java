@@ -27,10 +27,10 @@ public class Commandcharlist extends MagicCommand {
                 String server = tp.getServer();
                 if (servers.containsKey(server)) {
                     List<String> characters = servers.get(server);
-                    characters.add(tp.getName());
+                    characters.add(tp.getUsername());
                     servers.replace(server, characters);
                 } else {
-                    servers.put(server, Collections.singletonList(tp.getName()));
+                    servers.put(server, Collections.singletonList(tp.getUsername()));
                 }
             }
         }

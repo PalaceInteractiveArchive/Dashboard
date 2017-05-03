@@ -187,7 +187,7 @@ public class Dashboard {
 
     public Player getPlayer(String username) {
         for (Player player : players.values()) {
-            if (player.getName().equalsIgnoreCase(username)) {
+            if (player.getUsername().equalsIgnoreCase(username)) {
                 return player;
             }
         }

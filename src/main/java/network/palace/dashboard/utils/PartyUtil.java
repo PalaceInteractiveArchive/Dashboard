@@ -74,9 +74,9 @@ public class PartyUtil {
             return;
         }
         timerList.put(tp.getUniqueId(), party);
-        PacketPartyRequest packet = new PacketPartyRequest(tp.getUniqueId(), party.getLeader().getName());
+        PacketPartyRequest packet = new PacketPartyRequest(tp.getUniqueId(), party.getLeader().getUsername());
         tp.send(packet);
-        party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getName() + " has asked " + tp.getName() +
+        party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + " has asked " + tp.getUsername() +
                 " to join their party, they have 5 minutes to accept!", true);
         new Timer().schedule(new TimerTask() {
             @Override
@@ -84,9 +84,9 @@ public class PartyUtil {
                 if (timerList.containsKey(tp.getUniqueId()) && timerList.get(tp.getUniqueId()).getUniqueId()
                         .equals(party.getUniqueId())) {
                     timerList.remove(tp.getUniqueId());
-                    tp.sendMessage(ChatColor.YELLOW + party.getLeader().getName() + "'s party request has expired!");
-                    party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getName() + "'s request to " +
-                            tp.getName() + " has expired!", true);
+                    tp.sendMessage(ChatColor.YELLOW + party.getLeader().getUsername() + "'s party request has expired!");
+                    party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + "'s request to " +
+                            tp.getUsername() + " has expired!", true);
                 }
             }
         }, 300000);
@@ -131,7 +131,7 @@ public class PartyUtil {
         }
         Party party = timerList.remove(player.getUniqueId());
         party.addMember(player);
-        party.messageToAllMembers(ChatColor.YELLOW + player.getName() + " has accepted the Party Request!", true);
+        party.messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " has accepted the Party Request!", true);
     }
 
     public void denyRequest(Player player) {

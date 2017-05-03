@@ -39,7 +39,7 @@ public class Commandstaff extends MagicCommand {
                     Dashboard.getInstance(player.getServer()).send(packet);
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[Successful] *" + player.getRank().getName() + "* " +
-                            player.getName() + " " + player.getAddress());
+                            player.getUsername() + " " + player.getAddress());
                     a.color("good");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                 } else {
@@ -52,14 +52,14 @@ public class Commandstaff extends MagicCommand {
                         trial = 1;
                     }
                     if (trial >= 5) {
-                        Ban ban = new Ban(player.getUniqueId(), player.getName(), true, System.currentTimeMillis(),
+                        Ban ban = new Ban(player.getUniqueId(), player.getUsername(), true, System.currentTimeMillis(),
                                 "Locked out of staff account", "Dashboard");
                         dashboard.getSqlUtil().banPlayer(ban);
                         dashboard.getModerationUtil().announceBan(ban);
                         player.kickPlayer(ChatColor.RED + "Locked out of staff account. Please contact management to unlock your account.");
-                        SlackMessage m = new SlackMessage("<!channel> *" + player.getName() + " Locked Out*");
+                        SlackMessage m = new SlackMessage("<!channel> *" + player.getUsername() + " Locked Out*");
                         SlackAttachment a = new SlackAttachment("*[Locked] " + player.getRank().getName() + "* " +
-                                player.getName() + " " + player.getAddress());
+                                player.getUsername() + " " + player.getAddress());
                         a.color("danger");
                         dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                         return;
@@ -67,7 +67,7 @@ public class Commandstaff extends MagicCommand {
                     player.sendMessage(ChatColor.RED + "Incorrect password!");
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[" + trial + "/5] *" + player.getRank().getName() + "* " +
-                            player.getName() + " " + player.getAddress());
+                            player.getUsername() + " " + player.getAddress());
                     a.color("warning");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                 }
@@ -89,7 +89,7 @@ public class Commandstaff extends MagicCommand {
                         player.sendMessage(ChatColor.RED + "Your existing password is incorrect!");
                         SlackMessage m = new SlackMessage("");
                         SlackAttachment a = new SlackAttachment("[Failed PW Change] *" + player.getRank().getName() + "* " +
-                                player.getName() + " " + player.getAddress());
+                                player.getUsername() + " " + player.getAddress());
                         a.color("warning");
                         dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                         return;
@@ -98,7 +98,7 @@ public class Commandstaff extends MagicCommand {
                     player.sendMessage(ChatColor.GREEN + "Your password was successfully changed!");
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[PW Changed] *" + player.getRank().getName() + "* " +
-                            player.getName() + " " + player.getAddress());
+                            player.getUsername() + " " + player.getAddress());
                     a.color("good");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                     return;
@@ -133,7 +133,7 @@ public class Commandstaff extends MagicCommand {
                     player.sendMessage(ChatColor.GREEN + username + "'s password was successfully changed!");
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[PW Force-Changed] *" + username +
-                            "* changed by *" + player.getName() + "* " + player.getAddress());
+                            "* changed by *" + player.getUsername() + "* " + player.getAddress());
                     a.color("good");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     return;

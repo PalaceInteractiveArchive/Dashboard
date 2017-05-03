@@ -30,7 +30,7 @@ public class CommandDiscord extends MagicCommand {
                 fullName.append(args[i]);
             }
             if (fullName.toString().contains("#") && fullName.toString().matches("(.*)#(\\d+)")) {
-                DiscordUserInfo userInfo = new DiscordUserInfo(fullName.toString(), player.getName(), player.getUniqueId().toString(), player.getRank().toString());
+                DiscordUserInfo userInfo = new DiscordUserInfo(fullName.toString(), player.getUsername(), player.getUniqueId().toString(), player.getRank().toString());
                 SocketConnection.sendLink(userInfo);
             } else {
                 player.sendMessage(ChatColor.DARK_RED + "Please specify a valid Discord ID!");

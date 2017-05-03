@@ -54,7 +54,7 @@ public class Forum {
 
     public void linkAccount(Player player) {
         try {
-            String key = addNewKey(player.getUniqueId().toString(), player.getName(), player.getRank().getName());
+            String key = addNewKey(player.getUniqueId().toString(), player.getUsername(), player.getRank().getName());
             String link = "https://palace.network/link-minecraft/?key=" + key + "&type=link";
             PacketLink packet = new PacketLink(player.getUniqueId(), link, "Click to link your Minecraft and Palace Forum accounts", ChatColor.YELLOW, true, true);
             player.send(packet);

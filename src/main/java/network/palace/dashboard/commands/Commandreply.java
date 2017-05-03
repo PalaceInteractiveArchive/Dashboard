@@ -61,13 +61,13 @@ public class Commandreply extends MagicCommand {
         if (tp.hasMentions()) {
             tp.mention();
         }
-        tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getName() +
+        tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() +
                 ChatColor.GREEN + " -> " + ChatColor.LIGHT_PURPLE + "You: " + ChatColor.WHITE + msg);
         player.sendMessage(ChatColor.LIGHT_PURPLE + "You " + ChatColor.GREEN + "-> " +
-                tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getName() + ": " +
+                tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getUsername() + ": " +
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUniqueId());
         dashboard.getChatUtil().socialSpyMessage(player, tp, msg, "reply");
-        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/reply " + tp.getName() + " " + msg);
+        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/reply " + tp.getUsername() + " " + msg);
     }
 }

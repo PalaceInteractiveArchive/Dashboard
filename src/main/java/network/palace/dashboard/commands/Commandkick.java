@@ -35,8 +35,8 @@ public class Commandkick extends MagicCommand {
         reason = reason.trim();
         tp.kickPlayer(ChatColor.RED + "You have been disconnected for: " + ChatColor.AQUA + reason);
         try {
-            dashboard.getModerationUtil().announceKick(tp.getName(), reason, player.getName());
-            dashboard.getSqlUtil().logKick(new Kick(tp.getUniqueId(), reason, player.getName()));
+            dashboard.getModerationUtil().announceKick(tp.getUsername(), reason, player.getUsername());
+            dashboard.getSqlUtil().logKick(new Kick(tp.getUniqueId(), reason, player.getUsername()));
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "That player isn't online!");
         }

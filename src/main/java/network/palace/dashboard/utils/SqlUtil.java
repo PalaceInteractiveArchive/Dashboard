@@ -89,14 +89,22 @@ public class SqlUtil {
     public void login(final Player player) {
         Dashboard dashboard = Launcher.getDashboard();
 
-        // Check if the uuid is from MCLeaks before we continue.
-        boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
-        if (isMCLeaks) {
-            // UUID is in MCLeaks, temp ban the account
-            long timestamp = DateUtil.parseDateDiff("4d", true);
-            banPlayer(player.getUuid(), "MCLeaks Account", false, new Date(timestamp), "Dashboard");
-            return;
-        }
+        dashboard.getSchedulerManager().runAsync(new Runnable() {
+            @Override
+            public void run() {
+                // Check if the uuid is from MCLeaks before we continue.
+                boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
+                if (isMCLeaks) {
+                    // UUID is in MCLeaks, temp ban the account
+                    long timestamp = DateUtil.parseDateDiff("4d", true);
+                    banPlayer(player.getUuid(), "MCLeaks Account", false, new Date(timestamp), "Dashboard");
+                    dashboard.getModerationUtil().announceBan(new Ban(player.getUniqueId(), player.getUsername(),
+                            true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard"));
+                    player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
+                            ChatColor.AQUA + "If you think were banned incorrectly, submit an appeal at palnet.us/appeal");
+                }
+            }
+        });
 
         dashboard.getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -118,7 +126,7 @@ public class SqlUtil {
                 boolean isSameIP = !player.getAddress().equals(result.getString("ipAddress"));
                 boolean disable = isSameIP && rank.getRankId() >= Rank.SQUIRE.getRankId();
 
-                if (isSameIP || !player.getName().equals(result.getString("username")) ||
+                if (isSameIP || !player.getUsername().equals(result.getString("username")) ||
                         player.getMcVersion() != result.getInt("mcversion")) needsUpdate = true;
 
                 player.setDisabled(disable);
@@ -128,16 +136,17 @@ public class SqlUtil {
                 player.setOnlineTime(result.getLong("onlinetime"));
                 player.setNewGuest(result.getInt("tutorial") != 1);
                 dashboard.addPlayer(player);
-                dashboard.addToCache(player.getUniqueId(), player.getName());
+                dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
                 String username = result.getString("username");
                 int protocolVersion = result.getInt("mcversion");
                 result.close();
                 sql.close();
-                if (needsUpdate) update(player, connection, !player.getName().equals(username), player.getMcVersion() != protocolVersion);
+                if (needsUpdate)
+                    update(player, connection, !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getName() + " has clocked in.";
+                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
@@ -155,7 +164,7 @@ public class SqlUtil {
                 HashMap<UUID, String> friendList = player.getFriends();
                 if (friendList == null) return;
                 if (!friendList.isEmpty()) {
-                    String joinMessage = rank.getTagColor() + player.getName() + ChatColor.LIGHT_PURPLE + " has joined.";
+                    String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
                     if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                         for (Map.Entry<UUID, String> entry : friendList.entrySet()) {
                             Player tp = dashboard.getPlayer(entry.getKey());
@@ -174,11 +183,11 @@ public class SqlUtil {
                         }
                     }
                 }
-                Mute mute = getMute(player.getUniqueId(), player.getName());
+                Mute mute = getMute(player.getUniqueId(), player.getUsername());
                 player.setMute(mute);
                 if (disable) {
                     SlackMessage m = new SlackMessage("");
-                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getName() +
+                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
                             " connected from a new IP address " + player.getAddress());
                     a.color("warning");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
@@ -197,7 +206,7 @@ public class SqlUtil {
         player.setNewGuest(true);
         PreparedStatement sql = connection.prepareStatement("INSERT INTO player_data (uuid, username, ipAddress) VALUES(?,?,?)");
         sql.setString(1, player.getUniqueId().toString());
-        sql.setString(2, player.getName());
+        sql.setString(2, player.getUsername());
         sql.setString(3, player.getAddress());
         sql.execute();
         sql.close();
@@ -210,14 +219,14 @@ public class SqlUtil {
                 return;
             }
             PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET username=?,mcversion=? WHERE uuid=?");
-            sql.setString(1, player.getName());
+            sql.setString(1, player.getUsername());
             sql.setInt(2, player.getMcVersion());
             sql.setString(3, player.getUniqueId().toString());
             sql.execute();
             sql.close();
         } else {
             PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET username=?,mcversion=?,ipAddress=? WHERE uuid=?");
-            sql.setString(1, player.getName());
+            sql.setString(1, player.getUsername());
             sql.setInt(2, player.getMcVersion());
             sql.setString(3, player.getAddress());
             sql.setString(4, player.getUniqueId().toString());
@@ -225,7 +234,7 @@ public class SqlUtil {
             sql.close();
         }
         if (username) {
-            Launcher.getDashboard().getForum().updatePlayerName(player.getUniqueId().toString(), player.getName());
+            Launcher.getDashboard().getForum().updatePlayerName(player.getUniqueId().toString(), player.getUsername());
         }
     }
 
@@ -257,14 +266,14 @@ public class SqlUtil {
             player.setMentions(result.getInt("mentions") == 1);
             player.setOnlineTime(result.getLong("onlinetime"));
             dashboard.addPlayer(player);
-            dashboard.addToCache(player.getUniqueId(), player.getName());
+            dashboard.addToCache(player.getUniqueId(), player.getUsername());
             result.close();
             sql.close();
             HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
             HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
             player.setFriends(friends);
             player.setRequests(requests);
-            Mute mute = getMute(player.getUniqueId(), player.getName());
+            Mute mute = getMute(player.getUniqueId(), player.getUsername());
             player.setMute(mute);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -289,7 +298,7 @@ public class SqlUtil {
                 Rank rank = player.getRank();
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getName() + " has clocked out.";
+                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
@@ -299,7 +308,7 @@ public class SqlUtil {
                 }
                 HashMap<UUID, String> flist = player.getFriends();
                 if (!flist.isEmpty()) {
-                    String joinMessage = rank.getTagColor() + player.getName() + ChatColor.LIGHT_PURPLE + " has left.";
+                    String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has left.";
                     if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                         for (Map.Entry<UUID, String> entry : flist.entrySet()) {
                             Player tp = dashboard.getPlayer(entry.getKey());
@@ -872,7 +881,7 @@ public class SqlUtil {
                 useruuid.close();
             } else {
                 if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
-                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getName(), player.getUniqueId().toString(), ""),
+                    DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getUsername(), player.getUniqueId().toString(), ""),
                             new DiscordCacheInfo.Discord(result.getString("discordUsername")));
                     result.close();
                     useruuid.close();

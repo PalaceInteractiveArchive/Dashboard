@@ -63,7 +63,7 @@ public class Commandfriend extends MagicCommand {
                             return;
                         }
                         if (!player.getFriends().containsKey(tp.getUniqueId())) {
-                            player.sendMessage(ChatColor.GREEN + tp.getName() + ChatColor.RED +
+                            player.sendMessage(ChatColor.GREEN + tp.getUsername() + ChatColor.RED +
                                     " is not on your Friend List!");
                             return;
                         }

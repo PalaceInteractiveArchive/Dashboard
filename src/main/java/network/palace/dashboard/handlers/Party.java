@@ -74,7 +74,7 @@ public class Party {
         String name = null;
         Player lead = dashboard.getPlayer(leader);
         if (lead != null) {
-            name = lead.getName();
+            name = lead.getUsername();
         }
         messageToAllMembers(ChatColor.RED + (name == null ? "The Party has been closed!" : name +
                 " has closed the Party!"), true);
@@ -168,10 +168,10 @@ public class Party {
         for (int i = 0; i < members.size(); i++) {
             boolean l = members.get(i).equals(leader);
             if (i == (members.size() - 1)) {
-                sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getName());
+                sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername());
                 continue;
             }
-            sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getName()).append(", ");
+            sb.append(l ? "*" : "").append(dashboard.getPlayer(members.get(i)).getUsername()).append(", ");
         }
         String msg = ChatColor.YELLOW + "Members of your Party: " + sb.toString();
         player.sendMessage(headerMessage);
@@ -185,7 +185,7 @@ public class Party {
 
     public void leave(Player player) {
         removeMember(player);
-        messageToAllMembers(ChatColor.RED + player.getName() + ChatColor.YELLOW + " has left the Party!", true);
+        messageToAllMembers(ChatColor.RED + player.getUsername() + ChatColor.YELLOW + " has left the Party!", true);
         player.sendMessage(ChatColor.RED + "You have left the party!");
         if (player.getChannel().equals("party")) {
             player.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
@@ -201,8 +201,8 @@ public class Party {
             return;
         }
         removeMember(tp);
-        messageToAllMembers(ChatColor.YELLOW + dashboard.getPlayer(leader).getName() + " has removed " +
-                tp.getName() + " from the Party!", true);
+        messageToAllMembers(ChatColor.YELLOW + dashboard.getPlayer(leader).getUsername() + " has removed " +
+                tp.getUsername() + " from the Party!", true);
         if (tp.getChannel().equals("party")) {
             tp.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
                     ChatColor.GREEN + "channel");
@@ -214,7 +214,7 @@ public class Party {
         Dashboard dashboard = Launcher.getDashboard();
         Rank r = player.getRank();
         String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUniqueId()) ? ChatColor.YELLOW + "* " : "") +
-                r.getNameWithBrackets() + ChatColor.GRAY + " " + player.getName() + ": " + ChatColor.WHITE +
+                r.getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
                 (r.getRankId() >= Rank.SQUIRE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
         for (UUID uuid : getMembers()) {
             if (uuid.equals(player.getUniqueId())) {
@@ -230,7 +230,7 @@ public class Party {
     }
 
     public void promote(Player player, Player tp) {
-        messageToAllMembers(ChatColor.YELLOW + player.getName() + " promoted " + tp.getName() +
+        messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " promoted " + tp.getUsername() +
                 " to Party Leader!", true);
         leader = tp.getUniqueId();
     }
@@ -240,7 +240,7 @@ public class Party {
             members.add(player.getUniqueId());
         }
         leader = player.getUniqueId();
-        messageToAllMembers(ChatColor.YELLOW + player.getName() + " has taken over the Party!", true);
+        messageToAllMembers(ChatColor.YELLOW + player.getUsername() + " has taken over the Party!", true);
     }
 
     @Override

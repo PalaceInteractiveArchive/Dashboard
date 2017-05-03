@@ -21,7 +21,7 @@ public class Commandb extends MagicCommand {
             for (String arg : args) {
                 message.append(arg).append(" ");
             }
-            String sname = player.getName();
+            String sname = player.getUsername();
             String msg = ChatColor.WHITE + "[" + ChatColor.AQUA + "Information" +
                     ChatColor.WHITE + "] " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message.toString());
             String staff = ChatColor.WHITE + "[" + ChatColor.AQUA +

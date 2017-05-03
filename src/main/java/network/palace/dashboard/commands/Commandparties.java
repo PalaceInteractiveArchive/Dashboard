@@ -27,7 +27,7 @@ public class Commandparties extends MagicCommand {
             player.sendMessage(ChatColor.YELLOW + "Server Parties:");
             String msg = null;
             for (Party p : parties) {
-                String leader = p.getLeader().getName();
+                String leader = p.getLeader().getUsername();
                 if (msg != null) {
                     msg += "\n";
                 } else {
@@ -52,9 +52,9 @@ public class Commandparties extends MagicCommand {
         List<UUID> members = p.getMembers();
         List<String> names = new ArrayList<>();
         for (UUID uuid : members) {
-            names.add(dashboard.getPlayer(uuid).getName());
+            names.add(dashboard.getPlayer(uuid).getUsername());
         }
-        String msg = "Party Leader: " + p.getLeader().getName() + "\nParty Members: ";
+        String msg = "Party Leader: " + p.getLeader().getUsername() + "\nParty Members: ";
         for (int i = 0; i < names.size(); i++) {
             msg += names.get(i);
             if (i < (names.size() - 1)) {

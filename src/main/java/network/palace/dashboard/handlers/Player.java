@@ -20,7 +20,7 @@ import java.util.UUID;
  */
 public class Player {
     @Getter @Setter private UUID uuid;
-    @Setter private String username = "";
+    @Getter @Setter private String username = "";
     @Getter @Setter private Rank rank = Rank.SETTLER;
     @Getter private String address = "";
     @Getter @Setter private String server = "";
@@ -118,9 +118,8 @@ public class Player {
     /**
      * Get the name of the player
      *
-     * @deprecated Use `getUsername` instead.
-     *
      * @return the name of the player
+     * @deprecated Use `getUsername` instead.
      */
     public String getName() {
         return username;

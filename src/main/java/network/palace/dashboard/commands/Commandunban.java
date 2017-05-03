@@ -31,6 +31,6 @@ public class Commandunban extends MagicCommand {
             return;
         }
         dashboard.getSqlUtil().unbanPlayer(uuid);
-        dashboard.getModerationUtil().announceUnban(username, player.getName());
+        dashboard.getModerationUtil().announceUnban(username, player.getUsername());
     }
 }

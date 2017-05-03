@@ -36,7 +36,7 @@ public class Commandtempban extends MagicCommand {
                 r += args[i] + " ";
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
-            String source = player.getName();
+            String source = player.getUsername();
             Player tp = dashboard.getPlayer(username);
             UUID uuid;
             if (tp == null) {

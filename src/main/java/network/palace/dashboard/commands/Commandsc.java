@@ -25,11 +25,11 @@ public class Commandsc extends MagicCommand {
             player = dashboard.getPlayer(player.getUniqueId());
             Rank rank = player.getRank();
             msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getNameWithBrackets()
-                    + " " + ChatColor.GRAY + player.getName() + ": " + ChatColor.WHITE +
+                    + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
                     ChatColor.translateAlternateColorCodes('&', message);
             dashboard.getChatUtil().staffChatMessage(msg);
             if (player != null) {
-                dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getName() + " " + message);
+                dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getUsername() + " " + message);
             }
             return;
         }

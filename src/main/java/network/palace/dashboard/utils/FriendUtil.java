@@ -27,12 +27,12 @@ public class FriendUtil {
         }
         if (player.getServer().equals(target.getServer())) {
             player.sendMessage(ChatColor.RED + "You're already on the same server as " + ChatColor.AQUA +
-                    target.getName() + "!");
+                    target.getUsername() + "!");
             return;
         }
         try {
             dashboard.getServerUtil().sendPlayer(player, target.getServer());
-            player.sendMessage(ChatColor.BLUE + "You connected to the server " + ChatColor.GREEN + target.getName() +
+            player.sendMessage(ChatColor.BLUE + "You connected to the server " + ChatColor.GREEN + target.getUsername() +
                     " " + ChatColor.BLUE + "is on! (" + target.getServer() + ")");
         } catch (Exception ignored) {
         }
@@ -173,7 +173,7 @@ public class FriendUtil {
 
     public static void addFriend(Player player, String name) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (name.equalsIgnoreCase(player.getName())) {
+        if (name.equalsIgnoreCase(player.getUsername())) {
             player.sendMessage(ChatColor.RED + "You can't be your own friend, sorry!");
             return;
         }
@@ -229,10 +229,10 @@ public class FriendUtil {
                 return;
             }
         }
-        tp.getRequests().put(player.getUniqueId(), player.getName());
-        player.sendMessage(ChatColor.YELLOW + "You have sent " + ChatColor.AQUA + tp.getName() + ChatColor.YELLOW +
+        tp.getRequests().put(player.getUniqueId(), player.getUsername());
+        player.sendMessage(ChatColor.YELLOW + "You have sent " + ChatColor.AQUA + tp.getUsername() + ChatColor.YELLOW +
                 " a Friend Request!");
-        PacketFriendRequest packet = new PacketFriendRequest(tp.getUniqueId(), player.getName());
+        PacketFriendRequest packet = new PacketFriendRequest(tp.getUniqueId(), player.getUsername());
         tp.send(packet);
         /**
          * Add request to database
@@ -285,9 +285,9 @@ public class FriendUtil {
         }
         player.getFriends().remove(tp.getUniqueId());
         tp.getFriends().remove(player.getUniqueId());
-        player.sendMessage(ChatColor.RED + "You removed " + ChatColor.GREEN + tp.getName() + ChatColor.RED +
+        player.sendMessage(ChatColor.RED + "You removed " + ChatColor.GREEN + tp.getUsername() + ChatColor.RED +
                 " from your Friend List!");
-        tp.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.RED + " removed you from their Friend List!");
+        tp.sendMessage(ChatColor.GREEN + player.getUsername() + ChatColor.RED + " removed you from their Friend List!");
         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
             PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
             sql.setString(1, player.getUniqueId().toString());
@@ -332,8 +332,8 @@ public class FriendUtil {
         }
         Player tp = dashboard.getPlayer(tuuid);
         if (tp != null) {
-            tp.getFriends().put(player.getUniqueId(), player.getName());
-            tp.sendMessage(player.getRank().getTagColor() + player.getName() + ChatColor.YELLOW +
+            tp.getFriends().put(player.getUniqueId(), player.getUsername());
+            tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.YELLOW +
                     " has accepted your Friend Request!");
         }
         dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Accept Friend Request", name);

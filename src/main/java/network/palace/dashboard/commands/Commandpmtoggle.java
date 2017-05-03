@@ -20,6 +20,6 @@ public class Commandpmtoggle extends MagicCommand {
         Dashboard dashboard = Launcher.getDashboard();
         boolean enabled = dashboard.getChatUtil().privateMessagesEnabled();
         dashboard.getChatUtil().setPrivateMessages(!enabled);
-        dashboard.getModerationUtil().togglePrivate(dashboard.getChatUtil().privateMessagesEnabled(), player.getName());
+        dashboard.getModerationUtil().togglePrivate(dashboard.getChatUtil().privateMessagesEnabled(), player.getUsername());
     }
 }

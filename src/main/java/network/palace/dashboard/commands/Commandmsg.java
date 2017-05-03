@@ -68,15 +68,15 @@ public class Commandmsg extends MagicCommand {
         if (tp.hasMentions()) {
             tp.mention();
         }
-        tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getName() +
+        tp.sendMessage(player.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() +
                 ChatColor.GREEN + " -> " + ChatColor.LIGHT_PURPLE + "You: " + ChatColor.WHITE + msg);
         player.sendMessage(ChatColor.LIGHT_PURPLE + "You " + ChatColor.GREEN + "-> " +
-                tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getName() + ": " +
+                tp.getRank().getNameWithBrackets() + ChatColor.GRAY + " " + tp.getUsername() + ": " +
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUniqueId());
         player.setReply(tp.getUniqueId());
         dashboard.getChatUtil().socialSpyMessage(player, tp, msg.toString(), "msg");
-        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/msg " + tp.getName() + " " + msg);
+        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/msg " + tp.getUsername() + " " + msg);
     }
 
     private boolean enoughTime(Player player) {

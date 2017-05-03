@@ -39,7 +39,7 @@ public abstract class MagicCommand {
         if (tabCompletePlayers) {
             Dashboard dashboard = Launcher.getDashboard();
             for (Player tp : dashboard.getOnlinePlayers()) {
-                list.add(tp.getName());
+                list.add(tp.getUsername());
             }
             if (args.size() > 0) {
                 String arg2 = args.get(args.size() - 1);

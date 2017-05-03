@@ -75,7 +75,7 @@ public class Commandpchat extends MagicCommand {
             }
         }
         party.chat(player, msg.toString());
-        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/pchat " + party.getLeader().getName() + " " + msg);
+        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/pchat " + party.getLeader().getUsername() + " " + msg);
     }
 
     private boolean enoughTime(Player player) {

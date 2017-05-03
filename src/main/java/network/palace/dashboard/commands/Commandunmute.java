@@ -30,7 +30,7 @@ public class Commandunmute extends MagicCommand {
             uuid = dashboard.getSqlUtil().uuidFromUsername(username);
         } else {
             uuid = tp.getUniqueId();
-            username = tp.getName();
+            username = tp.getUsername();
         }
         if (uuid == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
@@ -38,6 +38,6 @@ public class Commandunmute extends MagicCommand {
         }
         dashboard.getSqlUtil().unmutePlayer(uuid);
         tp.getMute().setMuted(false);
-        dashboard.getModerationUtil().announceUnmute(username, player.getName());
+        dashboard.getModerationUtil().announceUnmute(username, player.getUsername());
     }
 }

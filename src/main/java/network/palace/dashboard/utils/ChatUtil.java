@@ -319,7 +319,7 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
-            String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getName() + ": " +
+            String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled()) {
@@ -330,7 +330,7 @@ public class ChatUtil {
                     boolean mention = false;
                     if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
                         String possibleMention = send;
-                        String name = tp.getName().toLowerCase();
+                        String name = tp.getUsername().toLowerCase();
                         if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
                                 possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
                                 possibleMention.contains(" " + name + ".") || possibleMention.startsWith(name + ".") ||
@@ -391,7 +391,7 @@ public class ChatUtil {
         if (bool) {
             player.sendMessage(ChatColor.RED + "Please do not swear!");
             logMessage(player.getUniqueId(), msg);
-            swearMessage(player.getName(), msg);
+            swearMessage(player.getUsername(), msg);
             return true;
         }
         return false;
@@ -569,7 +569,7 @@ public class ChatUtil {
             if (isWhitelisted(m.toMatchResult().group())) {
                 return false;
             }
-            advertMessage(player.getName(), msg);
+            advertMessage(player.getUsername(), msg);
             player.sendMessage(ChatColor.RED + "Please do not attempt to advertise or share links.");
             return true;
         }
@@ -608,7 +608,7 @@ public class ChatUtil {
     public void socialSpyMessage(Player from, Player to, String message, String command) {
         Dashboard dashboard = Launcher.getDashboard();
         if (dashboard.getServer(from.getServer()).isPark()) {
-            String msg = ChatColor.WHITE + from.getName() + ": /" + command + " " + to.getName() + " " + message;
+            String msg = ChatColor.WHITE + from.getUsername() + ": /" + command + " " + to.getUsername() + " " + message;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
@@ -626,7 +626,7 @@ public class ChatUtil {
                     continue;
                 }
                 if (tp.getServer().equals(server)) {
-                    tp.sendMessage(from.getName() + ": /" + command + " " + to.getName() + " " + message);
+                    tp.sendMessage(from.getUsername() + ": /" + command + " " + to.getUsername() + " " + message);
                 }
             }
         }
@@ -635,7 +635,7 @@ public class ChatUtil {
     public void socialSpyParty(Player player, Party party, String message, String command) {
         Dashboard dashboard = Launcher.getDashboard();
         if (dashboard.getServer(player.getServer()).isPark()) {
-            String msg = ChatColor.WHITE + player.getName() + ": /" + command + " " + party.getLeader().getName() +
+            String msg = ChatColor.WHITE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
                     " " + message;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
@@ -654,7 +654,7 @@ public class ChatUtil {
                     continue;
                 }
                 if (tp.getServer().equals(server)) {
-                    tp.sendMessage(player.getName() + ": /" + command + " " + party.getLeader().getName() + " " + message);
+                    tp.sendMessage(player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() + " " + message);
                 }
             }
         }

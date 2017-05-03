@@ -53,7 +53,7 @@ public class Commandsend extends MagicCommand {
                     player.sendMessage(ChatColor.RED + "Player not found!");
                     return;
                 }
-                player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + tp.getName() + ChatColor.GREEN +
+                player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + tp.getUsername() + ChatColor.GREEN +
                         " to " + ChatColor.YELLOW + server.getName());
                 dashboard.getServerUtil().sendPlayer(tp, server.getName());
             }
@@ -68,7 +68,7 @@ public class Commandsend extends MagicCommand {
             list.add("all");
             list.add("current");
             for (Player tp : dashboard.getOnlinePlayers()) {
-                list.add(tp.getName());
+                list.add(tp.getUsername());
             }
             Collections.sort(list);
             return list;
@@ -76,7 +76,7 @@ public class Commandsend extends MagicCommand {
             list.add("all");
             list.add("current");
             for (Player tp : dashboard.getOnlinePlayers()) {
-                list.add(tp.getName());
+                list.add(tp.getUsername());
             }
             String arg = args.get(0);
             List<String> l2 = new ArrayList<>();

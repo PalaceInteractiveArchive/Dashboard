@@ -31,7 +31,7 @@ public class Commandbanip extends MagicCommand {
                         "is already banned! Unban it to change the reason.");
                 return;
             }
-            dashboard.getSqlUtil().banIP(ip, finalReason, player.getName());
+            dashboard.getSqlUtil().banIP(ip, finalReason, player.getUsername());
             if (!ip.contains("*")) {
                 for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getAddress().equals(ip)) {
@@ -53,7 +53,7 @@ public class Commandbanip extends MagicCommand {
                     }
                 }
             }
-            dashboard.getModerationUtil().announceBan(new AddressBan(ip, finalReason, player.getName()));
+            dashboard.getModerationUtil().announceBan(new AddressBan(ip, finalReason, player.getUsername()));
         });
     }
 }
