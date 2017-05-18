@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.*;
@@ -14,17 +15,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Marc on 7/15/16
  */
 public class ChatUtil {
-    public HashMap<String, Boolean> mutedServers = new HashMap<>();
     private HashMap<UUID, Long> time = new HashMap<>();
     private HashMap<UUID, String> messageCache = new HashMap<>();
-    private int chatDelay = 2000;
-    private HashMap<Character, ChatColor> chars = new HashMap<>();
+    private HashMap<UUID, List<String>> messages = new HashMap<>();
+    private List<String> mutedChats = new ArrayList<>();
+
     private List<String> swearList = new ArrayList<>();
     private List<String> specificList = new ArrayList<>();
     private List<String> spacesList = new ArrayList<>();
@@ -34,19 +34,9 @@ public class ChatUtil {
             "8", "9", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "=", "_", "+", "[", "]", "{", "}", "/",
             "\\", "?", "|", ",", ".", "<", ">", "`", "~", ";", ":", "'", "\"", "√", "˚", "≤", "≥", "™", "£", "¢", "∞",
             "•", " ");
-    private Pattern linkPattern = Pattern.compile("((\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?)|(([0-9a-z:/]+(\\.|\\(dot\\)\\(\\.\\" +
-            ")))+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|network|org|pro|tel|travel|ac|ad|ae|" +
-            "af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc" +
-            "|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|f" +
-            "r|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|" +
-            "je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml" +
-            "|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|" +
-            "pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj" +
-            "|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-" +
-            "9]+)?((/([~0-9a-zA-Z#+%@./_-]+))?(/[0-9a-zA-Z+%@/&\\[\\];=_-]+)?)?)\\b");
-    private HashMap<UUID, List<String>> messages = new HashMap<>();
-    private List<String> mutedChats = new ArrayList<>();
+
     private boolean privateMessages = true;
+    private int chatDelay = 2000;
 
     public ChatUtil() {
         Dashboard dashboard = Launcher.getDashboard();
@@ -164,7 +154,6 @@ public class ChatUtil {
             return;
         }
         Rank rank = player.getRank();
-        boolean special = rank.getRankId() >= Rank.SPECIALGUEST.getRankId();
         boolean squire = rank.getRankId() >= Rank.SQUIRE.getRankId();
         if (squire) {
             if (player.isAFK()) {
@@ -216,8 +205,7 @@ public class ChatUtil {
             return;
         }
         if (!enoughTime(player)) {
-            player.sendMessage(ChatColor.DARK_AQUA + "New Guests must be on the server for at least 15 minutes before " +
-                    "talking in chat. Learn more at palnet.us/rules");
+            player.sendMessage(DashboardConstants.NEW_GUEST);
             return;
         }
         if (isMuted(player)) {
@@ -230,12 +218,13 @@ public class ChatUtil {
                 server = "ParkChat";
             }
             if (mutedChats.contains(server)) {
-                player.sendMessage(ChatColor.RED + "Chat is silenced right now!");
+                player.sendMessage(DashboardConstants.MUTED_CHAT);
                 return;
             }
             //ChatDelay Check
             if (time.containsKey(player.getUniqueId()) && System.currentTimeMillis() < time.get(player.getUniqueId())) {
-                player.sendMessage(ChatColor.RED + "You have to wait " + chatDelay / 1000 + " seconds before chatting!");
+                String response = DashboardConstants.CHAT_DELAY.replaceAll("<TIME>", String.valueOf(chatDelay / 1000));
+                player.sendMessage(response);
                 return;
             }
             time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
@@ -248,13 +237,13 @@ public class ChatUtil {
             String mm = packet.getMessage().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "").replace(";", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
-                player.sendMessage(ChatColor.RED + "Please do not ask for Skype information!");
+                player.sendMessage(DashboardConstants.SKYPE_INFORMATION);
                 return;
             }
             //Duplicate Message Check
             if (messageCache.containsKey(player.getUniqueId())) {
                 if (msg.toString().equalsIgnoreCase(messageCache.get(player.getUniqueId()))) {
-                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Please do not repeat the same message!");
+                    player.sendMessage(DashboardConstants.MESSAGE_REPEAT);
                     return;
                 }
             }
@@ -295,12 +284,11 @@ public class ChatUtil {
                 dashboard.getSqlUtil().unmutePlayer(player.getUniqueId());
                 player.getMute().setMuted(false);
             } else {
-                String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
-                        DateUtil.formatDateDiff(mute.getRelease()) + ".";
-                if (!mute.getReason().equals("")) {
-                    msg += " Reason: " + player.getMute().getReason();
-                }
-                player.sendMessage(msg);
+                String response = DashboardConstants.MUTED_PLAYER;
+                response = response.replaceAll("<TIME>", DateUtil.formatDateDiff(mute.getRelease()));
+                if (!mute.getReason().equals(""))
+                    response += DashboardConstants.MUTE_REASON.replaceAll("<REASON>", player.getMute().getReason());
+                player.sendMessage(response);
                 return true;
             }
         }
@@ -319,7 +307,7 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
-            String message = rank.getNameWithBrackets() + " " + ChatColor.GRAY + player.getUsername() + ": " +
+            String message = rank.getNameWithFormatting() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled()) {
@@ -354,7 +342,7 @@ public class ChatUtil {
     }
 
     public boolean containsSwear(Player player, String msg) {
-        boolean bool = false;
+        boolean containsSwear = false;
         //omsg is the player's message with spaces
         final String omsg = msg.replace(".", "").replace("-", "")
                 .replace(",", "").replace("/", "").replace("()", "o")
@@ -367,29 +355,29 @@ public class ChatUtil {
                 .replace("@", "a").replace("$", "s").replace(";", "");
         for (String s : swearList) {
             if (m.toLowerCase().contains(s)) {
-                bool = true;
+                containsSwear = true;
                 break;
             }
         }
-        if (!bool) {
+        if (!containsSwear) {
             for (String s : spacesList) {
                 if (omsg.equalsIgnoreCase(s) || omsg.toLowerCase().startsWith(s + " ") || omsg.toLowerCase().endsWith(" " + s)
                         || omsg.contains(" " + s + " ")) {
-                    bool = true;
+                    containsSwear = true;
                     break;
                 }
             }
         }
-        if (!bool) {
+        if (!containsSwear) {
             for (String s : specificList) {
                 if (omsg.toLowerCase().contains(s)) {
-                    bool = true;
+                    containsSwear = true;
                     break;
                 }
             }
         }
-        if (bool) {
-            player.sendMessage(ChatColor.RED + "Please do not swear!");
+        if (containsSwear) {
+            player.sendMessage(DashboardConstants.SWEAR_RESPONSE);
             logMessage(player.getUniqueId(), msg);
             swearMessage(player.getUsername(), msg);
             return true;
@@ -431,7 +419,7 @@ public class ChatUtil {
     private void swearMessage(String name, String msg) {
         Dashboard dashboard = Launcher.getDashboard();
         UUID id = UUID.randomUUID();
-        String response = "Please keep chat appropriate.";
+        String response = DashboardConstants.SWEAR_WARNING;
         Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
         dashboard.getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "possibly swears");
@@ -447,7 +435,7 @@ public class ChatUtil {
     private void advertMessage(String name, String msg) {
         Dashboard dashboard = Launcher.getDashboard();
         UUID id = UUID.randomUUID();
-        String response = "Please to not attempt to advertise or share links.";
+        String response = DashboardConstants.LINK_WARNING;
         Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
         dashboard.getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "advertises");
@@ -472,7 +460,7 @@ public class ChatUtil {
             }
         }
         if (Math.floor((double) (100 * (((float) amount) / size))) >= 50.0) {
-            player.sendMessage(ChatColor.RED + "Please do not use a lot of capitals in your messages.");
+            player.sendMessage(DashboardConstants.EXCESSIVE_CAPS);
             StringBuilder s = new StringBuilder();
             for (int i = 0; i < msg.length(); i++) {
                 if (i == 0) {
@@ -488,9 +476,7 @@ public class ChatUtil {
 
     public boolean spamCheck(Player player, String msg) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (dashboard.getPlayer(msg) != null) {
-            return false;
-        }
+        if (dashboard.getPlayer(msg) != null) return false;
         Character last = null;
         int amount = 0;
         StringBuilder word = new StringBuilder();
@@ -522,7 +508,7 @@ public class ChatUtil {
             spam = false;
         }
         if (spam) {
-            player.sendMessage(ChatColor.RED + "Please do not spam chat with excessive amounts of characters.");
+            player.sendMessage(DashboardConstants.SPAM_WARNING);
             return true;
         }
         int numamount = 0;
@@ -548,7 +534,7 @@ public class ChatUtil {
             spam = false;
         }
         if (spam) {
-            player.sendMessage(ChatColor.RED + "Please do not spam chat with excessive amounts of numbers.");
+            player.sendMessage(DashboardConstants.SPAM_WARNING);
             return true;
         }
         return false;
@@ -564,13 +550,13 @@ public class ChatUtil {
     }
 
     public boolean isAdvert(Player player, String msg) {
-        Matcher m = linkPattern.matcher(msg.toLowerCase());
+        Matcher m = DashboardConstants.LINK_PATTERN.matcher(msg.toLowerCase());
         if (m.find()) {
             if (isWhitelisted(m.toMatchResult().group())) {
                 return false;
             }
             advertMessage(player.getUsername(), msg);
-            player.sendMessage(ChatColor.RED + "Please do not attempt to advertise or share links.");
+            player.sendMessage(DashboardConstants.LINK_WARNING);
             return true;
         }
         return false;

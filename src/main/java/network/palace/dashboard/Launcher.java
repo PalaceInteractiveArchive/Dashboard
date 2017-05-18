@@ -7,6 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
+import network.palace.dashboard.handlers.Arcade;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Party;
 import network.palace.dashboard.handlers.Player;
@@ -110,6 +111,7 @@ public class Launcher {
         dashboard.setSlackUtil(new SlackUtil());
         dashboard.setWarningUtil(new WarningUtil());
         dashboard.setPasswordUtil(new PasswordUtil());
+        dashboard.setArcade(new Arcade());
         try {
             dashboard.setSiteUtil(new SiteUtil());
         } catch (Exception e) {

@@ -17,20 +17,15 @@ public class Commandsc extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length > 0) {
-            String message = "";
-            for (String arg : args) {
-                message += arg + " ";
-            }
-            String msg;
-            player = dashboard.getPlayer(player.getUniqueId());
+            String message = String.join(" ", args);
+            String response;
             Rank rank = player.getRank();
-            msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getNameWithBrackets()
+
+            response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getNameWithFormatting()
                     + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
                     ChatColor.translateAlternateColorCodes('&', message);
-            dashboard.getChatUtil().staffChatMessage(msg);
-            if (player != null) {
-                dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getUsername() + " " + message);
-            }
+            dashboard.getChatUtil().staffChatMessage(response);
+            dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getUsername() + " " + message);
             return;
         }
         player.sendMessage(ChatColor.RED + "/sc [Message]");

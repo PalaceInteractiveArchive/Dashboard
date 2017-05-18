@@ -1,23 +1,20 @@
 package network.palace.dashboard.packets;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Created by Marc on 6/15/15
  */
+@AllArgsConstructor
 public enum PacketID {
     HEARTBEAT(0), LOGIN(1), KICK(2), GLOBAL_PLAY_ONCE(3), AREA_START(4), AREA_STOP(5), CLIENT_ACCEPTED(6), AUDIO_SYNC(7),
     NOTIFICATION(8), EXEC_SCRIPT(9), COMPUTER_SPEAK(10), INCOMING_WARP(11), SERVER_SWITCH(12), GETPLAYER(13),
     PLAYERINFO(14), CONTAINER(17);
 
-    final int ID;
+    @Getter final int ID;
 
-    PacketID(int ID) {
-        this.ID = ID;
-    }
-
-    public int getID() {
-        return this.ID;
-    }
-
+    @AllArgsConstructor
     public enum Dashboard {
         STATUSREQUEST(18), SERVERSTATUS(19), STAFFLISTCOMMAND(20), LISTFRIENDCOMMAND(21), CONNECTIONTYPE(22),
         PLAYERJOIN(23), PLAYERDISCONNECT(24), PLAYERCHAT(25), MESSAGE(26), SERVERSWITCH(27), PLAYERRANK(28),
@@ -28,56 +25,25 @@ public enum PacketID {
         LINK(53), WDLPROTECT(54), RANKCHANGE(55), WARNING(56), EMPTYSERVER(57), PARTYREQUEST(58), MYMCMAGICREGISTER(59),
         TITLE(60), PLAYERLIST(63), UPDATEECONOMY(67), CONFIRMPLAYER(68), DISABLEPLAYER(69);
 
-        final int id;
-
-        Dashboard(int id) {
-            this.id = id;
-        }
-
-        public int getID() {
-            return id;
-        }
+        @Getter final int id;
     }
 
+    @AllArgsConstructor
     public enum Park {
         WARP(56), INVENTORYSTATUS(58), REFRESHHOTELS(59), BROADCAST(60), MUTECHAT(61), REFRESHWARPS(62);
 
-        final int id;
-
-        Park(int id) {
-            this.id = id;
-        }
-
-        public int getID() {
-            return id;
-        }
+        @Getter final int id;
     }
 
+    @AllArgsConstructor
     public enum Arcade {
         GAMESTATUS(64);
-
-        final int id;
-
-        Arcade(int id) {
-            this.id = id;
-        }
-
-        public int getID() {
-            return id;
-        }
+        @Getter final int id;
     }
 
+    @AllArgsConstructor
     public enum Bungee {
         BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70);
-
-        final int id;
-
-        Bungee(int id) {
-            this.id = id;
-        }
-
-        public int getID() {
-            return id;
-        }
+        @Getter final int id;
     }
 }

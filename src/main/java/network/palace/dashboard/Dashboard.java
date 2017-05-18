@@ -5,10 +5,7 @@ import lombok.Setter;
 import network.palace.dashboard.commands.Commandstaff;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -52,6 +49,7 @@ public class Dashboard {
     @Getter @Setter private AFKUtil afkUtil;
     @Getter @Setter private StatUtil statUtil;
     @Getter @Setter private VoteUtil voteUtil;
+    @Getter @Setter private Arcade arcade;
 
     @Getter @Setter public Forum forum;
     @Getter @Setter private Random random;

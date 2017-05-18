@@ -90,6 +90,11 @@ public enum Rank {
         return ChatColor.WHITE + "[" + getTagColor() + getName() + ChatColor.WHITE + "]";
     }
 
+    public String getNameWithFormatting() {
+        String bolded = getRankId() >= 8 ? ChatColor.BOLD.toString() : "";
+        return getTagColor() + bolded + getName();
+    }
+
     public ChatColor getChatColor() {
         return chatColor;
     }

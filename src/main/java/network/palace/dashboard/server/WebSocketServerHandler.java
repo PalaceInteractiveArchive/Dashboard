@@ -14,6 +14,7 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.packets.arcade.PacketGameStatus;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketGetPlayer;
 import network.palace.dashboard.packets.audio.PacketPlayerInfo;
@@ -751,6 +752,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                 }
                 break;
+            }
+            /*
+            Game status
+             */
+            case 64: {
+                PacketGameStatus packet = new PacketGameStatus().fromJSON(object);
+                // TODO: Do more stuff here with the packet
             }
             /**
              * Bungee ID (Sent when a bungee changes IDs)

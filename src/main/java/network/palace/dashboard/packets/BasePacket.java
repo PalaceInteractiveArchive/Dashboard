@@ -1,22 +1,14 @@
 package network.palace.dashboard.packets;
 
 import com.google.gson.JsonObject;
+import lombok.Getter;
 
 /**
  * Created by Marc on 6/15/15
  */
-public class BasePacket {
-    protected int id = 0;
+public abstract class BasePacket {
+    @Getter protected int id = 0;
 
-    public BasePacket fromJSON(JsonObject obj) {
-        return this;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public JsonObject getJSON() {
-        return null;
-    }
+    public abstract BasePacket fromJSON(JsonObject obj);
+    public abstract JsonObject getJSON();
 }
