@@ -87,7 +87,7 @@ public enum Rank {
     }
 
     public String getNameWithBrackets() {
-        return ChatColor.WHITE + "[" + getTagColor() + getName() + ChatColor.WHITE + "]";
+        return getNameWithFormatting();
     }
 
     public String getNameWithFormatting() {

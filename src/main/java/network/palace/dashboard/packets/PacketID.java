@@ -25,25 +25,25 @@ public enum PacketID {
         LINK(53), WDLPROTECT(54), RANKCHANGE(55), WARNING(56), EMPTYSERVER(57), PARTYREQUEST(58), MYMCMAGICREGISTER(59),
         TITLE(60), PLAYERLIST(63), UPDATEECONOMY(67), CONFIRMPLAYER(68), DISABLEPLAYER(69);
 
-        @Getter final int id;
+        @Getter final int ID;
     }
 
     @AllArgsConstructor
     public enum Park {
         WARP(56), INVENTORYSTATUS(58), REFRESHHOTELS(59), BROADCAST(60), MUTECHAT(61), REFRESHWARPS(62);
 
-        @Getter final int id;
+        @Getter final int ID;
     }
 
     @AllArgsConstructor
     public enum Arcade {
         GAMESTATUS(64);
-        @Getter final int id;
+        @Getter final int ID;
     }
 
     @AllArgsConstructor
     public enum Bungee {
         BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70);
-        @Getter final int id;
+        @Getter final int ID;
     }
 }

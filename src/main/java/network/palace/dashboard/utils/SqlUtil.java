@@ -89,20 +89,16 @@ public class SqlUtil {
     public void login(final Player player) {
         Dashboard dashboard = Launcher.getDashboard();
 
-        dashboard.getSchedulerManager().runAsync(new Runnable() {
-            @Override
-            public void run() {
-                // Check if the uuid is from MCLeaks before we continue.
-                boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
-                if (isMCLeaks) {
-                    // UUID is in MCLeaks, temp ban the account
-                    long timestamp = DateUtil.parseDateDiff("4d", true);
-                    banPlayer(player.getUuid(), "MCLeaks Account", false, new Date(timestamp), "Dashboard");
-                    dashboard.getModerationUtil().announceBan(new Ban(player.getUniqueId(), player.getUsername(),
-                            true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard"));
-                    player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
-                            ChatColor.AQUA + "If you think were banned incorrectly, submit an appeal at palnet.us/appeal");
-                }
+        dashboard.getSchedulerManager().runAsync(() -> {
+            // Check if the uuid is from MCLeaks before we continue.
+            boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
+            if (isMCLeaks) {
+                // UUID is in MCLeaks, temp ban the account
+                banPlayer(player.getUuid(), "MCLeaks Account", true,  new Date(System.currentTimeMillis()), "Dashboard");
+                dashboard.getModerationUtil().announceBan(new Ban(player.getUniqueId(), player.getUsername(),
+                        true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard"));
+                player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
+                        ChatColor.AQUA + "If you think were banned incorrectly, submit an appeal at palnet.us/appeal");
             }
         });
 
