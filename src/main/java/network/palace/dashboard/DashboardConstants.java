@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class DashboardConstants {
 
     public static final String SWEAR_RESPONSE = ChatColor.RED + "Please do not swear!";
-    public static final String SWEAR_WARNING = ChatColor.RED + "Please keep chat appropriate";
+    public static final String SWEAR_WARNING = "Please keep chat appropriate";
     public static final String LINK_WARNING = ChatColor.RED + "Please do not attempt to advertise or share links.";
     public static final String EXCESSIVE_CAPS = ChatColor.RED + "Please do not use excessive capitals in your messages.";
     public static final String SPAM_WARNING = ChatColor.RED + "Please do not spam chat with excessive amounts of characters.";
