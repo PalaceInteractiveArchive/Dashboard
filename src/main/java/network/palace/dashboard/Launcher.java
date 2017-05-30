@@ -150,6 +150,8 @@ public class Launcher {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            dashboard.getSqlUtil().stop();
+
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

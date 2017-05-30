@@ -12,12 +12,10 @@ public class Commandsocial extends MagicCommand {
         player.sendMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + "Palace Network Social Links:");
         player.send(new PacketLink(player.getUniqueId(), "https://palace.network", "Website: https://palace.network",
                 ChatColor.GREEN, false, false));
-        player.send(new PacketLink(player.getUniqueId(), "https://palace.network/mumble",
-                "Mumble: https://palace.network/mumble", ChatColor.YELLOW, false, false));
+        player.send(new PacketLink(player.getUniqueId(), "https://palace.network/discord",
+                "Discord: https://palace.network/Discord", ChatColor.YELLOW, false, false));
         player.send(new PacketLink(player.getUniqueId(), "https://twitter.com/PalaceNetwork",
                 "Twitter: @PalaceNetwork", ChatColor.AQUA, false, false));
-        player.send(new PacketLink(player.getUniqueId(), "https://beam.pro/PalaceNetworkMC",
-                "Beam: https://beam.pro/PalaceNetwork", ChatColor.DARK_PURPLE, false, false));
         player.send(new PacketLink(player.getUniqueId(), "https://youtube.com/MCMagicParks",
                 "YouTube: https://youtube.com/MCMagicParks", ChatColor.RED, false, false));
         player.send(new PacketLink(player.getUniqueId(), "https://facebook.com/PalaceNetworkMC",

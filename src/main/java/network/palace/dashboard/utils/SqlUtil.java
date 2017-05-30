@@ -24,8 +24,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Marc on 7/14/16
  */
 public class SqlUtil {
-    BoneCP connectionPool = null;
-    public String myMCMagicConnString;
+    private BoneCP connectionPool = null;
 
     public SqlUtil() throws SQLException, IOException {
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
@@ -60,16 +59,8 @@ public class SqlUtil {
         config.setPartitionCount(3);
         config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
         connectionPool = new BoneCP(config);
-        BoneCPConfig mymcm = new BoneCPConfig();
-        mymcm.setJdbcUrl("jdbc:mysql://" + address + ":3306/mymcmagic");
-        mymcm.setUsername(username);
-        mymcm.setPassword(password);
-        mymcm.setMinConnectionsPerPartition(30);
-        mymcm.setMaxConnectionsPerPartition(300);
-        mymcm.setPartitionCount(2);
-        mymcm.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
         Dashboard dashboard = Launcher.getDashboard();
-        dashboard.setActivityUtil(new ActivityUtil(new BoneCP(mymcm)));
+        dashboard.setActivityUtil(new ActivityUtil(connectionPool));
     }
 
     public Connection getConnection() throws SQLException {
