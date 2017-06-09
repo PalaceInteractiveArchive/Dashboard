@@ -26,7 +26,7 @@ public class Commandmotdrl extends MagicCommand {
         player.sendMessage(ChatColor.GREEN + "Loading MOTD from file...");
         dashboard.loadMOTD();
         player.sendMessage(ChatColor.GREEN + "MOTD Loaded! Notifying Bungees...");
-        PacketUpdateMOTD packet = new PacketUpdateMOTD(dashboard.getMotd(), dashboard.getMotdmaintenance(),
+        PacketUpdateMOTD packet = new PacketUpdateMOTD(dashboard.getMotd(), dashboard.getMotdMaintenance(),
                 dashboard.getInfo());
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;

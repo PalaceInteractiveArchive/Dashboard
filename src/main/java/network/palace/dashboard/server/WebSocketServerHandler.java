@@ -14,6 +14,7 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketGetPlayer;
@@ -30,9 +31,11 @@ import network.palace.dashboard.utils.IPUtil;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Created by Marc on 6/15/15
+ * @author Marc
+ * @since 6/15/15
  */
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -40,7 +43,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private WebSocketServerHandshaker handshaker;
 
-    private final String minigameRegex = "mini-(\\w+)([1-9])";
+    private final String MINIGAME_REGEX = "mini-(\\w+)([1-9])";
+
+    private final String MINIGAME_SERVER_NAME = "Arcade";
 
     public static ChannelGroup getGroup() {
         return channels;
@@ -64,7 +69,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
-            final DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
         }
     }
 
@@ -102,7 +106,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         dashboard.getLogger().info(object.toString());
         DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
         switch (id) {
-            /**
+            /*
              * GetPlayer (Audio)
              */
             case 13: {
@@ -122,14 +126,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     player.resetAudioToken();
                     try {
                         PacketAudioConnect connect = new PacketAudioConnect(player.getUniqueId());
-                        Dashboard.getInstance(player.getServer()).send(connect);
+                        DashboardSocketChannel socketChannel = Dashboard.getInstance(player.getServer());
+                        if (socketChannel == null) return;
+                        socketChannel.send(connect);
                     } catch (Exception ignored) {
                     }
                 }
                 channel.send(info);
                 break;
             }
-            /**
+            /*
              * AudioServer Packet (Container)
              */
             case 17: {
@@ -143,7 +149,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
             }
-            /**
+            /*
              * ConnectionType
              */
             case 22: {
@@ -158,7 +164,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         SlackAttachment a = new SlackAttachment("A new BungeeCord instance has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
                         a.color("good");
-                        dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                         break;
                     }
                     case DAEMON: {
@@ -167,7 +173,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         SlackAttachment a = new SlackAttachment("A new daemon has connected to dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
                         a.color("good");
-                        dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                         break;
                     }
                     case WEBCLIENT: {
@@ -183,13 +189,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         SlackAttachment a = new SlackAttachment("The Audio Server has connected to Dashboard from the IP Address " +
                                 channel.remoteAddress().getAddress().toString());
                         a.color("good");
-                        dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                         break;
                     }
                 }
                 dashboard.getLogger().info("New " + type.name().toLowerCase() + " connection");
                 if (type.equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
-                    PacketUpdateMOTD motd = new PacketUpdateMOTD(dashboard.getMotd(), dashboard.getMotdmaintenance(),
+                    PacketUpdateMOTD motd = new PacketUpdateMOTD(dashboard.getMotd(), dashboard.getMotdMaintenance(),
                             dashboard.getInfo());
                     PacketOnlineCount count = new PacketOnlineCount(dashboard.getOnlinePlayers().size());
                     List<String> servers = new ArrayList<>();
@@ -222,7 +228,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
             }
-            /**
+            /*
              * PlayerJoin
              */
             case 23: {
@@ -240,7 +246,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getSqlUtil().login(player);
                 break;
             }
-            /**
+            /*
              * PlayerDisconnect
              */
             case 24: {
@@ -248,7 +254,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.logout(packet.getUniqueId());
                 break;
             }
-            /**
+            /*
              * PlayerChat
              */
             case 25: {
@@ -256,7 +262,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getChatUtil().chatEvent(packet);
                 break;
             }
-            /**
+            /*
              * Message
              */
             case 26: {
@@ -270,7 +276,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 tp.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
                 break;
             }
-            /**
+            /*
              * Server Switch
              */
             case 27: {
@@ -287,7 +293,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     tp.setServer(target);
                     if (tp.isDisabled()) {
                         PacketDisablePlayer dis = new PacketDisablePlayer(tp.getUniqueId(), true);
-                        Dashboard.getInstance(target).send(dis);
+                        DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                        if (socketChannel == null) return;
+                        socketChannel.send(dis);
                         /*
                          * /staff login pw
                          * /staff change oldpw newpw
@@ -296,11 +304,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
                         tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                        try {
-                            Dashboard.getInstance(target).send(update);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        sendInventoryUpdate(target, update);
                     }
                     if (tp.isNewGuest()) {
                         Timer tutorial = new Timer();
@@ -393,11 +397,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (!dashboard.getServer(tp.getServer()).isPark() || tp.isInventoryUploaded()) {
                         tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                        try {
-                            dashboard.getInstance(target).send(update);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        sendInventoryUpdate(target, update);
                     }
                     if (tp.isPendingWarp()) {
                         tp.chat("/warp " + tp.getWarp());
@@ -421,7 +421,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 tp.setServer(target);
 
                 // Check if the destination is a minigame server
-                if (target.matches(minigameRegex)) {
+                if (target.matches(MINIGAME_REGEX)) {
                     Party party = dashboard.getPartyUtil().findPartyForPlayer(tp);
                     if (party != null) {
                         // Are they the leader?
@@ -434,7 +434,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
                 break;
             }
-            /**
+            /*
              * Send To Server
              */
             case 32: {
@@ -460,7 +460,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getServerUtil().sendPlayer(tp, target.getName());
                 break;
             }
-            /**
+            /*
              * Tab Complete
              */
             case 43: {
@@ -476,7 +476,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getCommandUtil().tabComplete(tp, command, args, results);
                 break;
             }
-            /**
+            /*
              * Set Player Resource Pack
              */
             case 48: {
@@ -490,7 +490,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 tp.setPack(pack);
                 break;
             }
-            /**
+            /*
              * Get Player Resource Pack
              */
             case 49: {
@@ -505,7 +505,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 break;
 
             }
-            /**
+            /*
              * Set Server Name
              */
             case 52: {
@@ -518,13 +518,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (!s.getServerType().equals(s.getName())) {
                     running = " running " + s.getServerType();
                 }
-                if (!name.matches(minigameRegex)) {
+                if (!name.matches(MINIGAME_REGEX)) {
                     dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                             ") has connected to dashboard.");
                 }
                 break;
             }
-            /**
+            /*
              * WDL Protect
              */
             case 54: {
@@ -600,7 +600,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getServerUtil().sendPlayerByType(tp, serverType);
                 break;
             }
-            /**
+            /*
              * Empty Server
              */
             case 57: {
@@ -631,7 +631,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
             }
-            /**
+            /*
              * Inventory Status
              */
             case 58: {
@@ -657,27 +657,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
             }
-            /**
+            /*
              * Refresh Hotel Rooms
              */
             case 59: {
                 PacketRefreshHotels packet = new PacketRefreshHotels().fromJSON(object);
-                for (Object o : WebSocketServerHandler.getGroup()) {
-                    DashboardSocketChannel dash = (DashboardSocketChannel) o;
-                    if (!dash.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) {
-                        continue;
-                    }
-                    try {
-                        if (dashboard.getServer(dash.getServerName()).isPark()) {
-                            dash.send(packet);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+                sendAll(packet);
                 break;
             }
-            /**
+            /*
              * Broadcast
              */
             case 60: {
@@ -697,7 +685,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
             }
-            /**
+            /*
              * Mute Chat
              */
             case 61: {
@@ -725,27 +713,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 break;
             }
-            /**
+            /*
              * Refresh Warps
              */
             case 62: {
                 PacketRefreshWarps packet = new PacketRefreshWarps().fromJSON(object);
-                for (Object o : WebSocketServerHandler.getGroup()) {
-                    DashboardSocketChannel dash = (DashboardSocketChannel) o;
-                    if (!dash.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) {
-                        continue;
-                    }
-                    try {
-                        if (dashboard.getServer(dash.getServerName()).isPark()) {
-                            dash.send(packet);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+                sendAll(packet);
                 break;
             }
-            /**
+            /*
              * Player List
              */
             case 63: {
@@ -764,9 +740,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 64: {
                 PacketGameStatus packet = new PacketGameStatus().fromJSON(object);
-                // TODO: Do more stuff here with the packet
+                findArcadeServers().stream().map(Dashboard::getInstance).filter(Objects::nonNull).forEach(serverChannel -> serverChannel.send(packet));
             }
-            /**
+            /*
              * Bungee ID (Sent when a bungee changes IDs)
              */
             case 65: {
@@ -782,7 +758,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         channel.localAddress().getAddress().toString());
                 break;
             }
-            /**
+            /*
              * Player List Info (Import players from Bungee on dashboard reboot)
              */
             case 66: {
@@ -804,7 +780,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 });
                 break;
             }
-            /**
+            /*
              * Confirm Player (return true if player is connected to dashboard, false if not)
              */
             case 68: {
@@ -815,7 +791,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 channel.send(new PacketConfirmPlayer(uuid, exists));
                 break;
             }
-            /**
+            /*
              * Server Icon Request from BungeeCord
              */
             case 70: {
@@ -855,7 +831,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 SlackMessage m = new SlackMessage("");
                 SlackAttachment a = new SlackAttachment("A BungeeCord Instance has disconnected from dashboard! #devs");
                 a.color("danger");
-                dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                 break;
             }
             case DAEMON: {
@@ -864,7 +840,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 SlackMessage m = new SlackMessage("");
                 SlackAttachment a = new SlackAttachment("A daemon has disconnected from Dashboard! #devs");
                 a.color("danger");
-                dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                 break;
             }
             case WEBCLIENT: {
@@ -881,14 +857,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     running = " running " + s.getServerType();
                 }
                 s.setOnline(false);
-                if (!name.matches(minigameRegex)) {
+                if (!name.matches(MINIGAME_REGEX)) {
                     dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("A server instance (" + name + running +
                             ") has disconnected from Dashboard! #devs");
                     a.color("danger");
-                    dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                    dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                 }
                 break;
             }
@@ -898,7 +874,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 SlackMessage m = new SlackMessage("");
                 SlackAttachment a = new SlackAttachment("The Audio Server has disconnected from Dashboard! #devs");
                 a.color("danger");
-                dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a));
+                dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                 break;
             }
         }
@@ -921,5 +897,44 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getLogger().warn(e.getMessage(), e);
             }
         }
+    }
+
+    private void sendAll(BasePacket packet) {
+        Dashboard dashboard = Launcher.getDashboard();
+
+        for (Object o : WebSocketServerHandler.getGroup()) {
+            DashboardSocketChannel dash = (DashboardSocketChannel) o;
+            if (!dash.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) {
+                continue;
+            }
+            try {
+                if (dashboard.getServer(dash.getServerName()).isPark()) {
+                    dash.send(packet);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendInventoryUpdate(String instance, BasePacket packet) {
+        try {
+            DashboardSocketChannel socketChannel = Dashboard.getInstance(instance);
+            if (socketChannel == null) return;
+            socketChannel.send(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Find all servers that function as arcades
+     *
+     * @return a list of server names
+     */
+    private List<String> findArcadeServers() {
+        Dashboard dashboard = Launcher.getDashboard();
+        return dashboard.getServers().stream().filter(server -> server.getServerType().equals(MINIGAME_SERVER_NAME))
+                .collect(Collectors.collectingAndThen(Collectors.toList(), Collection::stream)).map(Server::getName).collect(Collectors.toList());
     }
 }

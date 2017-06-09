@@ -1,5 +1,6 @@
 package network.palace.dashboard;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 import network.palace.dashboard.commands.Commandstaff;
@@ -50,6 +51,10 @@ public class Dashboard {
     @Getter @Setter private StatUtil statUtil;
     @Getter @Setter private VoteUtil voteUtil;
     @Getter @Setter private Arcade arcade;
+    @Getter @Setter private SocketConnection socketConnection;
+    @Getter @Setter private PasswordUtil passwordUtil;
+
+    @Getter private String socketURL = "";
 
     @Getter @Setter public Forum forum;
     @Getter @Setter private Random random;
@@ -58,7 +63,7 @@ public class Dashboard {
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
     @Getter @Setter private String motd = "";
-    @Getter @Setter private String motdmaintenance = "";
+    @Getter @Setter private String motdMaintenance = "";
     @Getter @Setter private List<String> info = new ArrayList<>();
     @Getter @Setter private String targetServer = "unknown";
     @Setter private List<String> joinServers = new ArrayList<>();
@@ -66,10 +71,6 @@ public class Dashboard {
     @Getter @Setter private boolean maintenance = false;
     @Getter @Setter private List<UUID> maintenanceWhitelist = new ArrayList<>();
     @Getter @Setter private boolean testNetwork = false;
-
-    @Getter private String socketURL = "";
-    @Getter @Setter private SocketConnection socketConnection;
-    @Getter @Setter private PasswordUtil passwordUtil;
 
     public void loadConfiguration() {
         try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
@@ -108,7 +109,7 @@ public class Dashboard {
                 if (line.startsWith("motd:")) {
                     motd = line.split("motd:")[1];
                 } else if (line.startsWith("maintenance:")) {
-                    motdmaintenance = line.split("maintenance:")[1];
+                    motdMaintenance = line.split("maintenance:")[1];
                 } else if (line.startsWith("info:")) {
                     isInfo = true;
                 } else if (isInfo) {
@@ -117,7 +118,7 @@ public class Dashboard {
                 line = br.readLine();
             }
             motd = motd.replaceAll("%n%", System.getProperty("line.separator"));
-            motdmaintenance = motdmaintenance.replaceAll("%n%", System.getProperty("line.separator"));
+            motdMaintenance = motdMaintenance.replaceAll("%n%", System.getProperty("line.separator"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -204,12 +205,12 @@ public class Dashboard {
         return s;
     }
 
-    public List<Server> getServers() {
-        return serverUtil.getServers();
+    public ImmutableList<Server> getServers() {
+        return ImmutableList.copyOf(serverUtil.getServers());
     }
 
-    public List<Player> getOnlinePlayers() {
-        return new ArrayList<>(players.values());
+    public ImmutableList<Player> getOnlinePlayers() {
+        return ImmutableList.copyOf(players.values());
     }
 
     public void addPlayer(Player player) {
@@ -351,19 +352,19 @@ public class Dashboard {
     }
 
     public String getServerIconBase64() {
-        String encodedfile = "";
+        String encodedFile = "";
         File serverIcon = new File("server-icon.png");
         if (!serverIcon.exists()) {
-            return encodedfile;
+            return encodedFile;
         }
         try {
             FileInputStream fileInputStreamReader = new FileInputStream(serverIcon);
             byte[] bytes = new byte[(int) serverIcon.length()];
             fileInputStreamReader.read(bytes);
-            encodedfile = new String(Base64.getEncoder().encode(bytes), "UTF-8");
+            encodedFile = new String(Base64.getEncoder().encode(bytes), "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return encodedfile;
+        return encodedFile;
     }
 }
