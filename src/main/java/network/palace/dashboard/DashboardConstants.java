@@ -38,4 +38,7 @@ public class DashboardConstants {
             "|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-" +
             "9]+)?((/([~0-9a-zA-Z#+%@./_-]+))?(/[0-9a-zA-Z+%@/&\\[\\];=_-]+)?)?)\\b");
 
+    public static final Pattern SIMPLE_LINE_PATTERN = Pattern.compile("(.+):( )?(.+)");
+    public static final Pattern CONFIGURATION_SECTION_KEY_PATTERN = Pattern.compile("^(.+):( )?$");
+
 }

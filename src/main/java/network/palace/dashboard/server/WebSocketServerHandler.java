@@ -28,6 +28,7 @@ import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.IPUtil;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -545,7 +546,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getModerationUtil().announceBan(ban);
                 break;
             }
-            /**
+            /*
              * Rank Change
              */
             case 55: {
@@ -553,31 +554,36 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 final UUID uuid = packet.getUniqueId();
                 final Rank rank = packet.getRank();
                 final String source = packet.getSource();
-                final Player tp = dashboard.getPlayer(uuid);
+                final Player player = dashboard.getPlayer(uuid);
+
                 dashboard.getSchedulerManager().runAsync(() -> {
                     String name;
-                    if (tp != null) {
-                        PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
-                        tp.send(packet1);
-                        tp.setRank(rank);
-                        name = tp.getUsername();
-                    } else {
+                    if (player == null) {
                         name = dashboard.getSqlUtil().usernameFromUUID(uuid);
+                    } else {
+                        PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
+                        player.send(packet1);
+                        player.setRank(rank);
+                        name = player.getUsername();
+                        DashboardSocketChannel socketChannel = Dashboard.getInstance(player.getServer());
+                        if (socketChannel != null) socketChannel.send(packet);
                     }
                     dashboard.getModerationUtil().rankChange(name, rank, source);
 
-                    DiscordCacheInfo info = dashboard.getSqlUtil().getUserFromPlayer(tp);
+                    DiscordCacheInfo info = dashboard.getSqlUtil().getUserFromPlayer(player);
                     info.getMinecraft().setRank(rank.toString());
-                    if (info != null) {
-                        SocketConnection.sendUpdate(info);
+                    SocketConnection.sendUpdate(info);
+
+                    try {
+                        dashboard.forum.updatePlayerRank(uuid.toString(), rank.getSqlName());
+                    } catch (SQLException e) {
+                        e.printStackTrace();
                     }
                 });
 
-                dashboard.forum.updatePlayerRank(uuid.toString(), rank.getSqlName());
-
                 break;
             }
-            /**
+            /*
              * Cross-server Warp
              */
             case 56: {
