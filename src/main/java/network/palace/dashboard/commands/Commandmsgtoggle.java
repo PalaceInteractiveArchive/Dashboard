@@ -13,7 +13,7 @@ public class Commandmsgtoggle extends MagicCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        player.setRecieveMessages(!player.canRecieveMessages());
+        player.setReceiveMessages(!player.canRecieveMessages());
         String modifier = player.canRecieveMessages() ? ChatColor.GREEN + "enabled " : ChatColor.RED + "disabled ";
         player.sendMessage(ChatColor.YELLOW + "You have " + modifier + ChatColor.YELLOW +
                 "receiving private messages!");

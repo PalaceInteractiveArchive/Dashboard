@@ -394,16 +394,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
-                    // Leaving non-Park server or inventory is uploaded from Park server
-                    if (!dashboard.getServer(tp.getServer()).isPark() /*|| tp.isInventoryUploaded()*/) {
-//                        tp.setInventoryUploaded(false);
-                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                        sendInventoryUpdate(target, update);
-                    }
                     if (tp.isPendingWarp()) {
                         tp.chat("/warp " + tp.getWarp());
                         tp.setPendingWarp(false);
                     }
+                }
+                if (tp.isSendInventoryOnJoin()) {
+                    PacketInventoryContent content = dashboard.getInventoryUtil().getInventory(tp.getUuid());
+                    DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                    if (socketChannel == null) return;
+                    socketChannel.send(content);
                 }
                 network.palace.dashboard.packets.audio.PacketServerSwitch change =
                         new network.palace.dashboard.packets.audio.PacketServerSwitch(target);
@@ -644,10 +644,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         dashboard.getInventoryUtil().cacheInventory(player.getUuid(), packet);
                     }
 
-                    if (!player.getServer().equals(channel.getServerName())) {
+                    if (player.getServer().equals(channel.getServerName())) {
+                        player.setSendInventoryOnJoin(true);
+                    } else {
                         DashboardSocketChannel socket = Dashboard.getInstance(player.getServer());
                         if (socket == null) return;
                         socket.send(dashboard.getInventoryUtil().getInventory(player.getUuid()));
+                        player.setSendInventoryOnJoin(false);
                     }
                 });
                 break;
