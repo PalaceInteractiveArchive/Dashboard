@@ -20,10 +20,6 @@ public class InventoryUtil {
      * @param inventory the player's inventory
      */
     public void cacheInventory(UUID uuid, PacketInventoryContent inventory) {
-        if (cachedInventories.containsKey(uuid)) {
-            cachedInventories.replace(uuid, inventory);
-            return;
-        }
         cachedInventories.put(uuid, inventory);
     }
 
