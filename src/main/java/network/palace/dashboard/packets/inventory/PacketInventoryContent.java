@@ -20,6 +20,12 @@ public class PacketInventoryContent extends BasePacket {
     @Getter private String inventoryJson;
     @Getter private String inventoryHash;
 
+    @Getter private String lockerJson;
+    @Getter private String lockerHash;
+
+    @Getter private String hotbarJson;
+    @Getter private String hotbarHash;
+
     @Override
     public PacketInventoryContent fromJSON(JsonObject obj) {
         this.id = PacketID.Inventory.INVENTORY_CONTENT.getID();

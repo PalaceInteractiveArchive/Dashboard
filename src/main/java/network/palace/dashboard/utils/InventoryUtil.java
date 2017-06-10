@@ -1,5 +1,7 @@
 package network.palace.dashboard.utils;
 
+import network.palace.dashboard.packets.inventory.PacketInventoryContent;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -9,24 +11,20 @@ import java.util.UUID;
  * @since 6/10/2017
  */
 public class InventoryUtil {
-    private Map<UUID, String> cachedInventories = new HashMap<>();
-    private Map<UUID, String> inventoryHash = new HashMap<>();
+    private Map<UUID, PacketInventoryContent> cachedInventories = new HashMap<>();
 
     /**
      * Cache a player's inventory
      *
      * @param uuid the uuid of the player to cache
      * @param inventory the player's inventory
-     * @param hash the hash of the player's inventory
      */
-    public void cacheInventory(UUID uuid, String inventory, String hash) {
+    public void cacheInventory(UUID uuid, PacketInventoryContent inventory) {
         if (cachedInventories.containsKey(uuid)) {
             cachedInventories.replace(uuid, inventory);
-            inventoryHash.replace(uuid, hash);
             return;
         }
-        cachedInventories.put(uuid, hash);
-        inventoryHash.put(uuid, hash);
+        cachedInventories.put(uuid, inventory);
     }
 
     /**
@@ -35,8 +33,8 @@ public class InventoryUtil {
      * @param uuid the uuid of the player
      * @return the inventory of the player. Defaults to a blank string if none is present
      */
-    public String getInventory(UUID uuid) {
-        return cachedInventories.getOrDefault(uuid, "");
+    public PacketInventoryContent getInventory(UUID uuid) {
+        return cachedInventories.getOrDefault(uuid, new PacketInventoryContent());
     }
 
     /**
@@ -47,17 +45,6 @@ public class InventoryUtil {
     public void removeHash(UUID uuid) {
         if (cachedInventories.containsKey(uuid)) {
             cachedInventories.remove(uuid);
-            inventoryHash.remove(uuid);
         }
-    }
-
-    /**
-     * Get the hash of a player's inventory
-     *
-     * @param uuid the uuid of the player
-     * @return the player's inventory hash. Empty if none.
-     */
-    public String getHash(UUID uuid) {
-        return inventoryHash.getOrDefault(uuid, "");
     }
 }

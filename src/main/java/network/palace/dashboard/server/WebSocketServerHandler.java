@@ -303,7 +303,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                          */
                     }
                     if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
-                        tp.setInventoryUploaded(false);
+//                        tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
                         sendInventoryUpdate(target, update);
                     }
@@ -395,8 +395,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
                     // Leaving non-Park server or inventory is uploaded from Park server
-                    if (!dashboard.getServer(tp.getServer()).isPark() || tp.isInventoryUploaded()) {
-                        tp.setInventoryUploaded(false);
+                    if (!dashboard.getServer(tp.getServer()).isPark() /*|| tp.isInventoryUploaded()*/) {
+//                        tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
                         sendInventoryUpdate(target, update);
                     }
@@ -633,29 +633,23 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 break;
             }
             /*
-             * Inventory Status
+             * Inventory status
              */
             case 58: {
-                PacketInventoryStatus packet = new PacketInventoryStatus().fromJSON(object);
-                UUID uuid = packet.getUniqueId();
-                int status = packet.getStatus();
-                String server = channel.getServerName();
-                Player tp = dashboard.getPlayer(uuid);
-                if (tp == null || server.equals("") || status != 0 || !dashboard.getServer(tp.getServer()).isPark()) {
-                    return;
-                }
-                if (!tp.getServer().equals(server)) {
-                    PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                    DashboardSocketChannel s = Dashboard.getInstance(tp.getServer());
-                    if (s == null) {
-                        dashboard.getLogger().warn("Target server " + tp.getServer() +
-                                " not connected, could not complete inventory update!");
-                    } else {
-                        s.send(update);
+                dashboard.getSchedulerManager().runAsync(() -> {
+                    PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
+                    Player player = dashboard.getPlayer(packet.getUuid());
+                    if (player == null) return;
+                    if (!packet.getInventoryHash().equals("")) {
+                        dashboard.getInventoryUtil().cacheInventory(player.getUuid(), packet);
                     }
-                } else {
-                    tp.setInventoryUploaded(true);
-                }
+
+                    if (!player.getServer().equals(channel.getServerName())) {
+                        DashboardSocketChannel socket = Dashboard.getInstance(player.getServer());
+                        if (socket == null) return;
+                        socket.send(dashboard.getInventoryUtil().getInventory(player.getUuid()));
+                    }
+                });
                 break;
             }
             /*
@@ -802,17 +796,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketServerIcon packet = new PacketServerIcon(Launcher.getDashboard().getServerIconBase64());
                 channel.send(packet);
                 break;
-            }
-            /*
-             * Inventory content
-             */
-            case 71: {
-                PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
-                if (packet.getInventoryHash().equals("")) {
-                    // Player is moving between servers
-                } else {
-                    // Set the inventory hash
-                }
             }
         }
     }

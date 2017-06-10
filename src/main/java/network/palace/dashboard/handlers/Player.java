@@ -41,7 +41,6 @@ public class Player {
     @Getter @Setter private String pack = "none";
     @Getter @Setter private String warp = "";
     @Getter @Setter private boolean pendingWarp = false;
-    @Getter @Setter private boolean inventoryUploaded = false;
     @Getter @Setter private long onlineTime = 0;
     @Getter @Setter private String channel = "all";
     @Getter private long afkTime = System.currentTimeMillis();
