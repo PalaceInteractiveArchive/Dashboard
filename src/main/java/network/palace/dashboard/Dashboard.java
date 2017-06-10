@@ -53,6 +53,7 @@ public class Dashboard {
     @Getter @Setter private Arcade arcade;
     @Getter @Setter private SocketConnection socketConnection;
     @Getter @Setter private PasswordUtil passwordUtil;
+    @Getter @Setter private InventoryUtil inventoryUtil;
 
     @Getter private String socketURL = "";
 

@@ -23,6 +23,7 @@ import network.palace.dashboard.packets.bungee.PacketBungeeID;
 import network.palace.dashboard.packets.bungee.PacketPlayerListInfo;
 import network.palace.dashboard.packets.bungee.PacketServerIcon;
 import network.palace.dashboard.packets.dashboard.*;
+import network.palace.dashboard.packets.inventory.PacketInventoryContent;
 import network.palace.dashboard.packets.park.*;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
@@ -801,6 +802,17 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 PacketServerIcon packet = new PacketServerIcon(Launcher.getDashboard().getServerIconBase64());
                 channel.send(packet);
                 break;
+            }
+            /*
+             * Inventory content
+             */
+            case 71: {
+                PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
+                if (packet.getInventoryHash().equals("")) {
+                    // Player is moving between servers
+                } else {
+                    // Set the inventory hash
+                }
             }
         }
     }

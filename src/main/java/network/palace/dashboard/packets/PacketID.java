@@ -46,4 +46,10 @@ public enum PacketID {
         BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70);
         @Getter final int ID;
     }
+
+    @AllArgsConstructor
+    public enum Inventory {
+        INVENTORY_CONTENT(71);
+        @Getter private final int ID;
+    }
 }

@@ -82,6 +82,7 @@ public class Launcher {
         }));
         dashboard.setRandom(new Random());
         dashboard.setSchedulerManager(new SchedulerManager());
+        dashboard.setInventoryUtil(new InventoryUtil());
         try {
             dashboard.getLogger().info("Initializing SQL Connections");
             dashboard.setSqlUtil(new SqlUtil());
