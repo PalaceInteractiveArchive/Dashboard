@@ -30,7 +30,7 @@ public enum PacketID {
 
     @AllArgsConstructor
     public enum Park {
-        WARP(56), REFRESHHOTELS(59), BROADCAST(60), MUTECHAT(61), REFRESHWARPS(62);
+        WARP(56), REFRESHHOTELS(59), BROADCAST(60), MUTECHAT(61), REFRESHWARPS(62), IMAPARK(71);
 
         @Getter final int ID;
     }

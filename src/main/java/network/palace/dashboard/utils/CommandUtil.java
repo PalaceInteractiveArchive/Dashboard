@@ -22,6 +22,7 @@ public class CommandUtil {
         register("banip", new Commandbanip());
         register("bseen", new Commandbseen());
         register("bug", new Commandbug());
+        register("bungeecounts", new Commandbungeecounts());
         register("cc", new Commandcc());
         register("charlist", new Commandcharlist());
         register("chat", new Commandchat());

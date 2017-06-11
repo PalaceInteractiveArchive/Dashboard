@@ -1,5 +1,7 @@
 package network.palace.dashboard.handlers;
 
+import lombok.Getter;
+import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 
@@ -17,6 +19,7 @@ public class Server {
     private int count;
     private String serverType;
     private boolean online = false;
+    @Getter @Setter private boolean inventory = false;
 
     public Server(String name, String address, int port, boolean park, int count, String serverType) {
         this.name = name;
