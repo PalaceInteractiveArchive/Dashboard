@@ -221,8 +221,7 @@ public class InventoryUtil {
                 }
             }
             try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
-                String q = "UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?";
-                PreparedStatement sql = connection.prepareStatement(q);
+                PreparedStatement sql = connection.prepareStatement("UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?");
                 int i = 1;
                 for (String s : valueMap.values()) {
                     sql.setString(i, s);
@@ -230,7 +229,6 @@ public class InventoryUtil {
                 }
                 sql.setString(i, uuid.toString());
                 sql.setInt(i += 1, entry.getKey().getId());
-                System.out.println(q);
                 sql.execute();
                 sql.close();
             } catch (SQLException e) {
