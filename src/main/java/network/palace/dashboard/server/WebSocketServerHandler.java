@@ -24,6 +24,7 @@ import network.palace.dashboard.packets.bungee.PacketPlayerListInfo;
 import network.palace.dashboard.packets.bungee.PacketServerIcon;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.packets.inventory.PacketInventoryContent;
+import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.packets.park.*;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
@@ -394,16 +395,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
+                    if (tp.isSendInventoryOnJoin()) {
+                        tp.setSendInventoryOnJoin(false);
+                        Resort resort = Resort.fromServer(target);
+                        ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUuid(), resort);
+                        PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
+                                inv.getBackpackJSON(), inv.getBackpackHash(), inv.getLockerJSON(), inv.getLockerHash(),
+                                inv.getHotbarJSON(), inv.getHotbarHash());
+                        DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                        if (socketChannel == null) return;
+                        socketChannel.send(content);
+                    }
                     if (tp.isPendingWarp()) {
                         tp.chat("/warp " + tp.getWarp());
                         tp.setPendingWarp(false);
                     }
-                }
-                if (tp.isSendInventoryOnJoin()) {
-                    PacketInventoryContent content = dashboard.getInventoryUtil().getInventory(tp.getUuid());
-                    DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
-                    if (socketChannel == null) return;
-                    socketChannel.send(content);
                 }
                 network.palace.dashboard.packets.audio.PacketServerSwitch change =
                         new network.palace.dashboard.packets.audio.PacketServerSwitch(target);
@@ -640,7 +646,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
                     Player player = dashboard.getPlayer(packet.getUuid());
                     if (player == null) return;
-                    if (!packet.getInventoryHash().equals("")) {
+                    if (!packet.getBackpackHash().equals("")) {
                         dashboard.getInventoryUtil().cacheInventory(player.getUuid(), packet);
                     }
 
@@ -649,7 +655,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     } else {
                         DashboardSocketChannel socket = Dashboard.getInstance(player.getServer());
                         if (socket == null) return;
-                        socket.send(dashboard.getInventoryUtil().getInventory(player.getUuid()));
+                        Resort resort = Resort.fromServer(player.getServer());
+                        ResortInventory inv = dashboard.getInventoryUtil().getInventory(player.getUuid(), resort);
+                        PacketInventoryContent updatePacket = new PacketInventoryContent(player.getUniqueId(), resort,
+                                inv.getBackpackJSON(), inv.getBackpackHash(), inv.getLockerJSON(), inv.getLockerHash(),
+                                inv.getHotbarJSON(), inv.getHotbarHash());
+                        socket.send(updatePacket);
                         player.setSendInventoryOnJoin(false);
                     }
                 });

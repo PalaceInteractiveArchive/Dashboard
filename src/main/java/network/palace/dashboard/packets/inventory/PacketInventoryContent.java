@@ -1,7 +1,9 @@
 package network.palace.dashboard.packets.inventory;
 
 import com.google.gson.JsonObject;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
 
@@ -15,9 +17,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class PacketInventoryContent extends BasePacket {
     @Getter private UUID uuid;
-    @Getter private ResortType resortType;
-    @Getter private String inventoryJson;
-    @Getter private String inventoryHash;
+    @Getter private Resort resort;
+    @Getter private String backpackJson;
+    @Getter private String backpackHash;
 
     @Getter private String lockerJson;
     @Getter private String lockerHash;
@@ -29,9 +31,13 @@ public class PacketInventoryContent extends BasePacket {
     public PacketInventoryContent fromJSON(JsonObject obj) {
         this.id = PacketID.Inventory.INVENTORY_CONTENT.getID();
         this.uuid = UUID.fromString(obj.get("uuid").getAsString());
-        this.resortType = ResortType.fromId(obj.get("resortType").getAsInt());
-        this.inventoryJson = obj.get("inventoryJson").getAsString();
-        this.inventoryHash = obj.get("inventoryHash").getAsString();
+        this.resort = Resort.fromId(obj.get("resortType").getAsInt());
+        this.backpackJson = obj.get("backpackJson").getAsString();
+        this.backpackHash = obj.get("backpackHash").getAsString();
+        this.lockerJson = obj.get("lockerJson").getAsString();
+        this.lockerHash = obj.get("lockerHash").getAsString();
+        this.hotbarJson = obj.get("hotbarJson").getAsString();
+        this.hotbarHash = obj.get("hotbarHash").getAsString();
         return this;
     }
 
@@ -41,9 +47,13 @@ public class PacketInventoryContent extends BasePacket {
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("resortType", this.resortType.getId());
-            obj.addProperty("inventoryJson", this.inventoryJson);
-            obj.addProperty("inventoryHash", this.inventoryHash);
+            obj.addProperty("resortType", this.resort.getId());
+            obj.addProperty("backpackJson", this.backpackJson);
+            obj.addProperty("backpackHash", this.backpackHash);
+            obj.addProperty("lockerJson", this.lockerJson);
+            obj.addProperty("lockerHash", this.lockerHash);
+            obj.addProperty("hotbarJson", this.hotbarJson);
+            obj.addProperty("hotbarHash", this.hotbarHash);
         } catch (Exception e) {
             return null;
         }
