@@ -9,9 +9,9 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 public enum Resort {
-    WDW(0, "all"), DLR(1, "dlr"), USO(2, "uso");
+    WDW(0, new String[]{"all"}), DLR(1, new String[]{"dlr"}), USO(2, new String[]{"uso", "build3"});
     @Getter private int id;
-    @Getter private String server;
+    @Getter private String[] server;
 
     public static Resort fromId(int id) {
         for (Resort type : values()) {
@@ -22,8 +22,10 @@ public enum Resort {
 
     public static Resort fromServer(String name) {
         for (Resort type : values()) {
-            if (type.getServer().equalsIgnoreCase(name)) {
-                return type;
+            for (String s : type.getServer()) {
+                if (s.equalsIgnoreCase(name)) {
+                    return type;
+                }
             }
         }
         return WDW;

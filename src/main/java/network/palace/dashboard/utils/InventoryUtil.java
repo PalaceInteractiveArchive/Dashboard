@@ -210,11 +210,9 @@ public class InventoryUtil {
                     "locker, lockersize, hotbar, resort) VALUES (?,?,0,?,0,?,?)");
             sql.setString(1, uuid.toString());
             sql.setString(2, "");
-            sql.setInt(3, 0);
+            sql.setString(3, "");
             sql.setString(4, "");
-            sql.setInt(5, 0);
-            sql.setString(6, "");
-            sql.setInt(7, resort.getId());
+            sql.setInt(5, resort.getId());
             sql.execute();
             sql.close();
         } catch (SQLException e) {
