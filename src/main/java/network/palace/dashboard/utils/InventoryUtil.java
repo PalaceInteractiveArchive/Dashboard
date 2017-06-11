@@ -45,17 +45,75 @@ public class InventoryUtil {
                     for (int i = 0; i < arr.size(); i++) {
                         JsonObject ob = arr.get(i).getAsJsonObject();
                         Resort resort = Resort.fromId(ob.get("resort").getAsInt());
-                        String packJSON = ob.get("packJSON").getAsString();
-                        String packHash = ob.get("packHash").getAsString();
-                        String sqlPackHash = ob.get("sqlPackHash").getAsString();
-                        int packsize = ob.get("packsize").getAsInt();
-                        String lockerJSON = ob.get("lockerJSON").getAsString();
-                        String lockerHash = ob.get("lockerHash").getAsString();
-                        String sqlLockerHash = ob.get("sqlLockerHash").getAsString();
-                        int lockersize = ob.get("lockersize").getAsInt();
-                        String hotbarJSON = ob.get("hotbarJSON").getAsString();
-                        String hotbarHash = ob.get("hotbarHash").getAsString();
-                        String sqlHotbarHash = ob.get("sqlHotbarHash").getAsString();
+                        String packJSON;
+                        String packHash;
+                        String sqlPackHash;
+                        int packsize;
+                        String lockerJSON;
+                        String lockerHash;
+                        String sqlLockerHash;
+                        int lockersize;
+                        String hotbarJSON;
+                        String hotbarHash;
+                        String sqlHotbarHash;
+                        if (ob.get("packJSON").isJsonNull()) {
+                            packJSON = "";
+                        } else {
+                            packJSON = ob.get("packJSON").getAsString();
+                        }
+                        if (ob.get("packHash").isJsonNull()) {
+                            packHash = "";
+                        } else {
+                            packHash = ob.get("packHash").getAsString();
+                        }
+                        if (ob.get("sqlPackHash").isJsonNull()) {
+                            sqlPackHash = "";
+                        } else {
+                            sqlPackHash = ob.get("sqlPackHash").getAsString();
+                        }
+                        if (ob.get("packsize").isJsonNull()) {
+                            packsize = 0;
+                        } else {
+                            packsize = ob.get("packsize").getAsInt();
+                        }
+
+                        if (ob.get("lockerJSON").isJsonNull()) {
+                            lockerJSON = "";
+                        } else {
+                            lockerJSON = ob.get("lockerJSON").getAsString();
+                        }
+                        if (ob.get("lockerHash").isJsonNull()) {
+                            lockerHash = "";
+                        } else {
+                            lockerHash = ob.get("lockerHash").getAsString();
+                        }
+                        if (ob.get("sqlLockerHash").isJsonNull()) {
+                            sqlLockerHash = "";
+                        } else {
+                            sqlLockerHash = ob.get("sqlLockerHash").getAsString();
+                        }
+                        if (ob.get("lockersize").isJsonNull()) {
+                            lockersize = 0;
+                        } else {
+                            lockersize = ob.get("lockersize").getAsInt();
+                        }
+
+                        if (ob.get("hotbarJSON").isJsonNull()) {
+                            hotbarJSON = "";
+                        } else {
+                            hotbarJSON = ob.get("hotbarJSON").getAsString();
+                        }
+                        if (ob.get("hotbarHash").isJsonNull()) {
+                            hotbarHash = "";
+                        } else {
+                            hotbarHash = ob.get("hotbarHash").getAsString();
+                        }
+                        if (ob.get("sqlHotbarHash").isJsonNull()) {
+                            sqlHotbarHash = "";
+                        } else {
+                            sqlHotbarHash = ob.get("sqlHotbarHash").getAsString();
+                        }
+
                         map.put(resort, new ResortInventory(resort, packJSON, packHash, sqlPackHash, packsize, lockerJSON,
                                 lockerHash, sqlLockerHash, lockersize, hotbarJSON, hotbarHash, sqlHotbarHash));
                     }
@@ -71,7 +129,7 @@ public class InventoryUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                for (InventoryCache cache : cachedInventories.values()) {
+                for (InventoryCache cache : new ArrayList<>(cachedInventories.values())) {
                     if (cache == null || cache.getResorts() == null) {
                         continue;
                     }
@@ -141,9 +199,28 @@ public class InventoryUtil {
         }
         ResortInventory inv = cache.getResorts().get(resort);
         if (inv == null) {
-            return new ResortInventory();
+            return createResortInventory(uuid, resort);
         }
         return inv;
+    }
+
+    private ResortInventory createResortInventory(UUID uuid, Resort resort) {
+        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
+                    "locker, lockersize, hotbar, resort) VALUES (?,?,0,?,0,?,?)");
+            sql.setString(1, uuid.toString());
+            sql.setString(2, "");
+            sql.setInt(3, 0);
+            sql.setString(4, "");
+            sql.setInt(5, 0);
+            sql.setString(6, "");
+            sql.setInt(7, resort.getId());
+            sql.execute();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new ResortInventory();
     }
 
     /**
