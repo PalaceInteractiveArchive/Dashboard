@@ -8,7 +8,6 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.InventoryCache;
 import network.palace.dashboard.handlers.InventoryUpdate;
-import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.ResortInventory;
 import network.palace.dashboard.packets.inventory.PacketInventoryContent;
 import network.palace.dashboard.packets.inventory.Resort;
@@ -72,8 +71,7 @@ public class InventoryUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                for (Player p : Launcher.getDashboard().getOnlinePlayers()) {
-                    InventoryCache cache = cachedInventories.get(p.getUniqueId());
+                for (InventoryCache cache : cachedInventories.values()) {
                     if (cache == null || cache.getResorts() == null) {
                         continue;
                     }
@@ -96,9 +94,12 @@ public class InventoryUtil {
                         dashboard.getSchedulerManager().runAsync(new Runnable() {
                             @Override
                             public void run() {
-                                updateData(p.getUniqueId(), update);
+                                updateData(cache.getUuid(), update);
                             }
                         });
+                    }
+                    if (dashboard.getPlayer(cache.getUuid()) == null) {
+                        cachedInventories.remove(cache.getUuid());
                     }
                 }
             }
