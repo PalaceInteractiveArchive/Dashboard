@@ -2,7 +2,6 @@ package network.palace.dashboard.packets.park;
 
 import com.google.gson.JsonObject;
 import network.palace.dashboard.packets.BasePacket;
-import network.palace.dashboard.packets.PacketID;
 
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ public class PacketInventoryStatus extends BasePacket {
     }
 
     public PacketInventoryStatus(UUID uuid, int status) {
-        this.id = PacketID.Park.INVENTORYSTATUS.getID();
+//        this.id = PacketID.Park.INVENTORYSTATUS.getID();
         this.uuid = uuid;
         this.status = status;
     }

@@ -37,16 +37,16 @@ public class Player {
     @Getter @Setter private HashMap<UUID, String> requests = new HashMap<>();
     @Getter private boolean kicking = false;
     @Getter private String audioToken = "";
-    @Setter private boolean recieveMessages = true;
+    @Setter private boolean receiveMessages = true;
     @Getter @Setter private String pack = "none";
     @Getter @Setter private String warp = "";
     @Getter @Setter private boolean pendingWarp = false;
-    @Getter @Setter private boolean inventoryUploaded = false;
     @Getter @Setter private long onlineTime = 0;
     @Getter @Setter private String channel = "all";
     @Getter private long afkTime = System.currentTimeMillis();
     @Getter @Setter private boolean isAFK = false;
     @Getter @Setter private boolean disabled = false;
+    @Getter @Setter private boolean sendInventoryOnJoin = true;
 
     public Player(UUID uuid, String username, String address, String server, UUID bungeeID, int mcVersion) {
         this.uuid = uuid;
@@ -138,6 +138,6 @@ public class Player {
     }
 
     public boolean canRecieveMessages() {
-        return recieveMessages;
+        return receiveMessages;
     }
 }

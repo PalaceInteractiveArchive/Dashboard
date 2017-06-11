@@ -23,6 +23,8 @@ import network.palace.dashboard.packets.bungee.PacketBungeeID;
 import network.palace.dashboard.packets.bungee.PacketPlayerListInfo;
 import network.palace.dashboard.packets.bungee.PacketServerIcon;
 import network.palace.dashboard.packets.dashboard.*;
+import network.palace.dashboard.packets.inventory.PacketInventoryContent;
+import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.packets.park.*;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
@@ -302,7 +304,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                          */
                     }
                     if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
-                        tp.setInventoryUploaded(false);
+//                        tp.setInventoryUploaded(false);
                         PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
                         sendInventoryUpdate(target, update);
                     }
@@ -393,11 +395,26 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
-                    // Leaving non-Park server or inventory is uploaded from Park server
-                    if (!dashboard.getServer(tp.getServer()).isPark() || tp.isInventoryUploaded()) {
-                        tp.setInventoryUploaded(false);
-                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                        sendInventoryUpdate(target, update);
+                    if (tp.isSendInventoryOnJoin()) {
+                        tp.setSendInventoryOnJoin(false);
+                        Resort resort = Resort.fromServer(target);
+                        dashboard.getSchedulerManager().runAsync(new Runnable() {
+                            @Override
+                            public void run() {
+                                ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUuid(), resort);
+                                PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
+                                        inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
+                                        inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
+                                        inv.getHotbarJSON(), inv.getHotbarHash());
+                                dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
+                                DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                                if (socketChannel == null) return;
+                                socketChannel.send(content);
+                            }
+                        });
+                    }
+                    if (!dashboard.getServer(target).isInventory()) {
+                        tp.setSendInventoryOnJoin(true);
                     }
                     if (tp.isPendingWarp()) {
                         tp.chat("/warp " + tp.getWarp());
@@ -632,29 +649,32 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 break;
             }
             /*
-             * Inventory Status
+             * Inventory content
              */
             case 58: {
-                PacketInventoryStatus packet = new PacketInventoryStatus().fromJSON(object);
-                UUID uuid = packet.getUniqueId();
-                int status = packet.getStatus();
-                String server = channel.getServerName();
-                Player tp = dashboard.getPlayer(uuid);
-                if (tp == null || server.equals("") || status != 0 || !dashboard.getServer(tp.getServer()).isPark()) {
-                    return;
-                }
-                if (!tp.getServer().equals(server)) {
-                    PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                    DashboardSocketChannel s = Dashboard.getInstance(tp.getServer());
-                    if (s == null) {
-                        dashboard.getLogger().warn("Target server " + tp.getServer() +
-                                " not connected, could not complete inventory update!");
-                    } else {
-                        s.send(update);
+                dashboard.getSchedulerManager().runAsync(() -> {
+                    PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
+                    Player player = dashboard.getPlayer(packet.getUuid());
+                    if (player == null) return;
+                    if (!packet.getBackpackHash().equals("")) {
+                        dashboard.getInventoryUtil().cacheInventory(player.getUuid(), packet);
                     }
-                } else {
-                    tp.setInventoryUploaded(true);
-                }
+
+                    if (player.getServer().equals(channel.getServerName()) ||
+                            !dashboard.getServer(player.getServer()).isInventory()) {
+                        player.setSendInventoryOnJoin(true);
+                    } else {
+                        DashboardSocketChannel socket = Dashboard.getInstance(player.getServer());
+                        if (socket == null) return;
+                        Resort resort = Resort.fromServer(player.getServer());
+                        ResortInventory inv = dashboard.getInventoryUtil().getInventory(player.getUuid(), resort);
+                        PacketInventoryContent updatePacket = new PacketInventoryContent(player.getUniqueId(), resort,
+                                inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(), inv.getLockerJSON(),
+                                inv.getLockerHash(), inv.getLockerSize(), inv.getHotbarJSON(), inv.getHotbarHash());
+                        socket.send(updatePacket);
+                        player.setSendInventoryOnJoin(false);
+                    }
+                });
                 break;
             }
             /*
@@ -800,6 +820,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 PacketServerIcon packet = new PacketServerIcon(Launcher.getDashboard().getServerIconBase64());
                 channel.send(packet);
+                break;
+            }
+            /*
+             * I'm A Park
+             */
+            case 71: {
+                dashboard.getServer(channel.getServerName()).setInventory(true);
                 break;
             }
         }

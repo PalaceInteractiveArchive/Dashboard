@@ -129,19 +129,18 @@ public class Commandserver extends MagicCommand {
                             "- Remove a server from all Bungees");
                     return;
                 } else if (args[0].equalsIgnoreCase("list")) {
-                    String msg = ChatColor.GREEN + "Server List:\n";
-                    List<Server> servers = dashboard.getServers();
+                    StringBuilder msg = new StringBuilder(ChatColor.GREEN + "Server List:\n");
+                    List<Server> servers = new ArrayList<>(dashboard.getServers());
                     servers.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
                     for (int i = 0; i < servers.size(); i++) {
                         Server s = servers.get(i);
                         ChatColor c = s.isOnline() ? ChatColor.GREEN : ChatColor.RED;
-                        msg += "- " + c + s.getName() + ChatColor.GREEN + " - " + s.getAddress() + ":" + s.getPort() +
-                                " - " + s.getServerType();
+                        msg.append("- ").append(c).append(s.getName()).append(ChatColor.GREEN).append(" - ").append(s.getAddress()).append(":").append(s.getPort()).append(" - ").append(s.getServerType());
                         if (i < (servers.size() - 1)) {
-                            msg += "\n";
+                            msg.append("\n");
                         }
                     }
-                    player.sendMessage(msg);
+                    player.sendMessage(msg.toString());
                     return;
                 }
             }
@@ -155,7 +154,7 @@ public class Commandserver extends MagicCommand {
         }
         if (args.length == 0) {
             player.sendMessage(ChatColor.GREEN + "You are currently on " + player.getServer());
-            String msg = "The following servers exist: ";
+            StringBuilder msg = new StringBuilder("The following servers exist: ");
             List<Server> servers = dashboard.getServers();
             List<String> names = new ArrayList<>();
             for (Server s : servers) {
@@ -163,12 +162,12 @@ public class Commandserver extends MagicCommand {
             }
             Collections.sort(names);
             for (int i = 0; i < names.size(); i++) {
-                msg += names.get(i);
+                msg.append(names.get(i));
                 if (i < (names.size() - 1)) {
-                    msg += ", ";
+                    msg.append(", ");
                 }
             }
-            player.sendMessage(ChatColor.GREEN + msg);
+            player.sendMessage(ChatColor.GREEN + msg.toString());
         }
     }
 

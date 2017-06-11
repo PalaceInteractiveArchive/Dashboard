@@ -30,7 +30,7 @@ public enum PacketID {
 
     @AllArgsConstructor
     public enum Park {
-        WARP(56), INVENTORYSTATUS(58), REFRESHHOTELS(59), BROADCAST(60), MUTECHAT(61), REFRESHWARPS(62);
+        WARP(56), REFRESHHOTELS(59), BROADCAST(60), MUTECHAT(61), REFRESHWARPS(62), IMAPARK(71);
 
         @Getter final int ID;
     }
@@ -45,5 +45,11 @@ public enum PacketID {
     public enum Bungee {
         BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70);
         @Getter final int ID;
+    }
+
+    @AllArgsConstructor
+    public enum Inventory {
+        INVENTORY_CONTENT(58);
+        @Getter private final int ID;
     }
 }
