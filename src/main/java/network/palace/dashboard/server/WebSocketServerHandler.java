@@ -398,19 +398,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (tp.isSendInventoryOnJoin()) {
                         tp.setSendInventoryOnJoin(false);
                         Resort resort = Resort.fromServer(target);
-                        dashboard.getSchedulerManager().runAsync(new Runnable() {
-                            @Override
-                            public void run() {
-                                ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUuid(), resort);
-                                PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
-                                        inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
-                                        inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
-                                        inv.getHotbarJSON(), inv.getHotbarHash());
-                                dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
-                                DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
-                                if (socketChannel == null) return;
-                                socketChannel.send(content);
-                            }
+                        dashboard.getSchedulerManager().runAsync(() -> {
+                            ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUuid(), resort);
+                            PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
+                                    inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
+                                    inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
+                                    inv.getHotbarJSON(), inv.getHotbarHash());
+                            dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
+                            DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                            if (socketChannel == null) return;
+                            socketChannel.send(content);
                         });
                     }
                     if (!dashboard.getServer(target).isInventory()) {
@@ -885,6 +882,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 s.setOnline(false);
                 if (!name.matches(MINIGAME_REGEX)) {
+                    // TODO: Make muting
                     dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
                     SlackMessage m = new SlackMessage("");

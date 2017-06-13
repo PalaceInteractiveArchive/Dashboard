@@ -116,6 +116,13 @@ public class Commandserver extends MagicCommand {
                 }
             }, 1000);
             return;
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("mute") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+            final String serverName = args[1];
+            if (dashboard.getServerUtil().isMuted(serverName)) {
+                dashboard.getServerUtil().unmuteServer(serverName);
+                return;
+            }
+            dashboard.getServerUtil().muteServer(serverName);
         }
         if (args.length == 1) {
             if (player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {

@@ -12,12 +12,12 @@ import network.palace.dashboard.packets.dashboard.PacketTargetLobby;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Marc on 7/14/16
@@ -27,10 +27,12 @@ public class ServerUtil {
     private int lastCount = 0;
     private int lastServerCount = 0;
 
-    public ServerUtil() throws IOException {
+    private Map<String, Integer> mutedServers = new HashMap<>();
+
+    public ServerUtil() {
         Dashboard dashboard = Launcher.getDashboard();
         loadServers();
-        /**
+        /*
          * Online Player Count Timer
          */
         new Timer().schedule(new TimerTask() {
@@ -108,19 +110,36 @@ public class ServerUtil {
                 }
             }
         }, 0, 5000);
-        /**
-         * Game Server Timer
-         new Timer().schedule(new TimerTask() {
-        @Override public void run() {
-        for (Server s : getServers()) {
-        if (s.getName().toLowerCase().matches("[a-z]\\d{1,3}") && s.isOnline()) {
-        PacketGameStatus packet = new PacketGameStatus(s.getName(), s.getCount(), s.isOnline() ?
-        "online" : "offline");
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                List<String> expiredServers = mutedServers.entrySet().stream().filter(entry -> entry.getValue().equals(30)).map(Map.Entry::getKey).collect(Collectors.toList());
+                expiredServers.forEach(server -> {
+                    mutedServers.remove(server);
+                    Launcher.getDashboard().getModerationUtil().displayServerMute(server, false);
+                });
+                new HashMap<>(mutedServers).forEach((server, time) -> {
+                    mutedServers.put(server, time + 1);
+                });
+            }
+        }, 0, 60000);
+    }
+
+    public boolean isMuted(String server) {
+        return mutedServers.containsKey(server);
+    }
+
+    public void muteServer(String server) {
+        mutedServers.put(server, 0);
+        Launcher.getDashboard().getModerationUtil().displayServerMute(server, true);
+    }
+
+    public void unmuteServer(String server) {
+        if (mutedServers.containsKey(server)) {
+            mutedServers.remove(server);
+            Launcher.getDashboard().getModerationUtil().displayServerMute(server, false);
         }
-        }
-        }
-        }, 0, 2000);
-         */
     }
 
     public List<Server> getServers() {
