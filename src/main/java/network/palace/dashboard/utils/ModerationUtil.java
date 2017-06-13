@@ -3,10 +3,13 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.slack.SlackAttachment;
+import network.palace.dashboard.slack.SlackMessage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,13 +30,6 @@ public class ModerationUtil {
                     PreparedStatement bans = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE active=1 AND permanent=0 AND `release`<=NOW();");
                     int banCount = bans.executeUpdate();
                     bans.close();
-//                    PreparedStatement bans = connection.prepareStatement("SELECT count(*) FROM banned_players WHERE active=1 AND permanent=0 AND `release`<=NOW();");
-//                    ResultSet result1 = bans.executeQuery();
-//                    int banCount = 0;
-//                    if (result1.next()) {
-//                        banCount = result1.getInt("count(*)");
-//                    }
-//                    result1.close();
                     bans.close();
                     if (banCount != 0) {
                         sendMessage(ChatColor.YELLOW + "" + banCount + ChatColor.GREEN +
@@ -43,14 +39,6 @@ public class ModerationUtil {
                     PreparedStatement mutes = connection.prepareStatement("UPDATE muted_players SET active=0 WHERE active=1 AND `release`<=NOW();");
                     int muteCount = mutes.executeUpdate();
                     mutes.close();
-//                    PreparedStatement mutes = connection.prepareStatement("SELECT count(*) FROM muted_players WHERE active=1 AND `release`<=NOW();");
-//                    ResultSet result2 = mutes.executeQuery();
-//                    int muteCount = 0;
-//                    if (result2.next()) {
-//                        muteCount = result2.getInt("count(*)");
-//                    }
-//                    result2.close();
-//                    mutes.close();
                     if (muteCount != 0) {
                         sendMessage(ChatColor.YELLOW + "" + muteCount + ChatColor.GREEN +
                                 (muteCount == 1 ? " mute that expired was removed" : " mutes that expired were removed"));
@@ -122,5 +110,15 @@ public class ModerationUtil {
     public void togglePrivate(boolean enabled, String name) {
         sendMessage(ChatColor.GREEN + "Private messages have been " + (enabled ? "enabled" : ChatColor.RED +
                 "disabled" + ChatColor.GREEN) + " by " + name);
+    }
+
+    public void displayServerMute(String name, boolean muted) {
+        ChatColor prefix = muted ? ChatColor.RED : ChatColor.GREEN;
+        String message = muted ? name + " has been muted!" : name + " has been unmuted!";
+        sendMessage(prefix + message);
+        SlackMessage slackMessage = new SlackMessage("");
+        SlackAttachment attachment = new SlackAttachment(message);
+        attachment.color(muted ? "danger" : "good");
+        Launcher.getDashboard().getSlackUtil().sendDashboardMessage(slackMessage, Collections.singletonList(attachment));
     }
 }
