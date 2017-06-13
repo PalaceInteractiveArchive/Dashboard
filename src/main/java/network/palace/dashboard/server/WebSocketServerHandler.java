@@ -882,7 +882,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 s.setOnline(false);
                 if (!name.matches(MINIGAME_REGEX)) {
-                    // TODO: Make muting
+                    if (dashboard.getServerUtil().isMuted(name)) return;
                     dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
                     SlackMessage m = new SlackMessage("");
