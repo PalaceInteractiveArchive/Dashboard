@@ -119,9 +119,7 @@ public class ServerUtil {
                     mutedServers.remove(server);
                     Launcher.getDashboard().getModerationUtil().displayServerMute(server, false);
                 });
-                new HashMap<>(mutedServers).forEach((server, time) -> {
-                    mutedServers.put(server, time + 1);
-                });
+                new HashMap<>(mutedServers).forEach((server, time) -> mutedServers.put(server, time + 1));
             }
         }, 0, 60000);
     }
@@ -150,7 +148,6 @@ public class ServerUtil {
         servers.clear();
         Dashboard dashboard = Launcher.getDashboard();
         try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-            //TODO Change this back to the regular table
             PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
                     (dashboard.isTestNetwork() ? "playground" : "") + "servers;");
             ResultSet result = sql.executeQuery();

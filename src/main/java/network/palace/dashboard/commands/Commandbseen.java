@@ -84,7 +84,7 @@ public class Commandbseen extends MagicCommand {
             PacketBseenCommand packet = new PacketBseenCommand(player.getUniqueId(), name, ip, server, online);
             player.sendMessage(ChatColor.GREEN + name + " has been " + (online ? "online" : "away") + " for " +
                     DateUtil.formatDateDiff(lastLogin));
-            player.sendMessage(ChatColor.RED + "Rank: " + rank.getNameWithBrackets());
+            player.sendMessage(ChatColor.RED + "Rank: " + rank.getFormattedName());
             player.send(packet);
         });
     }

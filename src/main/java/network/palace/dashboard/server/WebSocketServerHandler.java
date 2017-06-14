@@ -303,11 +303,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                          * /staff change oldpw newpw
                          */
                     }
-                    if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
+//                    if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
 //                        tp.setInventoryUploaded(false);
-                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                        sendInventoryUpdate(target, update);
-                    }
+//                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
+//                        sendInventoryUpdate(target, update);
+//                    }
                     if (tp.isNewGuest()) {
                         Timer tutorial = new Timer();
                         tutorial.schedule(new TimerTask() {
@@ -395,7 +395,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
-                    if (tp.isSendInventoryOnJoin()) {
+                    if (tp.isSendInventoryOnJoin() && dashboard.getServer(target).isInventory()) {
                         tp.setSendInventoryOnJoin(false);
                         Resort resort = Resort.fromServer(target);
                         dashboard.getSchedulerManager().runAsync(() -> {

@@ -133,7 +133,7 @@ public class SqlUtil {
                     update(player, connection, !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
+                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
@@ -285,7 +285,7 @@ public class SqlUtil {
                 Rank rank = player.getRank();
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
+                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);

@@ -7,10 +7,6 @@ import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 public class Commandb extends MagicCommand {
 
     public Commandb() {
@@ -38,20 +34,6 @@ public class Commandb extends MagicCommand {
                     tp.sendMessage(msg);
                 }
             }
-            return;
         }
-        Runtime r = Runtime.getRuntime();
-        try {
-            Process p = r.exec("sensors");
-            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String input;
-            while ((input = in.readLine()) != null) {
-                System.out.println(input);
-            }
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        player.sendMessage(ChatColor.RED + "/b [Message]");
     }
 }

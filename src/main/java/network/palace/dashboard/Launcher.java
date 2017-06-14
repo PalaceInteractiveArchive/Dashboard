@@ -132,11 +132,7 @@ public class Launcher {
             dashboard.setSocketConnection(new SocketConnection());
         }
 
-        try {
-            dashboard.setServerUtil(new ServerUtil());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        dashboard.setServerUtil(new ServerUtil());
         dashboard.setChatUtil(new ChatUtil());
         dashboard.setCommandUtil(new CommandUtil());
         dashboard.setPartyUtil(new PartyUtil());

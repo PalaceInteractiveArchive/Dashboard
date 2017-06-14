@@ -2,14 +2,14 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 
-import java.util.Date;
-import java.util.UUID;
+public class Commandbanprovider extends MagicCommand {
 
-public class Commandban extends MagicCommand {
-
-    public Commandban() {
+    public Commandbanprovider() {
         super(Rank.KNIGHT);
         tabCompletePlayers = true;
     }
@@ -17,36 +17,16 @@ public class Commandban extends MagicCommand {
     @Override
     public void execute(Player banner, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (args.length < 2) {
-            banner.sendMessage(ChatColor.RED + "/ban [Player] [Reason]");
+        if (args.length < 1) {
+            banner.sendMessage(ChatColor.RED + "/banprovider [Provider]");
             return;
         }
-        String playername = args[0];
-        UUID uuid;
-        try {
-            uuid = dashboard.getSqlUtil().uuidFromUsername(playername);
-        } catch (Exception ignored) {
-            banner.sendMessage(ChatColor.RED + "I can't find that player!");
-            return;
-        }
-        StringBuilder r = new StringBuilder();
-        for (int i = 1; i < args.length; i++) {
-            r.append(args[i]).append(" ");
-        }
-        String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
-        String finalReason = reason.trim();
-        dashboard.getSchedulerManager().runAsync(() -> {
-            if (dashboard.getSqlUtil().isBannedPlayer(uuid)) {
-                banner.sendMessage(ChatColor.RED + "This player is already banned! Unban them to change the reason.");
-                return;
+        StringBuilder provider = new StringBuilder();
+        for (int i = 0; i < args.length; i++) {
+            provider.append(args[i]);
+            if (i < (args.length - 1)) {
+                provider.append(" ");
             }
-            dashboard.getSqlUtil().banPlayer(uuid, finalReason, true, new Date(System.currentTimeMillis()), banner.getUsername());
-            Player tp = dashboard.getPlayer(uuid);
-            if (tp != null) {
-                tp.kickPlayer(ChatColor.RED + "You Have Been Banned For " + ChatColor.AQUA + finalReason);
-            }
-            dashboard.getModerationUtil().announceBan(new Ban(uuid, playername, true, System.currentTimeMillis(),
-                    finalReason, banner.getUsername()));
-        });
+        }
     }
 }

@@ -1,25 +1,11 @@
 package network.palace.dashboard.handlers;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
 public class AddressBan {
-    private String address;
-    private String reason;
-    private String source;
-
-    public AddressBan(String address, String reason, String source) {
-        this.address = address;
-        this.reason = reason;
-        this.source = source;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getSource() {
-        return source;
-    }
+    @Getter private String address;
+    @Getter private String reason;
+    @Getter private String source;
 }

@@ -214,7 +214,7 @@ public class Party {
         Dashboard dashboard = Launcher.getDashboard();
         Rank r = player.getRank();
         String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUniqueId()) ? ChatColor.YELLOW + "* " : "") +
-                r.getNameWithBrackets() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
+                r.getFormattedName() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
                 (r.getRankId() >= Rank.SQUIRE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
         for (UUID uuid : getMembers()) {
             if (uuid.equals(player.getUniqueId())) {

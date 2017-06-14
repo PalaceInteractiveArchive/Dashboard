@@ -34,6 +34,7 @@ public class ChatUtil {
             "8", "9", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "=", "_", "+", "[", "]", "{", "}", "/",
             "\\", "?", "|", ",", ".", "<", ">", "`", "~", ";", ":", "'", "\"", "√", "˚", "≤", "≥", "™", "£", "¢", "∞",
             "•", " ");
+
     private boolean privateMessages = true;
     private int chatDelay = 2000;
 
@@ -306,7 +307,7 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
-            String message = rank.getNameWithFormatting() + " " + ChatColor.GRAY + player.getUsername() + ": " +
+            String message = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled()) {
