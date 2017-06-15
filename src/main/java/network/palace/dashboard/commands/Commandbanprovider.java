@@ -2,23 +2,19 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.MagicCommand;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.*;
 
 public class Commandbanprovider extends MagicCommand {
 
     public Commandbanprovider() {
         super(Rank.KNIGHT);
-        tabCompletePlayers = true;
     }
 
     @Override
-    public void execute(Player banner, String label, String[] args) {
+    public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 1) {
-            banner.sendMessage(ChatColor.RED + "/banprovider [Provider]");
+            player.sendMessage(ChatColor.RED + "/banprovider [Provider]");
             return;
         }
         StringBuilder provider = new StringBuilder();
@@ -28,5 +24,23 @@ public class Commandbanprovider extends MagicCommand {
                 provider.append(" ");
             }
         }
+        ProviderBan ban = new ProviderBan(provider.toString(), player.getUsername());
+        dashboard.getSchedulerManager().runAsync(() -> {
+            ProviderBan existing = dashboard.getSqlUtil().getProviderBan(provider.toString());
+            if (existing != null) {
+                player.sendMessage(ChatColor.RED + "This provider is already banned!");
+                return;
+            }
+            dashboard.getSqlUtil().banProvider(ban);
+            for (Player tp : dashboard.getOnlinePlayers()) {
+                if (tp.getIsp().trim().equalsIgnoreCase(provider.toString().trim())) {
+                    try {
+                        tp.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            dashboard.getModerationUtil().announceBan(ban);
+        });
     }
 }

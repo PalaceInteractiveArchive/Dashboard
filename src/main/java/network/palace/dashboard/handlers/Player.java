@@ -47,6 +47,7 @@ public class Player {
     @Getter @Setter private boolean isAFK = false;
     @Getter @Setter private boolean disabled = false;
     @Getter @Setter private boolean sendInventoryOnJoin = true;
+    @Getter @Setter private String isp = "unknown";
 
     public Player(UUID uuid, String username, String address, String server, UUID bungeeID, int mcVersion) {
         this.uuid = uuid;

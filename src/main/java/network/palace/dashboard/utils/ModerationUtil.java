@@ -68,6 +68,11 @@ public class ModerationUtil {
                 ban.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason());
     }
 
+    public void announceBan(ProviderBan ban) {
+        sendMessage(ChatColor.GREEN + "ISP " + ban.getProvider() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
+                ban.getSource());
+    }
+
     public void announceUnban(String name, String source) {
         sendMessage(ChatColor.GREEN + name + ChatColor.RED + " has been unbanned by " + ChatColor.GREEN + source);
     }

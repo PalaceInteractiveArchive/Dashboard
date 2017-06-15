@@ -11,6 +11,8 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Marc on 3/5/17.
@@ -19,6 +21,17 @@ public class IPUtil {
     private static HashMap<String, Match> cache = new HashMap<>();
     private static int count = 0;
     private static long lastReset = System.currentTimeMillis();
+
+    public IPUtil() {
+        /*
+        If 5+ accounts connect within 5 minutes
+         */
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+            }
+        }, 0L, 1000L);
+    }
 
     public static ProviderData getProviderData(String address) {
         Dashboard dashboard = Launcher.getDashboard();

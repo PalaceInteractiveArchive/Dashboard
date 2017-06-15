@@ -229,15 +229,21 @@ public class InventoryUtil {
      */
     private InventoryCache getInventoryFromDatabase(UUID uuid) {
         HashMap<Resort, ResortInventory> map = new HashMap<>();
+        List<Integer> deleteRowIds = new ArrayList<>();
         try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
+            PreparedStatement sql = connection.prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
             while (result.next()) {
+                int id = result.getInt("id");
                 String backpack = result.getString("pack");
                 String locker = result.getString("locker");
                 String hotbar = result.getString("hotbar");
                 Resort resort = Resort.fromId(result.getInt("resort"));
+                if (map.get(resort) != null) {
+                    deleteRowIds.add(id);
+                    continue;
+                }
                 ResortInventory inv = new ResortInventory(resort, backpack, generateHash(backpack), "",
                         result.getInt("packsize"), locker, generateHash(locker), "",
                         result.getInt("lockersize"), hotbar, generateHash(hotbar), "");
@@ -245,6 +251,24 @@ public class InventoryUtil {
             }
             result.close();
             sql.close();
+            if (!deleteRowIds.isEmpty()) {
+                StringBuilder q = new StringBuilder("DELETE FROM storage2 WHERE ");
+                for (int i = 0; i < deleteRowIds.size(); i++) {
+                    q.append("id=?");
+                    if (i < (deleteRowIds.size() - 1)) {
+                        q.append(" OR ");
+                    }
+                }
+                PreparedStatement delete = connection.prepareStatement(q.toString());
+                int slot = 1;
+                for (Integer deleteRowId : deleteRowIds) {
+                    delete.setInt(slot, deleteRowId);
+                    slot++;
+                }
+                System.out.println("DELETE " + q);
+                delete.execute();
+                delete.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -267,6 +291,9 @@ public class InventoryUtil {
      * @return MD5 hash of inventory
      */
     private String generateHash(String inventory) {
+        if (inventory == null) {
+            inventory = "";
+        }
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.update(inventory.getBytes());
