@@ -15,6 +15,7 @@ import network.palace.dashboard.scheduler.ShowReminder;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.utils.*;
+import network.palace.dashboard.utils.chat.JaroWinkler;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -54,6 +55,10 @@ public class Dashboard {
     @Getter @Setter private SocketConnection socketConnection;
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
+
+    @Getter @Setter private boolean strictMode;
+    @Getter @Setter private double strictThreshold;
+    @Getter private JaroWinkler chatAlgorithm = new JaroWinkler();
 
     @Getter private String socketURL = "";
 

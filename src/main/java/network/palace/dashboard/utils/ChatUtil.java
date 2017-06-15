@@ -147,12 +147,20 @@ public class ChatUtil {
         Dashboard dashboard = Launcher.getDashboard();
         UUID uuid = packet.getUniqueId();
         Player player = dashboard.getPlayer(uuid);
-        if (player == null) {
-            return;
+        String message = packet.getMessage();
+
+        if (player == null) return;
+        if (player.isNewGuest()) return;
+
+        if (dashboard.isStrictMode()) {
+            String lastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 1];
+            double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
+            if (distance >= dashboard.getStrictThreshold()) {
+                swearMessage(player.getUsername(), message);
+                return;
+            }
         }
-        if (player.isNewGuest()) {
-            return;
-        }
+
         Rank rank = player.getRank();
         boolean squire = rank.getRankId() >= Rank.SQUIRE.getRankId();
         if (squire) {
@@ -167,10 +175,10 @@ public class ChatUtil {
             }
             player.afkAction();
         }
-        boolean command = packet.getMessage().startsWith("/");
+        boolean command = message.startsWith("/");
         if (player.isDisabled()) {
             if (command) {
-                String m = packet.getMessage().replaceFirst("/", "");
+                String m = message.replaceFirst("/", "");
                 if (m.startsWith("staff")) {
                     dashboard.getCommandUtil().handleCommand(player, m);
                 }
@@ -178,7 +186,7 @@ public class ChatUtil {
             return;
         }
         StringBuilder msg = new StringBuilder();
-        String[] l = packet.getMessage().split(" ");
+        String[] l = message.split(" ");
         for (int i = 0; i < l.length; i++) {
             if (l[i].equals("") || l[i].equals(" ")) {
                 continue;
@@ -229,12 +237,12 @@ public class ChatUtil {
             }
             time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
             msg = new StringBuilder(removeCaps(player, msg.toString()));
-            String temp = packet.getMessage().trim();
+            String temp = message.trim();
             if (containsSwear(player, temp) || isAdvert(player, temp) ||
                     spamCheck(player, temp) || containsUnicode(player, temp)) {
                 return;
             }
-            String mm = packet.getMessage().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
+            String mm = message.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "").replace(";", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
                 player.sendMessage(DashboardConstants.SKYPE_INFORMATION);

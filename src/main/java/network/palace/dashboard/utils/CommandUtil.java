@@ -65,6 +65,7 @@ public class CommandUtil {
         register("staff", new Commandstaff());
         register("stafflist", new Commandstafflist());
         register("store", new Commandstore());
+        register("strict", new CommandStrict());
         register("tempban", new Commandtempban());
         register("unban", new Commandunban());
         register("unbanip", new Commandunbanip());
