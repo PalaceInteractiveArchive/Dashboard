@@ -293,6 +293,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String target = packet.getTarget();
                 final Player tp = dashboard.getPlayer(uuid);
                 if (tp == null) {
+                    if (dashboard.hasPlayer(uuid)) {
+                        dashboard.setRegisteringPlayerServer(uuid, target);
+                    }
                     return;
                 }
                 // New connection
@@ -399,46 +402,23 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                     break;
                 }
-                boolean b = tp.getUsername().equals("Legobuilder0813");
-                if (b)
-                    tp.sendMessage("Sending you to " + target);
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
-                    if (b)
-                        tp.sendMessage("1");
                     if (tp.isSendInventoryOnJoin() && dashboard.getServer(target).isInventory()) {
-                        if (b)
-                            tp.sendMessage("2");
                         tp.setSendInventoryOnJoin(false);
                         Resort resort = Resort.fromServer(target);
-                        if (b)
-                            tp.sendMessage("3 " + resort.name());
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            if (b)
-                                tp.sendMessage("4");
                             ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUniqueId(), resort);
-                            if (b)
-                                tp.sendMessage("5");
                             PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
                                     inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
                                     inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
                                     inv.getHotbarJSON(), inv.getHotbarHash());
-                            if (b)
-                                tp.sendMessage("6");
                             dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
-                            if (b)
-                                tp.sendMessage("7");
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
-                            if (b)
-                                tp.sendMessage("8");
                             if (socketChannel == null) {
-                                if (b)
-                                    tp.sendMessage("9");
                                 return;
                             }
                             socketChannel.send(content);
-                            if (b)
-                                tp.sendMessage("10");
                         });
                     }
                     if (!dashboard.getServer(target).isInventory()) {

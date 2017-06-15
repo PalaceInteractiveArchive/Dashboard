@@ -209,9 +209,9 @@ public class InventoryUtil {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
                     "locker, lockersize, hotbar, resort) VALUES (?,?,0,?,0,?,?)");
             sql.setString(1, uuid.toString());
-            sql.setString(2, "");
-            sql.setString(3, "");
-            sql.setString(4, "");
+            sql.setString(2, "{}");
+            sql.setString(3, "{}");
+            sql.setString(4, "{}");
             sql.setInt(5, resort.getId());
             sql.execute();
             sql.close();

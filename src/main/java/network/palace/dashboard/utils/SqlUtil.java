@@ -654,6 +654,22 @@ public class SqlUtil {
         }
     }
 
+    public List<String> getBannedProviders() {
+        List<String> list = new ArrayList<>();
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT provider FROM banned_providers WHERE active=1");
+            ResultSet result = sql.executeQuery();
+            while (result.next()) {
+                list.add(result.getString("provider"));
+            }
+            result.close();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public void unbanPlayer(final UUID uuid) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {

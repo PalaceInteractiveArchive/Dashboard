@@ -20,6 +20,7 @@ public class CommandUtil {
         register("b", new Commandb());
         register("ban", new Commandban());
         register("banip", new Commandbanip());
+        register("bannedproviders", new Commandbannedproviders());
         register("banprovider", new Commandbanprovider());
         register("bseen", new Commandbseen());
         register("bug", new Commandbug());

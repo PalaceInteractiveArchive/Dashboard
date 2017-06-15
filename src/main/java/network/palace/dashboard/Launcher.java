@@ -1,7 +1,5 @@
 package network.palace.dashboard;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -9,7 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.handlers.Arcade;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.scheduler.SchedulerManager;
 import network.palace.dashboard.server.DashboardServerSocketChannel;
@@ -23,9 +21,6 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.PatternLayout;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -54,63 +49,7 @@ public class Launcher {
             e.printStackTrace();
         }
         dashboard.getLogger().info("Starting up Dashboard...");
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            dashboard.getLogger().warn("Shutting down Dashboard...");
-            for (Player p : dashboard.getOnlinePlayers()) {
-                if (!p.getChannel().equalsIgnoreCase("all")) {
-                    p.setChannel("all");
-                    p.sendMessage(ChatColor.GREEN + "You have been moved to the " + ChatColor.AQUA + "all " +
-                            ChatColor.GREEN + "channel");
-                }
-            }
-            File parties = new File("parties.txt");
-            try {
-                parties.createNewFile();
-                BufferedWriter bw = new BufferedWriter(new FileWriter(parties, false));
-                for (Party p : dashboard.getPartyUtil().getParties()) {
-                    bw.write(p.toString());
-                    bw.newLine();
-                }
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            File inventories = new File("inventories.txt");
-            try {
-                inventories.createNewFile();
-                BufferedWriter bw = new BufferedWriter(new FileWriter(inventories, false));
-                for (InventoryCache cache : dashboard.getInventoryUtil().getCachedInventories().values()) {
-                    JsonObject o = new JsonObject();
-                    o.addProperty("uuid", cache.getUuid().toString());
-                    JsonArray e = new JsonArray();
-                    for (ResortInventory inv : cache.getResorts().values()) {
-                        JsonObject ob = new JsonObject();
-                        ob.addProperty("resort", inv.getResort().getId());
-                        ob.addProperty("packJSON", inv.getBackpackJSON());
-                        ob.addProperty("packHash", inv.getBackpackHash());
-                        ob.addProperty("sqlPackHash", inv.getSqlBackpackHash());
-                        ob.addProperty("packsize", inv.getBackpackSize());
-                        ob.addProperty("lockerJSON", inv.getLockerJSON());
-                        ob.addProperty("lockerHash", inv.getLockerHash());
-                        ob.addProperty("sqlLockerHash", inv.getSqlLockerHash());
-                        ob.addProperty("lockersize", inv.getLockerSize());
-                        ob.addProperty("hotbarJSON", inv.getHotbarJSON());
-                        ob.addProperty("hotbarHash", inv.getHotbarHash());
-                        ob.addProperty("sqlHotbarHash", inv.getSqlHotbarHash());
-                        e.add(ob);
-                    }
-                    o.add("resorts", e);
-                    bw.write(o.toString());
-                    bw.newLine();
-                }
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            dashboard.getVoteUtil().stop();
-            dashboard.getSlackUtil().sendDashboardMessage(new SlackMessage(),
-                    Collections.singletonList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
-        }));
+        Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         dashboard.setRandom(new Random());
         dashboard.setSchedulerManager(new SchedulerManager());
         dashboard.setInventoryUtil(new InventoryUtil());

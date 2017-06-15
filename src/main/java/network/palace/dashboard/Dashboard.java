@@ -61,7 +61,7 @@ public class Dashboard {
     @Getter @Setter private Random random;
     @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
     @Setter private List<String> serverTypes = new ArrayList<>();
-    private List<UUID> registering = new ArrayList<>();
+    private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
     @Getter @Setter private String motd = "";
@@ -217,7 +217,10 @@ public class Dashboard {
 
     public void addPlayer(Player player) {
         players.put(player.getUniqueId(), player);
-        removeRegisteringPlayer(player.getUniqueId());
+        String server = removeRegisteringPlayer(player.getUniqueId());
+        if (player.getServer().equalsIgnoreCase("unknown")) {
+            player.setServer(server);
+        }
     }
 
     public static DashboardSocketChannel getBungee(UUID bungeeID) {
@@ -372,14 +375,18 @@ public class Dashboard {
     }
 
     public boolean hasPlayer(UUID uuid) {
-        return registering.contains(uuid);
+        return registering.containsKey(uuid);
     }
 
     public void addRegisteringPlayer(UUID uuid) {
-        registering.add(uuid);
+        registering.put(uuid, "");
     }
 
-    public void removeRegisteringPlayer(UUID uuid) {
-        registering.remove(uuid);
+    public void setRegisteringPlayerServer(UUID uuid, String server) {
+        registering.put(uuid, server);
+    }
+
+    public String removeRegisteringPlayer(UUID uuid) {
+        return registering.remove(uuid);
     }
 }
