@@ -254,11 +254,12 @@ public class Dashboard {
         Player player = getPlayer(uuid);
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {
-                getServerUtil().getServer(player.getServer()).changeCount(-1);
+                Server s = getServerUtil().getServer(player.getServer());
+                if (s != null)
+                    s.changeCount(-1);
             }
-            if (player.getTutorial() != null) {
+            if (player.getTutorial() != null)
                 player.getTutorial().cancel();
-            }
             sqlUtil.logout(player);
         }
         PacketKick packet = new PacketKick("See ya real soon!");
