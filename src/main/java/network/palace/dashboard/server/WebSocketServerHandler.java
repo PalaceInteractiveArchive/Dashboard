@@ -235,6 +235,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 23: {
                 PacketPlayerJoin packet = new PacketPlayerJoin().fromJSON(object);
+                dashboard.addRegisteringPlayer(packet.getUniqueId());
                 Player player = new Player(packet.getUniqueId(), packet.getUsername(), packet.getAddress(),
                         packet.getServer(), channel.getBungeeID(), packet.getMcVersion());
                 if (dashboard.getPlayer(player.getUniqueId()) != null) {
@@ -837,6 +838,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 UUID uuid = packet.getUniqueId();
                 Player tp = dashboard.getPlayer(uuid);
                 boolean exists = tp != null;
+                if (!exists) {
+                    // Check one more time if the player exists
+                    exists = dashboard.hasPlayer(uuid);
+                }
                 channel.send(new PacketConfirmPlayer(uuid, exists));
                 break;
             }
