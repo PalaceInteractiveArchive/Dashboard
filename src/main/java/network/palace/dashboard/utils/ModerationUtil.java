@@ -68,6 +68,11 @@ public class ModerationUtil {
                 ban.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason());
     }
 
+    public void announceBan(ProviderBan ban) {
+        sendMessage(ChatColor.GREEN + "ISP " + ban.getProvider() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
+                ban.getSource());
+    }
+
     public void announceUnban(String name, String source) {
         sendMessage(ChatColor.GREEN + name + ChatColor.RED + " has been unbanned by " + ChatColor.GREEN + source);
     }
@@ -93,7 +98,7 @@ public class ModerationUtil {
     }
 
     public void rankChange(String name, Rank rank, String source) {
-        sendMessage(ChatColor.GREEN + name + "'s rank has been changed to " + rank.getNameWithBrackets() +
+        sendMessage(ChatColor.GREEN + name + "'s rank has been changed to " + rank.getFormattedName() +
                 ChatColor.GREEN + " by " + source);
     }
 

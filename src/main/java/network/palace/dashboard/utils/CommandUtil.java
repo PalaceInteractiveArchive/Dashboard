@@ -20,6 +20,8 @@ public class CommandUtil {
         register("b", new Commandb());
         register("ban", new Commandban());
         register("banip", new Commandbanip());
+        register("bannedproviders", new Commandbannedproviders());
+        register("banprovider", new Commandbanprovider());
         register("bseen", new Commandbseen());
         register("bug", new Commandbug());
         register("bungeecounts", new Commandbungeecounts());
@@ -69,6 +71,7 @@ public class CommandUtil {
         register("tempban", new Commandtempban());
         register("unban", new Commandunban());
         register("unbanip", new Commandunbanip());
+        register("unbanprovider", new Commandunbanprovider());
         register("unmute", new Commandunmute());
         register("updatehashes", new Commandupdatehashes());
         register("uptime", new Commanduptime());

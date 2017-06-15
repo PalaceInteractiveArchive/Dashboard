@@ -85,7 +85,7 @@ public class SqlUtil {
             boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
             if (isMCLeaks) {
                 // UUID is in MCLeaks, temp ban the account
-                banPlayer(player.getUuid(), "MCLeaks Account", true,  new Date(System.currentTimeMillis()), "Dashboard");
+                banPlayer(player.getUuid(), "MCLeaks Account", true, new Date(System.currentTimeMillis()), "Dashboard");
                 dashboard.getModerationUtil().announceBan(new Ban(player.getUniqueId(), player.getUsername(),
                         true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard"));
                 player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
@@ -133,7 +133,7 @@ public class SqlUtil {
                     update(player, connection, !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
+                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
@@ -240,7 +240,6 @@ public class SqlUtil {
     }
 
     public void silentJoin(final Player player) {
-        Dashboard dashboard = Launcher.getDashboard();
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("SELECT toggled,mentions,onlinetime FROM player_data WHERE uuid=?");
             sql.setString(1, player.getUniqueId().toString());
@@ -248,12 +247,9 @@ public class SqlUtil {
             if (!result.next()) {
                 return;
             }
-            Rank rank = player.getRank();
             player.setToggled(result.getInt("toggled") == 1);
             player.setMentions(result.getInt("mentions") == 1);
             player.setOnlineTime(result.getLong("onlinetime"));
-            dashboard.addPlayer(player);
-            dashboard.addToCache(player.getUniqueId(), player.getUsername());
             result.close();
             sql.close();
             HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
@@ -285,7 +281,7 @@ public class SqlUtil {
                 Rank rank = player.getRank();
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getNameWithBrackets() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
+                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
                             tp.sendMessage(msg);
@@ -372,6 +368,9 @@ public class SqlUtil {
         Dashboard dashboard = Launcher.getDashboard();
         List<UUID> uuids = new ArrayList<>();
         HashMap<UUID, String> map = new HashMap<>();
+        if (uuid == null) {
+            return map;
+        }
         try (Connection connection = getConnection()) {
             switch (status) {
                 case 0: {
@@ -571,10 +570,24 @@ public class SqlUtil {
     public void banIP(final String ip, final String reason, final String source) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_ips values(0,?,?,?,1)");
+                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_ips VALUES(0,?,?,?,1)");
                 sql.setString(1, ip);
                 sql.setString(2, reason);
                 sql.setString(3, source);
+                sql.execute();
+                sql.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void banProvider(final ProviderBan ban) {
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+            try (Connection connection = getConnection()) {
+                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_providers VALUES (0,?,?)");
+                sql.setString(1, ban.getProvider());
+                sql.setString(2, ban.getSource());
                 sql.execute();
                 sql.close();
             } catch (Exception e) {
@@ -622,6 +635,41 @@ public class SqlUtil {
         }
     }
 
+    public ProviderBan getProviderBan(String provider) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT provider,source FROM banned_providers WHERE provider=? AND active=1;");
+            sql.setString(1, provider);
+            ResultSet result = sql.executeQuery();
+            ProviderBan ban;
+            if (!result.next()) {
+                return null;
+            }
+            ban = new ProviderBan(result.getString("provider"), result.getString("source"));
+            result.close();
+            sql.close();
+            return ban;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<String> getBannedProviders() {
+        List<String> list = new ArrayList<>();
+        try (Connection connection = getConnection()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT provider FROM banned_providers WHERE active=1");
+            ResultSet result = sql.executeQuery();
+            while (result.next()) {
+                list.add(result.getString("provider"));
+            }
+            result.close();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public void unbanPlayer(final UUID uuid) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -640,6 +688,19 @@ public class SqlUtil {
             try (Connection connection = getConnection()) {
                 PreparedStatement sql = connection.prepareStatement("UPDATE banned_ips SET active=0 WHERE ipAddress=?");
                 sql.setString(1, address);
+                sql.execute();
+                sql.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void unbanProvider(final String provider) {
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+            try (Connection connection = getConnection()) {
+                PreparedStatement sql = connection.prepareStatement("UPDATE banned_providers SET active=0 WHERE provider=?");
+                sql.setString(1, provider);
                 sql.execute();
                 sql.close();
             } catch (SQLException e) {

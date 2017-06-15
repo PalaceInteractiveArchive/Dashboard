@@ -9,6 +9,7 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -40,6 +41,21 @@ public class ChatUtil {
 
     public ChatUtil() {
         Dashboard dashboard = Launcher.getDashboard();
+        File f = new File("chat.txt");
+        if (!f.exists()) {
+            return;
+        }
+        try {
+            Scanner scanner = new Scanner(new FileReader(f));
+            while (scanner.hasNextLine()) {
+                String server = scanner.nextLine();
+                mutedChats.add(server);
+            }
+        } catch (Exception e) {
+            dashboard.getLogger().error("An exception occurred while parsing chat.txt - " + e.getMessage());
+            e.printStackTrace();
+        }
+        f.delete();
         reload();
         new Timer().schedule(new TimerTask() {
             @Override
@@ -315,7 +331,7 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
-            String message = rank.getNameWithFormatting() + " " + ChatColor.GRAY + player.getUsername() + ": " +
+            String message = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled()) {
@@ -680,5 +696,9 @@ public class ChatUtil {
 
     public void setPrivateMessages(boolean privateMessages) {
         this.privateMessages = privateMessages;
+    }
+
+    public List<String> getMutedChats() {
+        return new ArrayList<>(mutedChats);
     }
 }

@@ -1,105 +1,65 @@
 package network.palace.dashboard.handlers;
 
-/**
- * Created by Marc on 7/15/16
- */
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
 public enum Rank {
-    EMPRESS("Empress", ChatColor.RED, ChatColor.YELLOW, 11),
-    EMPEROR("Emperor", ChatColor.RED, ChatColor.YELLOW, 11),
-    WIZARD("Wizard", ChatColor.GOLD, ChatColor.YELLOW, 11),
-    PALADIN("Paladin", ChatColor.YELLOW, ChatColor.GREEN, 10),
-    ARCHITECT("Architect", ChatColor.GREEN, ChatColor.GREEN, 9),
-    KNIGHT("Knight", ChatColor.GREEN, ChatColor.GREEN, 9),
-    SQUIRE("Squire", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, 8),
-    CHARACTER("Character", ChatColor.BLUE, ChatColor.BLUE, 7),
-    SPECIALGUEST("Special Guest", ChatColor.DARK_PURPLE, ChatColor.WHITE, 6),
-    MCPROHOSTING("MCProHosting", ChatColor.RED, ChatColor.WHITE, 6),
-    HONORABLE("Honorable", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, 5),
-    MAJESTIC("Majestic", ChatColor.DARK_PURPLE, ChatColor.WHITE, 4),
-    NOBLE("Noble", ChatColor.BLUE, ChatColor.WHITE, 3),
-    DWELLER("Dweller", ChatColor.AQUA, ChatColor.WHITE, 2),
-    SHAREHOLDER("Shareholder", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, 3),
-    DVCMEMBER("DVC", ChatColor.AQUA, ChatColor.WHITE, 2),
-    SETTLER("Settler", ChatColor.DARK_AQUA, ChatColor.WHITE, 1);
 
-    private String name;
-    private ChatColor tagColor;
-    private ChatColor chatColor;
-    private int rankId;
+    EMPRESS("Empress", ChatColor.RED + "Empress ", ChatColor.RED, ChatColor.YELLOW, true, 11),
+    EMPEROR("Emperor", ChatColor.RED + "Emperor ", ChatColor.RED, ChatColor.YELLOW, true, 11),
+    WIZARD("Wizard", ChatColor.GOLD + "Wizard ", ChatColor.GOLD, ChatColor.YELLOW, true, 11),
+    PALADIN("Paladin", ChatColor.YELLOW + "Paladin ", ChatColor.YELLOW, ChatColor.GREEN, true, 10),
+    ARCHITECT("Architect", ChatColor.GREEN + "Architect ", ChatColor.GREEN, ChatColor.GREEN, true, 9),
+    KNIGHT("Knight", ChatColor.GREEN + "Knight ", ChatColor.GREEN, ChatColor.GREEN, true, 9),
+    SQUIRE("Squire", ChatColor.DARK_GREEN + "Squire ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 8),
+    CHARACTER("Character", ChatColor.BLUE + "Character ", ChatColor.BLUE, ChatColor.BLUE, false, 7),
+    SPECIALGUEST("Special Guest", ChatColor.DARK_PURPLE + "SG ", ChatColor.DARK_PURPLE, ChatColor.WHITE, false, 6),
+    MCPROHOSTING("MCProHosting", ChatColor.RED + "MCPro ", ChatColor.RED, ChatColor.WHITE, false, 6),
+    HONORABLE("Honorable", ChatColor.LIGHT_PURPLE + "Honorable ", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, false, 5),
+    MAJESTIC("Majestic", ChatColor.DARK_PURPLE + "Majestic ", ChatColor.DARK_PURPLE, ChatColor.WHITE, false, 4),
+    NOBLE("Noble", ChatColor.BLUE + "Noble ", ChatColor.BLUE, ChatColor.WHITE, false, 3),
+    SHAREHOLDER("Shareholder", ChatColor.LIGHT_PURPLE + "Shareholder ", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, false, 3),
+    DWELLER("Dweller", ChatColor.AQUA + "Dweller ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
+    DVCMEMBER("DVC", ChatColor.AQUA + "DVC ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
+    SETTLER("Settler", ChatColor.GRAY + "", ChatColor.DARK_AQUA, ChatColor.WHITE, false, 1);
 
-    Rank(String name, ChatColor tagColor, ChatColor chatColor, int rankId) {
-        this.name = name;
-        this.tagColor = tagColor;
-        this.chatColor = chatColor;
-        this.rankId = rankId;
-    }
+    @Getter private String name;
+    @Getter private String scoreboardName;
+    @Getter private ChatColor tagColor;
+    @Getter private ChatColor chatColor;
+    @Getter private boolean isOp;
+    @Getter private int rankId;
 
-    public int getRankId() {
-        return rankId;
-    }
-
-    public static Rank fromString(String string) {
-        String rankName = string.toLowerCase();
-        switch (rankName) {
-            case "empress":
-                return EMPRESS;
-            case "emperor":
-                return EMPEROR;
-            case "wizard":
-                return WIZARD;
-            case "paladin":
-                return PALADIN;
-            case "architect":
-                return ARCHITECT;
-            case "knight":
-                return KNIGHT;
-            case "squire":
-                return SQUIRE;
-            case "character":
-                return CHARACTER;
-            case "specialguest":
-                return SPECIALGUEST;
-            case "mcprohosting":
-                return MCPROHOSTING;
-            case "honorable":
-                return HONORABLE;
-            case "majestic":
-                return MAJESTIC;
-            case "noble":
-                return NOBLE;
-            case "dweller":
-                return DWELLER;
-            case "shareholder":
-                return SHAREHOLDER;
-            case "dvc":
-                return DVCMEMBER;
-            default:
-                return SETTLER;
+    /**
+     * Get rank object from a string
+     *
+     * @param name rank name in string
+     * @return rank object
+     */
+    public static Rank fromString(String name) {
+        for (Rank rank : Rank.values()) {
+            if (rank.getName().replaceAll(" ", "").equalsIgnoreCase(name)) return rank;
         }
-    }
-
-    public String getName() {
-        return name;
+        return SETTLER;
     }
 
     public String getSqlName() {
         return name.toLowerCase().replaceAll(" ", "");
     }
 
+    @Deprecated
     public String getNameWithBrackets() {
-        return getNameWithFormatting();
+        return getFormattedName();
     }
 
-    public String getNameWithFormatting() {
-        String bolded = getRankId() >= 8 ? ChatColor.BOLD.toString() : "";
-        return getTagColor() + bolded + getName();
-    }
-
-    public ChatColor getChatColor() {
-        return chatColor;
-    }
-
-    public ChatColor getTagColor() {
-        return tagColor;
+    /**
+     * Get the formatted name of a rank
+     *
+     * @return the rank name with any additional formatting that should exist
+     */
+    public String getFormattedName() {
+        String bold = getRankId() >= Rank.SQUIRE.getRankId() ? "" + ChatColor.BOLD : "";
+        return getTagColor() + bold + getName();
     }
 }

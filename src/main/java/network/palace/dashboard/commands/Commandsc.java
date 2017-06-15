@@ -21,7 +21,7 @@ public class Commandsc extends MagicCommand {
             String response;
             Rank rank = player.getRank();
 
-            response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getNameWithFormatting()
+            response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getFormattedName()
                     + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
                     ChatColor.translateAlternateColorCodes('&', message);
             dashboard.getChatUtil().staffChatMessage(response);

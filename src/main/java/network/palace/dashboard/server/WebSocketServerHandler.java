@@ -244,6 +244,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 dashboard.getSchedulerManager().runAsync(() -> {
                     IPUtil.ProviderData data = IPUtil.getProviderData(packet.getAddress());
+                    player.setIsp(data.getIsp());
+                    ProviderBan ban = dashboard.getSqlUtil().getProviderBan(player.getIsp());
+                    if (ban != null) {
+                        player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                    }
                     dashboard.getSqlUtil().updateProviderData(player.getUniqueId(), data);
                 });
                 dashboard.getSqlUtil().login(player);
@@ -288,6 +293,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String target = packet.getTarget();
                 final Player tp = dashboard.getPlayer(uuid);
                 if (tp == null) {
+                    if (dashboard.hasPlayer(uuid)) {
+                        dashboard.setRegisteringPlayerServer(uuid, target);
+                    }
                     return;
                 }
                 // New connection
@@ -304,11 +312,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                          * /staff change oldpw newpw
                          */
                     }
-                    if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
+//                    if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
 //                        tp.setInventoryUploaded(false);
-                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
-                        sendInventoryUpdate(target, update);
-                    }
+//                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
+//                        sendInventoryUpdate(target, update);
+//                    }
                     if (tp.isNewGuest()) {
                         Timer tutorial = new Timer();
                         tutorial.schedule(new TimerTask() {
@@ -396,18 +404,20 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 // Going to Park server
                 if (dashboard.getServer(target).isPark()) {
-                    if (tp.isSendInventoryOnJoin()) {
+                    if (tp.isSendInventoryOnJoin() && dashboard.getServer(target).isInventory()) {
                         tp.setSendInventoryOnJoin(false);
                         Resort resort = Resort.fromServer(target);
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUuid(), resort);
+                            ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUniqueId(), resort);
                             PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
                                     inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
                                     inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
                                     inv.getHotbarJSON(), inv.getHotbarHash());
                             dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
-                            if (socketChannel == null) return;
+                            if (socketChannel == null) {
+                                return;
+                            }
                             socketChannel.send(content);
                         });
                     }
@@ -789,6 +799,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     tp.setRank(Rank.fromString(p.getRank()));
                     list.add(tp);
                     dashboard.getServer(p.getServer()).changeCount(1);
+                    dashboard.addPlayer(tp);
+                    dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                 }
                 final List<Player> finalList = list;
                 dashboard.getSchedulerManager().runAsync(() -> {
