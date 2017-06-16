@@ -25,7 +25,8 @@ public class CommandStrict extends MagicCommand {
 
         Dashboard dashboard = Launcher.getDashboard();
         if (args[0].equalsIgnoreCase("toggle")) {
-            String response = dashboard.isStrictMode() ? ChatColor.GREEN + "" + ChatColor.BOLD + "Leaving strict mode..." : ChatColor.RED + "" + ChatColor.BOLD + "Entering strict mode...";
+            String response = dashboard.isStrictMode() ? ChatColor.GREEN + "" + ChatColor.BOLD + "Leaving strict mode..." :
+                    ChatColor.RED + "" + ChatColor.BOLD + "Entering strict mode... Matching level: " + dashboard.getStrictThreshold();
             dashboard.setStrictMode(!dashboard.isStrictMode());
             player.sendMessage(response);
         } else if (args[0].equalsIgnoreCase("threshold")) {

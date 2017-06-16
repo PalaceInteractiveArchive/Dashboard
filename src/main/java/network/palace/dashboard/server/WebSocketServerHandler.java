@@ -252,6 +252,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getSqlUtil().updateProviderData(player.getUniqueId(), data);
                 });
                 dashboard.getSqlUtil().login(player);
+                if (dashboard.isStrictMode()) player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
                 break;
             }
             /*
