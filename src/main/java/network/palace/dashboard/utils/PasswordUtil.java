@@ -4,18 +4,16 @@ package network.palace.dashboard.utils;
  * Created by Marc on 4/8/17.
  */
 public class PasswordUtil {
-    private BCrypt bCrypt = new BCrypt();
-
     public String hashPassword(String password, String salt) {
-        return bCrypt.hashpw(password, salt);
+        return BCrypt.hashpw(password, salt);
     }
 
     public boolean validPassword(String plain, String hashed) {
-        return bCrypt.checkpw(plain, hashed);
+        return BCrypt.checkpw(plain, hashed);
     }
 
     public String getNewSalt() {
-        return bCrypt.gensalt();
+        return BCrypt.gensalt();
     }
 
     public boolean isStrongEnough(String plain) {

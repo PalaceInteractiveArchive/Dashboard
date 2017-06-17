@@ -1015,10 +1015,13 @@ public class SqlUtil {
     }
 
     public void setPassword(UUID uuid, String pass) {
+        Dashboard dashboard = Launcher.getDashboard();
+        String salt = dashboard.getPasswordUtil().getNewSalt();
+        String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
         try (Connection connection = getConnection()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO staffpasswords (uuid,password) VALUES (?,?)");
             sql.setString(1, uuid.toString());
-            sql.setString(2, pass);
+            sql.setString(2, hashed);
             sql.execute();
             sql.close();
         } catch (SQLException e) {

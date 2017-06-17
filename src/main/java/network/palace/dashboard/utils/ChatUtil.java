@@ -168,15 +168,6 @@ public class ChatUtil {
         if (player == null) return;
         if (player.isNewGuest()) return;
 
-        if (dashboard.isStrictMode()) {
-            String lastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 1];
-            double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
-            if (distance >= dashboard.getStrictThreshold()) {
-                swearMessage(player.getUsername(), message);
-                return;
-            }
-        }
-
         Rank rank = player.getRank();
         boolean squire = rank.getRankId() >= Rank.SQUIRE.getRankId();
         if (squire) {
@@ -244,6 +235,15 @@ public class ChatUtil {
             if (mutedChats.contains(server)) {
                 player.sendMessage(DashboardConstants.MUTED_CHAT);
                 return;
+            }
+            
+            if (dashboard.isStrictMode()) {
+                String lastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 1];
+                double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
+                if (distance >= dashboard.getStrictThreshold()) {
+                    swearMessage(player.getUsername(), message);
+                    return;
+                }
             }
             //ChatDelay Check
             if (time.containsKey(player.getUniqueId()) && System.currentTimeMillis() < time.get(player.getUniqueId())) {
