@@ -53,7 +53,7 @@ public class ChatUtil {
             }
         } catch (Exception e) {
             dashboard.getLogger().error("An exception occurred while parsing chat.txt - " + e.getMessage());
-            e.printStackTrace();
+            ErrorUtil.logError("Error parsing chat.txt", e);
         }
         f.delete();
         reload();
@@ -64,15 +64,16 @@ public class ChatUtil {
                     if (messages.isEmpty()) {
                         return;
                     }
+                    final HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
                     int amount = 0;
-                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(messages.entrySet())) {
+                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
                         amount += entry.getValue().size();
                     }
                     StringBuilder statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
                     int i = 0;
                     HashMap<Integer, String> lastList = new HashMap<>();
-                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(messages.entrySet())) {
-                        if (entry == null || entry.getKey() == null || messages == null) {
+                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
+                        if (entry == null || entry.getKey() == null || localMessages == null) {
                             continue;
                         }
                         for (String s : new ArrayList<>(messages.remove(entry.getKey()))) {
@@ -164,6 +165,7 @@ public class ChatUtil {
         UUID uuid = packet.getUniqueId();
         Player player = dashboard.getPlayer(uuid);
         String message = packet.getMessage();
+        dashboard.getLogger().info((player == null ? "PLAYER IS NULL " : "") + "CHAT MESSAGE FROM " + uuid.toString() + ": '" + message + "'");
 
         if (player == null) return;
         if (player.isNewGuest()) return;
@@ -224,6 +226,7 @@ public class ChatUtil {
             return;
         }
         if (isMuted(player)) {
+            dashboard.getLogger().info("CANCELLED CHAT EVENT PLAYER MUTED");
             return;
         }
         if (!squire) {
@@ -234,14 +237,16 @@ public class ChatUtil {
             }
             if (mutedChats.contains(server)) {
                 player.sendMessage(DashboardConstants.MUTED_CHAT);
+                dashboard.getLogger().info("CANCELLED CHAT EVENT CHAT MUTED");
                 return;
             }
-            
+
             if (dashboard.isStrictMode()) {
                 String lastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 1];
                 double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
                 if (distance >= dashboard.getStrictThreshold()) {
                     swearMessage(player.getUsername(), message);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
                     return;
                 }
             }
@@ -249,6 +254,7 @@ public class ChatUtil {
             if (time.containsKey(player.getUniqueId()) && System.currentTimeMillis() < time.get(player.getUniqueId())) {
                 String response = DashboardConstants.CHAT_DELAY.replaceAll("<TIME>", String.valueOf(chatDelay / 1000));
                 player.sendMessage(response);
+                dashboard.getLogger().info("CANCELLED CHAT EVENT CHAT DELAY");
                 return;
             }
             time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
@@ -256,18 +262,21 @@ public class ChatUtil {
             String temp = message.trim();
             if (containsSwear(player, temp) || isAdvert(player, temp) ||
                     spamCheck(player, temp) || containsUnicode(player, temp)) {
+                dashboard.getLogger().info("CANCELLED CHAT EVENT SWEAR,ADVERT,SPAM,UNICODE");
                 return;
             }
             String mm = message.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "").replace(";", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
                 player.sendMessage(DashboardConstants.SKYPE_INFORMATION);
+                dashboard.getLogger().info("CANCELLED CHAT EVENT SKYPE");
                 return;
             }
             //Duplicate Message Check
             if (messageCache.containsKey(player.getUniqueId())) {
                 if (msg.toString().equalsIgnoreCase(messageCache.get(player.getUniqueId()))) {
                     player.sendMessage(DashboardConstants.MESSAGE_REPEAT);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT DUPLICATE");
                     return;
                 }
             }
@@ -275,6 +284,7 @@ public class ChatUtil {
         } else {
             if (msg.toString().startsWith(":warn-")) {
                 dashboard.getWarningUtil().handle(player, msg.toString());
+                dashboard.getLogger().info("CANCELLED CHAT EVENT WARNING CLICK");
                 return;
             }
         }
@@ -282,12 +292,15 @@ public class ChatUtil {
             switch (player.getChannel()) {
                 case "party":
                     dashboard.getCommandUtil().handleCommand(player, "pchat " + msg);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT PARTY CHAT");
                     return;
                 case "staff":
                     dashboard.getCommandUtil().handleCommand(player, "sc " + msg);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT STAFF CHAT");
                     return;
                 case "admin":
                     dashboard.getCommandUtil().handleCommand(player, "ho " + msg);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT ADMIN CHAT");
                     return;
             }
         }
@@ -432,7 +445,9 @@ public class ChatUtil {
 
     public void logMessage(UUID uuid, String msg) {
         if (messages.containsKey(uuid)) {
-            messages.get(uuid).add(msg);
+            List<String> msgs = messages.get(uuid);
+            msgs.add(msg);
+            messages.put(uuid, msgs);
             return;
         }
         List<String> list = new ArrayList<>();

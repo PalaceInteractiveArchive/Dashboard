@@ -56,7 +56,6 @@ public class WarningUtil {
             list.toArray(args);
             dashboard.getCommandUtil().getCommand("msg").execute(player, "msg", args);
         } catch (Exception ignored) {
-            ignored.printStackTrace();
             player.sendMessage(ChatColor.RED + "There was an error processing that warning!");
         }
     }

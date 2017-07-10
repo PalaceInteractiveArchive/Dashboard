@@ -123,6 +123,7 @@ public class SqlUtil {
                 player.setOnlineTime(result.getLong("onlinetime"));
                 player.setNewGuest(result.getInt("tutorial") != 1);
                 dashboard.addPlayer(player);
+                dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: SqlUtil.login");
                 dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
                 String username = result.getString("username");
@@ -198,6 +199,7 @@ public class SqlUtil {
         sql.execute();
         sql.close();
         dashboard.addPlayer(player);
+        dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: SqlUtil.newPlayer");
     }
 
     private void update(Player player, Connection connection, boolean username, boolean mcversion) throws SQLException {

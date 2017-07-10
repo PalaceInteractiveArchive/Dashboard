@@ -65,6 +65,8 @@ public class Dashboard {
     @Getter @Setter public Forum forum;
     @Getter @Setter private Random random;
     @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
+    @Getter @Setter private Logger errors = Logger.getLogger("Dashboard-Errors");
+    @Getter @Setter private Logger playerLog = Logger.getLogger("Dashboard-Players");
     @Setter private List<String> serverTypes = new ArrayList<>();
     private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();

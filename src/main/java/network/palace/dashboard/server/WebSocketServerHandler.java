@@ -261,6 +261,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             case 24: {
                 PacketPlayerDisconnect packet = new PacketPlayerDisconnect().fromJSON(object);
                 dashboard.logout(packet.getUniqueId());
+                dashboard.getPlayerLog().info("Removing Player Object for UUID " + packet.getUniqueId() + " Source: Player Disconnect");
                 break;
             }
             /*
@@ -760,6 +761,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getBungeeID().equals(uuid) && !players.contains(tp.getUniqueId())) {
                         dashboard.logout(tp.getUniqueId());
+                        dashboard.getPlayerLog().info("Removing Player Object for UUID " + tp.getUniqueId() + " Source: Player List Task");
                     }
                 }
                 break;
@@ -801,6 +803,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     list.add(tp);
                     dashboard.getServer(p.getServer()).changeCount(1);
                     dashboard.addPlayer(tp);
+                    dashboard.getPlayerLog().info("New Player Object for UUID " + tp.getUniqueId() + " username " + tp.getUsername() + " Source: Player List Info packet");
                     dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                 }
                 final List<Player> finalList = list;

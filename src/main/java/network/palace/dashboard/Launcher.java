@@ -48,6 +48,16 @@ public class Launcher {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        try {
+            dashboard.getErrors().addAppender(new FileAppender(layout, "error.log", true));
+        } catch (IOException e) {
+            ErrorUtil.logError("Error opening error.log", e);
+        }
+        try {
+            dashboard.getPlayerLog().addAppender(new FileAppender(layout, "players.log", true));
+        } catch (IOException e) {
+            ErrorUtil.logError("Error opening players.log", e);
+        }
         dashboard.getLogger().info("Starting up Dashboard...");
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         dashboard.setRandom(new Random());
