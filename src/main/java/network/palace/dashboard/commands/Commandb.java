@@ -34,6 +34,8 @@ public class Commandb extends MagicCommand {
                     tp.sendMessage(msg);
                 }
             }
+        } else {
+            player.sendMessage(ChatColor.RED + "/b [Message]");
         }
     }
 }

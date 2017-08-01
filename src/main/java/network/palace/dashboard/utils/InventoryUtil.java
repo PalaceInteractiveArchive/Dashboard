@@ -135,6 +135,9 @@ public class InventoryUtil {
                     }
                     InventoryUpdate update = new InventoryUpdate();
                     for (ResortInventory inv : cache.getResorts().values()) {
+                        if (inv == null) {
+                            continue;
+                        }
                         if (!inv.getSqlBackpackHash().equals(inv.getBackpackHash())) {
                             update.setValue(inv.getResort(), "backpack", inv.getBackpackJSON());
                             inv.setSqlBackpackHash(inv.getBackpackHash());
@@ -172,10 +175,40 @@ public class InventoryUtil {
      */
     public void cacheInventory(UUID uuid, PacketInventoryContent packet) {
         if (cachedInventories.containsKey(uuid)) {
-            cachedInventories.get(uuid).setInventory(packet.getResort(), new ResortInventory(packet.getResort(),
-                    packet.getBackpackJson(), packet.getBackpackHash(), "", packet.getBackpackSize(),
-                    packet.getLockerJson(), packet.getLockerHash(), "", packet.getLockerSize(),
-                    packet.getHotbarJson(), packet.getHotbarHash(), ""));
+            ResortInventory cache = cachedInventories.get(uuid).getResorts().get(packet.getResort());
+            if (cache == null) {
+                return;
+            }
+            ResortInventory inv = new ResortInventory();
+            inv.setResort(packet.getResort());
+            if (packet.getBackpackHash().equals("")) {
+                inv.setBackpackHash(cache.getBackpackHash());
+                inv.setBackpackJSON(cache.getBackpackJSON());
+                inv.setSqlBackpackHash(cache.getSqlBackpackHash());
+            } else {
+                inv.setBackpackHash(packet.getBackpackHash());
+                inv.setBackpackJSON(packet.getBackpackJson());
+                inv.setSqlBackpackHash("");
+            }
+            if (packet.getLockerHash().equals("")) {
+                inv.setLockerHash(cache.getLockerHash());
+                inv.setLockerJSON(cache.getLockerJSON());
+                inv.setSqlLockerHash(cache.getSqlLockerHash());
+            } else {
+                inv.setLockerHash(packet.getLockerHash());
+                inv.setLockerJSON(packet.getLockerJson());
+                inv.setSqlLockerHash("");
+            }
+            if (packet.getHotbarHash().equals("")) {
+                inv.setHotbarHash(cache.getHotbarHash());
+                inv.setHotbarJSON(cache.getHotbarJSON());
+                inv.setSqlHotbarHash(cache.getSqlHotbarHash());
+            } else {
+                inv.setHotbarHash(packet.getHotbarHash());
+                inv.setHotbarJSON(packet.getHotbarJson());
+                inv.setSqlHotbarHash("");
+            }
+            cachedInventories.get(uuid).setInventory(packet.getResort(), inv);
             return;
         }
         HashMap<Resort, ResortInventory> map = new HashMap<>();
@@ -184,6 +217,34 @@ public class InventoryUtil {
                 "", packet.getLockerSize(), packet.getHotbarJson(), packet.getHotbarHash(), ""));
         InventoryCache cache = new InventoryCache(uuid, map);
         cachedInventories.put(uuid, cache);
+        fillMapAsync(uuid);
+    }
+
+    /**
+     * Asynchronously fill an inventory map with missing resorts from the database
+     *
+     * @param uuid the uuid of the player's cache to fill
+     */
+    private void fillMapAsync(UUID uuid) {
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+            InventoryCache cache = cachedInventories.get(uuid);
+            if (cache == null)
+                cache = new InventoryCache(uuid, new HashMap<>());
+            HashMap<Resort, ResortInventory> resorts = cache.getResorts();
+            boolean changed = false;
+            for (Resort resort : Resort.values()) {
+                if (resorts.containsKey(resort)) {
+                    continue;
+                }
+                changed = true;
+                ResortInventory inv = getResortInventoryFromDatabase(uuid, resort);
+                if (inv.isEmpty())
+                    continue;
+                cache.setInventory(resort, inv);
+            }
+            if (!changed) return;
+            cachedInventories.put(uuid, cache);
+        });
     }
 
     /**
@@ -205,8 +266,13 @@ public class InventoryUtil {
     }
 
     private ResortInventory createResortInventory(UUID uuid, Resort resort) {
-        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
+        Optional<Connection> connection = Launcher.getDashboard().getSqlUtil().getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new ResortInventory();
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
                     "locker, lockersize, hotbar, resort) VALUES (?,?,0,?,0,?,?)");
             sql.setString(1, uuid.toString());
             sql.setString(2, "{}");
@@ -216,7 +282,7 @@ public class InventoryUtil {
             sql.execute();
             sql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("Error in InventoryUtil method createResortInventory", e);
         }
         return new ResortInventory();
     }
@@ -230,8 +296,14 @@ public class InventoryUtil {
     private InventoryCache getInventoryFromDatabase(UUID uuid) {
         HashMap<Resort, ResortInventory> map = new HashMap<>();
         List<Integer> deleteRowIds = new ArrayList<>();
-        try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
+        Dashboard dashboard = Launcher.getDashboard();
+        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new InventoryCache(uuid, map);
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
             while (result.next()) {
@@ -259,7 +331,7 @@ public class InventoryUtil {
                         q.append(" OR ");
                     }
                 }
-                PreparedStatement delete = connection.prepareStatement(q.toString());
+                PreparedStatement delete = connection.get().prepareStatement(q.toString());
                 int slot = 1;
                 for (Integer deleteRowId : deleteRowIds) {
                     delete.setInt(slot, deleteRowId);
@@ -270,9 +342,49 @@ public class InventoryUtil {
                 delete.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("Error in InventoryUtil method getInventoryFromDatabase", e);
         }
         return new InventoryCache(uuid, map);
+    }
+
+    /**
+     * Get a resort's inventory for a player
+     *
+     * @param uuid   the uuid of the player
+     * @param resort the resort inventory to retrieve
+     * @return the resort's inventory for the player
+     */
+    private ResortInventory getResortInventoryFromDatabase(UUID uuid, Resort resort) {
+        Dashboard dashboard = Launcher.getDashboard();
+        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new ResortInventory();
+        }
+        ResortInventory inv = null;
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=? AND resort=?");
+            sql.setString(1, uuid.toString());
+            sql.setInt(2, resort.getId());
+            ResultSet result = sql.executeQuery();
+            if (!result.next()) {
+                result.close();
+                sql.close();
+                return new ResortInventory();
+            }
+            int id = result.getInt("id");
+            String backpack = result.getString("pack");
+            String locker = result.getString("locker");
+            String hotbar = result.getString("hotbar");
+            inv = new ResortInventory(resort, backpack, generateHash(backpack), "",
+                    result.getInt("packsize"), locker, generateHash(locker), "",
+                    result.getInt("lockersize"), hotbar, generateHash(hotbar), "");
+            result.close();
+            sql.close();
+        } catch (SQLException e) {
+            ErrorUtil.logError("Error in InventoryUtil method getResortInventoryFromDatabase", e);
+        }
+        return inv;
     }
 
     /**
@@ -323,8 +435,13 @@ public class InventoryUtil {
                     values.append(", ");
                 }
             }
-            try (Connection connection = Launcher.getDashboard().getSqlUtil().getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?");
+            Optional<Connection> connection = Launcher.getDashboard().getSqlUtil().getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement sql = connection.get().prepareStatement("UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?");
                 int i = 1;
                 for (String s : valueMap.values()) {
                     sql.setString(i, s);
@@ -335,7 +452,7 @@ public class InventoryUtil {
                 sql.execute();
                 sql.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("Error in InventoryUtil method updateData", e);
             }
         }
     }

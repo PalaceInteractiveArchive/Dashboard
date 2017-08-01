@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,8 +27,13 @@ public class ModerationUtil {
                 if (dashboard.isTestNetwork()) {
                     return;
                 }
-                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                    PreparedStatement bans = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE active=1 AND permanent=0 AND `release`<=NOW();");
+                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+                if (!connection.isPresent()) {
+                    ErrorUtil.logError("Unable to connect to mysql");
+                    return;
+                }
+                try {
+                    PreparedStatement bans = connection.get().prepareStatement("UPDATE banned_players SET active=0 WHERE active=1 AND permanent=0 AND `release`<=NOW();");
                     int banCount = bans.executeUpdate();
                     bans.close();
                     bans.close();
@@ -36,7 +42,7 @@ public class ModerationUtil {
                                 (banCount == 1 ? " ban that expired was removed" : " bans that expired were removed"));
                     }
 
-                    PreparedStatement mutes = connection.prepareStatement("UPDATE muted_players SET active=0 WHERE active=1 AND `release`<=NOW();");
+                    PreparedStatement mutes = connection.get().prepareStatement("UPDATE muted_players SET active=0 WHERE active=1 AND `release`<=NOW();");
                     int muteCount = mutes.executeUpdate();
                     mutes.close();
                     if (muteCount != 0) {

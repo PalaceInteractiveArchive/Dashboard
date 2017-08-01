@@ -666,7 +666,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
                     Player player = dashboard.getPlayer(packet.getUuid());
                     if (player == null) return;
-                    if (!packet.getBackpackHash().equals("")) {
+                    if (!packet.isEmpty()) {
                         dashboard.getInventoryUtil().cacheInventory(player.getUuid(), packet);
                     }
 

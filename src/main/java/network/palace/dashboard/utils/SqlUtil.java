@@ -63,9 +63,14 @@ public class SqlUtil {
         dashboard.setActivityUtil(new ActivityUtil(connectionPool));
     }
 
-    public Connection getConnection() throws SQLException {
-        return connectionPool.getConnection();
+    public Optional<Connection> getConnection() {
+        try {
+            return Optional.of(connectionPool.getConnection());
+        } catch (SQLException e) {
+            return Optional.empty();
+        }
     }
+
 
     public void stop() {
         connectionPool.shutdown();
@@ -94,16 +99,23 @@ public class SqlUtil {
         });
 
         dashboard.getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement sql = connection.get().prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
                 sql.setString(1, player.getUniqueId().toString());
                 ResultSet result = sql.executeQuery();
                 if (!result.next()) {
-                    newPlayer(player, connection);
+                    newPlayer(player, connection.get());
                     result.close();
                     sql.close();
                     return;
                 }
+                long ot = result.getLong("onlinetime");
+                player.setOnlineTime(ot == 0 ? 1 : ot);
                 Rank rank = Rank.fromString(result.getString("rank"));
                 if (rank.getRankId() != Rank.SETTLER.getRankId()) {
                     PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
@@ -120,7 +132,6 @@ public class SqlUtil {
                 player.setRank(rank);
                 player.setToggled(result.getInt("toggled") == 1);
                 player.setMentions(result.getInt("mentions") == 1);
-                player.setOnlineTime(result.getLong("onlinetime"));
                 player.setNewGuest(result.getInt("tutorial") != 1);
                 dashboard.addPlayer(player);
                 dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: SqlUtil.login");
@@ -131,7 +142,7 @@ public class SqlUtil {
                 result.close();
                 sql.close();
                 if (needsUpdate)
-                    update(player, connection, !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
+                    update(player, connection.get(), !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
@@ -140,7 +151,7 @@ public class SqlUtil {
                             tp.sendMessage(msg);
                         }
                     }
-                    staffClock(player.getUniqueId(), true, connection);
+                    staffClock(player.getUniqueId(), true, connection.get());
                     if (rank.getRankId() >= Rank.SQUIRE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
                         player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
                     }
@@ -153,23 +164,7 @@ public class SqlUtil {
                 if (friendList == null) return;
                 if (!friendList.isEmpty()) {
                     String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
-                    if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
-                        for (Map.Entry<UUID, String> entry : friendList.entrySet()) {
-                            Player tp = dashboard.getPlayer(entry.getKey());
-                            if (tp != null) {
-                                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-                                    tp.sendMessage(joinMessage);
-                                }
-                            }
-                        }
-                    } else {
-                        for (Map.Entry<UUID, String> entry : friendList.entrySet()) {
-                            Player tp = dashboard.getPlayer(entry.getKey());
-                            if (tp != null) {
-                                tp.sendMessage(joinMessage);
-                            }
-                        }
-                    }
+                    dashboard.getFriendUtil().friendMessage(player, friendList, joinMessage);
                 }
                 Mute mute = getMute(player.getUniqueId(), player.getUsername());
                 player.setMute(mute);
@@ -229,8 +224,13 @@ public class SqlUtil {
 
     public void updateStaffIP(Player player) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET ipAddress=? WHERE uuid=?");
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement sql = connection.get().prepareStatement("UPDATE player_data SET ipAddress=? WHERE uuid=?");
                 sql.setString(1, player.getAddress());
                 sql.setString(2, player.getUniqueId().toString());
                 sql.execute();
@@ -242,18 +242,24 @@ public class SqlUtil {
     }
 
     public void silentJoin(final Player player) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT toggled,mentions,onlinetime FROM player_data WHERE uuid=?");
-            sql.setString(1, player.getUniqueId().toString());
-            ResultSet result = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql!");
+            return;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT toggled,mentions,onlinetime FROM player_data WHERE uuid=?");
+            statement.setString(1, player.getUniqueId().toString());
+            ResultSet result = statement.executeQuery();
             if (!result.next()) {
                 return;
             }
             player.setToggled(result.getInt("toggled") == 1);
             player.setMentions(result.getInt("mentions") == 1);
-            player.setOnlineTime(result.getLong("onlinetime"));
+            long ot = result.getLong("onlinetime");
+            player.setOnlineTime(ot == 0 ? 1 : ot);
             result.close();
-            sql.close();
+            statement.close();
             HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
             HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
             player.setFriends(friends);
@@ -268,18 +274,24 @@ public class SqlUtil {
     public void logout(final Player player) {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET server=?,lastseen=?,onlinetime = onlinetime+? WHERE uuid=?");
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql!");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("UPDATE player_data SET server=?,lastseen=?,onlinetime = onlinetime+? WHERE uuid=?");
                 if (player.getServer() != null) {
-                    sql.setString(1, player.getServer());
+                    statement.setString(1, player.getServer());
                 } else {
-                    sql.setString(1, "Unknown");
+                    statement.setString(1, "Unknown");
                 }
-                sql.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-                sql.setInt(3, (int) ((System.currentTimeMillis() / 1000) - (player.getLoginTime() / 1000)));
-                sql.setString(4, player.getUniqueId().toString());
-                sql.execute();
-                sql.close();
+                statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                statement.setInt(3, (int) ((System.currentTimeMillis() / 1000) - (player.getLoginTime() / 1000)));
+                statement.setString(4, player.getUniqueId().toString());
+                statement.execute();
+                statement.close();
+
                 Rank rank = player.getRank();
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
@@ -289,28 +301,12 @@ public class SqlUtil {
                             tp.sendMessage(msg);
                         }
                     }
-                    staffClock(player.getUniqueId(), false, connection);
+                    staffClock(player.getUniqueId(), false, connection.get());
                 }
                 HashMap<UUID, String> flist = player.getFriends();
                 if (!flist.isEmpty()) {
-                    String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has left.";
-                    if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
-                        for (Map.Entry<UUID, String> entry : flist.entrySet()) {
-                            Player tp = dashboard.getPlayer(entry.getKey());
-                            if (tp != null) {
-                                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-                                    tp.sendMessage(joinMessage);
-                                }
-                            }
-                        }
-                    } else {
-                        for (Map.Entry<UUID, String> entry : flist.entrySet()) {
-                            Player tp = dashboard.getPlayer(entry.getKey());
-                            if (tp != null) {
-                                tp.sendMessage(joinMessage);
-                            }
-                        }
-                    }
+                    String msg = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has left.";
+                    dashboard.getFriendUtil().friendMessage(player, flist, msg);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -319,44 +315,59 @@ public class SqlUtil {
     }
 
     public UUID uuidFromUsername(String username) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT uuid FROM player_data WHERE username=?");
-            sql.setString(1, username);
-            ResultSet result = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return UUID.randomUUID();
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT uuid FROM player_data WHERE username=?");
+            statement.setString(1, username);
+            ResultSet result = statement.executeQuery();
             if (!result.next()) {
                 result.close();
-                sql.close();
+                statement.close();
+                connection.get().close();
                 return null;
             }
             String uuid = result.getString("uuid");
-            sql.close();
+            connection.get().close();
+            statement.close();
             result.close();
             return UUID.fromString(uuid);
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error uuid from username method", e);
             return null;
         }
     }
 
     public String usernameFromUUID(UUID uuid) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT username FROM player_data WHERE uuid=?");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return "";
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT username FROM player_data WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
             if (!result.next()) {
                 result.close();
                 sql.close();
-                return "unknown";
+                connection.get().close();
+                return "";
             }
             String username = result.getString("username");
             sql.close();
             result.close();
+            connection.get().close();
             return username;
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            ErrorUtil.logError("SQL Error username from uuid method", e);
+            return "";
         }
     }
+
 
     public HashMap<UUID, String> getFriendList(UUID uuid) {
         return getList(uuid, 1);
@@ -373,10 +384,15 @@ public class SqlUtil {
         if (uuid == null) {
             return map;
         }
-        try (Connection connection = getConnection()) {
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new HashMap<>();
+        }
+        try {
             switch (status) {
                 case 0: {
-                    PreparedStatement sql = connection.prepareStatement("SELECT sender FROM friends WHERE receiver=? AND status=0");
+                    PreparedStatement sql = connection.get().prepareStatement("SELECT sender FROM friends WHERE receiver=? AND status=0");
                     sql.setString(1, uuid.toString());
                     ResultSet result = sql.executeQuery();
                     while (result.next()) {
@@ -393,7 +409,7 @@ public class SqlUtil {
                     break;
                 }
                 case 1: {
-                    PreparedStatement sql = connection.prepareStatement("SELECT sender,receiver FROM friends WHERE (sender=? OR receiver=?) AND status=1");
+                    PreparedStatement sql = connection.get().prepareStatement("SELECT sender,receiver FROM friends WHERE (sender=? OR receiver=?) AND status=1");
                     sql.setString(1, uuid.toString());
                     sql.setString(2, uuid.toString());
                     ResultSet result = sql.executeQuery();
@@ -425,7 +441,7 @@ public class SqlUtil {
                     query.append("? or uuid=");
                 }
             }
-            PreparedStatement sql2 = connection.prepareStatement(query.toString());
+            PreparedStatement sql2 = connection.get().prepareStatement(query.toString());
             for (int i = 1; i < (uuids.size() + 1); i++) {
                 sql2.setString(i, uuids.get(i - 1).toString());
             }
@@ -446,8 +462,13 @@ public class SqlUtil {
 
     public List<String> getNamesFromIP(String address) {
         List<String> list = new ArrayList<>();
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT username FROM player_data WHERE ipAddress=?");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new ArrayList<>();
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT username FROM player_data WHERE ipAddress=?");
             sql.setString(1, address);
             ResultSet result = sql.executeQuery();
             while (result.next()) {
@@ -463,12 +484,17 @@ public class SqlUtil {
 
     public HashMap<Rank, List<UUID>> getPlayersByRanks(Rank... ranks) {
         HashMap<Rank, List<UUID>> map = new HashMap<>();
-        try (Connection connection = getConnection()) {
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new HashMap<>();
+        }
+        try {
             StringBuilder q = new StringBuilder("SELECT uuid,rank FROM player_data WHERE rank=?");
             for (int i = 1; i < ranks.length; i++) {
                 q.append(" OR rank=?");
             }
-            PreparedStatement sql = connection.prepareStatement(q.toString());
+            PreparedStatement sql = connection.get().prepareStatement(q.toString());
             for (int i = 1; i <= ranks.length; i++) {
                 sql.setString(i, ranks[i - 1].getSqlName());
             }
@@ -502,11 +528,16 @@ public class SqlUtil {
 
     public void completeTutorial(final UUID uuid) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET tutorial=1 WHERE uuid=?");
-                sql.setString(1, uuid.toString());
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("UPDATE player_data SET tutorial=1 WHERE uuid=?");
+                statement.setString(1, uuid.toString());
+                statement.execute();
+                statement.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -518,14 +549,20 @@ public class SqlUtil {
      */
     public void banPlayer(final Ban ban) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_players (uuid,reason,permanent,`release`,source) VALUES (?,?,?,?,?)");
-                sql.setString(1, ban.getUniqueId().toString());
-                sql.setString(2, ban.getReason());
-                sql.setInt(3, ban.isPermanent() ? 1 : 0);
-                sql.setTimestamp(4, new Timestamp(new Date(ban.getRelease()).getTime()));
-                sql.setString(5, ban.getSource());
-                sql.execute();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("INSERT INTO banned_players (uuid,reason,permanent,`release`,source) VALUES (?,?,?,?,?)");
+                statement.setString(1, ban.getUniqueId().toString());
+                statement.setString(2, ban.getReason());
+                statement.setInt(3, ban.isPermanent() ? 1 : 0);
+                statement.setTimestamp(4, new Timestamp(new Date(ban.getRelease()).getTime()));
+                statement.setString(5, ban.getSource());
+                statement.execute();
+                connection.get().close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -534,14 +571,20 @@ public class SqlUtil {
 
     public void banPlayer(final UUID uuid, final String reason, final boolean permanent, final Date date, final String source) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_players (uuid,reason,permanent,`release`,source) VALUES (?,?,?,?,?)");
-                sql.setString(1, uuid.toString());
-                sql.setString(2, reason);
-                sql.setInt(3, permanent ? 1 : 0);
-                sql.setTimestamp(4, new Timestamp(date.getTime()));
-                sql.setString(5, source);
-                sql.execute();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("INSERT INTO banned_players (uuid,reason,permanent,`release`,source) VALUES (?,?,?,?,?)");
+                statement.setString(1, uuid.toString());
+                statement.setString(2, reason);
+                statement.setInt(3, permanent ? 1 : 0);
+                statement.setTimestamp(4, new Timestamp(date.getTime()));
+                statement.setString(5, source);
+                statement.execute();
+                connection.get().close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -549,10 +592,15 @@ public class SqlUtil {
     }
 
     public boolean isBannedPlayer(UUID uuid) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT active FROM banned_players WHERE uuid=?");
-            sql.setString(1, uuid.toString());
-            ResultSet results = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return false;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT active FROM banned_players WHERE uuid=?");
+            statement.setString(1, uuid.toString());
+            ResultSet results = statement.executeQuery();
             boolean banned = false;
             while (results.next()) {
                 if (results.getInt("active") == 1) {
@@ -560,49 +608,67 @@ public class SqlUtil {
                     break;
                 }
             }
-            sql.close();
+            statement.close();
             results.close();
+            connection.get().close();
             return banned;
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error is banned player method", e);
             return false;
         }
     }
 
     public void banIP(final String ip, final String reason, final String source) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_ips VALUES(0,?,?,?,1)");
-                sql.setString(1, ip);
-                sql.setString(2, reason);
-                sql.setString(3, source);
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("INSERT INTO banned_ips VALUES(0,?,?,?,1)");
+                statement.setString(1, ip);
+                statement.setString(2, reason);
+                statement.setString(3, source);
+                statement.execute();
+                statement.close();
+                connection.get().close();
             } catch (Exception e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error ban ip method", e);
             }
         });
     }
 
     public void banProvider(final ProviderBan ban) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO banned_providers VALUES (0,?,?)");
-                sql.setString(1, ban.getProvider());
-                sql.setString(2, ban.getSource());
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("INSERT INTO banned_providers VALUES (0,?,?)");
+                statement.setString(1, ban.getProvider());
+                statement.setString(2, ban.getSource());
+                statement.execute();
+                statement.close();
+                connection.get().close();
             } catch (Exception e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error ban provider method", e);
             }
         });
     }
 
     public Ban getBan(UUID uuid, String name) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT permanent,`release`,reason,source FROM banned_players WHERE uuid=? AND active=1;");
-            sql.setString(1, uuid.toString());
-            ResultSet result = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return null;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT permanent,`release`,reason,source FROM banned_players WHERE uuid=? AND active=1;");
+            statement.setString(1, uuid.toString());
+            ResultSet result = statement.executeQuery();
             Ban ban;
             if (!result.next()) {
                 return null;
@@ -610,36 +676,48 @@ public class SqlUtil {
             ban = new Ban(uuid, name, result.getInt("permanent") == 1, result.getTimestamp("release").getTime(),
                     result.getString("reason"), result.getString("source"));
             result.close();
-            sql.close();
+            statement.close();
+            connection.get().close();
             return ban;
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error get ban method", e);
             return null;
         }
     }
 
     public AddressBan getAddressBan(String address) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT ipAddress,reason,source FROM banned_ips WHERE ipAddress=? AND active=1;");
-            sql.setString(1, address);
-            ResultSet result = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return null;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT ipAddress,reason,source FROM banned_ips WHERE ipAddress=? AND active=1;");
+            statement.setString(1, address);
+            ResultSet result = statement.executeQuery();
             AddressBan ban;
             if (!result.next()) {
                 return null;
             }
             ban = new AddressBan(result.getString("ipAddress"), result.getString("reason"), result.getString("source"));
             result.close();
-            sql.close();
+            statement.close();
+            connection.get().close();
             return ban;
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error get address ban method", e);
             return null;
         }
     }
 
     public ProviderBan getProviderBan(String provider) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT provider,source FROM banned_providers WHERE provider=? AND active=1;");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return null;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT provider,source FROM banned_providers WHERE provider=? AND active=1;");
             sql.setString(1, provider);
             ResultSet result = sql.executeQuery();
             ProviderBan ban;
@@ -649,64 +727,89 @@ public class SqlUtil {
             ban = new ProviderBan(result.getString("provider"), result.getString("source"));
             result.close();
             sql.close();
+            connection.get().close();
             return ban;
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error get provider ban method", e);
             return null;
         }
     }
 
     public List<String> getBannedProviders() {
         List<String> list = new ArrayList<>();
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT provider FROM banned_providers WHERE active=1");
-            ResultSet result = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return new ArrayList<>();
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT provider FROM banned_providers WHERE active=1");
+            ResultSet result = statement.executeQuery();
             while (result.next()) {
                 list.add(result.getString("provider"));
             }
             result.close();
-            sql.close();
+            statement.close();
+            connection.get().close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error get banned providers method", e);
         }
         return list;
     }
 
     public void unbanPlayer(final UUID uuid) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE banned_players SET active=0 WHERE uuid=?");
-                sql.setString(1, uuid.toString());
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("UPDATE banned_players SET active=0 WHERE uuid=?");
+                statement.setString(1, uuid.toString());
+                statement.execute();
+                statement.close();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error unban player method", e);
             }
         });
     }
 
     public void unbanIP(final String address) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE banned_ips SET active=0 WHERE ipAddress=?");
-                sql.setString(1, address);
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("UPDATE banned_ips SET active=0 WHERE ipAddress=?");
+                statement.setString(1, address);
+                statement.execute();
+                statement.close();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error unban ip method", e);
             }
         });
     }
 
     public void unbanProvider(final String provider) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE banned_providers SET active=0 WHERE provider=?");
-                sql.setString(1, provider);
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("UPDATE banned_providers SET active=0 WHERE provider=?");
+                statement.setString(1, provider);
+                statement.execute();
+                statement.close();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error unban provider method", e);
             }
         });
     }
@@ -716,10 +819,15 @@ public class SqlUtil {
      */
 
     public Mute getMute(UUID uuid, String username) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
-            sql.setString(1, uuid.toString());
-            ResultSet result = sql.executeQuery();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return null;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
+            statement.setString(1, uuid.toString());
+            ResultSet result = statement.executeQuery();
             Mute mute = null;
             while (result.next()) {
                 if (result.getInt("active") == 1) {
@@ -729,38 +837,50 @@ public class SqlUtil {
             }
             if (mute == null) {
                 result.close();
-                sql.close();
+                statement.close();
                 return new Mute(uuid, username, false, System.currentTimeMillis(), "", "");
             }
             result.close();
-            sql.close();
+            statement.close();
+            connection.get().close();
             return mute;
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error get mute method", e);
             return null;
         }
     }
 
     public void mutePlayer(Mute mute) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO muted_players (uuid,`release`,source,reason) VALUES (?,?,?,?)");
-            sql.setString(1, mute.getUniqueId().toString());
-            sql.setTimestamp(2, new Timestamp(mute.getRelease()));
-            sql.setString(3, mute.getSource());
-            sql.setString(4, mute.getReason());
-            sql.execute();
-            sql.close();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("INSERT INTO muted_players (uuid,`release`,source,reason) VALUES (?,?,?,?)");
+            statement.setString(1, mute.getUniqueId().toString());
+            statement.setTimestamp(2, new Timestamp(mute.getRelease()));
+            statement.setString(3, mute.getSource());
+            statement.setString(4, mute.getReason());
+            statement.execute();
+            statement.close();
+            connection.get().close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error mute player method", e);
         }
     }
 
     public boolean isMuted(UUID uuid) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT active FROM muted_players WHERE uuid=? AND active=1");
-            sql.setString(1, uuid.toString());
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return false;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("SELECT active FROM muted_players WHERE uuid=? AND active=1");
+            statement.setString(1, uuid.toString());
             boolean muted = false;
-            ResultSet result = sql.executeQuery();
+            ResultSet result = statement.executeQuery();
             while (result.next()) {
                 if (result.getInt("active") == 1) {
                     muted = true;
@@ -768,22 +888,29 @@ public class SqlUtil {
                 }
             }
             result.close();
-            sql.close();
+            statement.close();
+            connection.get().close();
             return muted;
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error is muted method", e);
         }
         return false;
     }
 
     public void unmutePlayer(final UUID uuid) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE muted_players SET active=0 WHERE uuid=?");
-                sql.setString(1, uuid.toString());
-                sql.execute();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("UPDATE muted_players SET active=0 WHERE uuid=?");
+                statement.setString(1, uuid.toString());
+                statement.execute();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error unmute player method", e);
             }
         });
     }
@@ -794,15 +921,21 @@ public class SqlUtil {
 
     public void logKick(final Kick kick) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO kicks (uuid, reason, source) VALUES (?,?,?)");
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement sql = connection.get().prepareStatement("INSERT INTO kicks (uuid, reason, source) VALUES (?,?,?)");
                 sql.setString(1, kick.getUniqueId().toString());
                 sql.setString(2, kick.getReason());
                 sql.setString(3, kick.getSource());
                 sql.execute();
                 sql.close();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error log kick method", e);
             }
         });
     }
@@ -814,18 +947,22 @@ public class SqlUtil {
     public void insertDiscord(final DiscordCacheInfo cacheInfo) {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
-            dashboard.getLogger().info("discord insert");
-            try (Connection connection = getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("INSERT INTO discord (minecraftUsername, minecraftUUID, discordUsername) VALUES (?,?,?)");
-                sql.setString(1, cacheInfo.getMinecraft().getUsername());
-                sql.setString(2, cacheInfo.getMinecraft().getUuid());
-                sql.setString(3, cacheInfo.getDiscord().getUsername());
-                dashboard.getLogger().info("insert");
-                sql.execute();
-                sql.close();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("INSERT INTO discord (minecraftUsername, minecraftUUID, discordUsername) VALUES (?,?,?)");
+                statement.setString(1, cacheInfo.getMinecraft().getUsername());
+                statement.setString(2, cacheInfo.getMinecraft().getUuid());
+                statement.setString(3, cacheInfo.getDiscord().getUsername());
+                statement.execute();
+                statement.close();
+                connection.get().close();
                 SocketConnection.sendNewlink(cacheInfo);
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error insert discord method", e);
             }
         });
     }
@@ -834,45 +971,19 @@ public class SqlUtil {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
             SocketConnection.sendRemove(cacheInfo);
-            try (Connection connection = getConnection()) {
-                PreparedStatement deleteUUID = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
-                deleteUUID.setString(1, cacheInfo.getMinecraft().getUuid());
-                ResultSet result = deleteUUID.executeQuery();
-                DiscordDatabaseInfo databaseInfo;
-                if (!result.next()) {
-                    result.close();
-                    deleteUUID.close();
-                } else {
-                    boolean failed = false;
-                    if (result.getString("minecraftUsername") == null) failed = true;
-                    if (result.getString("minecraftUUID") == null) failed = true;
-                    if (result.getString("discordUsername") == null) failed = true;
-                    if (failed) {
-                        result.close();
-                        deleteUUID.close();
-                    } else {
-                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                        result.close();
-                        deleteUUID.close();
-                        if (databaseInfo != null) {
-                            removeDiscord(databaseInfo);
-                            DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                                    new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
-                            SocketConnection.sendRemove(info);
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
             }
-            try (Connection connection = getConnection()) {
-                PreparedStatement deleteUsername = connection.prepareStatement("SELECT * FROM discord WHERE discordUsername=?");
-                deleteUsername.setString(1, cacheInfo.getDiscord().getUsername());
-                ResultSet result = deleteUsername.executeQuery();
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
+                statement.setString(1, cacheInfo.getMinecraft().getUuid());
+                ResultSet result = statement.executeQuery();
                 DiscordDatabaseInfo databaseInfo;
                 if (!result.next()) {
                     result.close();
-                    deleteUsername.close();
+                    statement.close();
                 } else {
                     boolean failed = false;
                     if (result.getString("minecraftUsername") == null) failed = true;
@@ -880,21 +991,55 @@ public class SqlUtil {
                     if (result.getString("discordUsername") == null) failed = true;
                     if (failed) {
                         result.close();
-                        deleteUsername.close();
+                        statement.close();
+                        connection.get().close();
                     } else {
                         databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
                         result.close();
-                        deleteUsername.close();
-                        if (databaseInfo != null) {
-                            removeDiscord(databaseInfo);
-                            DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                                    new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
-                            SocketConnection.sendRemove(info);
-                        }
+                        statement.close();
+                        connection.get().close();
+                        removeDiscord(databaseInfo);
+                        DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                        SocketConnection.sendRemove(info);
                     }
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error select and remove discord method 1", e);
+            }
+            try {
+                PreparedStatement statement = connection.get().prepareStatement("SELECT * FROM discord WHERE discordUsername=?");
+                statement.setString(1, cacheInfo.getDiscord().getUsername());
+                ResultSet result = statement.executeQuery();
+                DiscordDatabaseInfo databaseInfo;
+                if (!result.next()) {
+                    result.close();
+                    statement.close();
+                } else {
+                    boolean failed = false;
+                    if (result.getString("minecraftUsername") == null) failed = true;
+                    if (result.getString("minecraftUUID") == null) failed = true;
+                    if (result.getString("discordUsername") == null) failed = true;
+                    if (failed) {
+                        result.close();
+                        statement.close();
+                    } else {
+                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+                        result.close();
+                        statement.close();
+                        removeDiscord(databaseInfo);
+                        DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+                        SocketConnection.sendRemove(info);
+                    }
+                }
+            } catch (SQLException e) {
+                ErrorUtil.logError("SQL Error select and remove discord method 2", e);
+            }
+            try {
+                connection.get().close();
+            } catch (SQLException e) {
+                ErrorUtil.logError("SQL Error closing discord method 3 connection", e);
             }
             insertDiscord(cacheInfo);
         });
@@ -902,73 +1047,100 @@ public class SqlUtil {
 
     public void removeDiscord(final DiscordDatabaseInfo databaseInfo) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            try (Connection connection = getConnection()) {
-                PreparedStatement deleteUUID = connection.prepareStatement("DELETE FROM discord WHERE minecraftUUID=?");
+            Optional<Connection> connection = getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement deleteUUID = connection.get().prepareStatement("DELETE FROM discord WHERE minecraftUUID=?");
                 deleteUUID.setString(1, databaseInfo.getMinecraftUUID());
                 deleteUUID.execute();
                 deleteUUID.close();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error remove discord method 1", e);
             }
-            try (Connection connection = getConnection()) {
-                PreparedStatement deleteUsername = connection.prepareStatement("DELETE FROM discord WHERE discordUsername=?");
+            try {
+                PreparedStatement deleteUsername = connection.get().prepareStatement("DELETE FROM discord WHERE discordUsername=?");
                 deleteUsername.setString(1, databaseInfo.getDiscordUsername());
                 deleteUsername.execute();
                 deleteUsername.close();
+                connection.get().close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                ErrorUtil.logError("SQL Error remove discord method 2", e);
             }
         });
     }
 
     public DiscordCacheInfo getUserFromPlayer(final Player player) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement useruuid = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return null;
+        }
+        try {
+            PreparedStatement useruuid = connection.get().prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
             useruuid.setString(1, player.getUniqueId().toString());
             ResultSet result = useruuid.executeQuery();
             if (!result.next()) {
                 result.close();
                 useruuid.close();
+                connection.get().close();
             } else {
                 if (result.getString("minecraftUsername") != null && result.getString("minecraftUUID") != null && result.getString("discordUsername") != null) {
                     DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(player.getUsername(), player.getUniqueId().toString(), ""),
                             new DiscordCacheInfo.Discord(result.getString("discordUsername")));
                     result.close();
                     useruuid.close();
+                    connection.get().close();
                     return info;
                 }
                 result.close();
                 useruuid.close();
+                connection.get().close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error get user from player method", e);
         }
         return null;
     }
 
     public void updateProviderData(UUID uuid, IPUtil.ProviderData data) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET isp=?,country=?,region=?,regionName=?,timezone=? WHERE uuid=?");
-            sql.setString(1, data.getIsp());
-            sql.setString(2, data.getCountry());
-            sql.setString(3, data.getRegion());
-            sql.setString(4, data.getRegionName());
-            sql.setString(5, data.getTimezone());
-            sql.setString(6, uuid.toString());
-            sql.execute();
-            sql.close();
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement statement = connection.get().prepareStatement("UPDATE player_data SET isp=?,country=?,region=?,regionName=?,timezone=? WHERE uuid=?");
+            statement.setString(1, data.getIsp());
+            statement.setString(2, data.getCountry());
+            statement.setString(3, data.getRegion());
+            statement.setString(4, data.getRegionName());
+            statement.setString(5, data.getTimezone());
+            statement.setString(6, uuid.toString());
+            statement.execute();
+            statement.close();
+            connection.get().close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error update provider data method", e);
         }
     }
+
 
     /**
      * Password Methods
      */
 
     public boolean verifyPassword(UUID uuid, String pass) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT password FROM staffpasswords WHERE uuid=?");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return false;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT password FROM staffpasswords WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
             if (!result.next()) {
@@ -981,14 +1153,19 @@ public class SqlUtil {
             sql.close();
             return Launcher.getDashboard().getPasswordUtil().validPassword(pass, hashed);
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error verify password method", e);
         }
         return false;
     }
 
     public boolean hasPassword(UUID uuid) {
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT password FROM staffpasswords WHERE uuid=?");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return false;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT password FROM staffpasswords WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
             boolean has = result.next();
@@ -996,7 +1173,7 @@ public class SqlUtil {
             sql.close();
             return has;
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error has password method", e);
         }
         return false;
     }
@@ -1005,14 +1182,19 @@ public class SqlUtil {
         Dashboard dashboard = Launcher.getDashboard();
         String salt = dashboard.getPasswordUtil().getNewSalt();
         String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("UPDATE staffpasswords SET password=? WHERE uuid=?");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("UPDATE staffpasswords SET password=? WHERE uuid=?");
             sql.setString(1, hashed);
             sql.setString(2, uuid.toString());
             sql.execute();
             sql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error change password method", e);
         }
     }
 
@@ -1020,14 +1202,19 @@ public class SqlUtil {
         Dashboard dashboard = Launcher.getDashboard();
         String salt = dashboard.getPasswordUtil().getNewSalt();
         String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
-        try (Connection connection = getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO staffpasswords (uuid,password) VALUES (?,?)");
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO staffpasswords (uuid,password) VALUES (?,?)");
             sql.setString(1, uuid.toString());
             sql.setString(2, hashed);
             sql.execute();
             sql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorUtil.logError("SQL Error set password method", e);
         }
     }
 }

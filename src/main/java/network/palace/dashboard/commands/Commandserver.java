@@ -8,6 +8,7 @@ import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.dashboard.PacketRemoveServer;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
+import network.palace.dashboard.utils.ErrorUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,8 +49,13 @@ public class Commandserver extends MagicCommand {
             Server s = new Server(name, address, port, park, 0, type);
             dashboard.getServerUtil().addServer(s);
             dashboard.getSchedulerManager().runAsync(() -> {
-                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                    PreparedStatement sql = connection.prepareStatement("INSERT INTO " + (dashboard.isTestNetwork() ?
+                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+                if (!connection.isPresent()) {
+                    ErrorUtil.logError("Unable to connect to mysql");
+                    return;
+                }
+                try {
+                    PreparedStatement sql = connection.get().prepareStatement("INSERT INTO " + (dashboard.isTestNetwork() ?
                             "playground" : "") + "servers (name,address,port,park,type) VALUES (?,?,?,?,?)");
                     sql.setString(1, name);
                     sql.setString(2, address);
@@ -91,9 +97,13 @@ public class Commandserver extends MagicCommand {
                         cancel();
                         dashboard.getServerUtil().removeServer(name);
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                                //TODO Change this back to the regular table
-                                PreparedStatement sql = connection.prepareStatement("DELETE FROM " +
+                            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+                            if (!connection.isPresent()) {
+                                ErrorUtil.logError("Unable to connect to mysql");
+                                return;
+                            }
+                            try {
+                                PreparedStatement sql = connection.get().prepareStatement("DELETE FROM " +
                                         (dashboard.isTestNetwork() ? "playground" : "") + "servers WHERE name=?");
                                 sql.setString(1, s.getName());
                                 sql.execute();

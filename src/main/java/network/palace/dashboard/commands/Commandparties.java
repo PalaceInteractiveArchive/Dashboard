@@ -25,17 +25,17 @@ public class Commandparties extends MagicCommand {
                 return;
             }
             player.sendMessage(ChatColor.YELLOW + "Server Parties:");
-            String msg = null;
+            StringBuilder msg = null;
             for (Party p : parties) {
                 String leader = p.getLeader().getUsername();
                 if (msg != null) {
-                    msg += "\n";
+                    msg.append("\n");
                 } else {
-                    msg = "";
+                    msg = new StringBuilder();
                 }
-                msg += "- " + leader + " " + p.getMembers().size() + " Member" + (p.getMembers().size() > 1 ? "s" : "");
+                msg.append("- ").append(leader).append(" ").append(p.getMembers().size()).append(" Member").append(p.getMembers().size() > 1 ? "s" : "");
             }
-            player.sendMessage(ChatColor.GREEN + msg);
+            player.sendMessage(ChatColor.GREEN + msg.toString());
             player.sendMessage(ChatColor.YELLOW + "/parties info [Party Leader] " + ChatColor.GREEN + "- Display info on that Party");
             return;
         }
@@ -52,15 +52,19 @@ public class Commandparties extends MagicCommand {
         List<UUID> members = p.getMembers();
         List<String> names = new ArrayList<>();
         for (UUID uuid : members) {
-            names.add(dashboard.getPlayer(uuid).getUsername());
+            Player pl = dashboard.getPlayer(uuid);
+            if (pl == null) {
+                continue;
+            }
+            names.add(pl.getUsername());
         }
-        String msg = "Party Leader: " + p.getLeader().getUsername() + "\nParty Members: ";
+        StringBuilder msg = new StringBuilder("Party Leader: " + p.getLeader().getUsername() + "\nParty Members: ");
         for (int i = 0; i < names.size(); i++) {
-            msg += names.get(i);
+            msg.append(names.get(i));
             if (i < (names.size() - 1)) {
-                msg += ", ";
+                msg.append(", ");
             }
         }
-        player.sendMessage(ChatColor.YELLOW + msg);
+        player.sendMessage(ChatColor.YELLOW + msg.toString());
     }
 }

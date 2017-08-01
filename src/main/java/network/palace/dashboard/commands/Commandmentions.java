@@ -5,10 +5,12 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.utils.ErrorUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class Commandmentions extends MagicCommand {
 
@@ -22,8 +24,13 @@ public class Commandmentions extends MagicCommand {
             player.mention();
         }
         dashboard.getSchedulerManager().runAsync(() -> {
-            try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET mentions=? WHERE uuid=?");
+            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
+                PreparedStatement sql = connection.get().prepareStatement("UPDATE player_data SET mentions=? WHERE uuid=?");
                 sql.setInt(1, player.hasMentions() ? 1 : 0);
                 sql.setString(2, player.getUniqueId().toString());
                 sql.execute();

@@ -27,9 +27,9 @@ public class Commandkick extends MagicCommand {
             player.sendMessage(ChatColor.RED + "I can't find that player!");
             return;
         }
-        String r = "";
+        StringBuilder r = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            r += args[i] + " ";
+            r.append(args[i]).append(" ");
         }
         String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
         reason = reason.trim();

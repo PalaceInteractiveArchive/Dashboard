@@ -46,6 +46,10 @@ public class PacketInventoryContent extends BasePacket {
         this.hotbarHash = hotbarHash;
     }
 
+    public boolean isEmpty() {
+        return backpackHash.isEmpty() && lockerHash.isEmpty() && hotbarHash.isEmpty();
+    }
+
     @Override
     public PacketInventoryContent fromJSON(JsonObject obj) {
         this.id = PacketID.Inventory.INVENTORY_CONTENT.getID();

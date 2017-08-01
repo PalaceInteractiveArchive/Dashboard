@@ -60,7 +60,12 @@ public class ChatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
+                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+                if (!connection.isPresent()) {
+                    ErrorUtil.logError("Unable to connect to mysql");
+                    return;
+                }
+                try {
                     if (messages.isEmpty()) {
                         return;
                     }
@@ -86,7 +91,7 @@ public class ChatUtil {
                         }
                     }
                     statement.append(";");
-                    PreparedStatement sql = connection.prepareStatement(statement.toString());
+                    PreparedStatement sql = connection.get().prepareStatement(statement.toString());
                     for (Map.Entry<Integer, String> entry : new HashSet<>(lastList.entrySet())) {
                         sql.setString(entry.getKey(), entry.getValue());
                     }
@@ -219,6 +224,10 @@ public class ChatUtil {
                 }
                 player.chat(msg.toString());
             }
+            return;
+        }
+        if (player.getOnlineTime() == 0) {
+            player.sendMessage(ChatColor.RED + "We're currently loading your chat settings, try chatting again in a few seconds!");
             return;
         }
         if (!enoughTime(player)) {

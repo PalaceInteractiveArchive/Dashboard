@@ -26,17 +26,17 @@ public class Commandkickall extends MagicCommand {
             player.sendMessage(ChatColor.RED + "/kickall [Message]");
             return;
         }
-        String r = "";
+        StringBuilder r = new StringBuilder();
         for (String arg : args) {
-            r += arg + " ";
+            r.append(arg).append(" ");
         }
-        r = ChatColor.translateAlternateColorCodes('&', r.trim());
+        r = new StringBuilder(ChatColor.translateAlternateColorCodes('&', r.toString().trim()));
         player.sendMessage(ChatColor.GREEN + "Disconnecting all players for " + r);
         for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
                 continue;
             }
-            tp.kickPlayer(r);
+            tp.kickPlayer(r.toString());
         }
         new Timer().schedule(new TimerTask() {
             @Override

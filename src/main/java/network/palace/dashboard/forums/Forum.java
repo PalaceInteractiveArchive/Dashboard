@@ -53,6 +53,10 @@ public class Forum {
     }
 
     public void linkAccount(Player player) {
+        if (!Database.isConnected()) {
+            player.sendMessage(ChatColor.RED + "Could not connect to database, please try again later!");
+            return;
+        }
         try {
             String key = addNewKey(player.getUniqueId().toString(), player.getUsername(), player.getRank().getName());
             String link = "https://palace.network/link-minecraft/?key=" + key + "&type=link";

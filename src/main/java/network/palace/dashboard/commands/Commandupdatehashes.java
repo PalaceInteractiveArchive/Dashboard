@@ -9,6 +9,7 @@ import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.utils.ErrorUtil;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -22,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * Created by Marc on 3/26/17.
@@ -36,9 +38,14 @@ public class Commandupdatehashes extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
-            try (Connection connection = dashboard.getSqlUtil().getConnection()) {
+            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try {
                 player.sendMessage(ChatColor.GREEN + "Requesting Resource Pack list from database...");
-                PreparedStatement sql = connection.prepareStatement("SELECT * FROM resource_packs;");
+                PreparedStatement sql = connection.get().prepareStatement("SELECT * FROM resource_packs;");
                 ResultSet result = sql.executeQuery();
                 HashMap<String, ResourcePack> list = new HashMap<>();
                 while (result.next()) {
@@ -101,14 +108,12 @@ public class Commandupdatehashes extends MagicCommand {
                     if (!pack.isUpdated()) {
                         continue;
                     }
-                    try (Connection connection1 = dashboard.getSqlUtil().getConnection()) {
-                        PreparedStatement sql1 = connection1.prepareStatement("UPDATE resource_packs SET hash=? WHERE name=?");
-                        sql1.setString(1, pack.getHash());
-                        sql1.setString(2, pack.getName());
-                        sql1.execute();
-                        sql1.close();
-                        player.sendMessage(ChatColor.YELLOW + "Updated hash for " + pack.getName());
-                    }
+                    PreparedStatement sql1 = connection.get().prepareStatement("UPDATE resource_packs SET hash=? WHERE name=?");
+                    sql1.setString(1, pack.getHash());
+                    sql1.setString(2, pack.getName());
+                    sql1.execute();
+                    sql1.close();
+                    player.sendMessage(ChatColor.YELLOW + "Updated hash for " + pack.getName());
                 }
                 player.sendMessage(ChatColor.GREEN + "Clearing download folder...");
                 for (File file : dir.listFiles()) {

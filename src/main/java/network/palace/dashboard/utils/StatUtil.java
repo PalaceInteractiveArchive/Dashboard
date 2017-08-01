@@ -6,6 +6,7 @@ import network.palace.dashboard.Launcher;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,8 +35,13 @@ public class StatUtil {
 
     private void setValue(int value) {
         Dashboard dashboard = Launcher.getDashboard();
-        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
+        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
                     (System.currentTimeMillis() / 1000) + "','count','" + value + "')");
             sql.execute();
             sql.close();

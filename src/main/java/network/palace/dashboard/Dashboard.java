@@ -135,8 +135,13 @@ public class Dashboard {
 
     public void loadServerTypes() {
         serverTypes.clear();
-        try (Connection connection = sqlUtil.getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT name FROM servertypes");
+        Optional<Connection> connection = getSqlUtil().getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement sql = connection.get().prepareStatement("SELECT name FROM servertypes");
             ResultSet result = sql.executeQuery();
             while (result.next()) {
                 serverTypes.add(result.getString("name"));
@@ -225,7 +230,7 @@ public class Dashboard {
     public void addPlayer(Player player) {
         players.put(player.getUniqueId(), player);
         String server = removeRegisteringPlayer(player.getUniqueId());
-        if (player.getServer().equalsIgnoreCase("unknown")) {
+        if (player.getServer().equalsIgnoreCase("unknown") && server != null) {
             player.setServer(server);
         }
     }

@@ -5,11 +5,13 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketBseenCommand;
 import network.palace.dashboard.utils.DateUtil;
+import network.palace.dashboard.utils.ErrorUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Commandbseen extends MagicCommand {
@@ -52,8 +54,13 @@ public class Commandbseen extends MagicCommand {
                 mute = tp.getMute();
                 server = tp.getServer();
             } else {
-                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                    PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
+                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+                if (!connection.isPresent()) {
+                    ErrorUtil.logError("Unable to connect to mysql");
+                    return;
+                }
+                try {
+                    PreparedStatement sql = connection.get().prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
                     sql.setString(1, uuid.toString());
                     ResultSet result = sql.executeQuery();
                     if (result.next()) {

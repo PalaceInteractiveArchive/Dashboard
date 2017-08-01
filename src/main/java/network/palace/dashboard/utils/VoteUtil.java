@@ -33,10 +33,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Marc on 1/15/17.
@@ -162,8 +159,13 @@ public class VoteUtil {
 
     private void vote(UUID uuid, int serverId) {
         Dashboard dashboard = Launcher.getDashboard();
-        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-            PreparedStatement q = connection.prepareStatement("SELECT vote FROM player_data WHERE uuid=?");
+        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+        if (!connection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return;
+        }
+        try {
+            PreparedStatement q = connection.get().prepareStatement("SELECT vote FROM player_data WHERE uuid=?");
             q.setString(1, uuid.toString());
             ResultSet qres = q.executeQuery();
             if (!qres.next()) {
@@ -182,14 +184,14 @@ public class VoteUtil {
                 }
                 return;
             }
-            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET tokens=tokens+5,vote=?," +
+            PreparedStatement sql = connection.get().prepareStatement("UPDATE player_data SET tokens=tokens+5,vote=?," +
                     "lastvote=? WHERE uuid=?");
             sql.setLong(1, System.currentTimeMillis());
             sql.setInt(2, serverId);
             sql.setString(3, uuid.toString());
             sql.execute();
             sql.close();
-            PreparedStatement log = connection.prepareStatement("INSERT INTO economy_logs (uuid, amount, type, source," +
+            PreparedStatement log = connection.get().prepareStatement("INSERT INTO economy_logs (uuid, amount, type, source," +
                     " server, timestamp) VALUES ('" + uuid.toString() + "', '5', 'add tokens', 'Vote', " +
                     "'Dashboard', '" + System.currentTimeMillis() / 1000L + "')");
             log.execute();

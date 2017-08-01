@@ -51,6 +51,10 @@ public final class Database {
 
     }
 
+    public static boolean isConnected() {
+        return connectionPool != null;
+    }
+
     public static DbStatement query(String query) throws SQLException {
         return (new DbStatement()).query(query);
     }

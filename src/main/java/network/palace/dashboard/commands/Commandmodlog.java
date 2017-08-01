@@ -7,6 +7,7 @@ import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.utils.DateUtil;
+import network.palace.dashboard.utils.ErrorUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +17,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Commandmodlog extends MagicCommand {
@@ -47,13 +49,18 @@ public class Commandmodlog extends MagicCommand {
                 uuid = tp.getUniqueId();
             }
             String action = "";
+            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
+            if (!connection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
             if (args.length > 1) {
                 action = args[1].toLowerCase();
                 switch (action) {
                     case "bans": {
                         List<String> msgs = new ArrayList<>();
-                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                            PreparedStatement sql = connection.prepareStatement("SELECT reason,permanent,`release`,source,active FROM banned_players WHERE uuid=?");
+                        try {
+                            PreparedStatement sql = connection.get().prepareStatement("SELECT reason,permanent,`release`,source,active FROM banned_players WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
                             while (result.next()) {
@@ -79,21 +86,21 @@ public class Commandmodlog extends MagicCommand {
                             player.sendMessage(ChatColor.GREEN + "No bans!");
                             return;
                         }
-                        String message = "";
+                        StringBuilder message = new StringBuilder();
                         for (int i = 0; i < msgs.size(); i++) {
                             String msg = msgs.get(i);
-                            message += msg;
+                            message.append(msg);
                             if (i < (msgs.size() - 1)) {
-                                message += "\n";
+                                message.append("\n");
                             }
                         }
-                        player.sendMessage(message);
+                        player.sendMessage(message.toString());
                         return;
                     }
                     case "mutes": {
                         List<String> msgs = new ArrayList<>();
-                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                            PreparedStatement sql = connection.prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
+                        try {
+                            PreparedStatement sql = connection.get().prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
                             while (result.next()) {
@@ -117,22 +124,22 @@ public class Commandmodlog extends MagicCommand {
                             player.sendMessage(ChatColor.GREEN + "No mutes!");
                             return;
                         }
-                        String message = "";
+                        StringBuilder message = new StringBuilder();
                         for (int i = 0; i < msgs.size(); i++) {
                             String msg = msgs.get(i);
-                            message += msg;
+                            message.append(msg);
                             if (i < (msgs.size() - 1)) {
-                                message += "\n";
+                                message.append("\n");
                             }
                         }
-                        player.sendMessage(message);
+                        player.sendMessage(message.toString());
                         return;
                     }
                     case "kicks": {
                         DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                         List<String> msgs = new ArrayList<>();
-                        try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                            PreparedStatement sql = connection.prepareStatement("SELECT reason,source,time FROM kicks WHERE uuid=?");
+                        try {
+                            PreparedStatement sql = connection.get().prepareStatement("SELECT reason,source,time FROM kicks WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
                             while (result.next()) {
@@ -151,15 +158,15 @@ public class Commandmodlog extends MagicCommand {
                             player.sendMessage(ChatColor.GREEN + "No kicks!");
                             return;
                         }
-                        String message = "";
+                        StringBuilder message = new StringBuilder();
                         for (int i = 0; i < msgs.size(); i++) {
                             String msg = msgs.get(i);
-                            message += msg;
+                            message.append(msg);
                             if (i < (msgs.size() - 1)) {
-                                message += "\n";
+                                message.append("\n");
                             }
                         }
-                        player.sendMessage(message);
+                        player.sendMessage(message.toString());
                         return;
                     }
                 }
@@ -168,22 +175,22 @@ public class Commandmodlog extends MagicCommand {
                 int banCount = 0;
                 int muteCount = 0;
                 int kickCount = 0;
-                try (Connection connection = dashboard.getSqlUtil().getConnection()) {
-                    PreparedStatement bans = connection.prepareStatement("SELECT count(*) FROM banned_players WHERE uuid=?");
+                try {
+                    PreparedStatement bans = connection.get().prepareStatement("SELECT count(*) FROM banned_players WHERE uuid=?");
                     bans.setString(1, uuid.toString());
                     ResultSet bansresult = bans.executeQuery();
                     bansresult.next();
                     banCount = bansresult.getInt("count(*)");
                     bansresult.close();
                     bans.close();
-                    PreparedStatement mutes = connection.prepareStatement("SELECT count(*) FROM muted_players WHERE uuid=?");
+                    PreparedStatement mutes = connection.get().prepareStatement("SELECT count(*) FROM muted_players WHERE uuid=?");
                     mutes.setString(1, uuid.toString());
                     ResultSet mutesresult = mutes.executeQuery();
                     mutesresult.next();
                     muteCount = mutesresult.getInt("count(*)");
                     mutesresult.close();
                     mutes.close();
-                    PreparedStatement kicks = connection.prepareStatement("SELECT count(*) FROM kicks WHERE uuid=?");
+                    PreparedStatement kicks = connection.get().prepareStatement("SELECT count(*) FROM kicks WHERE uuid=?");
                     kicks.setString(1, uuid.toString());
                     ResultSet kicksresult = kicks.executeQuery();
                     kicksresult.next();

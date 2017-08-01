@@ -12,18 +12,27 @@ import network.palace.dashboard.packets.inventory.Resort;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResortInventory {
-    @Getter private Resort resort;
-    @Getter @Setter private String backpackJSON;
-    @Getter @Setter private String backpackHash;
-    @Getter @Setter private String sqlBackpackHash;
+    @Getter @Setter private Resort resort;
+    @Getter @Setter private String backpackJSON = "";
+    @Getter @Setter private String backpackHash = "";
+    @Getter @Setter private String sqlBackpackHash = "";
     @Getter @Setter private int backpackSize;
 
-    @Getter @Setter private String lockerJSON;
-    @Getter @Setter private String lockerHash;
-    @Getter @Setter private String sqlLockerHash;
+    @Getter @Setter private String lockerJSON = "";
+    @Getter @Setter private String lockerHash = "";
+    @Getter @Setter private String sqlLockerHash = "";
     @Getter @Setter private int lockerSize;
 
-    @Getter @Setter private String hotbarJSON;
-    @Getter @Setter private String hotbarHash;
-    @Getter @Setter private String sqlHotbarHash;
+    @Getter @Setter private String hotbarJSON = "";
+    @Getter @Setter private String hotbarHash = "";
+    @Getter @Setter private String sqlHotbarHash = "";
+
+    /**
+     * Check if all JSON entries are empty (meaning no data is here, not even empty inventories)
+     *
+     * @return true if three JSON entries are empty, otherwise false
+     */
+    public boolean isEmpty() {
+        return backpackJSON.isEmpty() && lockerJSON.isEmpty() && hotbarJSON.isEmpty();
+    }
 }

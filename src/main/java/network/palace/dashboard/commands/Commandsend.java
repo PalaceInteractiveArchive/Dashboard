@@ -41,6 +41,8 @@ public class Commandsend extends MagicCommand {
                         dashboard.getServer(name).getCount() + " players)" + ChatColor.GREEN + " to " +
                         ChatColor.YELLOW + server.getName());
                 for (Player tp : dashboard.getOnlinePlayers()) {
+                    if (tp == null)
+                        continue;
                     if (tp.getServer().equals(name)) {
                         dashboard.getServerUtil().sendPlayer(tp, server.getName());
                     }
