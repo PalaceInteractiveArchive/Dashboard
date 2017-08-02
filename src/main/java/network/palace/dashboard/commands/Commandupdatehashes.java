@@ -38,14 +38,14 @@ public class Commandupdatehashes extends MagicCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
-            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-            if (!connection.isPresent()) {
+            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+            if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;
             }
-            try {
+            try (Connection connection = optConnection.get()) {
                 player.sendMessage(ChatColor.GREEN + "Requesting Resource Pack list from database...");
-                PreparedStatement sql = connection.get().prepareStatement("SELECT * FROM resource_packs;");
+                PreparedStatement sql = connection.prepareStatement("SELECT * FROM resource_packs;");
                 ResultSet result = sql.executeQuery();
                 HashMap<String, ResourcePack> list = new HashMap<>();
                 while (result.next()) {
@@ -108,7 +108,7 @@ public class Commandupdatehashes extends MagicCommand {
                     if (!pack.isUpdated()) {
                         continue;
                     }
-                    PreparedStatement sql1 = connection.get().prepareStatement("UPDATE resource_packs SET hash=? WHERE name=?");
+                    PreparedStatement sql1 = connection.prepareStatement("UPDATE resource_packs SET hash=? WHERE name=?");
                     sql1.setString(1, pack.getHash());
                     sql1.setString(2, pack.getName());
                     sql1.execute();

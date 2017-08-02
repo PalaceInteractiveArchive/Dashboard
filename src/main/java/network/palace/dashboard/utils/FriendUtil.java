@@ -81,13 +81,13 @@ public class FriendUtil {
 
     public static void toggleRequests(Player player) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("UPDATE player_data SET toggled=? WHERE uuid=?");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET toggled=? WHERE uuid=?");
             sql.setInt(1, player.hasFriendToggledOff() ? 1 : 0);
             sql.setString(2, player.getUniqueId().toString());
             sql.execute();
@@ -113,15 +113,15 @@ public class FriendUtil {
         Dashboard dashboard = Launcher.getDashboard();
         List<UUID> uuids = new ArrayList<>();
         HashMap<UUID, String> map = new HashMap<>();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return map;
         }
-        try {
+        try (Connection connection = optConnection.get()) {
             switch (status) {
                 case 0: {
-                    PreparedStatement sql = connection.get().prepareStatement("SELECT sender FROM friends WHERE receiver=? AND status=0");
+                    PreparedStatement sql = connection.prepareStatement("SELECT sender FROM friends WHERE receiver=? AND status=0");
                     sql.setString(1, uuid.toString());
                     ResultSet result = sql.executeQuery();
                     while (result.next()) {
@@ -132,7 +132,7 @@ public class FriendUtil {
                     break;
                 }
                 case 1: {
-                    PreparedStatement sql = connection.get().prepareStatement("SELECT sender,receiver FROM friends WHERE (sender=? OR receiver=?) AND status=1");
+                    PreparedStatement sql = connection.prepareStatement("SELECT sender,receiver FROM friends WHERE (sender=? OR receiver=?) AND status=1");
                     sql.setString(1, uuid.toString());
                     sql.setString(2, uuid.toString());
                     ResultSet result = sql.executeQuery();
@@ -157,7 +157,7 @@ public class FriendUtil {
                     query.append("? or uuid=");
                 }
             }
-            PreparedStatement sql2 = connection.get().prepareStatement(query.toString());
+            PreparedStatement sql2 = connection.prepareStatement(query.toString());
             for (int i = 1; i < (uuids.size() + 1); i++) {
                 sql2.setString(i, uuids.get(i - 1).toString());
             }
@@ -214,13 +214,13 @@ public class FriendUtil {
                 /**
                  * Add request to database
                  */
-                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                if (!connection.isPresent()) {
+                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                if (!optConnection.isPresent()) {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
                 }
-                try {
-                    PreparedStatement sql = connection.get().prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
+                try (Connection connection = optConnection.get()) {
+                    PreparedStatement sql = connection.prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
                     sql.setString(1, player.getUniqueId().toString());
                     sql.setString(2, tuuid.toString());
                     sql.execute();
@@ -252,13 +252,13 @@ public class FriendUtil {
         /**
          * Add request to database
          */
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("INSERT INTO friends (sender,receiver) VALUES (?,?)");
             sql.setString(1, player.getUniqueId().toString());
             sql.setString(2, tp.getUniqueId().toString());
             sql.execute();
@@ -282,13 +282,13 @@ public class FriendUtil {
                 player.getFriends().remove(tuuid);
                 player.sendMessage(ChatColor.RED + "You removed " + ChatColor.AQUA + name + ChatColor.RED +
                         " from your Friend List!");
-                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                if (!connection.isPresent()) {
+                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                if (!optConnection.isPresent()) {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
                 }
-                try {
-                    PreparedStatement sql = connection.get().prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
+                try (Connection connection = optConnection.get()) {
+                    PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
                     sql.setString(1, player.getUniqueId().toString());
                     sql.setString(2, player.getUniqueId().toString());
                     sql.setString(3, tuuid.toString());
@@ -313,13 +313,13 @@ public class FriendUtil {
         player.sendMessage(ChatColor.RED + "You removed " + ChatColor.GREEN + tp.getUsername() + ChatColor.RED +
                 " from your Friend List!");
         tp.sendMessage(ChatColor.GREEN + player.getUsername() + ChatColor.RED + " removed you from their Friend List!");
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
             sql.setString(1, player.getUniqueId().toString());
             sql.setString(2, player.getUniqueId().toString());
             sql.setString(3, tp.getUniqueId().toString());
@@ -350,13 +350,13 @@ public class FriendUtil {
         player.getFriends().put(tuuid, name);
         player.sendMessage(ChatColor.YELLOW + "You have accepted " + ChatColor.GREEN + name + "'s " + ChatColor.YELLOW +
                 "Friend Request!");
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("UPDATE friends SET status=1 WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("UPDATE friends SET status=1 WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
             sql.setString(1, player.getUniqueId().toString());
             sql.setString(2, player.getUniqueId().toString());
             sql.setString(3, tuuid.toString());
@@ -391,13 +391,13 @@ public class FriendUtil {
         player.getRequests().remove(tuuid);
         player.sendMessage(ChatColor.RED + "You have denied " + ChatColor.GREEN + name + "'s " + ChatColor.RED +
                 "Friend Request!");
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("DELETE FROM friends WHERE (sender=? OR receiver=?) AND (sender=? OR receiver=?)");
             sql.setString(1, player.getUniqueId().toString());
             sql.setString(2, player.getUniqueId().toString());
             sql.setString(3, tuuid.toString());
@@ -411,13 +411,13 @@ public class FriendUtil {
 
     public static boolean hasFriendsToggledOff(UUID uuid) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return false;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("SELECT * FROM player_data WHERE uuid=?");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT * FROM player_data WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
             result.next();

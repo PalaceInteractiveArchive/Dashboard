@@ -81,13 +81,13 @@ public class AFKUtil {
                 try {
                     if (player != null && player.isAFK()) {
                         player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
-                        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                        if (!connection.isPresent()) {
+                        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                        if (!optConnection.isPresent()) {
                             ErrorUtil.logError("Unable to connect to mysql");
                             return;
                         }
-                        try {
-                            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +
+                        try (Connection connection = optConnection.get()) {
+                            PreparedStatement sql = connection.prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +
                                     uuid + "')");
                             sql.execute();
                             sql.close();

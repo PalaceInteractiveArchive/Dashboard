@@ -47,6 +47,7 @@ public class PartyUtil {
             if (p == null) continue;
             if (p.getLeader() == null) {
                 p.close();
+                continue;
             }
             if (p.getMembers().contains(uuid) || p.getLeader().getUuid().equals(uuid)) {
                 return p;

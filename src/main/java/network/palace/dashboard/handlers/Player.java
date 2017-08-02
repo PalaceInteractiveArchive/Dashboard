@@ -74,7 +74,7 @@ public class Player {
         }
         DashboardSocketChannel bungee = Dashboard.getBungee(bungeeID);
         if (bungee == null) {
-            Launcher.getDashboard().getLogger().info("CANCELLED PACKET EVENT INVALID BUNGEE");
+            Launcher.getDashboard().getLogger().info("CANCELLED PACKET EVENT INVALID BUNGEE '" + bungeeID + "' '" + uuid + "' '" + username + "'");
             return;
         }
         bungee.send(packet.getJSON().toString());

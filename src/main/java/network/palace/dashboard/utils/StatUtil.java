@@ -24,24 +24,29 @@ public class StatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                int count = dashboard.getOnlinePlayers().size();
+                int count;
+                try {
+                    count = dashboard.getOnlinePlayers().size();
+                } catch (Exception e) {
+                    count = 0;
+                }
                 if (count != playerCount) {
                     playerCount = count;
                 }
                 dashboard.getSchedulerManager().runAsync(() -> setValue(playerCount));
             }
-        }, 600000, 60000);
+        }, 60000, 60000);
     }
 
     private void setValue(int value) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
                     (System.currentTimeMillis() / 1000) + "','count','" + value + "')");
             sql.execute();
             sql.close();

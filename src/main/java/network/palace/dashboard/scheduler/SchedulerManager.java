@@ -1,11 +1,14 @@
 package network.palace.dashboard.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import network.palace.dashboard.Launcher;
+import network.palace.dashboard.utils.ErrorUtil;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Created by Marc on 7/15/16
@@ -24,7 +27,14 @@ public class SchedulerManager {
     }
 
     public void runAsync(Runnable runnable) {
-        executor.execute(runnable);
+        if (runnable == null)
+            return;
+        try {
+            executor.submit(runnable);
+            Launcher.getDashboard().getLogger().warn("SUCCESSFULLY SUBMITTED RUNNABLE");
+        } catch (RejectedExecutionException e) {
+            ErrorUtil.logError("Error scheduling async task in SchedulerManager", e);
+        }
     }
 
     public void stop() {

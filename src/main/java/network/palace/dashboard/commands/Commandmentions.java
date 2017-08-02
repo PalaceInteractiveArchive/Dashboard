@@ -24,13 +24,13 @@ public class Commandmentions extends MagicCommand {
             player.mention();
         }
         dashboard.getSchedulerManager().runAsync(() -> {
-            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-            if (!connection.isPresent()) {
+            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+            if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;
             }
-            try {
-                PreparedStatement sql = connection.get().prepareStatement("UPDATE player_data SET mentions=? WHERE uuid=?");
+            try (Connection connection = optConnection.get()) {
+                PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET mentions=? WHERE uuid=?");
                 sql.setInt(1, player.hasMentions() ? 1 : 0);
                 sql.setString(2, player.getUniqueId().toString());
                 sql.execute();

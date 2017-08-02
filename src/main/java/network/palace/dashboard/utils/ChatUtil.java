@@ -60,12 +60,12 @@ public class ChatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                if (!connection.isPresent()) {
+                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                if (!optConnection.isPresent()) {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
                 }
-                try {
+                try (Connection connection = optConnection.get()) {
                     if (messages.isEmpty()) {
                         return;
                     }
@@ -91,7 +91,7 @@ public class ChatUtil {
                         }
                     }
                     statement.append(";");
-                    PreparedStatement sql = connection.get().prepareStatement(statement.toString());
+                    PreparedStatement sql = connection.prepareStatement(statement.toString());
                     for (Map.Entry<Integer, String> entry : new HashSet<>(lastList.entrySet())) {
                         sql.setString(entry.getKey(), entry.getValue());
                     }

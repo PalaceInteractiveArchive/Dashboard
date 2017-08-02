@@ -147,13 +147,13 @@ public class ServerUtil {
     private void loadServers() {
         servers.clear();
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("SELECT name,address,port,park,type FROM " +
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
                     (dashboard.isTestNetwork() ? "playground" : "") + "servers;");
             ResultSet result = sql.executeQuery();
             while (result.next()) {

@@ -797,21 +797,18 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 List<PacketPlayerListInfo.Player> players = packet.getPlayers();
                 List<Player> list = new ArrayList<>();
                 for (PacketPlayerListInfo.Player p : players) {
+                    if (dashboard.getPlayer(p.getUniqueId()) != null)
+                        continue;
                     Player tp = new Player(p.getUniqueId(), p.getUsername(), p.getAddress(), p.getServer(),
                             channel.getBungeeID(), p.getMcVersion());
-                    tp.setRank(Rank.fromString(p.getRank()));
+                    tp.setRank(dashboard.getSqlUtil().getRank(tp.getUniqueId()));
                     list.add(tp);
                     dashboard.getServer(p.getServer()).changeCount(1);
                     dashboard.addPlayer(tp);
                     dashboard.getPlayerLog().info("New Player Object for UUID " + tp.getUniqueId() + " username " + tp.getUsername() + " Source: Player List Info packet");
                     dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                 }
-                final List<Player> finalList = list;
-                dashboard.getSchedulerManager().runAsync(() -> {
-                    for (Player p : finalList) {
-                        dashboard.getSqlUtil().silentJoin(p);
-                    }
-                });
+                dashboard.getSchedulerManager().runAsync(() -> list.stream().forEach(p -> dashboard.getSqlUtil().silentJoin(p)));
                 break;
             }
             /*
@@ -826,7 +823,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     // Check one more time if the player exists
                     exists = dashboard.hasPlayer(uuid);
                 }
-                channel.send(new PacketConfirmPlayer(uuid, exists));
+                if (!exists)
+                    dashboard.getPlayerLog().error("Received request to verify player that doesn't exist " + uuid);
+                channel.send(new PacketConfirmPlayer(uuid, true));
                 break;
             }
             /*

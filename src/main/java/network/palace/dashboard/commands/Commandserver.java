@@ -49,13 +49,13 @@ public class Commandserver extends MagicCommand {
             Server s = new Server(name, address, port, park, 0, type);
             dashboard.getServerUtil().addServer(s);
             dashboard.getSchedulerManager().runAsync(() -> {
-                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                if (!connection.isPresent()) {
+                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                if (!optConnection.isPresent()) {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
                 }
-                try {
-                    PreparedStatement sql = connection.get().prepareStatement("INSERT INTO " + (dashboard.isTestNetwork() ?
+                try (Connection connection = optConnection.get()) {
+                    PreparedStatement sql = connection.prepareStatement("INSERT INTO " + (dashboard.isTestNetwork() ?
                             "playground" : "") + "servers (name,address,port,park,type) VALUES (?,?,?,?,?)");
                     sql.setString(1, name);
                     sql.setString(2, address);
@@ -97,13 +97,13 @@ public class Commandserver extends MagicCommand {
                         cancel();
                         dashboard.getServerUtil().removeServer(name);
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                            if (!connection.isPresent()) {
+                            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                            if (!optConnection.isPresent()) {
                                 ErrorUtil.logError("Unable to connect to mysql");
                                 return;
                             }
-                            try {
-                                PreparedStatement sql = connection.get().prepareStatement("DELETE FROM " +
+                            try (Connection connection = optConnection.get()) {
+                                PreparedStatement sql = connection.prepareStatement("DELETE FROM " +
                                         (dashboard.isTestNetwork() ? "playground" : "") + "servers WHERE name=?");
                                 sql.setString(1, s.getName());
                                 sql.execute();

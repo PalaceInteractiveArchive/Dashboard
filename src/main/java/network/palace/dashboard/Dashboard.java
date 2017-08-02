@@ -135,13 +135,13 @@ public class Dashboard {
 
     public void loadServerTypes() {
         serverTypes.clear();
-        Optional<Connection> connection = getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("SELECT name FROM servertypes");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT name FROM servertypes");
             ResultSet result = sql.executeQuery();
             while (result.next()) {
                 serverTypes.add(result.getString("name"));

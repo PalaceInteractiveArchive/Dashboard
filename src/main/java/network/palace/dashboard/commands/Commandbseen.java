@@ -54,13 +54,13 @@ public class Commandbseen extends MagicCommand {
                 mute = tp.getMute();
                 server = tp.getServer();
             } else {
-                Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-                if (!connection.isPresent()) {
+                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                if (!optConnection.isPresent()) {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
                 }
-                try {
-                    PreparedStatement sql = connection.get().prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
+                try (Connection connection = optConnection.get()) {
+                    PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
                     sql.setString(1, uuid.toString());
                     ResultSet result = sql.executeQuery();
                     if (result.next()) {

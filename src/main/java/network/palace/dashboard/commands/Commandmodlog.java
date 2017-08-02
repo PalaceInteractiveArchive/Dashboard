@@ -49,8 +49,8 @@ public class Commandmodlog extends MagicCommand {
                 uuid = tp.getUniqueId();
             }
             String action = "";
-            Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-            if (!connection.isPresent()) {
+            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+            if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;
             }
@@ -59,8 +59,8 @@ public class Commandmodlog extends MagicCommand {
                 switch (action) {
                     case "bans": {
                         List<String> msgs = new ArrayList<>();
-                        try {
-                            PreparedStatement sql = connection.get().prepareStatement("SELECT reason,permanent,`release`,source,active FROM banned_players WHERE uuid=?");
+                        try (Connection connection = optConnection.get()) {
+                            PreparedStatement sql = connection.prepareStatement("SELECT reason,permanent,`release`,source,active FROM banned_players WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
                             while (result.next()) {
@@ -99,8 +99,8 @@ public class Commandmodlog extends MagicCommand {
                     }
                     case "mutes": {
                         List<String> msgs = new ArrayList<>();
-                        try {
-                            PreparedStatement sql = connection.get().prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
+                        try (Connection connection = optConnection.get()) {
+                            PreparedStatement sql = connection.prepareStatement("SELECT reason,`release`,source,active FROM muted_players WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
                             while (result.next()) {
@@ -138,8 +138,8 @@ public class Commandmodlog extends MagicCommand {
                     case "kicks": {
                         DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                         List<String> msgs = new ArrayList<>();
-                        try {
-                            PreparedStatement sql = connection.get().prepareStatement("SELECT reason,source,time FROM kicks WHERE uuid=?");
+                        try (Connection connection = optConnection.get()) {
+                            PreparedStatement sql = connection.prepareStatement("SELECT reason,source,time FROM kicks WHERE uuid=?");
                             sql.setString(1, uuid.toString());
                             ResultSet result = sql.executeQuery();
                             while (result.next()) {
@@ -175,22 +175,22 @@ public class Commandmodlog extends MagicCommand {
                 int banCount = 0;
                 int muteCount = 0;
                 int kickCount = 0;
-                try {
-                    PreparedStatement bans = connection.get().prepareStatement("SELECT count(*) FROM banned_players WHERE uuid=?");
+                try (Connection connection = optConnection.get()) {
+                    PreparedStatement bans = connection.prepareStatement("SELECT count(*) FROM banned_players WHERE uuid=?");
                     bans.setString(1, uuid.toString());
                     ResultSet bansresult = bans.executeQuery();
                     bansresult.next();
                     banCount = bansresult.getInt("count(*)");
                     bansresult.close();
                     bans.close();
-                    PreparedStatement mutes = connection.get().prepareStatement("SELECT count(*) FROM muted_players WHERE uuid=?");
+                    PreparedStatement mutes = connection.prepareStatement("SELECT count(*) FROM muted_players WHERE uuid=?");
                     mutes.setString(1, uuid.toString());
                     ResultSet mutesresult = mutes.executeQuery();
                     mutesresult.next();
                     muteCount = mutesresult.getInt("count(*)");
                     mutesresult.close();
                     mutes.close();
-                    PreparedStatement kicks = connection.get().prepareStatement("SELECT count(*) FROM kicks WHERE uuid=?");
+                    PreparedStatement kicks = connection.prepareStatement("SELECT count(*) FROM kicks WHERE uuid=?");
                     kicks.setString(1, uuid.toString());
                     ResultSet kicksresult = kicks.executeQuery();
                     kicksresult.next();

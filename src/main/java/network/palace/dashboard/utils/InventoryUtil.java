@@ -266,13 +266,13 @@ public class InventoryUtil {
     }
 
     private ResortInventory createResortInventory(UUID uuid, Resort resort) {
-        Optional<Connection> connection = Launcher.getDashboard().getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = Launcher.getDashboard().getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return new ResortInventory();
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
                     "locker, lockersize, hotbar, resort) VALUES (?,?,0,?,0,?,?)");
             sql.setString(1, uuid.toString());
             sql.setString(2, "{}");
@@ -297,24 +297,25 @@ public class InventoryUtil {
         HashMap<Resort, ResortInventory> map = new HashMap<>();
         List<Integer> deleteRowIds = new ArrayList<>();
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return new InventoryCache(uuid, map);
         }
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
             sql.setString(1, uuid.toString());
             ResultSet result = sql.executeQuery();
+            List<Integer> previousIds = new ArrayList<>();
             while (result.next()) {
                 int id = result.getInt("id");
                 String backpack = result.getString("pack");
                 String locker = result.getString("locker");
                 String hotbar = result.getString("hotbar");
                 Resort resort = Resort.fromId(result.getInt("resort"));
+                previousIds.add(id);
                 if (map.get(resort) != null) {
-                    deleteRowIds.add(id);
-                    continue;
+                    deleteRowIds.add(previousIds.get(previousIds.size() - 1));
                 }
                 ResortInventory inv = new ResortInventory(resort, backpack, generateHash(backpack), "",
                         result.getInt("packsize"), locker, generateHash(locker), "",
@@ -331,7 +332,7 @@ public class InventoryUtil {
                         q.append(" OR ");
                     }
                 }
-                PreparedStatement delete = connection.get().prepareStatement(q.toString());
+                PreparedStatement delete = connection.prepareStatement(q.toString());
                 int slot = 1;
                 for (Integer deleteRowId : deleteRowIds) {
                     delete.setInt(slot, deleteRowId);
@@ -356,14 +357,14 @@ public class InventoryUtil {
      */
     private ResortInventory getResortInventoryFromDatabase(UUID uuid, Resort resort) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> connection = dashboard.getSqlUtil().getConnection();
-        if (!connection.isPresent()) {
+        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return new ResortInventory();
         }
         ResortInventory inv = null;
-        try {
-            PreparedStatement sql = connection.get().prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=? AND resort=?");
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=? AND resort=?");
             sql.setString(1, uuid.toString());
             sql.setInt(2, resort.getId());
             ResultSet result = sql.executeQuery();
@@ -435,13 +436,13 @@ public class InventoryUtil {
                     values.append(", ");
                 }
             }
-            Optional<Connection> connection = Launcher.getDashboard().getSqlUtil().getConnection();
-            if (!connection.isPresent()) {
+            Optional<Connection> optConnection = Launcher.getDashboard().getSqlUtil().getConnection();
+            if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;
             }
-            try {
-                PreparedStatement sql = connection.get().prepareStatement("UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?");
+            try (Connection connection = optConnection.get()) {
+                PreparedStatement sql = connection.prepareStatement("UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?");
                 int i = 1;
                 for (String s : valueMap.values()) {
                     sql.setString(i, s);
