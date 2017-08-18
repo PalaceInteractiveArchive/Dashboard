@@ -24,7 +24,7 @@ public class CommandDiscord extends MagicCommand {
             PacketLink packet = new PacketLink(player.getUniqueId(), "https://palace.network/Discord",
                     "Click for more information about Discord!", ChatColor.YELLOW, true);
             player.send(packet);
-        } else if (args.length == 2 && args[0].equals("link")) {
+        } else if (args.length >= 2 && args[0].equals("link")) {
             StringBuilder fullName = new StringBuilder();
             for (int i = 1; i < args.length; i++) {
                 fullName.append(args[i]);
