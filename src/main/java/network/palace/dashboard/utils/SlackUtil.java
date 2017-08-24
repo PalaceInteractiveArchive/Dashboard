@@ -34,7 +34,7 @@ public class SlackUtil {
         }
         String webhook;
         if (status) {
-            webhook = "https://hooks.slack.com/services/T0GA29EGP/B6U4DB3RU/PVpTcCSDNgv4xbxUmNcME4e";
+            webhook = "https://hooks.slack.com/services/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";
         } else {
             webhook = "https://hooks.slack.com/services/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";
         }
