@@ -65,6 +65,7 @@ public class ChatUtil {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
                 }
+                StringBuilder statement = new StringBuilder();
                 try (Connection connection = optConnection.get()) {
                     if (messages.isEmpty()) {
                         return;
@@ -74,7 +75,7 @@ public class ChatUtil {
                     for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
                         amount += entry.getValue().size();
                     }
-                    StringBuilder statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
+                    statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
                     int i = 0;
                     HashMap<Integer, String> lastList = new HashMap<>();
                     for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
@@ -99,6 +100,7 @@ public class ChatUtil {
                     sql.close();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    dashboard.getErrors().error("Error with Chat SQL Query: '" + statement.toString() + "'");
                 }
             }
         }, 0, 5000);
