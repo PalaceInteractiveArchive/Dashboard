@@ -665,11 +665,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getSchedulerManager().runAsync(() -> {
                     PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
                     Player player = dashboard.getPlayer(packet.getUuid());
-                    if (player == null) return;
                     if (!packet.isEmpty()) {
-                        dashboard.getInventoryUtil().cacheInventory(player.getUuid(), packet);
+                        dashboard.getInventoryUtil().cacheInventory(packet.getUuid(), packet);
                     }
-
+                    if (player == null) return;
                     if (player.getServer().equals(channel.getServerName()) ||
                             !dashboard.getServer(player.getServer()).isInventory()) {
                         player.setSendInventoryOnJoin(true);

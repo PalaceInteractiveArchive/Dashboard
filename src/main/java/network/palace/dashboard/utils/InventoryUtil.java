@@ -151,7 +151,9 @@ public class InventoryUtil {
                             inv.setSqlHotbarHash(inv.getHotbarHash());
                         }
                     }
+                    boolean updated = false;
                     if (update.shouldUpdate()) {
+                        updated = true;
                         dashboard.getSchedulerManager().runAsync(new Runnable() {
                             @Override
                             public void run() {
@@ -161,10 +163,18 @@ public class InventoryUtil {
                     }
                     if (dashboard.getPlayer(cache.getUuid()) == null) {
                         cachedInventories.remove(cache.getUuid());
+                        if (!updated) {
+                            dashboard.getSchedulerManager().runAsync(new Runnable() {
+                                @Override
+                                public void run() {
+                                    updateData(cache.getUuid(), update);
+                                }
+                            });
+                        }
                     }
                 }
             }
-        }, 1000, 300000);
+        }, 1000, 60000);
     }
 
     /**
