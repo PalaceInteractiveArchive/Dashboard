@@ -54,8 +54,8 @@ public class SqlUtil {
         config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
         config.setUsername(username);
         config.setPassword(password);
-        config.setMinConnectionsPerPartition(30);
-        config.setMaxConnectionsPerPartition(300);
+        config.setMinConnectionsPerPartition(10);
+        config.setMaxConnectionsPerPartition(100);
         config.setPartitionCount(3);
         config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
         connectionPool = new BoneCP(config);
