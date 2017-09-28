@@ -7,6 +7,7 @@ import network.palace.dashboard.commands.Commandstaff;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -36,7 +37,7 @@ public class Dashboard {
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
-    @Getter @Setter private SqlUtil sqlUtil = null;
+    @Getter @Setter private Optional<MongoHandler> mongoHandler;
     @Getter @Setter private ServerUtil serverUtil = null;
     @Getter @Setter private ChatUtil chatUtil = null;
     @Getter @Setter private CommandUtil commandUtil = null;
@@ -101,11 +102,12 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.SQUIRE, Rank.ARCHITECT,
-                    Rank.KNIGHT, Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
-            for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
-                maintenanceWhitelist.addAll(entry.getValue());
-            }
+            // TODO
+//            HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.SQUIRE, Rank.ARCHITECT,
+//                    Rank.KNIGHT, Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
+//            for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
+//                maintenanceWhitelist.addAll(entry.getValue());
+//            }
         }
     }
 

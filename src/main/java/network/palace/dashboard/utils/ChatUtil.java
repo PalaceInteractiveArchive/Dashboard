@@ -671,7 +671,7 @@ public class ChatUtil {
     public void socialSpyParty(Player player, Party party, String message, String command) {
         Dashboard dashboard = Launcher.getDashboard();
         if (dashboard.getServer(player.getServer()).isPark()) {
-            String msg = ChatColor.WHITE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
+            String msg = "" + ChatColor.BOLD + ChatColor.YELLOW + "[P]" + ChatColor.LIGHT_PURPLE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
                     " " + message;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||

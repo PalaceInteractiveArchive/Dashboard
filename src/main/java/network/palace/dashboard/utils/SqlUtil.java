@@ -1,7 +1,5 @@
 package network.palace.dashboard.utils;
 
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
@@ -12,76 +10,14 @@ import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Marc on 7/14/16
  */
 public class SqlUtil {
-    private BoneCP connectionPool = null;
-
-    public SqlUtil() throws SQLException, IOException {
-        DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-        BoneCPConfig config = new BoneCPConfig();
-        String address = "";
-        String database = "";
-        String username = "";
-        String password = "";
-        try (BufferedReader br = new BufferedReader(new FileReader("sql.txt"))) {
-            String line = br.readLine();
-            while (line != null) {
-                if (line.startsWith("address:")) {
-                    address = line.split("address:")[1];
-                }
-                if (line.startsWith("username:")) {
-                    username = line.split("username:")[1];
-                }
-                if (line.startsWith("password:")) {
-                    password = line.split("password:")[1];
-                }
-                if (line.startsWith("database:")) {
-                    database = line.split("database:")[1];
-                }
-                line = br.readLine();
-            }
-        }
-        config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
-        config.setUsername(username);
-        config.setPassword(password);
-        config.setMinConnectionsPerPartition(10);
-        config.setMaxConnectionsPerPartition(100);
-        config.setPartitionCount(3);
-        config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
-        connectionPool = new BoneCP(config);
-        Dashboard dashboard = Launcher.getDashboard();
-        dashboard.setActivityUtil(new ActivityUtil(connectionPool));
-    }
-
-    public Optional<Connection> getConnection() {
-        try {
-            return Optional.of(connectionPool.getConnection());
-        } catch (SQLException e) {
-            return Optional.empty();
-        }
-    }
-
-
-    public void stop() {
-        connectionPool.shutdown();
-        Dashboard dashboard = Launcher.getDashboard();
-        dashboard.getActivityUtil().stop();
-    }
-
-    /**
-     * Player Methods
-     */
-
     public void login(final Player player) {
         Dashboard dashboard = Launcher.getDashboard();
 
@@ -314,57 +250,6 @@ public class SqlUtil {
         });
     }
 
-    public UUID uuidFromUsername(String username) {
-        Optional<Connection> optConnection = getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return UUID.randomUUID();
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement statement = connection.prepareStatement("SELECT uuid FROM player_data WHERE username=?");
-            statement.setString(1, username);
-            ResultSet result = statement.executeQuery();
-            if (!result.next()) {
-                result.close();
-                statement.close();
-                return null;
-            }
-            String uuid = result.getString("uuid");
-            statement.close();
-            result.close();
-            return UUID.fromString(uuid);
-        } catch (Exception e) {
-            ErrorUtil.logError("SQL Error uuid from username method", e);
-            return null;
-        }
-    }
-
-    public String usernameFromUUID(UUID uuid) {
-        Optional<Connection> optConnection = getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return "";
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT username FROM player_data WHERE uuid=?");
-            sql.setString(1, uuid.toString());
-            ResultSet result = sql.executeQuery();
-            if (!result.next()) {
-                result.close();
-                sql.close();
-                return "";
-            }
-            String username = result.getString("username");
-            sql.close();
-            result.close();
-            return username;
-        } catch (Exception e) {
-            ErrorUtil.logError("SQL Error username from uuid method", e);
-            return "";
-        }
-    }
-
-
     public HashMap<UUID, String> getFriendList(UUID uuid) {
         return getList(uuid, 1);
     }
@@ -454,87 +339,6 @@ public class SqlUtil {
             e.printStackTrace();
         }
         return map;
-    }
-
-    public List<String> getNamesFromIP(String address) {
-        List<String> list = new ArrayList<>();
-        Optional<Connection> optConnection = getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return new ArrayList<>();
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT username FROM player_data WHERE ipAddress=?");
-            sql.setString(1, address);
-            ResultSet result = sql.executeQuery();
-            while (result.next()) {
-                list.add(result.getString("username"));
-            }
-            result.close();
-            sql.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public HashMap<Rank, List<UUID>> getPlayersByRanks(Rank... ranks) {
-        HashMap<Rank, List<UUID>> map = new HashMap<>();
-        Optional<Connection> optConnection = getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return new HashMap<>();
-        }
-        try (Connection connection = optConnection.get()) {
-            StringBuilder q = new StringBuilder("SELECT uuid,rank FROM player_data WHERE rank=?");
-            for (int i = 1; i < ranks.length; i++) {
-                q.append(" OR rank=?");
-            }
-            PreparedStatement sql = connection.prepareStatement(q.toString());
-            for (int i = 1; i <= ranks.length; i++) {
-                sql.setString(i, ranks[i - 1].getSqlName());
-            }
-            ResultSet result = sql.executeQuery();
-            while (result.next()) {
-                UUID uuid = UUID.fromString(result.getString("uuid"));
-                Rank rank = Rank.fromString(result.getString("rank"));
-                if (!map.containsKey(rank)) {
-                    List<UUID> list = new ArrayList<>();
-                    list.add(uuid);
-                    map.put(rank, list);
-                } else {
-                    map.get(rank).add(uuid);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return map;
-    }
-
-    public Rank getRank(UUID uuid) {
-        Optional<Connection> optConnection = getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return Rank.SETTLER;
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT rank FROM player_data WHERE uuid=?");
-            sql.setString(1, uuid.toString());
-            ResultSet result = sql.executeQuery();
-            if (!result.next()) {
-                result.close();
-                sql.close();
-                return Rank.SETTLER;
-            }
-            Rank rank = Rank.fromString(result.getString("rank"));
-            result.close();
-            sql.close();
-            return rank;
-        } catch (SQLException e) {
-            ErrorUtil.logError("Error in SqlUtil method getRank", e);
-        }
-        return Rank.SETTLER;
     }
 
     private void staffClock(UUID uuid, boolean in, Connection connection) throws SQLException {
