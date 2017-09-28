@@ -3,13 +3,10 @@ package network.palace.dashboard;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
-import network.palace.dashboard.commands.StaffCommand;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -40,7 +37,7 @@ public class Dashboard {
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
-    @Getter @Setter private SqlUtil sqlUtil = null;
+    @Getter @Setter private MongoHandler mongoHandler;
     @Getter @Setter private ServerUtil serverUtil = null;
     @Getter @Setter private ChatUtil chatUtil = null;
     @Getter @Setter private CommandUtil commandUtil = null;
