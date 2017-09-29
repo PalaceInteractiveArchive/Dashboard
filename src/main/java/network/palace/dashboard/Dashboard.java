@@ -6,7 +6,10 @@ import lombok.Setter;
 import network.palace.dashboard.commands.Commandstaff;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.handlers.Arcade;
+import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Server;
 import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
@@ -37,14 +40,13 @@ public class Dashboard {
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
-    @Getter @Setter private Optional<MongoHandler> mongoHandler;
+    @Getter @Setter private MongoHandler mongoHandler;
     @Getter @Setter private ServerUtil serverUtil = null;
     @Getter @Setter private ChatUtil chatUtil = null;
     @Getter @Setter private CommandUtil commandUtil = null;
     @Getter @Setter private ModerationUtil moderationUtil = new ModerationUtil();
     @Getter @Setter private SchedulerManager schedulerManager = null;
     @Getter @Setter private FriendUtil friendUtil;
-    @Getter @Setter private ActivityUtil activityUtil;
     @Getter @Setter private PartyUtil partyUtil;
     @Getter @Setter private SlackUtil slackUtil;
     @Getter @Setter private WarningUtil warningUtil;

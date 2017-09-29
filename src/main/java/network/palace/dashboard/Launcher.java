@@ -8,6 +8,7 @@ import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.Arcade;
+import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.scheduler.SchedulerManager;
 import network.palace.dashboard.server.DashboardServerSocketChannel;
@@ -23,7 +24,6 @@ import org.apache.log4j.PatternLayout;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Timer;
@@ -64,9 +64,9 @@ public class Launcher {
         dashboard.setSchedulerManager(new SchedulerManager());
         dashboard.setInventoryUtil(new InventoryUtil());
         try {
-            dashboard.getLogger().info("Initializing SQL Connections");
-            dashboard.setSqlUtil(new SqlUtil());
-        } catch (SQLException | IOException e) {
+            dashboard.getLogger().info("Initializing MongoDB Handler");
+            dashboard.setMongoHandler(new MongoHandler());
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
@@ -130,7 +130,7 @@ public class Launcher {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            dashboard.getSqlUtil().stop();
+            dashboard.getMongoHandler().disconnect();
 
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

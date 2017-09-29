@@ -5,13 +5,7 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketBseenCommand;
 import network.palace.dashboard.utils.DateUtil;
-import network.palace.dashboard.utils.ErrorUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Optional;
 import java.util.UUID;
 
 public class Commandbseen extends MagicCommand {
@@ -36,7 +30,7 @@ public class Commandbseen extends MagicCommand {
             if (online) {
                 uuid = tp.getUniqueId();
             } else {
-                uuid = dashboard.getSqlUtil().uuidFromUsername(args[0]);
+                uuid = dashboard.getMongoHandler().uuidFromName(args[0]).orElse(null);
             }
             if (uuid == null) {
                 player.sendMessage(ChatColor.RED + "That player can't be found!");
@@ -54,26 +48,26 @@ public class Commandbseen extends MagicCommand {
                 mute = tp.getMute();
                 server = tp.getServer();
             } else {
-                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-                if (!optConnection.isPresent()) {
-                    ErrorUtil.logError("Unable to connect to mysql");
-                    return;
-                }
-                try (Connection connection = optConnection.get()) {
-                    PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
-                    sql.setString(1, uuid.toString());
-                    ResultSet result = sql.executeQuery();
-                    if (result.next()) {
-                        rank = Rank.fromString(result.getString("rank"));
-                        lastLogin = result.getTimestamp("lastseen").getTime();
-                        ip = result.getString("ipAddress");
-                        server = result.getString("server");
-                    }
-                    result.close();
-                    sql.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+//                try (Connection connection = optConnection.get()) {
+//                    PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
+//                    sql.setString(1, uuid.toString());
+//                    ResultSet result = sql.executeQuery();
+//                    if (result.next()) {
+//                        rank = Rank.fromString(result.getString("rank"));
+//                        lastLogin = result.getTimestamp("lastseen").getTime();
+//                        ip = result.getString("ipAddress");
+//                        server = result.getString("server");
+//                    }
+//                    result.close();
+//                    sql.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+                BseenData data = dashboard.getMongoHandler().getBseenInformation(uuid);
+                rank = data.getRank();
+                lastLogin = data.getLastLogin();
+                ip = data.getIpAddress();
+                server = data.getServer();
                 Ban ban = dashboard.getSqlUtil().getBan(uuid, name);
                 if (ban != null) {
                     String type = ban.isPermanent() ? "Permanently" : ("Temporarily (Expires: " +

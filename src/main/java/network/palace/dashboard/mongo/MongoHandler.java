@@ -7,6 +7,8 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import network.palace.dashboard.handlers.BseenData;
+import network.palace.dashboard.handlers.Mute;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.mongo.structures.MuteStructure;
@@ -23,12 +25,14 @@ public class MongoHandler {
     private Optional<MongoClient> client = Optional.empty();
     private Optional<MongoDatabase> database = Optional.empty();
     private Optional<MongoCollection<Document>> playerCollection = Optional.empty();
+    private Optional<MongoCollection<Document>> activityCollection = Optional.empty();
 
     public void connect(String uri) {
         MongoClientURI connectionString = new MongoClientURI(uri);
         client = Optional.of(new MongoClient(connectionString));
         database = Optional.ofNullable(client.map(c -> c.getDatabase("palace")).orElse(null));
-        playerCollection = Optional.ofNullable(database.map(d -> d.getCollection("palace")).orElse(null));
+        playerCollection = Optional.ofNullable(database.map(d -> d.getCollection("player")).orElse(null));
+        activityCollection = Optional.ofNullable(database.map(d -> d.getCollection("activity")).orElse(null));
     }
 
     public void createPlayer(Player player) {
@@ -165,8 +169,8 @@ public class MongoHandler {
         return playerCollection.map(p -> getPlayer(uuid, new Document("username", 1)).map(d -> d.getString("username")).orElse(""));
     }
 
-    public Optional<String> uuidFromName(String name) {
-        return playerCollection.map(p -> getPlayer(name, new Document("username", 1)).map(d -> d.getString("username")).orElse(""));
+    public Optional<UUID> uuidFromName(String name) {
+        return playerCollection.map(p -> getPlayer(name, new Document("uuid", 1)).map(d -> UUID.fromString(d.getString("uuid"))).orElse(null));
     }
 
     public List<String> getPlayersOnIP(String ip) {
@@ -189,6 +193,32 @@ public class MongoHandler {
     public Rank getRank(UUID uuid) {
         return Rank.valueOf(playerCollection.map(p -> getPlayer(uuid).map(document -> document.getString("rank")))
                 .orElse(Optional.of(Rank.SETTLER.getSqlName())).orElse(Rank.SETTLER.getSqlName()));
+    }
+
+    /**
+     * Log activity to the collection
+     *
+     * @param uuid        the uuid
+     * @param action      the action
+     * @param description the description
+     */
+    public void logActivity(UUID uuid, String action, String description) {
+        if (!activityCollection.isPresent()) return;
+        activityCollection.get().insertOne(new Document("uuid", uuid).append("action", action).append("description", description));
+    }
+
+    public BseenData getBseenInformation(UUID uuid) {
+        Optional<Document> player = getPlayer(uuid, new Document("username", 1).append("rank", 1).append("lastOnline", 1)
+                .append("ip", 1).append("mutes", new Document("currentMute", 1)).append("server", 1));
+        if (!player.isPresent()) return null;
+        Document doc = player.get();
+        Rank rank = Rank.fromString(doc.getString("rank"));
+        long lastLogin = doc.getLong("lastOnline");
+        String ipAddress = doc.getString("ip");
+        Mute mute = new Mute(uuid, doc.getString("username"), (Document) ((BasicDBObject) doc.get("mutes"))
+                .getOrDefault("currentMute", null));
+        String server = doc.getString("server");
+        return new BseenData(uuid, rank, lastLogin, ipAddress, mute, server);
     }
 
     public void disconnect() {
