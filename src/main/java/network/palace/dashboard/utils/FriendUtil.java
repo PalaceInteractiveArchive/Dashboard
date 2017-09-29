@@ -227,7 +227,7 @@ public class FriendUtil {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Send Friend Request", name);
+                dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Send Friend Request", name);
             } catch (Exception ignored) {
                 player.sendMessage(ChatColor.RED + "That player could not be found!");
             }
@@ -265,7 +265,7 @@ public class FriendUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Send Friend Request", name);
+        dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Send Friend Request", name);
     }
 
     public static void removeFriend(Player player, String name) {
@@ -300,7 +300,7 @@ public class FriendUtil {
             } catch (Exception ignored) {
                 player.sendMessage(ChatColor.RED + "That player could not be found!");
             }
-            dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Remove Friend", name);
+            dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Remove Friend", name);
             return;
         }
         if (!player.getFriends().containsKey(tp.getUniqueId())) {
@@ -328,7 +328,7 @@ public class FriendUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Remove Friend", name);
+        dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Remove Friend", name);
     }
 
     public static void acceptFriend(Player player, String name) {
@@ -370,7 +370,7 @@ public class FriendUtil {
             tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.YELLOW +
                     " has accepted your Friend Request!");
         }
-        dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Accept Friend Request", name);
+        dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Accept Friend Request", name);
     }
 
     public static void denyFriend(Player player, String name) {
@@ -405,7 +405,7 @@ public class FriendUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        dashboard.getActivityUtil().logActivity(player.getUniqueId(), "Denied Friend Request", name);
+        dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Denied Friend Request", name);
     }
 
     public static boolean hasFriendsToggledOff(UUID uuid) {

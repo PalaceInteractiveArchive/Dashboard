@@ -1,5 +1,7 @@
 package network.palace.dashboard.handlers;
 
+import org.bson.Document;
+
 import java.util.UUID;
 
 /**
@@ -20,6 +22,16 @@ public class Mute {
         this.release = release;
         this.reason = reason;
         this.source = source;
+    }
+
+    public Mute(UUID uuid, String name, Document structure) {
+        this.uuid = uuid;
+        this.name = name;
+        this.muted = structure != null;
+        if (!muted) return;
+        this.release = structure.getLong("expires");
+        this.reason = structure.getString("reason");
+        this.source = structure.getString("source");
     }
 
     public UUID getUniqueId() {
