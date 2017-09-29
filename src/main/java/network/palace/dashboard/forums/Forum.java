@@ -121,22 +121,22 @@ public class Forum {
                 rankid = 6;
                 break;
             case "trainee":
-                rankid = 7;
-                break;
-            case "mod":
                 rankid = 8;
                 break;
-            case "srmod":
+            case "mod":
                 rankid = 9;
                 break;
-            case "developer":
-                rankid = 10;
-                break;
-            case "admin":
+            case "srmod":
                 rankid = 11;
                 break;
-            case "manager":
+            case "developer":
                 rankid = 12;
+                break;
+            case "admin":
+                rankid = 13;
+                break;
+            case "manager":
+                rankid = 14;
                 break;
         }
         Database.executeUpdate("UPDATE xf_user SET apms2_group=?,apms2_groups=? WHERE apms2_uuid=?", rankid, rankid, uuid);
