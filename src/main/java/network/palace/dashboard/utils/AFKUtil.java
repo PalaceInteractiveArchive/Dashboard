@@ -24,8 +24,8 @@ public class AFKUtil {
             @Override
             public void run() {
                 for (Player tp : dashboard.getOnlinePlayers()) {
-                    if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getRank().getRankId() >=
-                            Rank.WIZARD.getRankId()) {
+                    if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId() || tp.getRank().getRankId() >=
+                            Rank.DEVELOPER.getRankId()) {
                         continue;
                     }
                     if (System.currentTimeMillis() - tp.getAfkTime() >= 1800000) {

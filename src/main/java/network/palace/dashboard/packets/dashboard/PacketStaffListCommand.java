@@ -16,56 +16,56 @@ import java.util.UUID;
  */
 public class PacketStaffListCommand extends BasePacket {
     private UUID uuid;
-    private List<String> empress = new ArrayList<>();
-    private List<String> emperors = new ArrayList<>();
-    private List<String> wizards = new ArrayList<>();
-    private List<String> paladins = new ArrayList<>();
-    private List<String> knights = new ArrayList<>();
-    private List<String> squires = new ArrayList<>();
+    private List<String> managers = new ArrayList<>();
+    private List<String> admins = new ArrayList<>();
+    private List<String> developers = new ArrayList<>();
+    private List<String> srmods = new ArrayList<>();
+    private List<String> mods = new ArrayList<>();
+    private List<String> trainees = new ArrayList<>();
 
     public PacketStaffListCommand() {
         this.id = PacketID.Dashboard.STAFFLISTCOMMAND.getID();
         uuid = null;
     }
 
-    public PacketStaffListCommand(UUID uuid, List<String> empress, List<String> emperors, List<String> wizards,
-                                  List<String> paladins, List<String> knights, List<String> squires) {
+    public PacketStaffListCommand(UUID uuid, List<String> managers, List<String> admins, List<String> developers,
+                                  List<String> srmods, List<String> mods, List<String> trainees) {
         this.id = PacketID.Dashboard.STAFFLISTCOMMAND.getID();
         this.uuid = uuid;
-        this.empress = empress;
-        this.emperors = emperors;
-        this.wizards = wizards;
-        this.paladins = paladins;
-        this.knights = knights;
-        this.squires = squires;
+        this.managers = managers;
+        this.admins = admins;
+        this.developers = developers;
+        this.srmods = srmods;
+        this.mods = mods;
+        this.trainees = trainees;
     }
 
     public UUID getUniqueId() {
         return uuid;
     }
 
-    public List<String> getEmperors() {
-        return emperors;
+    public List<String> getAdmins() {
+        return admins;
     }
 
-    public List<String> getEmpress() {
-        return empress;
+    public List<String> getManagers() {
+        return managers;
     }
 
-    public List<String> getWizards() {
-        return wizards;
+    public List<String> getDevelopers() {
+        return developers;
     }
 
-    public List<String> getPaladins() {
-        return paladins;
+    public List<String> getSrmods() {
+        return srmods;
     }
 
-    public List<String> getKnights() {
-        return knights;
+    public List<String> getMods() {
+        return mods;
     }
 
-    public List<String> getSquires() {
-        return squires;
+    public List<String> getTrainees() {
+        return trainees;
     }
 
     public PacketStaffListCommand fromJSON(JsonObject obj) {
@@ -74,29 +74,29 @@ public class PacketStaffListCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
-        JsonArray may = obj.get("empress").getAsJsonArray();
+        JsonArray may = obj.get("managers").getAsJsonArray();
         for (JsonElement e : may) {
-            this.empress.add(e.getAsString());
+            this.managers.add(e.getAsString());
         }
-        JsonArray man = obj.get("emperors").getAsJsonArray();
+        JsonArray man = obj.get("admins").getAsJsonArray();
         for (JsonElement e : man) {
-            this.emperors.add(e.getAsString());
+            this.admins.add(e.getAsString());
         }
-        JsonArray dev = obj.get("wizards").getAsJsonArray();
+        JsonArray dev = obj.get("developers").getAsJsonArray();
         for (JsonElement e : dev) {
-            this.wizards.add(e.getAsString());
+            this.developers.add(e.getAsString());
         }
-        JsonArray crd = obj.get("paladins").getAsJsonArray();
+        JsonArray crd = obj.get("srmods").getAsJsonArray();
         for (JsonElement e : crd) {
-            this.paladins.add(e.getAsString());
+            this.srmods.add(e.getAsString());
         }
-        JsonArray cas = obj.get("knights").getAsJsonArray();
+        JsonArray cas = obj.get("mods").getAsJsonArray();
         for (JsonElement e : cas) {
-            this.knights.add(e.getAsString());
+            this.mods.add(e.getAsString());
         }
-        JsonArray ear = obj.get("squires").getAsJsonArray();
+        JsonArray ear = obj.get("trainees").getAsJsonArray();
         for (JsonElement e : ear) {
-            this.squires.add(e.getAsString());
+            this.trainees.add(e.getAsString());
         }
         return this;
     }
@@ -107,12 +107,12 @@ public class PacketStaffListCommand extends BasePacket {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
             Gson gson = new Gson();
-            obj.add("empress", gson.toJsonTree(this.empress).getAsJsonArray());
-            obj.add("emperors", gson.toJsonTree(this.emperors).getAsJsonArray());
-            obj.add("wizards", gson.toJsonTree(this.wizards).getAsJsonArray());
-            obj.add("paladins", gson.toJsonTree(this.paladins).getAsJsonArray());
-            obj.add("knights", gson.toJsonTree(this.knights).getAsJsonArray());
-            obj.add("squires", gson.toJsonTree(this.squires).getAsJsonArray());
+            obj.add("managers", gson.toJsonTree(this.managers).getAsJsonArray());
+            obj.add("admins", gson.toJsonTree(this.admins).getAsJsonArray());
+            obj.add("developers", gson.toJsonTree(this.developers).getAsJsonArray());
+            obj.add("srmods", gson.toJsonTree(this.srmods).getAsJsonArray());
+            obj.add("mods", gson.toJsonTree(this.mods).getAsJsonArray());
+            obj.add("trainees", gson.toJsonTree(this.trainees).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }

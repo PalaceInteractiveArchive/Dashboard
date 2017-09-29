@@ -31,7 +31,7 @@ import java.util.Optional;
 public class Commandupdatehashes extends MagicCommand {
 
     public Commandupdatehashes() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override

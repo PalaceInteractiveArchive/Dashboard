@@ -19,7 +19,7 @@ public class Commandjoin extends MagicCommand {
         Dashboard dashboard = Launcher.getDashboard();
         List<String> servers = dashboard.getJoinServers();
         if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("reload") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+            if (args[0].equalsIgnoreCase("reload") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                 dashboard.loadJoinServers();
                 player.sendMessage(ChatColor.GREEN + "Join Servers have been reloaded!");
                 return;

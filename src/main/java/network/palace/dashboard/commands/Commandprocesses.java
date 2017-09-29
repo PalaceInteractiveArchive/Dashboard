@@ -1,11 +1,11 @@
 package network.palace.dashboard.commands;
 
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.server.DashboardSocketChannel;
+import network.palace.dashboard.server.WebSocketServerHandler;
 
 /**
  * Created by Marc on 10/8/16
@@ -13,12 +13,12 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 public class Commandprocesses extends MagicCommand {
 
     public Commandprocesses() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        String msg = ChatColor.YELLOW + "Processes connected to Dashboard:";
+        StringBuilder msg = new StringBuilder(ChatColor.YELLOW + "Processes connected to Dashboard:");
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
             String type = "";
@@ -43,8 +43,8 @@ public class Commandprocesses extends MagicCommand {
                     type = "Unknown - " + ip;
                     break;
             }
-            msg += ChatColor.GREEN + "\n- " + type;
+            msg.append(ChatColor.GREEN).append("\n- ").append(type);
         }
-        player.sendMessage(msg);
+        player.sendMessage(msg.toString());
     }
 }

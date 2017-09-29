@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Commandunban extends MagicCommand {
 
     public Commandunban() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
         aliases = Arrays.asList("pardon");
     }
 

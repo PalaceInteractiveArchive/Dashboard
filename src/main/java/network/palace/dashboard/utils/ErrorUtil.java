@@ -26,7 +26,7 @@ public class ErrorUtil {
         dashboard.getErrors().error(error, e);
         String msg = ChatColor.RED + "[ERROR] " + ChatColor.WHITE + error;
         for (Player p : dashboard.getOnlinePlayers()) {
-            if (p.getRank().getRankId() >= Rank.WIZARD.getRankId() && !debugIgnore.contains(p.getUniqueId())) {
+            if (p.getRank().getRankId() >= Rank.DEVELOPER.getRankId() && !debugIgnore.contains(p.getUniqueId())) {
                 p.sendMessage(msg);
             }
         }
@@ -40,7 +40,7 @@ public class ErrorUtil {
         dashboard.getErrors().error(error);
         String msg = ChatColor.RED + "[ERROR] " + ChatColor.WHITE + error;
         for (Player p : dashboard.getOnlinePlayers()) {
-            if (p.getRank().getRankId() >= Rank.WIZARD.getRankId() && !debugIgnore.contains(p.getUniqueId())) {
+            if (p.getRank().getRankId() >= Rank.DEVELOPER.getRankId() && !debugIgnore.contains(p.getUniqueId())) {
                 p.sendMessage(msg);
             }
         }

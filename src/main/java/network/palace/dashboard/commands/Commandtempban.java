@@ -11,7 +11,7 @@ import java.util.UUID;
 public class Commandtempban extends MagicCommand {
 
     public Commandtempban() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
         tabCompletePlayers = true;
     }
 
@@ -31,9 +31,9 @@ public class Commandtempban extends MagicCommand {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
             String reason;
-            String r = "";
+            StringBuilder r = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                r += args[i] + " ";
+                r.append(args[i]).append(" ");
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
             String source = player.getUsername();

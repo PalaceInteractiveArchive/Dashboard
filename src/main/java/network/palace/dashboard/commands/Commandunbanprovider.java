@@ -10,7 +10,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandunbanprovider extends MagicCommand {
 
     public Commandunbanprovider() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class Commandstaff extends MagicCommand {
     private static HashMap<UUID, Integer> attempts = new HashMap<>();
 
     public Commandstaff() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class Commandstaff extends MagicCommand {
                     a.color("good");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                     return;
-                } else if (args[0].equalsIgnoreCase("force") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+                } else if (args[0].equalsIgnoreCase("force") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                     String username = args[1];
                     String pass = args[2];
                     UUID uuid = dashboard.getSqlUtil().uuidFromUsername(args[1]);
@@ -143,7 +143,7 @@ public class Commandstaff extends MagicCommand {
             player.sendMessage(ChatColor.GREEN + "/staff login [password] " + ChatColor.YELLOW + "- Login to a staff account");
             player.sendMessage(ChatColor.GREEN + "/staff change [old password] [new password] " +
                     ChatColor.YELLOW + "- Change your staff password");
-            if (player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                 player.sendMessage(ChatColor.GOLD + "/staff force [Username] [Password] - Force-change a staff member's password");
             }
         });

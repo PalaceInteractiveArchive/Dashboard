@@ -11,7 +11,7 @@ public class Commandcc extends MagicCommand {
     public String clearMessage = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 
     public Commandcc() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class Commandcc extends MagicCommand {
         boolean park = dashboard.getServer(server).isPark();
         for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getServer().equals(server) || (park && dashboard.getServer(tp.getServer()).isPark())) {
-                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+                if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
                     tp.sendMessage(clearMessage + ChatColor.DARK_AQUA + "Chat has been cleared");
                 } else {
                     tp.sendMessage("\n" + ChatColor.DARK_AQUA + "Chat has been cleared by " + player.getUsername());

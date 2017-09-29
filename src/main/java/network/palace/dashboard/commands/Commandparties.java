@@ -11,7 +11,7 @@ import java.util.UUID;
 public class Commandparties extends MagicCommand {
 
     public Commandparties() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         tabCompletePlayers = true;
     }
 

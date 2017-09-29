@@ -10,7 +10,7 @@ import java.util.List;
 public class Commandipseen extends MagicCommand {
 
     public Commandipseen() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override

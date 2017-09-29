@@ -706,7 +706,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String staff = ChatColor.WHITE + "[" + ChatColor.AQUA + source + ChatColor.WHITE + "] " +
                         ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message);
                 for (Player tp : dashboard.getOnlinePlayers()) {
-                    if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
+                    if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.MOD.getRankId()) {
                         tp.sendMessage(staff);
                     } else {
                         tp.sendMessage(msg);
@@ -737,7 +737,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String msgname = msg + " by " + packet.getSource();
                 for (Player tp : dashboard.getOnlinePlayers()) {
                     if ((server.equals("ParkChat") && dashboard.getServer(tp.getServer()).isPark()) || tp.getServer().equals(server)) {
-                        tp.sendMessage(tp.getRank().getRankId() >= Rank.SQUIRE.getRankId() ? msgname : msg);
+                        tp.sendMessage(tp.getRank().getRankId() >= Rank.TRAINEE.getRankId() ? msgname : msg);
                     }
                 }
                 break;
@@ -858,7 +858,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
         boolean devs = false;
         for (Player tp : dashboard.getOnlinePlayers()) {
-            if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+            if (tp.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                 devs = true;
                 break;
             }

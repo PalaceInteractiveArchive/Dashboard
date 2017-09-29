@@ -10,7 +10,7 @@ import network.palace.dashboard.handlers.*;
 public class Commandchatstatus extends MagicCommand {
 
     public Commandchatstatus() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override

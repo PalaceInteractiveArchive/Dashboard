@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Commandban extends MagicCommand {
 
     public Commandban() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
         tabCompletePlayers = true;
     }
 

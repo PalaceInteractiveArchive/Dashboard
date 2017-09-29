@@ -120,29 +120,23 @@ public class Forum {
             case "specialguest":
                 rankid = 6;
                 break;
-            case "mcprohosting":
+            case "trainee":
                 rankid = 7;
                 break;
-            case "squire":
+            case "mod":
                 rankid = 8;
                 break;
-            case "knight":
+            case "srmod":
                 rankid = 9;
                 break;
-            case "architect":
+            case "developer":
                 rankid = 10;
                 break;
-            case "paladin":
+            case "admin":
                 rankid = 11;
                 break;
-            case "wizard":
+            case "manager":
                 rankid = 12;
-                break;
-            case "emperor":
-                rankid = 13;
-                break;
-            case "empress":
-                rankid = 14;
                 break;
         }
         Database.executeUpdate("UPDATE xf_user SET apms2_group=?,apms2_groups=? WHERE apms2_uuid=?", rankid, rankid, uuid);

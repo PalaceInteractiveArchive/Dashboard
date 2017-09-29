@@ -11,7 +11,7 @@ import java.util.List;
 public class Commandsend extends MagicCommand {
 
     public Commandsend() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override

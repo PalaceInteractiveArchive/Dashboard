@@ -23,7 +23,7 @@ import java.util.UUID;
 public class Commandmodlog extends MagicCommand {
 
     public Commandmodlog() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         tabCompletePlayers = true;
     }
 

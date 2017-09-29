@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Commandunmute extends MagicCommand {
 
     public Commandunmute() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
         tabCompletePlayers = true;
     }
 

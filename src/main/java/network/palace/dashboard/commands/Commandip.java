@@ -9,7 +9,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandip extends MagicCommand {
 
     public Commandip() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         tabCompletePlayers = true;
     }
 

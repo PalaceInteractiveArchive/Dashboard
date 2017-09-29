@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Commandmute extends MagicCommand {
 
     public Commandmute() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         tabCompletePlayers = true;
     }
 

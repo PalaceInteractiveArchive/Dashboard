@@ -17,7 +17,7 @@ import network.palace.dashboard.server.WebSocketServerHandler;
 public class Commandmotdrl extends MagicCommand {
 
     public Commandmotdrl() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

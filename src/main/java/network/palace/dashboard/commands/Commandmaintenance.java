@@ -20,7 +20,7 @@ import java.util.*;
 public class Commandmaintenance extends MagicCommand {
 
     public Commandmaintenance() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override
@@ -29,8 +29,8 @@ public class Commandmaintenance extends MagicCommand {
         dashboard.setMaintenance(!dashboard.isMaintenance());
         PacketMaintenance packet = new PacketMaintenance(dashboard.isMaintenance());
         if (dashboard.isMaintenance()) {
-            HashMap<Rank, List<UUID>> staff = dashboard.getSqlUtil().getPlayersByRanks(Rank.SQUIRE, Rank.KNIGHT,
-                    Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
+            HashMap<Rank, List<UUID>> staff = dashboard.getSqlUtil().getPlayersByRanks(Rank.TRAINEE, Rank.MOD,
+                    Rank.SRMOD, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
             List<UUID> list = new ArrayList<>();
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
                 list.addAll(entry.getValue());
@@ -48,7 +48,7 @@ public class Commandmaintenance extends MagicCommand {
             }
             player.sendMessage(ChatColor.GREEN + "Bungees notified! Disconnecting all Guests...");
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+                if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                     continue;
                 }
                 tp.kickPlayer(ChatColor.AQUA + "Maintenance Mode has been enabled!\nFollow " + ChatColor.BLUE +
@@ -59,7 +59,7 @@ public class Commandmaintenance extends MagicCommand {
                 public void run() {
                     boolean guests = false;
                     for (Player tp : dashboard.getOnlinePlayers()) {
-                        if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+                        if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
                             guests = true;
                             return;
                         }

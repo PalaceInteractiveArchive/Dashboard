@@ -96,7 +96,7 @@ public class Commandparty extends MagicCommand {
         } else if (args.length == 2) {
             Party party = dashboard.getPartyUtil().findPartyForPlayer(player);
             if (args[0].equalsIgnoreCase("takeover")) {
-                if (player.getRank().getRankId() < Rank.KNIGHT.getRankId()) {
+                if (player.getRank().getRankId() < Rank.MOD.getRankId()) {
                     helpMenu(player);
                     return;
                 }

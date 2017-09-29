@@ -16,7 +16,7 @@ import java.util.TimerTask;
 public class Commandreboot extends MagicCommand {
 
     public Commandreboot() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override

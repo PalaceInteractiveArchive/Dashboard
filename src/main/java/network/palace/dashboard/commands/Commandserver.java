@@ -18,13 +18,13 @@ import java.util.*;
 public class Commandserver extends MagicCommand {
 
     public Commandserver() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override
     public void execute(final Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (args.length == 6 && args[0].equalsIgnoreCase("add") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+        if (args.length == 6 && args[0].equalsIgnoreCase("add") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
             final String name = args[1];
             final String address = args[2];
             final int port;
@@ -80,7 +80,7 @@ public class Commandserver extends MagicCommand {
             });
             return;
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("remove") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+        if (args.length == 2 && args[0].equalsIgnoreCase("remove") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
             final String name = args[1];
             final Server s = dashboard.getServerUtil().getServer(name);
             if (s == null) {
@@ -126,7 +126,7 @@ public class Commandserver extends MagicCommand {
                 }
             }, 1000);
             return;
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("mute") && player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("mute") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
             final String serverName = args[1];
             if (dashboard.getServerUtil().isMuted(serverName)) {
                 dashboard.getServerUtil().unmuteServer(serverName);
@@ -135,7 +135,7 @@ public class Commandserver extends MagicCommand {
             dashboard.getServerUtil().muteServer(serverName);
         }
         if (args.length == 1) {
-            if (player.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                 if (args[0].equalsIgnoreCase("help")) {
                     player.sendMessage(ChatColor.GREEN + "Server Commands:");
                     player.sendMessage(ChatColor.GREEN + "/server list " + ChatColor.AQUA +

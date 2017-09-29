@@ -12,7 +12,7 @@ import java.util.List;
 public class Commandnamecheck extends MagicCommand {
 
     public Commandnamecheck() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         tabCompletePlayers = true;
     }
 
@@ -30,11 +30,11 @@ public class Commandnamecheck extends MagicCommand {
                 player.sendMessage(ChatColor.RED + "That user could not be found!");
                 return;
             }
-            String msg = ChatColor.GREEN + "Previous usernames of " + args[0] + " are:";
+            StringBuilder msg = new StringBuilder(ChatColor.GREEN + "Previous usernames of " + args[0] + " are:");
             for (int i = 1; i < names.size(); i++) {
-                msg += ChatColor.AQUA + "\n- " + ChatColor.GREEN + names.get(i);
+                msg.append(ChatColor.AQUA).append("\n- ").append(ChatColor.GREEN).append(names.get(i));
             }
-            player.sendMessage(msg);
+            player.sendMessage(msg.toString());
         });
     }
 }

@@ -13,7 +13,7 @@ import network.palace.dashboard.handlers.Rank;
  */
 public class CommandStrict extends MagicCommand {
     public CommandStrict() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

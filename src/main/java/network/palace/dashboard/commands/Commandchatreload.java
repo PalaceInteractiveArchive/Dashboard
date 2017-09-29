@@ -13,7 +13,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandchatreload extends MagicCommand {
 
     public Commandchatreload() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

@@ -101,8 +101,8 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.SQUIRE, Rank.ARCHITECT,
-                    Rank.KNIGHT, Rank.PALADIN, Rank.WIZARD, Rank.EMPEROR, Rank.EMPRESS);
+            HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.TRAINEE, Rank.MOD, Rank.SRMOD,
+                    Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
                 maintenanceWhitelist.addAll(entry.getValue());
             }

@@ -16,7 +16,7 @@ import java.util.TimerTask;
 public class Commandkickall extends MagicCommand {
 
     public Commandkickall() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class Commandkickall extends MagicCommand {
         r = new StringBuilder(ChatColor.translateAlternateColorCodes('&', r.toString().trim()));
         player.sendMessage(ChatColor.GREEN + "Disconnecting all players for " + r);
         for (Player tp : dashboard.getOnlinePlayers()) {
-            if (tp.getRank().getRankId() >= Rank.WIZARD.getRankId()) {
+            if (tp.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                 continue;
             }
             tp.kickPlayer(r.toString());
@@ -43,7 +43,7 @@ public class Commandkickall extends MagicCommand {
             public void run() {
                 boolean empty = true;
                 for (Player tp : dashboard.getOnlinePlayers()) {
-                    if (tp.getRank().getRankId() < Rank.WIZARD.getRankId()) {
+                    if (tp.getRank().getRankId() < Rank.DEVELOPER.getRankId()) {
                         empty = false;
                         break;
                     }

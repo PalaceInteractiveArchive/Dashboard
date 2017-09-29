@@ -10,7 +10,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandb extends MagicCommand {
 
     public Commandb() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class Commandb extends MagicCommand {
                     sname + ChatColor.WHITE + "] " + ChatColor.GREEN +
                     ChatColor.translateAlternateColorCodes('&', message.toString());
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.KNIGHT.getRankId()) {
+                if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.MOD.getRankId()) {
                     tp.sendMessage(staff);
                 } else {
                     tp.sendMessage(msg);

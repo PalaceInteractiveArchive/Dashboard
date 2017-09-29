@@ -16,7 +16,7 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 public class Commandreloadicon extends MagicCommand {
 
     public Commandreloadicon() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override

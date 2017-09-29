@@ -203,7 +203,7 @@ public class FriendUtil {
                     player.sendMessage(ChatColor.RED + "You have already sent this player a Friend Request!");
                     return;
                 }
-                if (player.getRank().getRankId() < Rank.KNIGHT.getRankId()) {
+                if (player.getRank().getRankId() < Rank.MOD.getRankId()) {
                     if (hasFriendsToggledOff(tuuid)) {
                         player.sendMessage(ChatColor.RED + "That player has Friend Requests toggled off!");
                         return;
@@ -238,7 +238,7 @@ public class FriendUtil {
             player.sendMessage(ChatColor.RED + "You have already sent this player a Friend Request!");
             return;
         }
-        if (player.getRank().getRankId() < Rank.KNIGHT.getRankId()) {
+        if (player.getRank().getRankId() < Rank.MOD.getRankId()) {
             if (tp.hasFriendToggledOff()) {
                 player.sendMessage(ChatColor.RED + "That player has Friend Requests toggled off!");
                 return;
@@ -446,11 +446,11 @@ public class FriendUtil {
 
     public void friendMessage(Player player, HashMap<UUID, String> friendList, String joinMessage) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
             for (Map.Entry<UUID, String> entry : friendList.entrySet()) {
                 Player tp = dashboard.getPlayer(entry.getKey());
                 if (tp != null) {
-                    if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+                    if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
                         tp.sendMessage(joinMessage);
                     }
                 }

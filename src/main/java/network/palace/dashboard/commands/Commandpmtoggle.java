@@ -12,7 +12,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandpmtoggle extends MagicCommand {
 
     public Commandpmtoggle() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

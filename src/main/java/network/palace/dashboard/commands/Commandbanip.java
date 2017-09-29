@@ -7,7 +7,7 @@ import network.palace.dashboard.handlers.*;
 public class Commandbanip extends MagicCommand {
 
     public Commandbanip() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

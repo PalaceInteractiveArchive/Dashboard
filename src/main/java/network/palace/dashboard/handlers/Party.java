@@ -215,7 +215,7 @@ public class Party {
         Rank r = player.getRank();
         String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUniqueId()) ? ChatColor.YELLOW + "* " : "") +
                 r.getFormattedName() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
-                (r.getRankId() >= Rank.SQUIRE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
+                (r.getRankId() >= Rank.TRAINEE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
         for (UUID uuid : getMembers()) {
             if (uuid.equals(player.getUniqueId())) {
                 continue;

@@ -26,7 +26,7 @@ public class Commandpchat extends MagicCommand {
                     ChatColor.DARK_AQUA + "Learn more at palnet.us/rules");
             return;
         }
-        if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
@@ -60,9 +60,9 @@ public class Commandpchat extends MagicCommand {
         for (String arg : args) {
             msg.append(arg).append(" ");
         }
-        msg = new StringBuilder(player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
+        msg = new StringBuilder(player.getRank().getRankId() < Rank.TRAINEE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
                 msg.toString().trim()) : msg.toString().trim());
-        if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             if (dashboard.getChatUtil().containsSwear(player, msg.toString()) || dashboard.getChatUtil().isAdvert(player, msg.toString())
                     || dashboard.getChatUtil().spamCheck(player, msg.toString()) || dashboard.getChatUtil().containsUnicode(player, msg.toString())) {
                 return;

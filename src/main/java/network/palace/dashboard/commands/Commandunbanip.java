@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class Commandunbanip extends MagicCommand {
 
     public Commandunbanip() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
         aliases = Arrays.asList("pardonip", "pardon-ip");
     }
 

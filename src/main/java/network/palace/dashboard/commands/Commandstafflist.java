@@ -13,50 +13,50 @@ import java.util.List;
 public class Commandstafflist extends MagicCommand {
 
     public Commandstafflist() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        List<String> empress = new ArrayList<>();
-        List<String> emperor = new ArrayList<>();
-        List<String> wizard = new ArrayList<>();
-        List<String> paladin = new ArrayList<>();
-        List<String> knight = new ArrayList<>();
-        List<String> squire = new ArrayList<>();
+        List<String> manager = new ArrayList<>();
+        List<String> admin = new ArrayList<>();
+        List<String> developer = new ArrayList<>();
+        List<String> srmod = new ArrayList<>();
+        List<String> mod = new ArrayList<>();
+        List<String> trainee = new ArrayList<>();
         for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             Rank r = tp.getRank();
-            if (r.getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (r.getRankId() >= Rank.TRAINEE.getRankId()) {
                 switch (r) {
-                    case SQUIRE:
-                        squire.add(tp.getUsername() + ":" + tp.getServer());
+                    case TRAINEE:
+                        trainee.add(tp.getUsername() + ":" + tp.getServer());
                         break;
-                    case KNIGHT:
-                        knight.add(tp.getUsername() + ":" + tp.getServer());
+                    case MOD:
+                        mod.add(tp.getUsername() + ":" + tp.getServer());
                         break;
-                    case PALADIN:
-                        paladin.add(tp.getUsername() + ":" + tp.getServer());
+                    case SRMOD:
+                        srmod.add(tp.getUsername() + ":" + tp.getServer());
                         break;
-                    case WIZARD:
-                        wizard.add(tp.getUsername() + ":" + tp.getServer());
+                    case DEVELOPER:
+                        developer.add(tp.getUsername() + ":" + tp.getServer());
                         break;
-                    case EMPEROR:
-                        emperor.add(tp.getUsername() + ":" + tp.getServer());
+                    case ADMIN:
+                        admin.add(tp.getUsername() + ":" + tp.getServer());
                         break;
-                    case EMPRESS:
-                        empress.add(tp.getUsername() + ":" + tp.getServer());
+                    case MANAGER:
+                        manager.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                 }
             }
         }
-        Collections.sort(emperor);
-        Collections.sort(empress);
-        Collections.sort(wizard);
-        Collections.sort(paladin);
-        Collections.sort(knight);
-        Collections.sort(squire);
-        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), empress, emperor,
-                wizard, paladin, knight, squire);
+        Collections.sort(manager);
+        Collections.sort(admin);
+        Collections.sort(developer);
+        Collections.sort(srmod);
+        Collections.sort(mod);
+        Collections.sort(trainee);
+        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), manager, admin,
+                developer, srmod, mod, trainee);
         player.send(packet);
     }
 }

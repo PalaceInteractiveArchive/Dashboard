@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Commandbseen extends MagicCommand {
 
     public Commandbseen() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         tabCompletePlayers = true;
     }
 

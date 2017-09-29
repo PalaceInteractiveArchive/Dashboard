@@ -10,7 +10,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandchatdelay extends MagicCommand {
 
     public Commandchatdelay() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

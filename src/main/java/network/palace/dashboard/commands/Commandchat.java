@@ -22,20 +22,20 @@ public class Commandchat extends MagicCommand {
         List<String> list = new ArrayList<>();
         list.add("all");
         list.add("party");
-        if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
             list.add("staff");
-            if (player.getRank().getRankId() >= Rank.EMPEROR.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.ADMIN.getRankId()) {
                 list.add("admin");
             }
         }
         if (args.length <= 0) {
-            String m = ChatColor.AQUA + "You are currently in the " + ChatColor.GREEN + player.getChannel() +
-                    ChatColor.AQUA + " channel. You can speak in the following channels:";
+            StringBuilder m = new StringBuilder(ChatColor.AQUA + "You are currently in the " + ChatColor.GREEN + player.getChannel() +
+                    ChatColor.AQUA + " channel. You can speak in the following channels:");
             for (String s : list) {
-                m += ChatColor.GREEN + "\n- " + ChatColor.AQUA + s;
+                m.append(ChatColor.GREEN).append("\n- ").append(ChatColor.AQUA).append(s);
             }
-            m += "\n\nExample: " + ChatColor.GREEN + "/chat all " + ChatColor.AQUA + "switches you to main chat";
-            player.sendMessage(m);
+            m.append("\n\nExample: ").append(ChatColor.GREEN).append("/chat all ").append(ChatColor.AQUA).append("switches you to main chat");
+            player.sendMessage(m.toString());
             return;
         }
         String channel = args[0].toLowerCase();
@@ -58,9 +58,9 @@ public class Commandchat extends MagicCommand {
         if (args.size() == 0) {
             list.add("all");
             list.add("party");
-            if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                 list.add("staff");
-                if (player.getRank().getRankId() >= Rank.EMPEROR.getRankId()) {
+                if (player.getRank().getRankId() >= Rank.ADMIN.getRankId()) {
                     list.add("admin");
                 }
             }
@@ -69,9 +69,9 @@ public class Commandchat extends MagicCommand {
         } else if (args.size() == 1) {
             list.add("all");
             list.add("party");
-            if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                 list.add("staff");
-                if (player.getRank().getRankId() >= Rank.EMPEROR.getRankId()) {
+                if (player.getRank().getRankId() >= Rank.ADMIN.getRankId()) {
                     list.add("admin");
                 }
             }

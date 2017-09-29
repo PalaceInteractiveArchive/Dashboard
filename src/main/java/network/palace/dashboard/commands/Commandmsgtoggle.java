@@ -8,7 +8,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandmsgtoggle extends MagicCommand {
 
     public Commandmsgtoggle() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override

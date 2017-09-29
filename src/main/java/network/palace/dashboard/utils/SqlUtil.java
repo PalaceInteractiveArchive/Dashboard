@@ -123,7 +123,7 @@ public class SqlUtil {
                 }
                 boolean needsUpdate = false;
                 boolean isSameIP = !player.getAddress().equals(result.getString("ipAddress"));
-                boolean disable = isSameIP && rank.getRankId() >= Rank.SQUIRE.getRankId();
+                boolean disable = isSameIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
 
                 if (isSameIP || !player.getUsername().equals(result.getString("username")) ||
                         player.getMcVersion() != result.getInt("mcversion")) needsUpdate = true;
@@ -147,12 +147,12 @@ public class SqlUtil {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
-                        if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+                        if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                             tp.sendMessage(msg);
                         }
                     }
                     staffClock(player.getUniqueId(), true, connection);
-                    if (rank.getRankId() >= Rank.SQUIRE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
+                    if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
                         player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
                     }
                 }
@@ -198,7 +198,7 @@ public class SqlUtil {
     }
 
     private void update(Player player, Connection connection, boolean username, boolean mcversion) throws SQLException {
-        if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
             if (!username && !mcversion) {
                 return;
             }
@@ -297,7 +297,7 @@ public class SqlUtil {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked out.";
                     for (Player tp : dashboard.getOnlinePlayers()) {
-                        if (tp.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+                        if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                             tp.sendMessage(msg);
                         }
                     }

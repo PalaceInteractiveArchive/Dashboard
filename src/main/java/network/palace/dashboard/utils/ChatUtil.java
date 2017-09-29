@@ -178,7 +178,7 @@ public class ChatUtil {
         if (player.isNewGuest()) return;
 
         Rank rank = player.getRank();
-        boolean squire = rank.getRankId() >= Rank.SQUIRE.getRankId();
+        boolean squire = rank.getRankId() >= Rank.TRAINEE.getRankId();
         if (squire) {
             if (player.isAFK()) {
                 player.setAFK(false);
@@ -216,7 +216,7 @@ public class ChatUtil {
         if (command) {
             if (!dashboard.getCommandUtil().handleCommand(player, msg.toString().replaceFirst("/", ""))) {
                 String s = msg.toString().toLowerCase().replaceFirst("/", "");
-                if (rank.getRankId() < Rank.KNIGHT.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
+                if (rank.getRankId() < Rank.MOD.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
                         s.startsWith("/eval") || s.startsWith("/evaluate") || s.startsWith("/solve") ||
                         s.startsWith("worldedit:/calc") || s.startsWith("worldedit:/calculate") ||
                         s.startsWith("worldedit:/eval") || s.startsWith("worldedit:/evaluate") ||
@@ -352,7 +352,7 @@ public class ChatUtil {
         }
         if (dashboard.getServer(player.getServer()).isPark()) {
             Rank rank = player.getRank();
-            if (rank.getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
             }
             String message = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
@@ -632,7 +632,7 @@ public class ChatUtil {
     public void staffChatMessage(String msg) {
         Dashboard dashboard = Launcher.getDashboard();
         for (Player player : dashboard.getOnlinePlayers()) {
-            if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId() && !player.isDisabled()) {
+            if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId() && !player.isDisabled()) {
                 try {
                     player.sendMessage(msg);
                 } catch (Exception ignored) {
@@ -646,7 +646,7 @@ public class ChatUtil {
         if (dashboard.getServer(from.getServer()).isPark()) {
             String msg = ChatColor.WHITE + from.getUsername() + ": /" + command + " " + to.getUsername() + " " + message;
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
+                if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
@@ -657,7 +657,7 @@ public class ChatUtil {
         } else {
             String server = from.getServer();
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
+                if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId() || tp.getServer() == null ||
                         tp.getUniqueId().equals(from.getUniqueId()) || tp.getUniqueId().equals(to.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
@@ -674,7 +674,7 @@ public class ChatUtil {
             String msg = ChatColor.WHITE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
                     " " + message;
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
+                if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId() || tp.getServer() == null ||
                         party.getMembers().contains(tp.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }
@@ -685,7 +685,7 @@ public class ChatUtil {
         } else {
             String server = player.getServer();
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.getRank().getRankId() < Rank.SQUIRE.getRankId() || tp.getServer() == null ||
+                if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId() || tp.getServer() == null ||
                         party.getMembers().contains(tp.getUniqueId()) || tp.isDisabled()) {
                     continue;
                 }

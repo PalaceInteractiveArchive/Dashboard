@@ -27,7 +27,7 @@ public class Commandreply extends MagicCommand {
             player.sendMessage(ChatColor.RED + "You don't have anyone to respond to!");
             return;
         }
-        if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
@@ -40,18 +40,18 @@ public class Commandreply extends MagicCommand {
                 return;
             }
         }
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         for (String arg : args) {
-            msg += arg + " ";
+            msg.append(arg).append(" ");
         }
-        msg = player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
-                msg.trim()) : msg.trim();
-        if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
-            if (dashboard.getChatUtil().containsSwear(player, msg) || dashboard.getChatUtil().isAdvert(player, msg)
-                    || dashboard.getChatUtil().spamCheck(player, msg) || dashboard.getChatUtil().containsUnicode(player, msg)) {
+        msg = new StringBuilder(player.getRank().getRankId() < Rank.TRAINEE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
+                msg.toString().trim()) : msg.toString().trim());
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
+            if (dashboard.getChatUtil().containsSwear(player, msg.toString()) || dashboard.getChatUtil().isAdvert(player, msg.toString())
+                    || dashboard.getChatUtil().spamCheck(player, msg.toString()) || dashboard.getChatUtil().containsUnicode(player, msg.toString())) {
                 return;
             }
-            String mm = msg.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
+            String mm = msg.toString().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
                 player.sendMessage(ChatColor.RED + "Please do not ask for Skype information!");
@@ -67,7 +67,7 @@ public class Commandreply extends MagicCommand {
                 tp.getRank().getFormattedName() + ChatColor.GRAY + " " + tp.getUsername() + ": " +
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUniqueId());
-        dashboard.getChatUtil().socialSpyMessage(player, tp, msg, "reply");
+        dashboard.getChatUtil().socialSpyMessage(player, tp, msg.toString(), "reply");
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/reply " + tp.getUsername() + " " + msg);
     }
 }

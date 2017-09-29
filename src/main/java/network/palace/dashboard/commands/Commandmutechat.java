@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class Commandmutechat extends MagicCommand {
 
     public Commandmutechat() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
         aliases = Arrays.asList("chatmute");
     }
 
@@ -37,7 +37,7 @@ public class Commandmutechat extends MagicCommand {
         String msgname = msg + " by " + player.getUsername();
         for (Player tp : dashboard.getOnlinePlayers()) {
             if ((server.equals("ParkChat") && dashboard.getServer(tp.getServer()).isPark()) || tp.getServer().equals(server)) {
-                tp.sendMessage(tp.getRank().getRankId() >= Rank.SQUIRE.getRankId() ? msgname : msg);
+                tp.sendMessage(tp.getRank().getRankId() >= Rank.TRAINEE.getRankId() ? msgname : msg);
             }
         }
     }

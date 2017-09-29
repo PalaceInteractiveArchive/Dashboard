@@ -34,7 +34,7 @@ public class Commandmsg extends MagicCommand {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
-        if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
@@ -51,9 +51,9 @@ public class Commandmsg extends MagicCommand {
         for (int i = 1; i < args.length; i++) {
             msg.append(args[i]).append(" ");
         }
-        msg = new StringBuilder(player.getRank().getRankId() < Rank.SQUIRE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
+        msg = new StringBuilder(player.getRank().getRankId() < Rank.TRAINEE.getRankId() ? dashboard.getChatUtil().removeCaps(player,
                 msg.toString().trim()) : msg.toString().trim());
-        if (player.getRank().getRankId() < Rank.SQUIRE.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             if (dashboard.getChatUtil().containsSwear(player, msg.toString()) || dashboard.getChatUtil().isAdvert(player, msg.toString())
                     || dashboard.getChatUtil().spamCheck(player, msg.toString()) || dashboard.getChatUtil().containsUnicode(player, msg.toString())) {
                 return;

@@ -16,34 +16,34 @@ import java.util.TreeMap;
 public class Commandcmds extends MagicCommand {
 
     public Commandcmds() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override
     public void execute(Player player, String label, String[] args) {
         player.sendMessage(ChatColor.GREEN + "Registered Commands:");
-        String msg = null;
+        StringBuilder msg = null;
         TreeMap<String, MagicCommand> map = Launcher.getDashboard().getCommandUtil().getCommands();
         for (Map.Entry<String, MagicCommand> entry : map.entrySet()) {
             if (msg != null) {
-                msg += "\n";
+                msg.append("\n");
             } else {
-                msg = "";
+                msg = new StringBuilder();
             }
-            msg += ChatColor.YELLOW + "- /" + entry.getKey() + " ";
+            msg.append(ChatColor.YELLOW).append("- /").append(entry.getKey()).append(" ");
             List<String> aliases = entry.getValue().getAliases();
             if (!aliases.isEmpty()) {
-                msg += "(";
+                msg.append("(");
                 for (int i = 0; i < aliases.size(); i++) {
-                    msg += aliases.get(i);
+                    msg.append(aliases.get(i));
                     if (i < (aliases.size() - 1)) {
-                        msg += ", ";
+                        msg.append(", ");
                     }
                 }
-                msg += ") ";
+                msg.append(") ");
             }
-            msg += entry.getValue().getRank().getTagColor() + entry.getValue().getRank().getName();
+            msg.append(entry.getValue().getRank().getTagColor()).append(entry.getValue().getRank().getName());
         }
-        player.sendMessage(msg);
+        player.sendMessage(msg.toString());
     }
 }

@@ -10,7 +10,7 @@ import network.palace.dashboard.handlers.Rank;
 public class Commandsc extends MagicCommand {
 
     public Commandsc() {
-        super(Rank.SQUIRE);
+        super(Rank.TRAINEE);
     }
 
     @Override

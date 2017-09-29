@@ -20,7 +20,7 @@ import java.util.UUID;
 public class Commandbungeecounts extends MagicCommand {
 
     public Commandbungeecounts() {
-        super(Rank.WIZARD);
+        super(Rank.DEVELOPER);
     }
 
     @Override

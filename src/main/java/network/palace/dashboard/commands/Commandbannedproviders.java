@@ -12,7 +12,7 @@ import java.util.List;
 public class Commandbannedproviders extends MagicCommand {
 
     public Commandbannedproviders() {
-        super(Rank.KNIGHT);
+        super(Rank.MOD);
     }
 
     @Override

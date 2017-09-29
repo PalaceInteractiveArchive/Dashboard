@@ -112,7 +112,7 @@ public class ModerationUtil {
         Dashboard dashboard = Launcher.getDashboard();
         String msg = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + message;
         for (Player player : dashboard.getOnlinePlayers()) {
-            if (player.getRank().getRankId() >= Rank.SQUIRE.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                 player.sendMessage(msg);
             }
         }
