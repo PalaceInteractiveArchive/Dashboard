@@ -1,11 +1,13 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.MagicCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.utils.ChatUtil;
 
 import java.util.Arrays;
 
@@ -23,9 +25,8 @@ public class Commandmsg extends MagicCommand {
             player.sendMessage(ChatColor.RED + "/msg [Player] [Message]");
             return;
         }
-        if (!enoughTime(player)) {
-            player.sendMessage(ChatColor.RED + "New Guests must be on the server for at least 15 minutes before talking in chat. " +
-                    ChatColor.DARK_AQUA + "Learn more at palnet.us/rules");
+        if (!ChatUtil.enoughTime(player)) {
+            player.sendMessage(DashboardConstants.NEW_GUEST);
             return;
         }
         String target = args[0];
@@ -77,9 +78,5 @@ public class Commandmsg extends MagicCommand {
         player.setReply(tp.getUniqueId());
         dashboard.getChatUtil().socialSpyMessage(player, tp, msg.toString(), "msg");
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/msg " + tp.getUsername() + " " + msg);
-    }
-
-    private boolean enoughTime(Player player) {
-        return (((System.currentTimeMillis() - player.getLoginTime()) / 1000) + player.getOnlineTime()) >= 900;
     }
 }

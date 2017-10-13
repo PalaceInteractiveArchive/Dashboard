@@ -1,8 +1,10 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.utils.ChatUtil;
 import network.palace.dashboard.utils.DateUtil;
 
 import java.util.Date;
@@ -21,9 +23,8 @@ public class Commandpchat extends MagicCommand {
             player.sendMessage(ChatColor.RED + "You are not in a party!");
             return;
         }
-        if (!enoughTime(player)) {
-            player.sendMessage(ChatColor.RED + "New Guests must be on the server for at least 15 minutes before talking in chat. " +
-                    ChatColor.DARK_AQUA + "Learn more at palnet.us/rules");
+        if (!ChatUtil.enoughTime(player)) {
+            player.sendMessage(DashboardConstants.NEW_GUEST);
             return;
         }
         if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
@@ -76,9 +77,5 @@ public class Commandpchat extends MagicCommand {
         }
         party.chat(player, msg.toString());
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/pchat " + party.getLeader().getUsername() + " " + msg);
-    }
-
-    private boolean enoughTime(Player player) {
-        return (((System.currentTimeMillis() - player.getLoginTime()) / 1000) + player.getOnlineTime()) >= 900;
     }
 }

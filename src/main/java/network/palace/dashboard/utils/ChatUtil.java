@@ -175,7 +175,7 @@ public class ChatUtil {
         dashboard.getLogger().info((player == null ? "PLAYER IS NULL " : "") + "CHAT MESSAGE FROM " + uuid.toString() + ": '" + message + "'");
 
         if (player == null) return;
-        if (player.isNewGuest()) return;
+        if (player.isNewGuest() && !message.startsWith("/")) return;
 
         Rank rank = player.getRank();
         boolean squire = rank.getRankId() >= Rank.TRAINEE.getRankId();
@@ -318,8 +318,8 @@ public class ChatUtil {
         sendChat(player, msg.toString());
     }
 
-    private boolean enoughTime(Player player) {
-        return (((System.currentTimeMillis() - player.getLoginTime()) / 1000) + player.getOnlineTime()) >= 900;
+    public static boolean enoughTime(Player player) {
+        return (((System.currentTimeMillis() - player.getLoginTime()) / 1000) + player.getOnlineTime()) >= 600;
     }
 
     public boolean isMuted(Player player) {

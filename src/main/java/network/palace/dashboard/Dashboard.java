@@ -233,6 +233,9 @@ public class Dashboard {
         if (player.getServer().equalsIgnoreCase("unknown") && server != null) {
             player.setServer(server);
         }
+        if (player.isNewGuest()) {
+            player.runTutorial();
+        }
     }
 
     public static DashboardSocketChannel getBungee(UUID bungeeID) {
@@ -267,11 +270,9 @@ public class Dashboard {
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {
                 Server s = getServerUtil().getServer(player.getServer());
-                if (s != null)
-                    s.changeCount(-1);
+                if (s != null) s.changeCount(-1);
             }
-            if (player.getTutorial() != null)
-                player.getTutorial().cancel();
+            if (player.getTutorial() != null) player.getTutorial().cancel();
             sqlUtil.logout(player);
         }
         PacketKick packet = new PacketKick("See ya real soon!");

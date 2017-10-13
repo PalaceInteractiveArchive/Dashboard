@@ -20,8 +20,8 @@ public class DashboardConstants {
 
     public static final String MUTED_CHAT = ChatColor.RED + "Chat is currently muted!";
     public static final String CHAT_DELAY = ChatColor.RED + "You must wait <TIME> seconds before chatting!";
-    public static final String NEW_GUEST = ChatColor.RED + "New guests must be on the server for at least 15 minutes before talking in chat." +
-            " Learn more at palnet.us/rules";
+    public static final String NEW_GUEST = ChatColor.RED + "New guests must be on the server for at least 10 minutes before talking in chat." +
+            ChatColor.DARK_AQUA + " Learn more at palnet.us/rules";
     public static final String MESSAGE_REPEAT = ChatColor.RED + "Please do not repeat the same message!";
     public static final String SKYPE_INFORMATION = ChatColor.RED + "Please do not ask for Skype information!";
     public static final String MUTED_PLAYER = ChatColor.RED + "You are muted! You will be unmuted in <TIME>.";

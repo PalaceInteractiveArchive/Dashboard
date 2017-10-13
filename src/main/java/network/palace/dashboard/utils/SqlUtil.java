@@ -187,6 +187,7 @@ public class SqlUtil {
     private void newPlayer(Player player, Connection connection) throws SQLException {
         Dashboard dashboard = Launcher.getDashboard();
         player.setNewGuest(true);
+        player.setOnlineTime(1);
         PreparedStatement sql = connection.prepareStatement("INSERT INTO player_data (uuid, username, ipAddress) VALUES(?,?,?)");
         sql.setString(1, player.getUniqueId().toString());
         sql.setString(2, player.getUsername());
@@ -195,6 +196,7 @@ public class SqlUtil {
         sql.close();
         dashboard.addPlayer(player);
         dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: SqlUtil.newPlayer");
+        dashboard.addToCache(player.getUniqueId(), player.getUsername());
     }
 
     private void update(Player player, Connection connection, boolean username, boolean mcversion) throws SQLException {

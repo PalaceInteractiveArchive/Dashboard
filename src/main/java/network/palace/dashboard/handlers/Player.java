@@ -13,6 +13,7 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 
 import java.util.HashMap;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 /**
@@ -143,5 +144,89 @@ public class Player {
 
     public boolean canRecieveMessages() {
         return receiveMessages;
+    }
+
+    public void runTutorial() {
+        Timer tutorial = new Timer();
+        tutorial.schedule(new TimerTask() {
+            int i = 0;
+
+            @Override
+            public void run() {
+                switch (i) {
+                    case 0: {
+                        sendMessage(ChatColor.GREEN + "\nWelcome to the " + ChatColor.AQUA + "Palace Network" +
+                                ChatColor.GREEN + ", we're happy you're here!");
+                        mention();
+                        break;
+                    }
+                    case 4: {
+                        sendMessage(ChatColor.GREEN + "\nWe are an all-inclusive family-friendly " +
+                                ChatColor.DARK_GREEN + "Minecraft " + ChatColor.GREEN + "gaming network!");
+                        mention();
+                        break;
+                    }
+                    case 7: {
+                        sendMessage(ChatColor.GREEN + "\nRight now you're at the " + ChatColor.AQUA +
+                                "Hub. " + ChatColor.GREEN + "From here, you can get to all of the different parts of our network.");
+                        mention();
+                        break;
+                    }
+                    case 15: {
+                        sendMessage(ChatColor.GREEN + "\nArcade Games, Theme Parks, and a Creative server to name a few.");
+                        mention();
+                        break;
+                    }
+                    case 21: {
+                        sendMessage(ChatColor.GREEN + "\nYou can also use your " + ChatColor.AQUA +
+                                "Navigation Star " + ChatColor.GREEN + "to get to the different parts of our server.");
+                        mention();
+                        break;
+                    }
+                    case 28: {
+                        sendMessage(ChatColor.GREEN + "\nInstall our Resource Pack for the " +
+                                ChatColor.AQUA + "best " + ChatColor.GREEN +
+                                "experience possible! All you have to do is type " + ChatColor.AQUA +
+                                "/pack " + ChatColor.GREEN + "on a Park server and select " + ChatColor.DARK_GREEN +
+                                "Yes. " + ChatColor.GRAY + "" + ChatColor.ITALIC +
+                                "(You can set this up when the tutorial finishes)");
+                        mention();
+                        break;
+                    }
+                    case 36: {
+                        sendMessage(ChatColor.GREEN + "\nAlso, connect to our " + ChatColor.BLUE +
+                                "Audio Server " + ChatColor.GREEN + "for an immersive experience! You will hear the " +
+                                ChatColor.AQUA + "sounds from rides, music from shows, and so much more! " +
+                                ChatColor.GREEN + "Just type " + ChatColor.AQUA + "/audio " + ChatColor.GREEN +
+                                "and click the message to connect. " + ChatColor.GRAY + "" + ChatColor.ITALIC +
+                                "(You can set this up when the tutorial finishes)");
+                        mention();
+                        break;
+                    }
+                    case 49: {
+                        sendMessage(ChatColor.GREEN + "\nBefore you start exploring, please take a " +
+                                "few minutes to review our rules: " + ChatColor.AQUA +
+                                "palace.network/rules " + ChatColor.GREEN + "\nWe are a " +
+                                "family-friendly server with a goal of providing a safe, fun experience " +
+                                "to all of our settlers.");
+                        mention();
+                        break;
+                    }
+                    case 58: {
+                        sendMessage(ChatColor.GREEN + "\nAfter you finish reviewing our rules, " +
+                                "you're finished with the tutorial! " + ChatColor.DARK_AQUA +
+                                "Note: New settlers must wait " + ChatColor.BOLD + "15 minutes " +
+                                ChatColor.DARK_AQUA + "before using chat. Read why: " +
+                                ChatColor.AQUA + "palace.network/rules#chat");
+                        mention();
+                        setNewGuest(false);
+                        Launcher.getDashboard().getSqlUtil().completeTutorial(getUniqueId());
+                        cancel();
+                    }
+                }
+                i++;
+            }
+        }, 2000, 1000);
+        setTutorial(tutorial);
     }
 }
