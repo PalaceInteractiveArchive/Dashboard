@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 public enum GameState {
-    WAITING(1), RUNNING(2), ENDING(3);
+    LOBBY(1), INGAME(2), RESTARTING(3);
 
     @Getter private int id;
 
@@ -20,8 +20,15 @@ public enum GameState {
      * @return the state of the game
      */
     public static GameState stateFromInt(int state) {
-        if (state == 1) return WAITING;
-        if (state == 2) return RUNNING;
-        return ENDING;
+        switch (state) {
+            case 1:
+                return LOBBY;
+            case 2:
+                return INGAME;
+            case 3:
+                return RESTARTING;
+            default:
+                return null;
+        }
     }
 }

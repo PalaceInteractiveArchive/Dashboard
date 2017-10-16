@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.packets.arcade.GameState;
 
 import java.util.UUID;
 
@@ -20,6 +21,8 @@ public class Server {
     private String serverType;
     private boolean online = false;
     @Getter @Setter private boolean inventory = false;
+    @Getter @Setter private GameState gameState = GameState.LOBBY;
+    @Getter @Setter private boolean gameNeedsUpdate = true;
 
     public Server(String name, String address, int port, boolean park, int count, String serverType) {
         this.name = name;

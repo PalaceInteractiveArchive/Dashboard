@@ -5,6 +5,7 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.packets.arcade.PacketGameStatus;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.dashboard.PacketOnlineCount;
 import network.palace.dashboard.packets.dashboard.PacketSendToServer;
@@ -73,7 +74,7 @@ public class ServerUtil {
                 }
             }
         }, 0L, 1000L);
-        /**
+        /*
          * Empty Lobby Timer
          */
         new Timer().schedule(new TimerTask() {
@@ -110,7 +111,9 @@ public class ServerUtil {
                 }
             }
         }, 0, 5000);
-
+        /*
+         * Muted Servers Timer
+         */
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -122,6 +125,26 @@ public class ServerUtil {
                 new HashMap<>(mutedServers).forEach((server, time) -> mutedServers.put(server, time + 1));
             }
         }, 0, 60000);
+        /*
+         * Game Server Timer
+         */
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                List<Server> arcades = getServers().stream().filter(s -> s.getName().startsWith("Arcade")).collect(Collectors.toList());
+                for (Server s : getServers()) {
+                    if (!s.getName().matches(WebSocketServerHandler.MINIGAME_REGEX) || !s.isGameNeedsUpdate()) continue;
+                    PacketGameStatus status = new PacketGameStatus(s.getGameState(), s.getCount(), s.getName());
+                    s.setGameNeedsUpdate(false);
+                    for (Server arcade : arcades) {
+                        DashboardSocketChannel socketChannel = Dashboard.getInstance(arcade.getName());
+                        if (socketChannel != null) {
+                            socketChannel.send(status);
+                        }
+                    }
+                }
+            }
+        }, 0, 1000);
     }
 
     public boolean isMuted(String server) {

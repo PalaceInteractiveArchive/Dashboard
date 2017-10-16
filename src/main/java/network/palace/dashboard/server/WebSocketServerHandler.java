@@ -45,7 +45,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private WebSocketServerHandshaker handshaker;
 
-    private final String MINIGAME_REGEX = "mini-(\\w+)([1-9])";
+    public static final String MINIGAME_REGEX = "mini-(\\w+)([1-9])";
 
     private final String MINIGAME_SERVER_NAME = "Arcade";
 
@@ -466,6 +466,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                             ") has connected to dashboard.");
                 }
+                if (name.startsWith("Arcade")) {
+                    for (Server game : dashboard.getServerUtil().getServers()) {
+                        if (!game.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) continue;
+                        game.setGameNeedsUpdate(true);
+                    }
+                }
                 break;
             }
             /*
@@ -687,7 +693,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
              */
             case 64: {
                 PacketGameStatus packet = new PacketGameStatus().fromJSON(object);
-                findArcadeServers().stream().map(Dashboard::getInstance).filter(Objects::nonNull).forEach(serverChannel -> serverChannel.send(packet));
+                Server s = dashboard.getServerUtil().getServer(packet.getServerName());
+                if (s == null) return;
+                s.setGameState(packet.getState());
+                s.setCount(packet.getPlayerAmount());
+                s.setGameNeedsUpdate(true);
+                break;
             }
             /*
              * Bungee ID (Sent when a bungee changes IDs)
@@ -895,7 +906,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      */
     private List<String> findArcadeServers() {
         Dashboard dashboard = Launcher.getDashboard();
-        return dashboard.getServers().stream().filter(server -> server.getServerType().equals(MINIGAME_SERVER_NAME))
+        return dashboard.getServers().stream().filter(server -> server.getName().startsWith("Arcade"))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), Collection::stream)).map(Server::getName).collect(Collectors.toList());
     }
 }

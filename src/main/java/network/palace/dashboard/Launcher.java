@@ -7,7 +7,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.Arcade;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.scheduler.SchedulerManager;
 import network.palace.dashboard.server.DashboardServerSocketChannel;
@@ -88,7 +87,6 @@ public class Launcher {
         dashboard.setSlackUtil(new SlackUtil());
         dashboard.setWarningUtil(new WarningUtil());
         dashboard.setPasswordUtil(new PasswordUtil());
-        dashboard.setArcade(new Arcade());
         dashboard.setFriendUtil(new FriendUtil());
         dashboard.setStrictThreshold(0.5);
         dashboard.setStrictMode(false);
