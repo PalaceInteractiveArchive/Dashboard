@@ -4,7 +4,9 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.*;
+import network.palace.dashboard.packets.park.PacketMuteChat;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
@@ -246,7 +248,7 @@ public class ChatUtil {
             if (dashboard.getServer(server).isPark()) {
                 server = "ParkChat";
             }
-            if (mutedChats.contains(server)) {
+            if (isChatMuted(server) && !server.equals("Creative")) {
                 player.sendMessage(DashboardConstants.MUTED_CHAT);
                 dashboard.getLogger().info("CANCELLED CHAT EVENT CHAT MUTED");
                 return;
@@ -706,10 +708,28 @@ public class ChatUtil {
 
     public void muteChat(String server) {
         mutedChats.add(server);
+        if (server.equals("Creative")) {
+            PacketMuteChat packet = new PacketMuteChat(server, true, "");
+            sendToServer(server, packet);
+        }
     }
 
     public void unmuteChat(String server) {
         mutedChats.remove(server);
+        if (server.equals("Creative")) {
+            PacketMuteChat packet = new PacketMuteChat(server, false, "");
+            sendToServer(server, packet);
+        }
+    }
+
+    public void sendToServer(String server, BasePacket packet) {
+        for (Object o : WebSocketServerHandler.getGroup()) {
+            DashboardSocketChannel dash = (DashboardSocketChannel) o;
+            if (!dash.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) continue;
+            if (dash.getServerName().equals(server)) {
+                dash.send(packet);
+            }
+        }
     }
 
     public boolean isChatMuted(String server) {
