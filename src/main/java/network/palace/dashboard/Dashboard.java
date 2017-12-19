@@ -3,7 +3,7 @@ package network.palace.dashboard;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
-import network.palace.dashboard.commands.Commandstaff;
+import network.palace.dashboard.commands.StaffCommand;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.ChatColor;
@@ -226,7 +226,7 @@ public class Dashboard {
     }
 
     public ImmutableList<Player> getOnlinePlayers() {
-        return ImmutableList.copyOf(players.values());
+        return ImmutableList.copyOf(new ArrayList<>(players.values()));
     }
 
     public void addPlayer(Player player) {
@@ -267,7 +267,7 @@ public class Dashboard {
     }
 
     public void logout(UUID uuid) {
-        Commandstaff.logout(uuid);
+        StaffCommand.logout(uuid);
         Player player = getPlayer(uuid);
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {

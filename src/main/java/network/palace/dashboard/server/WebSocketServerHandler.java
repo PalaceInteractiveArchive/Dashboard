@@ -588,9 +588,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getSchedulerManager().runAsync(() -> {
                     PacketInventoryContent packet = new PacketInventoryContent().fromJSON(object);
                     Player player = dashboard.getPlayer(packet.getUuid());
-                    if (!packet.isEmpty()) {
-                        dashboard.getInventoryUtil().cacheInventory(packet.getUuid(), packet);
-                    }
+                    if (!packet.isEmpty()) dashboard.getInventoryUtil().cacheInventory(packet.getUuid(), packet);
                     if (player == null) return;
                     if (player.getServer().equals(channel.getServerName()) ||
                             !dashboard.getServer(player.getServer()).isInventory()) {
@@ -735,7 +733,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getPlayerLog().info("New Player Object for UUID " + tp.getUniqueId() + " username " + tp.getUsername() + " Source: Player List Info packet");
                     dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                 }
-                dashboard.getSchedulerManager().runAsync(() -> list.stream().forEach(p -> dashboard.getSqlUtil().silentJoin(p)));
+                dashboard.getSchedulerManager().runAsync(() -> list.forEach(p -> dashboard.getSqlUtil().silentJoin(p)));
                 break;
             }
             /*

@@ -73,8 +73,7 @@ public class FriendUtil {
             }
         }
         Collections.sort(currentFriends);
-        List<String> fsOnPage = new ArrayList<>();
-        fsOnPage.addAll(currentFriends.subList(startAmount, endAmount));
+        List<String> fsOnPage = new ArrayList<>(currentFriends.subList(startAmount, endAmount));
         PacketListFriendCommand packet = new PacketListFriendCommand(player.getUniqueId(), page, maxPage, fsOnPage);
         player.send(packet);
     }

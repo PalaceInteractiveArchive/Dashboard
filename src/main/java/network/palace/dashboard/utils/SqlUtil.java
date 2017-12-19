@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Marc on 7/14/16
  */
 public class SqlUtil {
-    private BoneCP connectionPool = null;
+    private BoneCP connectionPool;
 
     public SqlUtil() throws SQLException, IOException {
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
@@ -156,6 +156,10 @@ public class SqlUtil {
                         player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
                     }
                 }
+
+                List<IgnoreData> ignored = getIgnoreData(player);
+                player.setIgnoredUsers(ignored);
+
                 HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
                 HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
                 player.setFriends(friends);
@@ -262,6 +266,8 @@ public class SqlUtil {
             player.setOnlineTime(ot == 0 ? 1 : ot);
             result.close();
             statement.close();
+            List<IgnoreData> ignored = getIgnoreData(player);
+            player.setIgnoredUsers(ignored);
             HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
             HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
             player.setFriends(friends);
@@ -359,6 +365,7 @@ public class SqlUtil {
             String username = result.getString("username");
             sql.close();
             result.close();
+            if (username != null) Launcher.getDashboard().addToCache(uuid, username);
             return username;
         } catch (Exception e) {
             ErrorUtil.logError("SQL Error username from uuid method", e);
@@ -561,6 +568,71 @@ public class SqlUtil {
                 statement.setString(1, uuid.toString());
                 statement.execute();
                 statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public List<IgnoreData> getIgnoreData(Player player) {
+        List<IgnoreData> list = new ArrayList<>();
+        Optional<Connection> optConnection = getConnection();
+        if (!optConnection.isPresent()) {
+            ErrorUtil.logError("Unable to connect to mysql");
+            return list;
+        }
+        try (Connection connection = optConnection.get()) {
+            PreparedStatement sql = connection.prepareStatement("SELECT uuid,ignored,started FROM ignored_players WHERE uuid=?");
+            sql.setString(1, player.getUniqueId().toString());
+            ResultSet result = sql.executeQuery();
+            UUID uuid = player.getUniqueId();
+            while (result.next()) {
+                UUID ignored = UUID.fromString(result.getString("ignored"));
+                list.add(new IgnoreData(uuid, ignored, result.getLong("started")));
+            }
+            result.close();
+            sql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public void ignorePlayer(Player player, UUID ignore) {
+        long time = System.currentTimeMillis() / 1000;
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+            Optional<Connection> optConnection = getConnection();
+            if (!optConnection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try (Connection connection = optConnection.get()) {
+                PreparedStatement sql = connection.prepareStatement("INSERT INTO ignored_players (uuid,ignored,started) VALUES (?, ?, ?)");
+                sql.setString(1, player.getUniqueId().toString());
+                sql.setString(2, ignore.toString());
+                sql.setLong(3, time);
+                sql.execute();
+                sql.close();
+                player.addIgnoreData(new IgnoreData(player.getUniqueId(), ignore, time));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void unignorePlayer(Player player, UUID unignore) {
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+            Optional<Connection> optConnection = getConnection();
+            if (!optConnection.isPresent()) {
+                ErrorUtil.logError("Unable to connect to mysql");
+                return;
+            }
+            try (Connection connection = optConnection.get()) {
+                PreparedStatement sql = connection.prepareStatement("DELETE FROM ignored_players WHERE uuid=? AND ignored=?");
+                sql.setString(1, player.getUniqueId().toString());
+                sql.setString(2, unignore.toString());
+                sql.execute();
+                sql.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

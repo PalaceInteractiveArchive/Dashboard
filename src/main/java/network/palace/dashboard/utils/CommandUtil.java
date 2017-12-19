@@ -2,80 +2,81 @@ package network.palace.dashboard.utils;
 
 import network.palace.dashboard.commands.*;
 import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.MagicCommand;
+import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketTabComplete;
 
 import java.util.*;
 
 public class CommandUtil {
-    private HashMap<String, MagicCommand> commands = new HashMap<>();
+    private HashMap<String, DashboardCommand> commands = new HashMap<>();
 
     public CommandUtil() {
         initialize();
     }
 
     private void initialize() {
-        register("audio", new Commandaudio());
-        register("b", new Commandb());
-        register("ban", new Commandban());
-        register("banip", new Commandbanip());
-        register("bannedproviders", new Commandbannedproviders());
-        register("banprovider", new Commandbanprovider());
-        register("bseen", new Commandbseen());
-        register("bug", new Commandbug());
-        register("bungeecounts", new Commandbungeecounts());
-        register("cc", new Commandcc());
-        register("charlist", new Commandcharlist());
-        register("chat", new Commandchat());
-        register("chatdelay", new Commandchatdelay());
-        register("chatreload", new Commandchatreload());
-        register("chatstatus", new Commandchatstatus());
-        register("cmds", new Commandcmds());
-        register("discord", new CommandDiscord());
-        register("find", new Commandfind());
-        register("friend", new Commandfriend());
-        register("ho", new Commandho());
-        register("ip", new Commandip());
-        register("ipseen", new Commandipseen());
-        register("join", new Commandjoin());
-        register("kick", new Commandkick());
-        register("kickall", new Commandkickall());
-        register("link", new Commandlink());
-        register("maintenance", new Commandmaintenance());
-        register("mentions", new Commandmentions());
-        register("modlog", new Commandmodlog());
-        register("motdrl", new Commandmotdrl());
-        register("msg", new Commandmsg());
-        register("msgtoggle", new Commandmsgtoggle());
-        register("mute", new Commandmute());
-        register("mutechat", new Commandmutechat());
-        register("namecheck", new Commandnamecheck());
-        register("oc", new Commandoc());
-        register("party", new Commandparty());
-        register("parties", new Commandparties());
-        register("pchat", new Commandpchat());
-        register("pmtoggle", new Commandpmtoggle());
-        register("processes", new Commandprocesses());
-        register("reboot", new Commandreboot());
-        register("reloadicon", new Commandreloadicon());
-        register("reply", new Commandreply());
-        register("sc", new Commandsc());
-        register("send", new Commandsend());
-        register("server", new Commandserver());
-        register("social", new Commandsocial());
-        register("staff", new Commandstaff());
-        register("stafflist", new Commandstafflist());
-        register("store", new Commandstore());
-        register("strict", new CommandStrict());
-        register("tempban", new Commandtempban());
-        register("unban", new Commandunban());
-        register("unbanip", new Commandunbanip());
-        register("unbanprovider", new Commandunbanprovider());
-        register("unmute", new Commandunmute());
-        register("updatehashes", new Commandupdatehashes());
-        register("uptime", new Commanduptime());
-        register("whereami", new Commandwhereami());
+        register("audio", new AudioCommand());
+        register("b", new BroadcastCommand());
+        register("ban", new BanCommand());
+        register("banip", new BanIPCommand());
+        register("bannedproviders", new BannedProvidersCommand());
+        register("banprovider", new BanProviderCommand());
+        register("bseen", new BseenCommand());
+        register("bug", new Bugcommand());
+        register("bungeecounts", new BungeeCountsCommand());
+        register("cc", new ClearChatCommand());
+        register("charlist", new CharListCommand());
+        register("chat", new ChatCommand());
+        register("chatdelay", new ChatDelayCommand());
+        register("chatreload", new ChatReloadCommand());
+        register("chatstatus", new ChatStatusCommand());
+        register("cmds", new CmdsCommand());
+        register("discord", new DiscordCommand());
+        register("find", new FindCommand());
+        register("friend", new FriendCommand());
+        register("ignore", new IgnoreCommand());
+        register("ho", new AdminChatCommand());
+        register("ip", new IPCommand());
+        register("ipseen", new IPSeenCommand());
+        register("join", new JoinCommand());
+        register("kick", new KickCommand());
+        register("kickall", new KickAllCommand());
+        register("link", new LinkCommand());
+        register("maintenance", new MaintenanceCommand());
+        register("mentions", new MentionsCommand());
+        register("modlog", new ModlogCommand());
+        register("motdrl", new MotdReloadCommand());
+        register("msg", new MsgCommand());
+        register("msgtoggle", new MsgToggleCommand());
+        register("mute", new MuteCommand());
+        register("mutechat", new MuteChatCommand());
+        register("namecheck", new NamecheckCommand());
+        register("oc", new OnlineCountCommand());
+        register("party", new PartyCommand());
+        register("parties", new PartiesCommand());
+        register("pchat", new PartyChatCommand());
+        register("pmtoggle", new PMToggleCommand());
+        register("processes", new ProcessesCommand());
+        register("reboot", new RebootCommand());
+        register("reloadicon", new ReloadIconCommand());
+        register("reply", new ReplyCommand());
+        register("sc", new StaffChatCommand());
+        register("send", new SendCommand());
+        register("server", new ServerCommand());
+        register("social", new SocialCommand());
+        register("staff", new StaffCommand());
+        register("stafflist", new StaffListCommand());
+        register("store", new StoreCommand());
+        register("strict", new StrictCommand());
+        register("tempban", new TempBanCommand());
+        register("unban", new UnbanCommand());
+        register("unbanip", new UnbanIPCommand());
+        register("unbanprovider", new UnbanProviderCommand());
+        register("unmute", new UnmuteCommand());
+        register("updatehashes", new UpdateHashesCommand());
+        register("uptime", new UptimeCommand());
+        register("whereami", new WhereAmICommand());
     }
 
     public boolean handleCommand(Player player, String message) {
@@ -93,9 +94,9 @@ public class CommandUtil {
                 args[i] = s;
                 i++;
             }
-            MagicCommand cmd = null;
+            DashboardCommand cmd = null;
             if (!commands.containsKey(command)) {
-                for (MagicCommand c : new ArrayList<>(commands.values())) {
+                for (DashboardCommand c : new ArrayList<>(commands.values())) {
                     if (c.getAliases().contains(command)) {
                         cmd = c;
                         break;
@@ -116,15 +117,15 @@ public class CommandUtil {
         }
     }
 
-    public TreeMap<String, MagicCommand> getCommands() {
+    public TreeMap<String, DashboardCommand> getCommands() {
         return new TreeMap<>(commands);
     }
 
-    public MagicCommand getCommand(String label) {
+    public DashboardCommand getCommand(String label) {
         return commands.get(label);
     }
 
-    private void execute(Player player, MagicCommand c, String command, String[] args) {
+    private void execute(Player player, DashboardCommand c, String command, String[] args) {
         if (!c.canPerformCommand(player.getRank())) {
             player.sendMessage(ChatColor.RED + "You do not have permission to execute this command!");
             return;
@@ -132,7 +133,7 @@ public class CommandUtil {
         c.execute(player, command, args);
     }
 
-    public void register(String label, MagicCommand command) {
+    public void register(String label, DashboardCommand command) {
         if (commands.containsKey(label.toLowerCase())) {
             commands.remove(label.toLowerCase());
         }
@@ -140,9 +141,9 @@ public class CommandUtil {
     }
 
     public void tabComplete(Player player, String command, List<String> args, List<String> results) {
-        MagicCommand cmd = null;
+        DashboardCommand cmd = null;
         if (!commands.containsKey(command)) {
-            for (MagicCommand c : new ArrayList<>(commands.values())) {
+            for (DashboardCommand c : new ArrayList<>(commands.values())) {
                 if (c.getAliases().contains(command)) {
                     cmd = c;
                     break;
@@ -169,7 +170,7 @@ public class CommandUtil {
 
     public List<String> getCommandsAndAliases() {
         List<String> list = new ArrayList<>();
-        for (Map.Entry<String, MagicCommand> entry : commands.entrySet()) {
+        for (Map.Entry<String, DashboardCommand> entry : commands.entrySet()) {
             list.add(entry.getKey());
             list.addAll(entry.getValue().getAliases());
         }

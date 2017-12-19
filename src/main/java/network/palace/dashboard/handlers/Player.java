@@ -11,22 +11,19 @@ import network.palace.dashboard.packets.dashboard.PacketPlayerChat;
 import network.palace.dashboard.packets.dashboard.PacketPlayerDisconnect;
 import network.palace.dashboard.server.DashboardSocketChannel;
 
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Marc on 7/14/16
  */
 public class Player {
     @Getter @Setter private UUID uuid;
-    @Getter @Setter private String username = "";
+    @Getter @Setter private String username;
     @Getter @Setter private Rank rank = Rank.SETTLER;
-    @Getter private String address = "";
-    @Getter @Setter private String server = "";
+    @Getter private String address;
+    @Getter @Setter private String server;
     @Getter @Setter private UUID bungeeID;
-    @Getter private int mcVersion = 0;
+    @Getter private int mcVersion;
     @Getter @Setter private boolean newGuest = false;
     @Getter @Setter private Timer tutorial = null;
     @Getter @Setter private boolean toggled = true;
@@ -47,6 +44,10 @@ public class Player {
     @Getter private long afkTime = System.currentTimeMillis();
     @Getter @Setter private boolean isAFK = false;
     @Getter @Setter private boolean disabled = false;
+    private List<IgnoreData> ignoredUsers = new ArrayList<>();
+    /**
+     * Automatically send player's inventory to target server when switching to a server that handles inventories
+     */
     @Getter @Setter private boolean sendInventoryOnJoin = true;
     @Getter @Setter private String isp = "unknown";
 
@@ -144,6 +145,47 @@ public class Player {
 
     public boolean canRecieveMessages() {
         return receiveMessages;
+    }
+
+    public void setIgnoredUsers(List<IgnoreData> ignoredUsers) {
+        this.ignoredUsers = ignoredUsers;
+    }
+
+    /**
+     * Check if this player ignores the UUID of a player
+     *
+     * @param uuid the uuid to check
+     * @return whether or not the player blocks that UUID
+     */
+    public boolean isIgnored(UUID uuid) {
+        for (IgnoreData data : ignoredUsers) {
+            if (data.getUuid().equals(getUniqueId()) && data.getIgnored().equals(uuid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void ignorePlayer(UUID uuid) {
+        Launcher.getDashboard().getSqlUtil().ignorePlayer(this, uuid);
+    }
+
+    public void unignorePlayer(UUID uuid) {
+        for (IgnoreData data : ignoredUsers) {
+            if (data.getUuid().equals(getUniqueId()) && data.getIgnored().equals(uuid)) {
+                ignoredUsers.remove(data);
+                break;
+            }
+        }
+        Launcher.getDashboard().getSqlUtil().unignorePlayer(this, uuid);
+    }
+
+    public List<IgnoreData> getIgnoreData() {
+        return new ArrayList<>(ignoredUsers);
+    }
+
+    public void addIgnoreData(IgnoreData data) {
+        ignoredUsers.add(data);
     }
 
     public void runTutorial() {

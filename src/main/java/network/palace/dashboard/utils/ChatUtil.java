@@ -360,14 +360,14 @@ public class ChatUtil {
             String message = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + msg;
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.isNewGuest() || tp.isDisabled()) {
+                if (tp.isNewGuest() || tp.isDisabled() ||
+                        (rank.getRankId() < Rank.CHARACTER.getRankId() && tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()))
                     continue;
-                }
                 if (dashboard.getServer(tp.getServer()).isPark()) {
                     String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + message;
                     boolean mention = false;
                     if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
-                        String possibleMention = send;
+                        String possibleMention = msg.toLowerCase();
                         String name = tp.getUsername().toLowerCase();
                         if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
                                 possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
@@ -375,7 +375,6 @@ public class ChatUtil {
                                 possibleMention.contains(" " + name + "!") || possibleMention.startsWith(name + "!")) {
                             mention = true;
                             send = ChatColor.BLUE + "* " + send;
-                            break;
                         }
                     }
                     if (mention) {
