@@ -65,6 +65,10 @@ public class IgnoreCommand extends DashboardCommand {
                     helpMenu(player);
                     return;
                 }
+                if (args[1].equalsIgnoreCase(player.getUsername())) {
+                    player.sendMessage(ChatColor.RED + "You can't ignore yourself!");
+                    return;
+                }
                 String name;
                 UUID uuid = dashboard.getSqlUtil().uuidFromUsername(args[1]);
                 if (uuid == null) {

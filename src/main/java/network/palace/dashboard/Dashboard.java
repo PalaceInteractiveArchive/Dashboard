@@ -233,6 +233,8 @@ public class Dashboard {
         players.put(player.getUniqueId(), player);
         String server = removeRegisteringPlayer(player.getUniqueId());
         if (player.getServer().equalsIgnoreCase("unknown") && server != null) {
+            Server s = Launcher.getDashboard().getServerUtil().getServer(server);
+            if (s != null) s.changeCount(1);
             player.setServer(server);
         }
         if (player.isNewGuest()) {

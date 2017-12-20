@@ -24,13 +24,9 @@ public class ChatStatusCommand extends DashboardCommand {
         if (park) {
             int c = 0;
             for (Server sr : dashboard.getServers()) {
-                if (!sr.isPark()) {
-                    continue;
-                }
+                if (!sr.isPark() || sr.getCount() == 0) continue;
+                c++;
                 count += sr.getCount();
-                if (sr.getCount() != 0) {
-                    c++;
-                }
             }
             name = "ParkChat (" + c + " servers)";
             muted = dashboard.getChatUtil().isChatMuted("ParkChat");

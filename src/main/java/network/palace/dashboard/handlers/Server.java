@@ -13,13 +13,13 @@ import java.util.UUID;
  */
 public class Server {
     private UUID uuid = UUID.randomUUID();
-    private String name;
-    private String address;
-    private int port;
-    private boolean park;
-    private int count;
-    private String serverType;
-    private boolean online = false;
+    @Getter private String name;
+    @Getter private String address;
+    @Getter private int port;
+    @Getter private boolean park;
+    @Getter @Setter private int count;
+    @Getter private String serverType;
+    @Getter @Setter private boolean online = false;
     @Getter @Setter private boolean inventory = false;
     @Getter @Setter private GameState gameState = GameState.LOBBY;
     @Getter @Setter private boolean gameNeedsUpdate = true;
@@ -35,34 +35,6 @@ public class Server {
 
     public UUID getUniqueId() {
         return uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public boolean isPark() {
-        return park;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public String getServerType() {
-        return serverType;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public void changeCount(int i) {
@@ -91,13 +63,5 @@ public class Server {
                 dashboard.getServerUtil().sendPlayer(tp, s.getName());
             }
         }
-    }
-
-    public boolean isOnline() {
-        return online;
-    }
-
-    public void setOnline(boolean online) {
-        this.online = online;
     }
 }
