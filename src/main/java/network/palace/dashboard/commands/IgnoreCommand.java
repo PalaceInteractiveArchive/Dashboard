@@ -121,8 +121,12 @@ public class IgnoreCommand extends DashboardCommand {
             hour += 12;
         }
         String month = new DateFormatSymbols().getMonths()[c.get(Calendar.MONTH)].substring(0, 3);
+        String min = String.valueOf(c.get(Calendar.MINUTE));
+        if (min.length() < 2) {
+            min = "0" + min;
+        }
         return month + " " + c.get(Calendar.DAY_OF_MONTH) + " " +
-                c.get(Calendar.YEAR) + " at " + hour + ":" + c.get(Calendar.MINUTE) + am;
+                c.get(Calendar.YEAR) + " at " + hour + ":" + min + am;
     }
 
     @Override
