@@ -2,14 +2,12 @@ package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;
-import network.palace.dashboard.packets.dashboard.PacketConnectionType;
-import network.palace.dashboard.packets.dashboard.PacketOnlineCount;
-import network.palace.dashboard.packets.dashboard.PacketSendToServer;
-import network.palace.dashboard.packets.dashboard.PacketTargetLobby;
+import network.palace.dashboard.packets.audio.PacketContainer;
+import network.palace.dashboard.packets.dashboard.*;
+import network.palace.dashboard.packets.inventory.PacketInventoryContent;
+import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
@@ -145,6 +143,97 @@ public class ServerUtil {
                 }
             }
         }, 0, 1000);
+    }
+
+    public void serverSwitchEvent(UUID uuid, String target) {
+        Dashboard dashboard = Launcher.getDashboard();
+        final Player tp = dashboard.getPlayer(uuid);
+        if (tp == null) {
+            if (dashboard.hasPlayer(uuid)) {
+                dashboard.setRegisteringPlayerServer(uuid, target);
+            }
+            return;
+        }
+        // New connection
+        if (dashboard.getServerUtil().getServer(tp.getServer()) == null) {
+            dashboard.getServerUtil().getServer(target).changeCount(1);
+            tp.setServer(target);
+            if (tp.isDisabled()) {
+                PacketDisablePlayer dis = new PacketDisablePlayer(tp.getUniqueId(), true);
+                DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                if (socketChannel == null) return;
+                socketChannel.send(dis);
+                /*
+                 * /staff login pw
+                 * /staff change oldpw newpw
+                 */
+            }
+//                    if (dashboard.getServer(target).isPark() && Dashboard.getInstance(target) != null) {
+//                        tp.setInventoryUploaded(false);
+//                        PacketInventoryStatus update = new PacketInventoryStatus(tp.getUniqueId(), 1);
+//                        sendInventoryUpdate(target, update);
+//                    }
+            return;
+        }
+        // Going to Park server
+        Server server = dashboard.getServer(target);
+        if (server == null) server = getServerByType("Hub");
+        if (server.isPark()) {
+            if (tp.isSendInventoryOnJoin() && server.isInventory()) {
+                tp.setSendInventoryOnJoin(false);
+                Resort resort = Resort.fromServer(target);
+                dashboard.getSchedulerManager().runAsync(() -> {
+                    ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUniqueId(), resort);
+                    PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
+                            inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
+                            inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
+                            inv.getHotbarJSON(), inv.getHotbarHash());
+                    dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
+                    DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
+                    if (socketChannel == null) {
+                        return;
+                    }
+                    socketChannel.send(content);
+                });
+            }
+            if (!server.isInventory()) {
+                tp.setSendInventoryOnJoin(true);
+            }
+            if (tp.isPendingWarp()) {
+                tp.chat("/warp " + tp.getWarp());
+                tp.setPendingWarp(false);
+            }
+        }
+        if (server.getServerType().equals("Creative")) {
+            tp.sendServerIgnoreList(target);
+        }
+        network.palace.dashboard.packets.audio.PacketServerSwitch change =
+                new network.palace.dashboard.packets.audio.PacketServerSwitch(target);
+        PacketContainer audio = new PacketContainer(uuid, change.getJSON().toString());
+        for (Object o : WebSocketServerHandler.getGroup()) {
+            DashboardSocketChannel dash = (DashboardSocketChannel) o;
+            if (!dash.getType().equals(PacketConnectionType.ConnectionType.AUDIOSERVER)) {
+                continue;
+            }
+            dash.send(audio);
+        }
+        if (!tp.getServer().equalsIgnoreCase("unknown")) {
+            dashboard.getServerUtil().getServer(tp.getServer()).changeCount(-1);
+        }
+        dashboard.getServerUtil().getServer(target).changeCount(1);
+        tp.setServer(target);
+
+        // Check if the destination is a minigame server
+        if (target.matches(WebSocketServerHandler.MINIGAME_REGEX)) {
+            Party party = dashboard.getPartyUtil().findPartyForPlayer(tp);
+            if (party != null) {
+                // Are they the leader?
+                if (party.getLeader().getUniqueId().equals(tp.getUniqueId())) {
+                    // Yup, so send all the party members.
+                    party.warpToLeader();
+                }
+            }
+        }
     }
 
     public boolean isMuted(String server) {

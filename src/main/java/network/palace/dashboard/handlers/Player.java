@@ -5,10 +5,7 @@ import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.packets.BasePacket;
-import network.palace.dashboard.packets.dashboard.PacketMention;
-import network.palace.dashboard.packets.dashboard.PacketMessage;
-import network.palace.dashboard.packets.dashboard.PacketPlayerChat;
-import network.palace.dashboard.packets.dashboard.PacketPlayerDisconnect;
+import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.server.DashboardSocketChannel;
 
 import java.util.*;
@@ -270,5 +267,20 @@ public class Player {
             }
         }, 2000, 1000);
         setTutorial(tutorial);
+    }
+
+    public void sendServerIgnoreList() {
+        sendServerIgnoreList(server);
+    }
+
+    public void sendServerIgnoreList(String server) {
+        if (getIgnoreData().isEmpty()) return;
+        List<String> ignoredList = new ArrayList<>();
+        for (IgnoreData data : getIgnoreData()) {
+            ignoredList.add(data.getIgnored().toString());
+        }
+        DashboardSocketChannel socket = Dashboard.getInstance(server);
+        PacketIgnoreList packet = new PacketIgnoreList(getUniqueId(), ignoredList);
+        socket.send(packet);
     }
 }
