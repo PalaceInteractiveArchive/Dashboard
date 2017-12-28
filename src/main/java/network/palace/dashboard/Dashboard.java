@@ -43,6 +43,7 @@ public class Dashboard {
     @Getter @Setter private ServerUtil serverUtil = null;
     @Getter @Setter private ChatUtil chatUtil = null;
     @Getter @Setter private CommandUtil commandUtil = null;
+    @Getter @Setter private EmojiUtil emojiUtil = null;
     @Getter @Setter private ModerationUtil moderationUtil = new ModerationUtil();
     @Getter @Setter private SchedulerManager schedulerManager = null;
     @Getter @Setter private FriendUtil friendUtil;

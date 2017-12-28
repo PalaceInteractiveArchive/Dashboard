@@ -417,7 +417,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 if (tp == null) {
                     return;
                 }
-                dashboard.getCommandUtil().tabComplete(tp, command, args, results);
+                dashboard.getLogger().info(command + " " + String.join(", ", args) + " " + String.join(", ", results));
+                String last = "";
+                if (args.size() > 0) {
+                    last = args.get(args.size() - 1);
+                    if (!last.trim().startsWith(":")) {
+                        last = "";
+                    }
+                } else if (command.startsWith(":")) {
+                    last = command;
+                }
+                if (last.isEmpty()) {
+                    dashboard.getCommandUtil().tabComplete(tp, command, args, results);
+                } else {
+                    dashboard.getEmojiUtil().tabComplete(tp, command, args, results);
+                }
                 break;
             }
             /*

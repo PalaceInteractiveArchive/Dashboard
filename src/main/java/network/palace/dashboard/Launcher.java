@@ -83,6 +83,7 @@ public class Launcher {
         dashboard.setServerUtil(new ServerUtil());
         dashboard.setChatUtil(new ChatUtil());
         dashboard.setCommandUtil(new CommandUtil());
+        dashboard.setEmojiUtil(new EmojiUtil());
         dashboard.setPartyUtil(new PartyUtil());
         dashboard.setSlackUtil(new SlackUtil());
         dashboard.setWarningUtil(new WarningUtil());

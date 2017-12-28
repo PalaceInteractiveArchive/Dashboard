@@ -317,7 +317,51 @@ public class ChatUtil {
                     return;
             }
         }
-        sendChat(player, msg.toString());
+        String m = msg.toString();
+        logMessage(player.getUniqueId(), m);
+        String emoji = dashboard.getEmojiUtil().convertMessage(player, m);
+        if (!emoji.equals(m)) {
+            m = emoji;
+        }
+        String sname = dashboard.getServer(player.getServer()).getServerType();
+        if (sname.startsWith("New")) {
+            sname = sname.replaceAll("New", "");
+        }
+        if (dashboard.getServer(player.getServer()).isPark()) {
+            if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
+                m = ChatColor.translateAlternateColorCodes('&', m);
+            }
+            String m2 = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
+                    rank.getChatColor() + m;
+            for (Player tp : dashboard.getOnlinePlayers()) {
+                if (tp.isNewGuest() || tp.isDisabled() ||
+                        (rank.getRankId() < Rank.CHARACTER.getRankId() && tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()))
+                    continue;
+                if (dashboard.getServer(tp.getServer()).isPark()) {
+                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
+                    boolean mention = false;
+                    if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
+                        String possibleMention = m.toLowerCase();
+                        String name = tp.getUsername().toLowerCase();
+                        if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
+                                possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
+                                possibleMention.contains(" " + name + ".") || possibleMention.startsWith(name + ".") ||
+                                possibleMention.contains(" " + name + "!") || possibleMention.startsWith(name + "!")) {
+                            mention = true;
+                            send = ChatColor.BLUE + "* " + send;
+                        }
+                    }
+                    if (mention) {
+                        tp.sendMessage(send);
+                        tp.mention();
+                    } else {
+                        tp.sendMessage(send);
+                    }
+                }
+            }
+            return;
+        }
+        player.chat(m);
     }
 
     public static boolean enoughTime(Player player) {
@@ -343,51 +387,6 @@ public class ChatUtil {
             }
         }
         return false;
-    }
-
-    public void sendChat(Player player, String msg) {
-        Dashboard dashboard = Launcher.getDashboard();
-        logMessage(player.getUniqueId(), msg);
-        String sname = dashboard.getServer(player.getServer()).getServerType();
-        if (sname.startsWith("New")) {
-            sname = sname.replaceAll("New", "");
-        }
-        if (dashboard.getServer(player.getServer()).isPark()) {
-            Rank rank = player.getRank();
-            if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
-                msg = ChatColor.translateAlternateColorCodes('&', msg);
-            }
-            String message = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
-                    rank.getChatColor() + msg;
-            for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.isNewGuest() || tp.isDisabled() ||
-                        (rank.getRankId() < Rank.CHARACTER.getRankId() && tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()))
-                    continue;
-                if (dashboard.getServer(tp.getServer()).isPark()) {
-                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + message;
-                    boolean mention = false;
-                    if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
-                        String possibleMention = msg.toLowerCase();
-                        String name = tp.getUsername().toLowerCase();
-                        if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
-                                possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
-                                possibleMention.contains(" " + name + ".") || possibleMention.startsWith(name + ".") ||
-                                possibleMention.contains(" " + name + "!") || possibleMention.startsWith(name + "!")) {
-                            mention = true;
-                            send = ChatColor.BLUE + "* " + send;
-                        }
-                    }
-                    if (mention) {
-                        tp.sendMessage(send);
-                        tp.mention();
-                    } else {
-                        tp.sendMessage(send);
-                    }
-                }
-            }
-            return;
-        }
-        player.chat(msg);
     }
 
     public boolean containsSwear(Player player, String msg) {
