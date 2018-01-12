@@ -23,20 +23,33 @@ public class EmojiUtil {
         translations.put("<3", "❤");
     }
 
-    public String convertMessage(Player player, String msg) {
+    public String convertMessage(Player player, String msg) throws IllegalArgumentException {
         if (player.getRank().getRankId() < emojiRank.getRankId()) return msg;
+        int count = 0;
         for (Map.Entry<String, String> entry : translations.entrySet()) {
             if (msg.equalsIgnoreCase(entry.getKey())) {
-                return entry.getValue();
+                msg = entry.getValue();
+                count++;
+                continue;
             }
             if (msg.startsWith(entry.getKey() + " ")) {
                 msg = msg.replaceFirst(entry.getKey() + " ", entry.getValue() + " ");
+                count++;
             }
             if (msg.endsWith(" " + entry.getKey())) {
                 int start = msg.lastIndexOf(entry.getKey());
                 msg = msg.substring(0, start) + entry.getValue();
+                count++;
             }
-            msg = msg.replace(" " + entry.getKey() + " ", " " + entry.getValue() + " ");
+            String from = " " + entry.getKey() + " ";
+            String to = " " + entry.getValue() + " ";
+            while (!msg.replaceFirst(from, to).equals(msg)) {
+                msg = msg.replaceFirst(from, to);
+                count++;
+            }
+        }
+        if (count > 5) {
+            throw new IllegalArgumentException("Your message can't contain more than five emoji!");
         }
         return msg;
     }

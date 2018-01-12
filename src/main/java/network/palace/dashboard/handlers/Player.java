@@ -274,7 +274,6 @@ public class Player {
     }
 
     public void sendServerIgnoreList(String server) {
-        if (getIgnoreData().isEmpty()) return;
         List<String> ignoredList = new ArrayList<>();
         for (IgnoreData data : getIgnoreData()) {
             ignoredList.add(data.getIgnored().toString());

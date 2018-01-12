@@ -600,6 +600,7 @@ public class SqlUtil {
 
     public void ignorePlayer(Player player, UUID ignore) {
         long time = System.currentTimeMillis() / 1000;
+        player.addIgnoreData(new IgnoreData(player.getUniqueId(), ignore, time));
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             Optional<Connection> optConnection = getConnection();
             if (!optConnection.isPresent()) {
@@ -613,7 +614,6 @@ public class SqlUtil {
                 sql.setLong(3, time);
                 sql.execute();
                 sql.close();
-                player.addIgnoreData(new IgnoreData(player.getUniqueId(), ignore, time));
             } catch (SQLException e) {
                 e.printStackTrace();
             }

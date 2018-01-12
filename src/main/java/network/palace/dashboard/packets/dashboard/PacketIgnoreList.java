@@ -24,7 +24,7 @@ public class PacketIgnoreList extends BasePacket {
     }
 
     public PacketIgnoreList(UUID uuid, List<String> ignoreList) {
-        this.id = PacketID.Dashboard.LISTFRIENDCOMMAND.getID();
+        this.id = PacketID.Dashboard.IGNORELIST.getID();
         this.uuid = uuid;
         this.ignoreList = ignoreList;
     }

@@ -319,7 +319,13 @@ public class ChatUtil {
         }
         String m = msg.toString();
         logMessage(player.getUniqueId(), m);
-        String emoji = dashboard.getEmojiUtil().convertMessage(player, m);
+        String emoji;
+        try {
+            emoji = dashboard.getEmojiUtil().convertMessage(player, m);
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(ChatColor.RED + e.getMessage());
+            return;
+        }
         if (!emoji.equals(m)) {
             m = emoji;
         }

@@ -99,10 +99,12 @@ public class IgnoreCommand extends DashboardCommand {
                     return;
                 }
                 name = dashboard.getCachedName(uuid) == null ? dashboard.getSqlUtil().usernameFromUUID(uuid) : dashboard.getCachedName(uuid);
-                player.unignorePlayer(uuid);
-                player.sendMessage(ChatColor.GREEN + "You have unignored " + name);
-                if (dashboard.getServer(player.getServer()).getServerType().equals("Creative"))
-                    player.sendServerIgnoreList();
+                dashboard.getSchedulerManager().runAsync(() -> {
+                    player.unignorePlayer(uuid);
+                    player.sendMessage(ChatColor.GREEN + "You have unignored " + name);
+                    if (dashboard.getServer(player.getServer()).getServerType().equals("Creative"))
+                        player.sendServerIgnoreList();
+                });
                 break;
             }
             default: {
