@@ -3,12 +3,14 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.packets.dashboard.PacketTabComplete;
 
 import java.util.*;
 
 public class EmojiUtil {
     private HashMap<String, String> translations = new HashMap<>();
+    public static final Rank emojiRank = Rank.MAJESTIC;
 
     public EmojiUtil() {
         translations.put(":heart:", "❤");
@@ -22,6 +24,7 @@ public class EmojiUtil {
     }
 
     public String convertMessage(Player player, String msg) {
+        if (player.getRank().getRankId() < emojiRank.getRankId()) return msg;
         for (Map.Entry<String, String> entry : translations.entrySet()) {
             if (msg.equalsIgnoreCase(entry.getKey())) {
                 return entry.getValue();
@@ -39,6 +42,7 @@ public class EmojiUtil {
     }
 
     public void tabComplete(Player player, String cmd, List<String> args, List<String> results) {
+        if (player.getRank().getRankId() < emojiRank.getRankId()) return;
         Dashboard dashboard = Launcher.getDashboard();
 
         Iterable<String> l;

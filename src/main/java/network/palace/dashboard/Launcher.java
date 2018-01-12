@@ -61,7 +61,6 @@ public class Launcher {
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         dashboard.setRandom(new Random());
         dashboard.setSchedulerManager(new SchedulerManager());
-        dashboard.setInventoryUtil(new InventoryUtil());
         try {
             dashboard.getLogger().info("Initializing SQL Connections");
             dashboard.setSqlUtil(new SqlUtil());
@@ -69,6 +68,8 @@ public class Launcher {
             e.printStackTrace();
             System.exit(0);
         }
+        dashboard.setInventoryUtil(new InventoryUtil());
+        dashboard.setModerationUtil(new ModerationUtil());
 
         dashboard.loadConfiguration();
         dashboard.loadMOTD();

@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
+    @Getter public static final String version = "1.6.6";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -44,7 +45,7 @@ public class Dashboard {
     @Getter @Setter private ChatUtil chatUtil = null;
     @Getter @Setter private CommandUtil commandUtil = null;
     @Getter @Setter private EmojiUtil emojiUtil = null;
-    @Getter @Setter private ModerationUtil moderationUtil = new ModerationUtil();
+    @Getter @Setter private ModerationUtil moderationUtil = null;
     @Getter @Setter private SchedulerManager schedulerManager = null;
     @Getter @Setter private FriendUtil friendUtil;
     @Getter @Setter private ActivityUtil activityUtil;

@@ -32,6 +32,7 @@ public class CommandUtil {
         register("chatreload", new ChatReloadCommand());
         register("chatstatus", new ChatStatusCommand());
         register("cmds", new CmdsCommand());
+        register("dashboardversion", new DashboardVersion());
         register("discord", new DiscordCommand());
         register("find", new FindCommand());
         register("friend", new FriendCommand());
