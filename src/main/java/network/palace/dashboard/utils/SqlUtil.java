@@ -56,8 +56,10 @@ public class SqlUtil {
         config.setPassword(password);
         config.setMinConnectionsPerPartition(10);
         config.setMaxConnectionsPerPartition(100);
-        config.setPartitionCount(3);
-        config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
+        config.setIdleMaxAge(100, TimeUnit.SECONDS);
+        config.setMaxConnectionAge(300, TimeUnit.SECONDS);
+        config.setPartitionCount(2);
+        config.setIdleConnectionTestPeriod(300, TimeUnit.SECONDS);
         connectionPool = new BoneCP(config);
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.setActivityUtil(new ActivityUtil(connectionPool));

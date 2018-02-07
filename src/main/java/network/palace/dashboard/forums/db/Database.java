@@ -26,7 +26,7 @@ public final class Database {
             config.setMinConnectionsPerPartition(5);
             config.setMaxConnectionsPerPartition(30);
             config.setPartitionCount(1);
-            config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
+            config.setIdleConnectionTestPeriod(300, TimeUnit.SECONDS);
             connectionPool = new BoneCP(config);
             /*HikariConfig ex = new HikariConfig();
             ex.setPoolName("MineSync-Connection-Pool");
