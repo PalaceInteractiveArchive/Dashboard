@@ -276,7 +276,7 @@ public class InventoryUtil {
     }
 
     private ResortInventory createResortInventory(UUID uuid, Resort resort) {
-        Optional<Connection> optConnection = Launcher.getDashboard().getSqlUtil().getConnection();
+        Optional<Connection> optConnection = Launcher.getDashboard().getMongoHandler().getConnection();
         if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return new ResortInventory();
@@ -307,7 +307,7 @@ public class InventoryUtil {
         HashMap<Resort, ResortInventory> map = new HashMap<>();
         List<Integer> deleteRowIds = new ArrayList<>();
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
         if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return new InventoryCache(uuid, map);
@@ -367,7 +367,7 @@ public class InventoryUtil {
      */
     private ResortInventory getResortInventoryFromDatabase(UUID uuid, Resort resort) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
         if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return new ResortInventory();
@@ -446,7 +446,7 @@ public class InventoryUtil {
                     values.append(", ");
                 }
             }
-            Optional<Connection> optConnection = Launcher.getDashboard().getSqlUtil().getConnection();
+            Optional<Connection> optConnection = Launcher.getDashboard().getMongoHandler().getConnection();
             if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;

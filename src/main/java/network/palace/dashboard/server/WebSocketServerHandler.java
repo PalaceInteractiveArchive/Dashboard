@@ -11,8 +11,6 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.discordSocket.DiscordCacheInfo;
-import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;
@@ -202,7 +200,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketOnlineCount count = new PacketOnlineCount(dashboard.getOnlinePlayers().size());
                     List<String> servers = new ArrayList<>();
                     for (Server s : dashboard.getServers()) {
-                        servers.add(s.getName() + ":" + s.getAddress() + ":" + s.getPort());
+                        servers.add(s.getName() + ":" + s.getAddress());
                     }
                     PacketServerList server = new PacketServerList(servers);
                     PacketTargetLobby lobby = new PacketTargetLobby(dashboard.getTargetServer());
@@ -245,13 +243,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getSchedulerManager().runAsync(() -> {
                     IPUtil.ProviderData data = IPUtil.getProviderData(packet.getAddress());
                     player.setIsp(data.getIsp());
-                    ProviderBan ban = dashboard.getSqlUtil().getProviderBan(player.getIsp());
+                    ProviderBan ban = dashboard.getMongoHandler().getProviderBan(player.getIsp());
                     if (ban != null) {
                         player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
                     }
-                    dashboard.getSqlUtil().updateProviderData(player.getUniqueId(), data);
+                    dashboard.getMongoHandler().updateProviderData(player.getUniqueId(), data);
                 });
-                dashboard.getSqlUtil().login(player);
+                dashboard.getMongoHandler().login(player);
                 if (dashboard.isStrictMode()) player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
                 break;
             }
@@ -424,7 +422,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             "https://palnet.us/appeal.");
                 }
                 Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "dashboard");
-                dashboard.getSqlUtil().banPlayer(ban);
+                dashboard.getMongoHandler().banPlayer(uuid, ban);
                 dashboard.getModerationUtil().announceBan(ban);
                 break;
             }
@@ -441,7 +439,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 dashboard.getSchedulerManager().runAsync(() -> {
                     String name;
                     if (player == null) {
-                        name = dashboard.getSqlUtil().usernameFromUUID(uuid);
+                        name = dashboard.getMongoHandler().uuidToUsername(uuid);
                     } else {
                         PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
                         player.send(packet1);
@@ -452,12 +450,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                     dashboard.getModerationUtil().rankChange(name, rank, source);
 
-                    DiscordCacheInfo info = dashboard.getSqlUtil().getUserFromPlayer(player);
+                    /* TODO Discord stuff
+                    DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
                     info.getMinecraft().setRank(rank.toString());
-                    SocketConnection.sendUpdate(info);
+                    SocketConnection.sendUpdate(info);*/
 
                     try {
-                        dashboard.forum.updatePlayerRank(uuid.toString(), rank.getSqlName());
+                        dashboard.forum.updatePlayerRank(uuid.toString(), rank.getDBName());
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -658,14 +657,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         continue;
                     Player tp = new Player(p.getUniqueId(), p.getUsername(), p.getAddress(), p.getServer(),
                             channel.getBungeeID(), p.getMcVersion());
-                    tp.setRank(dashboard.getSqlUtil().getRank(tp.getUniqueId()));
+                    tp.setRank(dashboard.getMongoHandler().getRank(tp.getUniqueId()));
                     list.add(tp);
                     dashboard.getServer(p.getServer()).changeCount(1);
                     dashboard.addPlayer(tp);
                     dashboard.getPlayerLog().info("New Player Object for UUID " + tp.getUniqueId() + " username " + tp.getUsername() + " Source: Player List Info packet");
                     dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                 }
-                dashboard.getSchedulerManager().runAsync(() -> list.forEach(p -> dashboard.getSqlUtil().silentJoin(p)));
+                dashboard.getSchedulerManager().runAsync(() -> list.forEach(p -> dashboard.getMongoHandler().login(p, true)));
                 break;
             }
             /*

@@ -29,7 +29,7 @@ public class MaintenanceCommand extends DashboardCommand {
         dashboard.setMaintenance(!dashboard.isMaintenance());
         PacketMaintenance packet = new PacketMaintenance(dashboard.isMaintenance());
         if (dashboard.isMaintenance()) {
-            HashMap<Rank, List<UUID>> staff = dashboard.getSqlUtil().getPlayersByRanks(Rank.TRAINEE, Rank.MOD,
+            HashMap<Rank, List<UUID>> staff = dashboard.getMongoHandler().getPlayersByRanks(Rank.TRAINEE, Rank.MOD,
                     Rank.SRMOD, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
             List<UUID> list = new ArrayList<>();
             for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {

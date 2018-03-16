@@ -3,10 +3,6 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -40,7 +36,8 @@ public class StatUtil {
 
     private void setValue(int value) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+        /*
+        Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
         if (!optConnection.isPresent()) {
             ErrorUtil.logError("Unable to connect to mysql");
             return;
@@ -52,6 +49,6 @@ public class StatUtil {
             sql.close();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

@@ -42,7 +42,7 @@ public class MuteCommand extends DashboardCommand {
             Player tp = dashboard.getPlayer(username);
             UUID uuid;
             if (tp == null) {
-                uuid = dashboard.getSqlUtil().uuidFromUsername(username);
+                uuid = dashboard.getMongoHandler().usernameToUUID(username);
             } else {
                 uuid = tp.getUniqueId();
                 if (tp.getMute().isMuted()) {
@@ -50,11 +50,11 @@ public class MuteCommand extends DashboardCommand {
                     return;
                 }
             }
-            Mute mute = new Mute(uuid, username, true, muteTimestamp, reason, source);
+            Mute mute = new Mute(uuid, username, true, System.currentTimeMillis(), muteTimestamp, reason, source);
             if (tp != null) {
                 tp.setMute(mute);
             }
-            dashboard.getSqlUtil().mutePlayer(mute);
+            dashboard.getMongoHandler().mutePlayer(uuid, mute);
             dashboard.getModerationUtil().announceMute(mute);
         });
     }

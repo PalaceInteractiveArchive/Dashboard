@@ -14,8 +14,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -62,47 +60,15 @@ public class ChatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-                if (!optConnection.isPresent()) {
-                    ErrorUtil.logError("Unable to connect to mysql");
-                    return;
-                }
-                StringBuilder statement = new StringBuilder();
-                try (Connection connection = optConnection.get()) {
-                    if (messages.isEmpty()) {
-                        return;
-                    }
-                    final HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
-                    int amount = 0;
+                try {
+                    HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
+                    messages.clear();
                     for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
-                        amount += entry.getValue().size();
+                        dashboard.getMongoHandler().logChat(entry.getKey(), entry.getValue());
                     }
-                    statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
-                    int i = 0;
-                    HashMap<Integer, String> lastList = new HashMap<>();
-                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
-                        if (entry == null || entry.getKey() == null || localMessages == null) {
-                            continue;
-                        }
-                        for (String s : new ArrayList<>(messages.remove(entry.getKey()))) {
-                            statement.append("(?, ?)");
-                            if (((i / 2) + 1) < amount) {
-                                statement.append(", ");
-                            }
-                            lastList.put(i += 1, entry.getKey().toString());
-                            lastList.put(i += 1, s);
-                        }
-                    }
-                    statement.append(";");
-                    PreparedStatement sql = connection.prepareStatement(statement.toString());
-                    for (Map.Entry<Integer, String> entry : new HashSet<>(lastList.entrySet())) {
-                        sql.setString(entry.getKey(), entry.getValue());
-                    }
-                    sql.execute();
-                    sql.close();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    dashboard.getErrors().error("Error with Chat SQL Query: '" + statement.toString() + "'");
+                    dashboard.getErrors().error("Error logging chat: " + e.getMessage());
                 }
             }
         }, 0, 5000);
@@ -378,14 +344,14 @@ public class ChatUtil {
         Dashboard dashboard = Launcher.getDashboard();
         Mute mute = player.getMute();
         if (mute != null && mute.isMuted()) {
-            long releaseTime = mute.getRelease();
+            long releaseTime = mute.getExpires();
             Date currentTime = new Date();
             if (currentTime.getTime() > releaseTime) {
-                dashboard.getSqlUtil().unmutePlayer(player.getUniqueId());
+                dashboard.getMongoHandler().unmutePlayer(player.getUniqueId());
                 player.getMute().setMuted(false);
             } else {
                 String response = DashboardConstants.MUTED_PLAYER;
-                response = response.replaceAll("<TIME>", DateUtil.formatDateDiff(mute.getRelease()));
+                response = response.replaceAll("<TIME>", DateUtil.formatDateDiff(mute.getExpires()));
                 if (!mute.getReason().equals(""))
                     response += DashboardConstants.MUTE_REASON.replaceAll("<REASON>", player.getMute().getReason());
                 player.sendMessage(response);

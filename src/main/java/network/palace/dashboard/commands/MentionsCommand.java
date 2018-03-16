@@ -24,7 +24,7 @@ public class MentionsCommand extends DashboardCommand {
             player.mention();
         }
         dashboard.getSchedulerManager().runAsync(() -> {
-            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+            Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
             if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;

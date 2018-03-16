@@ -49,7 +49,7 @@ public class ServerCommand extends DashboardCommand {
             Server s = new Server(name, address, port, park, 0, type);
             dashboard.getServerUtil().addServer(s);
             dashboard.getSchedulerManager().runAsync(() -> {
-                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
                 if (!optConnection.isPresent()) {
                     ErrorUtil.logError("Unable to connect to mysql");
                     return;
@@ -97,7 +97,7 @@ public class ServerCommand extends DashboardCommand {
                         cancel();
                         dashboard.getServerUtil().removeServer(name);
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+                            Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
                             if (!optConnection.isPresent()) {
                                 ErrorUtil.logError("Unable to connect to mysql");
                                 return;

@@ -30,17 +30,17 @@ public class BseenCommand extends DashboardCommand {
             if (online) {
                 uuid = tp.getUniqueId();
             } else {
-                uuid = dashboard.getMongoHandler().uuidFromName(args[0]).orElse(null);
+                uuid = dashboard.getMongoHandler().usernameToUUID(args[0]);
             }
             if (uuid == null) {
                 player.sendMessage(ChatColor.RED + "That player can't be found!");
                 return;
             }
-            Rank rank = Rank.SETTLER;
-            long lastLogin = 0;
-            String ip = "no ip";
+            Rank rank;
+            long lastLogin;
+            String ip;
             Mute mute;
-            String server = "Unknown";
+            String server;
             if (online) {
                 rank = tp.getRank();
                 lastLogin = tp.getLoginTime();
@@ -68,18 +68,18 @@ public class BseenCommand extends DashboardCommand {
                 lastLogin = data.getLastLogin();
                 ip = data.getIpAddress();
                 server = data.getServer();
-                Ban ban = dashboard.getSqlUtil().getBan(uuid, name);
+                Ban ban = dashboard.getMongoHandler().getCurrentBan(uuid, name);
                 if (ban != null) {
                     String type = ban.isPermanent() ? "Permanently" : ("Temporarily (Expires: " +
-                            DateUtil.formatDateDiff(ban.getRelease()) + ")");
+                            DateUtil.formatDateDiff(ban.getExpires()) + ")");
                     player.sendMessage(ChatColor.RED + name + " is Banned " + type + " for " + ban.getReason() +
                             " by " + ban.getSource());
                 }
-                mute = dashboard.getSqlUtil().getMute(uuid, name);
+                mute = dashboard.getMongoHandler().getCurrentMute(uuid, name);
             }
             if (mute != null && mute.isMuted()) {
                 player.sendMessage(ChatColor.RED + name + " is Muted for " +
-                        DateUtil.formatDateDiff(mute.getRelease()) + " by " + mute.getSource() +
+                        DateUtil.formatDateDiff(mute.getExpires()) + " by " + mute.getSource() +
                         ". Reason: " + mute.getReason());
             }
             PacketBseenCommand packet = new PacketBseenCommand(player.getUniqueId(), name, ip, server, online);

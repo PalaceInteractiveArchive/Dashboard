@@ -34,7 +34,8 @@ public class SocketConnection {
         socket.on("discord:delinkrequest", args -> {
             dashboard.getLogger().info("Got delink request");
             DiscordCacheInfo json = gson.fromJson(args[0].toString(), DiscordCacheInfo.class);
-            dashboard.getSqlUtil().selectAndRemoveDiscord(json);
+            //TODO Discord stuff
+//            dashboard.getMongoHandler().selectAndRemoveDiscord(json);
         });
         socket.on(Socket.EVENT_CONNECT, args ->
                 dashboard.getLogger().info(ChatColor.DARK_GREEN + "Discord link socket connected"))

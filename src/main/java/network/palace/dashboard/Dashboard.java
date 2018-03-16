@@ -3,11 +3,12 @@ package network.palace.dashboard;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
+import network.palace.dashboard.commands.StaffCommand;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.Arcade;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
 import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketContainer;
@@ -22,10 +23,6 @@ import network.palace.dashboard.utils.chat.JaroWinkler;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -70,7 +67,6 @@ public class Dashboard {
     @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
     @Getter @Setter private Logger errors = Logger.getLogger("Dashboard-Errors");
     @Getter @Setter private Logger playerLog = Logger.getLogger("Dashboard-Players");
-    @Setter private List<String> serverTypes = new ArrayList<>();
     private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
@@ -104,11 +100,9 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.TRAINEE, Rank.MOD, Rank.SRMOD,
+            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.MOD, Rank.SRMOD,
                     Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
-            for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
-                maintenanceWhitelist.addAll(entry.getValue());
-            }
+            maintenanceWhitelist.addAll(staff);
         }
     }
 
@@ -136,27 +130,6 @@ public class Dashboard {
         }
     }
 
-    public void loadServerTypes() {
-        serverTypes.clear();
-        Optional<Connection> optConnection = getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return;
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT name FROM servertypes");
-            ResultSet result = sql.executeQuery();
-            while (result.next()) {
-                serverTypes.add(result.getString("name"));
-            }
-            result.close();
-            sql.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-    }
-
     public void loadJoinServers() {
         joinServers.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("servers.txt"))) {
@@ -180,10 +153,6 @@ public class Dashboard {
 
     public String getCachedName(UUID uuid) {
         return cache.get(uuid);
-    }
-
-    public List<String> getServerTypes() {
-        return new ArrayList<>(serverTypes);
     }
 
     public static List<DashboardSocketChannel> getChannels(PacketConnectionType.ConnectionType type) {
@@ -278,7 +247,7 @@ public class Dashboard {
                 if (s != null) s.changeCount(-1);
             }
             if (player.getTutorial() != null) player.getTutorial().cancel();
-            sqlUtil.logout(player);
+            mongoHandler.logout(player);
         }
         PacketKick packet = new PacketKick("See ya real soon!");
         PacketContainer kick = new PacketContainer(uuid, packet.getJSON().toString());

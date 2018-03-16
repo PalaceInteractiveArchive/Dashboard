@@ -8,9 +8,6 @@ import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.packets.dashboard.PacketTitle;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -78,26 +75,11 @@ public class AFKUtil {
             @Override
             public void run() {
                 id.cancel();
-                try {
-                    if (player != null && player.isAFK()) {
-                        player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
-                        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-                        if (!optConnection.isPresent()) {
-                            ErrorUtil.logError("Unable to connect to mysql");
-                            return;
-                        }
-                        try (Connection connection = optConnection.get()) {
-                            PreparedStatement sql = connection.prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +
-                                    uuid + "')");
-                            sql.execute();
-                            sql.close();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        cancel();
-                    }
-                } catch (Exception ignored) {
+                if (player != null && player.isAFK()) {
+                    player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
+                    dashboard.getMongoHandler().logAFK(player.getUniqueId());
+                } else {
+                    cancel();
                 }
             }
         }, 300000);

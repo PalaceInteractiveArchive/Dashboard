@@ -11,7 +11,9 @@ import io.netty.util.AttributeKey;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.handlers.CurrencyType;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.dashboard.PacketUpdateEconomy;
 import network.palace.dashboard.server.DashboardSocketChannel;
@@ -23,17 +25,17 @@ import network.palace.dashboard.vote.VotifierSession;
 import network.palace.dashboard.vote.protocol.VoteInboundHandler;
 import network.palace.dashboard.vote.protocol.rsa.RSAIO;
 import network.palace.dashboard.vote.protocol.rsa.RSAKeygen;
+import org.bson.Document;
 
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.Key;
 import java.security.KeyPair;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by Marc on 1/15/17.
@@ -109,7 +111,7 @@ public class VoteUtil {
         Player player = dashboard.getPlayer(username);
         final UUID uuid;
         if (player == null) {
-            UUID temp = dashboard.getSqlUtil().uuidFromUsername(username);
+            UUID temp = dashboard.getMongoHandler().usernameToUUID(username);
             if (temp == null) {
                 return;
             } else {
@@ -159,24 +161,12 @@ public class VoteUtil {
 
     private void vote(UUID uuid, int serverId) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return;
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement q = connection.prepareStatement("SELECT vote FROM player_data WHERE uuid=?");
-            q.setString(1, uuid.toString());
-            ResultSet qres = q.executeQuery();
-            if (!qres.next()) {
-                return;
-            }
+        try {
+            long lastVote = dashboard.getMongoHandler().getPlayer(uuid, new Document("vote.lasttime", 1)).getLong("lastTime");
             boolean cancel = false;
-            if (System.currentTimeMillis() - qres.getLong("vote") <= 21600000) {
+            if (System.currentTimeMillis() - lastVote <= 21600000) {
                 cancel = true;
             }
-            qres.close();
-            q.close();
             Player p = dashboard.getPlayer(uuid);
             if (cancel) {
                 if (p != null) {
@@ -184,18 +174,10 @@ public class VoteUtil {
                 }
                 return;
             }
-            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET tokens=tokens+5,vote=?," +
-                    "lastvote=? WHERE uuid=?");
-            sql.setLong(1, System.currentTimeMillis());
-            sql.setInt(2, serverId);
-            sql.setString(3, uuid.toString());
-            sql.execute();
-            sql.close();
-            PreparedStatement log = connection.prepareStatement("INSERT INTO economy_logs (uuid, amount, type, source," +
-                    " server, timestamp) VALUES ('" + uuid.toString() + "', '5', 'add tokens', 'Vote', " +
-                    "'Dashboard', '" + System.currentTimeMillis() / 1000L + "')");
-            log.execute();
-            log.close();
+            Document update = new Document("$inc", new Document("tokens", 5)).append("vote", new Document("lastTime",
+                    System.currentTimeMillis()).append("lastSite", serverId));
+            dashboard.getMongoHandler().getPlayerCollection().updateOne(MongoHandler.MongoFilter.UUID.getFilter(uuid.toString()), update);
+            dashboard.getMongoHandler().logTransaction(uuid, 5, "Vote", CurrencyType.TOKENS, false);
             if (p == null) {
                 return;
             }
@@ -214,24 +196,15 @@ public class VoteUtil {
                     e.printStackTrace();
                 }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void reload() {
         voteServices.clear();
-        Dashboard dashboard = Launcher.getDashboard();
-        try (Connection connection = dashboard.getActivityUtil().getConnection()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT siteid,name FROM vote");
-            ResultSet result = sql.executeQuery();
-            while (result.next()) {
-                voteServices.put(result.getString("name").toLowerCase(), result.getInt("siteid"));
-            }
-            result.close();
-            sql.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        for (Document doc : Launcher.getDashboard().getMongoHandler().getVotingCollection().find()) {
+            voteServices.put(doc.getString("name"), doc.getInteger("siteid"));
         }
     }
 }

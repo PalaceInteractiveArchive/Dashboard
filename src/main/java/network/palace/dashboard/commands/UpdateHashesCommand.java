@@ -1,5 +1,7 @@
 package network.palace.dashboard.commands;
 
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +11,7 @@ import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.utils.ErrorUtil;
+import org.bson.Document;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -18,12 +20,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Optional;
 
 /**
  * Created by Marc on 3/26/17.
@@ -38,22 +35,14 @@ public class UpdateHashesCommand extends DashboardCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         dashboard.getSchedulerManager().runAsync(() -> {
-            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-            if (!optConnection.isPresent()) {
-                ErrorUtil.logError("Unable to connect to mysql");
-                return;
-            }
-            try (Connection connection = optConnection.get()) {
-                player.sendMessage(ChatColor.GREEN + "Requesting Resource Pack list from database...");
-                PreparedStatement sql = connection.prepareStatement("SELECT * FROM resource_packs;");
-                ResultSet result = sql.executeQuery();
+            player.sendMessage(ChatColor.GREEN + "Requesting Resource Pack list from database...");
+            try {
                 HashMap<String, ResourcePack> list = new HashMap<>();
-                while (result.next()) {
-                    list.put(result.getString("name"), new ResourcePack(result.getString("name"),
-                            result.getString("url"), result.getString("hash"), false));
+
+                for (Document doc : dashboard.getMongoHandler().getResourcePackCollection().find()) {
+                    list.put(doc.getString("name"), new ResourcePack(doc.getString("name"),
+                            doc.getString("url"), doc.getString("hash"), false));
                 }
-                result.close();
-                sql.close();
                 File dir = new File("packs");
                 if (!dir.exists()) {
                     dir.mkdir();
@@ -80,7 +69,7 @@ public class UpdateHashesCommand extends DashboardCommand {
                         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                         File f = new File(path);
                         if (!f.exists()) {
-                            player.sendMessage(ChatColor.RED + "There was an error in the download!");
+                            player.sendMessage(ChatColor.RED + "There was an error downloading " + pack.getName() + "!");
                         } else {
                             MessageDigest digest = MessageDigest.getInstance("SHA-1");
                             InputStream fis = new FileInputStream(f);
@@ -105,14 +94,9 @@ public class UpdateHashesCommand extends DashboardCommand {
                     }
                 }
                 for (ResourcePack pack : list.values()) {
-                    if (!pack.isUpdated()) {
-                        continue;
-                    }
-                    PreparedStatement sql1 = connection.prepareStatement("UPDATE resource_packs SET hash=? WHERE name=?");
-                    sql1.setString(1, pack.getHash());
-                    sql1.setString(2, pack.getName());
-                    sql1.execute();
-                    sql1.close();
+                    if (!pack.isUpdated()) continue;
+                    dashboard.getMongoHandler().getResourcePackCollection().updateOne(Filters.eq("name",
+                            pack.getName()), Updates.set("hash", pack.getHash()));
                     player.sendMessage(ChatColor.YELLOW + "Updated hash for " + pack.getName());
                 }
                 player.sendMessage(ChatColor.GREEN + "Clearing download folder...");
@@ -122,9 +106,9 @@ public class UpdateHashesCommand extends DashboardCommand {
                     }
                 }
                 player.sendMessage(ChatColor.BLUE + "Task complete");
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-                player.sendMessage(ChatColor.RED + "There was an error in the SQL query!");
+                player.sendMessage(ChatColor.RED + "There was an error processing the resource packs!");
             }
         });
     }

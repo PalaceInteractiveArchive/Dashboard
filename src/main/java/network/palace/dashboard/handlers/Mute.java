@@ -1,5 +1,7 @@
 package network.palace.dashboard.handlers;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bson.Document;
 
 import java.util.UUID;
@@ -9,17 +11,19 @@ import java.util.UUID;
  */
 public class Mute {
     private UUID uuid;
-    private String name;
-    private boolean muted;
-    private long release;
-    private String reason;
-    private String source;
+    @Getter private String name;
+    @Getter @Setter private boolean muted;
+    @Getter @Setter private long created;
+    @Getter @Setter private long expires;
+    @Getter @Setter private String reason;
+    @Getter @Setter private String source;
 
-    public Mute(UUID uuid, String name, boolean muted, long release, String reason, String source) {
+    public Mute(UUID uuid, String name, boolean muted, long created, long expires, String reason, String source) {
         this.uuid = uuid;
         this.name = name;
         this.muted = muted;
-        this.release = release;
+        this.created = created;
+        this.expires = expires;
         this.reason = reason;
         this.source = source;
     }
@@ -29,48 +33,13 @@ public class Mute {
         this.name = name;
         this.muted = structure != null;
         if (!muted) return;
-        this.release = structure.getLong("expires");
+        this.created = structure.getLong("created");
+        this.expires = structure.getLong("expires");
         this.reason = structure.getString("reason");
         this.source = structure.getString("source");
     }
 
     public UUID getUniqueId() {
         return uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isMuted() {
-        return muted;
-    }
-
-    public long getRelease() {
-        return release;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setMuted(boolean muted) {
-        this.muted = muted;
-    }
-
-    public void setRelease(long release) {
-        this.release = release;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
     }
 }

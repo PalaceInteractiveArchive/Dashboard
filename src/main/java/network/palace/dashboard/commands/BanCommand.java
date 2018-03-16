@@ -4,7 +4,6 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
-import java.util.Date;
 import java.util.UUID;
 
 public class BanCommand extends DashboardCommand {
@@ -24,7 +23,7 @@ public class BanCommand extends DashboardCommand {
         String playername = args[0];
         UUID uuid;
         try {
-            uuid = dashboard.getSqlUtil().uuidFromUsername(playername);
+            uuid = dashboard.getMongoHandler().usernameToUUID(playername);
         } catch (Exception ignored) {
             banner.sendMessage(ChatColor.RED + "I can't find that player!");
             return;
@@ -36,17 +35,17 @@ public class BanCommand extends DashboardCommand {
         String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
         String finalReason = reason.trim();
         dashboard.getSchedulerManager().runAsync(() -> {
-            if (dashboard.getSqlUtil().isBannedPlayer(uuid)) {
+            if (dashboard.getMongoHandler().isPlayerBanned(uuid)) {
                 banner.sendMessage(ChatColor.RED + "This player is already banned! Unban them to change the reason.");
                 return;
             }
-            dashboard.getSqlUtil().banPlayer(uuid, finalReason, true, new Date(System.currentTimeMillis()), banner.getUsername());
+            Ban ban = new Ban(uuid, playername, true, System.currentTimeMillis(), System.currentTimeMillis(), finalReason, banner.getUsername());
+            dashboard.getMongoHandler().banPlayer(uuid, ban);
             Player tp = dashboard.getPlayer(uuid);
             if (tp != null) {
                 tp.kickPlayer(ChatColor.RED + "You Have Been Banned For " + ChatColor.AQUA + finalReason);
             }
-            dashboard.getModerationUtil().announceBan(new Ban(uuid, playername, true, System.currentTimeMillis(),
-                    finalReason, banner.getUsername()));
+            dashboard.getModerationUtil().announceBan(ban);
         });
     }
 }

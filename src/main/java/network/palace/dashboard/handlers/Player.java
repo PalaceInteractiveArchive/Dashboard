@@ -23,7 +23,7 @@ public class Player {
     @Getter private int mcVersion;
     @Getter @Setter private boolean newGuest = false;
     @Getter @Setter private Timer tutorial = null;
-    @Getter @Setter private boolean toggled = true;
+    @Getter @Setter private boolean friendRequestToggle = true;
     @Setter private boolean mentions = true;
     @Getter private long loginTime = System.currentTimeMillis();
     @Getter @Setter private UUID reply;
@@ -96,7 +96,7 @@ public class Player {
 
     public Mute getMute() {
         if (mute == null) {
-            return new Mute(uuid, username, false, System.currentTimeMillis(), "", "");
+            return new Mute(uuid, username, false, System.currentTimeMillis(), System.currentTimeMillis(), "", "");
         }
         return mute;
     }
@@ -137,7 +137,7 @@ public class Player {
     }
 
     public boolean hasFriendToggledOff() {
-        return toggled;
+        return friendRequestToggle;
     }
 
     public boolean canRecieveMessages() {
@@ -164,7 +164,7 @@ public class Player {
     }
 
     public void ignorePlayer(UUID uuid) {
-        Launcher.getDashboard().getSqlUtil().ignorePlayer(this, uuid);
+        Launcher.getDashboard().getMongoHandler().ignorePlayer(this, uuid);
     }
 
     public void unignorePlayer(UUID uuid) {
@@ -174,7 +174,7 @@ public class Player {
                 break;
             }
         }
-        Launcher.getDashboard().getSqlUtil().unignorePlayer(this, uuid);
+        Launcher.getDashboard().getMongoHandler().unignorePlayer(this, uuid);
     }
 
     public List<IgnoreData> getIgnoreData() {
@@ -259,7 +259,7 @@ public class Player {
                                 ChatColor.AQUA + "palace.network/rules#chat");
                         mention();
                         setNewGuest(false);
-                        Launcher.getDashboard().getSqlUtil().completeTutorial(getUniqueId());
+                        Launcher.getDashboard().getMongoHandler().completeTutorial(getUniqueId());
                         cancel();
                     }
                 }

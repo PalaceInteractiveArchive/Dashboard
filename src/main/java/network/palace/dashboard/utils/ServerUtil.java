@@ -11,10 +11,6 @@ import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -259,22 +255,12 @@ public class ServerUtil {
     private void loadServers() {
         servers.clear();
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return;
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT name,address,port,park,type FROM " +
-                    (dashboard.isTestNetwork() ? "playground" : "") + "servers;");
-            ResultSet result = sql.executeQuery();
-            while (result.next()) {
-                servers.put(result.getString("name"), new Server(result.getString("name"), result.getString("address"),
-                        result.getInt("port"), result.getInt("park") == 1, 0, result.getString("type")));
+        try {
+            List<Server> servers = dashboard.getMongoHandler().getServers();
+            for (Server s : servers) {
+                this.servers.put(s.getName(), s);
             }
-            result.close();
-            sql.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
             System.exit(0);

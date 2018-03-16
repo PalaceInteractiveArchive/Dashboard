@@ -25,13 +25,13 @@ public class BanIPCommand extends DashboardCommand {
         String reason = r.substring(0, 1).toUpperCase() + r.substring(1);
         String finalReason = reason.trim();
         dashboard.getSchedulerManager().runAsync(() -> {
-            AddressBan existing = dashboard.getSqlUtil().getAddressBan(ip);
+            AddressBan existing = dashboard.getMongoHandler().getAddressBan(ip);
             if (existing != null) {
                 player.sendMessage(ChatColor.RED + "This IP " + (!ip.contains("*") ? "Address " : "Range ") +
                         "is already banned! Unban it to change the reason.");
                 return;
             }
-            dashboard.getSqlUtil().banIP(ip, finalReason, player.getUsername());
+            dashboard.getMongoHandler().banIP(ip, finalReason, player.getUsername());
             if (!ip.contains("*")) {
                 for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getAddress().equals(ip)) {

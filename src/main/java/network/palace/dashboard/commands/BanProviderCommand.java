@@ -26,12 +26,12 @@ public class BanProviderCommand extends DashboardCommand {
         }
         ProviderBan ban = new ProviderBan(provider.toString(), player.getUsername());
         dashboard.getSchedulerManager().runAsync(() -> {
-            ProviderBan existing = dashboard.getSqlUtil().getProviderBan(provider.toString());
+            ProviderBan existing = dashboard.getMongoHandler().getProviderBan(provider.toString());
             if (existing != null) {
                 player.sendMessage(ChatColor.RED + "This provider is already banned!");
                 return;
             }
-            dashboard.getSqlUtil().banProvider(ban);
+            dashboard.getMongoHandler().banProvider(ban);
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getIsp().trim().equalsIgnoreCase(provider.toString().trim())) {
                     try {

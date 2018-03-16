@@ -8,9 +8,6 @@ import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.DiscordDatabaseInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
-import network.palace.dashboard.slack.SlackAttachment;
-import network.palace.dashboard.slack.SlackMessage;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,7 +24,7 @@ public class SqlUtil {
     private BoneCP connectionPool;
 
     public SqlUtil() throws SQLException, IOException {
-        DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+//        DriverManager.registerDriver(new com.mysql.jdbc.Driver());
         BoneCPConfig config = new BoneCPConfig();
         String address = "";
         String database = "";
@@ -60,7 +57,7 @@ public class SqlUtil {
         config.setIdleConnectionTestPeriod(600, TimeUnit.SECONDS);
         connectionPool = new BoneCP(config);
         Dashboard dashboard = Launcher.getDashboard();
-        dashboard.setActivityUtil(new ActivityUtil(connectionPool));
+//        dashboard.setActivityUtil(new ActivityUtil(connectionPool));
     }
 
     public Optional<Connection> getConnection() {
@@ -75,7 +72,7 @@ public class SqlUtil {
     public void stop() {
         connectionPool.shutdown();
         Dashboard dashboard = Launcher.getDashboard();
-        dashboard.getActivityUtil().stop();
+//        dashboard.getActivityUtil().stop();
     }
 
     /**
@@ -83,109 +80,109 @@ public class SqlUtil {
      */
 
     public void login(final Player player) {
-        Dashboard dashboard = Launcher.getDashboard();
-
-        dashboard.getSchedulerManager().runAsync(() -> {
-            // Check if the uuid is from MCLeaks before we continue.
-            boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
-            if (isMCLeaks) {
-                // UUID is in MCLeaks, temp ban the account
-                banPlayer(player.getUuid(), "MCLeaks Account", true, new Date(System.currentTimeMillis()), "Dashboard");
-                dashboard.getModerationUtil().announceBan(new Ban(player.getUniqueId(), player.getUsername(),
-                        true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard"));
-                player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
-                        ChatColor.AQUA + "If you think were banned incorrectly, submit an appeal at palnet.us/appeal");
-            }
-        });
-
-        dashboard.getSchedulerManager().runAsync(() -> {
-            Optional<Connection> optConnection = getConnection();
-            if (!optConnection.isPresent()) {
-                ErrorUtil.logError("Unable to connect to mysql");
-                return;
-            }
-            try (Connection connection = optConnection.get()) {
-                PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,toggled,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
-                sql.setString(1, player.getUniqueId().toString());
-                ResultSet result = sql.executeQuery();
-                if (!result.next()) {
-                    newPlayer(player, connection);
-                    result.close();
-                    sql.close();
-                    return;
-                }
-                long ot = result.getLong("onlinetime");
-                player.setOnlineTime(ot == 0 ? 1 : ot);
-                Rank rank = Rank.fromString(result.getString("rank"));
-                if (!rank.equals(Rank.SETTLER)) {
-                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
-                    player.send(packet);
-                }
-                boolean needsUpdate = false;
-                boolean isSameIP = !player.getAddress().equals(result.getString("ipAddress"));
-                boolean disable = isSameIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
-
-                if (isSameIP || !player.getUsername().equals(result.getString("username")) ||
-                        player.getMcVersion() != result.getInt("mcversion")) needsUpdate = true;
-
-                player.setDisabled(disable);
-                player.setRank(rank);
-                player.setToggled(result.getInt("toggled") == 1);
-                player.setMentions(result.getInt("mentions") == 1);
-                player.setNewGuest(result.getInt("tutorial") != 1);
-                dashboard.addPlayer(player);
-                dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: SqlUtil.login");
-                dashboard.addToCache(player.getUniqueId(), player.getUsername());
-
-                String username = result.getString("username");
-                int protocolVersion = result.getInt("mcversion");
-                result.close();
-                sql.close();
-                if (needsUpdate)
-                    update(player, connection, !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
-                if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
-                    String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
-                    for (Player tp : dashboard.getOnlinePlayers()) {
-                        if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
-                            tp.sendMessage(msg);
-                        }
-                    }
-                    staffClock(player.getUniqueId(), true, connection);
-                    if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
-                        player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
-                    }
-                }
-
-                List<IgnoreData> ignored = getIgnoreData(player);
-                player.setIgnoredUsers(ignored);
-
-                HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
-                HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
-                player.setFriends(friends);
-                player.setRequests(requests);
-                HashMap<UUID, String> friendList = player.getFriends();
-                if (friendList == null) return;
-                if (!friendList.isEmpty()) {
-                    String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
-                    dashboard.getFriendUtil().friendMessage(player, friendList, joinMessage);
-                }
-                Mute mute = getMute(player.getUniqueId(), player.getUsername());
-                player.setMute(mute);
-                if (disable) {
-                    SlackMessage m = new SlackMessage("");
-                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
-                            " connected from a new IP address " + player.getAddress());
-                    a.color("warning");
-                    dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
-                    player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
-                            "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
-                            "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
-                }
-            } catch (SQLException e) {
-                ErrorUtil.logError("Error in SqlUtil with login method", e);
-            }
-        });
+//        Dashboard dashboard = Launcher.getDashboard();
+//
+//        dashboard.getSchedulerManager().runAsync(() -> {
+//            // Check if the uuid is from MCLeaks before we continue.
+//            boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
+//            if (isMCLeaks) {
+//                // UUID is in MCLeaks, temp ban the account
+//                banPlayer(player.getUuid(), "MCLeaks Account", true, new Date(System.currentTimeMillis()), "Dashboard");
+//                dashboard.getModerationUtil().announceBan(new Ban(player.getUniqueId(), player.getUsername(),
+//                        true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard"));
+//                player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
+//                        ChatColor.AQUA + "If you think were banned incorrectly, submit an appeal at palnet.us/appeal");
+//            }
+//        });
+//
+//        dashboard.getSchedulerManager().runAsync(() -> {
+//            Optional<Connection> optConnection = getConnection();
+//            if (!optConnection.isPresent()) {
+//                ErrorUtil.logError("Unable to connect to mysql");
+//                return;
+//            }
+//            try (Connection connection = optConnection.get()) {
+//                PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,friendRequestToggle,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
+//                sql.setString(1, player.getUniqueId().toString());
+//                ResultSet result = sql.executeQuery();
+//                if (!result.next()) {
+//                    newPlayer(player, connection);
+//                    result.close();
+//                    sql.close();
+//                    return;
+//                }
+//                long ot = result.getLong("onlinetime");
+//                player.setOnlineTime(ot == 0 ? 1 : ot);
+//                Rank rank = Rank.fromString(result.getString("rank"));
+//                if (!rank.equals(Rank.SETTLER)) {
+//                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
+//                    player.send(packet);
+//                }
+//                boolean needsUpdate = false;
+//                boolean isSameIP = !player.getAddress().equals(result.getString("ipAddress"));
+//                boolean disable = isSameIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
+//
+//                if (isSameIP || !player.getUsername().equals(result.getString("username")) ||
+//                        player.getMcVersion() != result.getInt("mcversion")) needsUpdate = true;
+//
+//                player.setDisabled(disable);
+//                player.setRank(rank);
+//                player.setFriendRequestToggle(result.getInt("friendRequestToggle") == 1);
+//                player.setMentions(result.getInt("mentions") == 1);
+//                player.setNewGuest(result.getInt("tutorial") != 1);
+//                dashboard.addPlayer(player);
+//                dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: SqlUtil.login");
+//                dashboard.addToCache(player.getUniqueId(), player.getUsername());
+//
+//                String username = result.getString("username");
+//                int protocolVersion = result.getInt("mcversion");
+//                result.close();
+//                sql.close();
+//                if (needsUpdate)
+//                    update(player, connection, !player.getUsername().equals(username), player.getMcVersion() != protocolVersion);
+//                if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
+//                    String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+//                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
+//                    for (Player tp : dashboard.getOnlinePlayers()) {
+//                        if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
+//                            tp.sendMessage(msg);
+//                        }
+//                    }
+//                    staffClock(player.getUniqueId(), true, connection);
+//                    if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
+//                        player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
+//                    }
+//                }
+//
+//                List<IgnoreData> ignored = getIgnoreData(player);
+//                player.setIgnoredUsers(ignored);
+//
+//                HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
+//                HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
+//                player.setFriends(friends);
+//                player.setRequests(requests);
+//                HashMap<UUID, String> friendList = player.getFriends();
+//                if (friendList == null) return;
+//                if (!friendList.isEmpty()) {
+//                    String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
+//                    dashboard.getFriendUtil().friendMessage(player, friendList, joinMessage);
+//                }
+//                Mute mute = getMute(player.getUniqueId(), player.getUsername());
+//                player.setMute(mute);
+//                if (disable) {
+//                    SlackMessage m = new SlackMessage("");
+//                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
+//                            " connected from a new IP address " + player.getAddress());
+//                    a.color("warning");
+//                    dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+//                    player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
+//                            "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
+//                            "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
+//                }
+//            } catch (SQLException e) {
+//                ErrorUtil.logError("Error in SqlUtil with login method", e);
+//            }
+//        });
     }
 
     private void newPlayer(Player player, Connection connection) throws SQLException {
@@ -260,7 +257,7 @@ public class SqlUtil {
             if (!result.next()) {
                 return;
             }
-            player.setToggled(result.getInt("toggled") == 1);
+            player.setFriendRequestToggle(result.getInt("friendRequestToggle") == 1);
             player.setMentions(result.getInt("mentions") == 1);
             long ot = result.getLong("onlinetime");
             player.setOnlineTime(ot == 0 ? 1 : ot);
@@ -501,7 +498,7 @@ public class SqlUtil {
             }
             PreparedStatement sql = connection.prepareStatement(q.toString());
             for (int i = 1; i <= ranks.length; i++) {
-                sql.setString(i, ranks[i - 1].getSqlName());
+                sql.setString(i, ranks[i - 1].getDBName());
             }
             ResultSet result = sql.executeQuery();
             while (result.next()) {
@@ -654,7 +651,7 @@ public class SqlUtil {
                 statement.setString(1, ban.getUniqueId().toString());
                 statement.setString(2, ban.getReason());
                 statement.setInt(3, ban.isPermanent() ? 1 : 0);
-                statement.setTimestamp(4, new Timestamp(new Date(ban.getRelease()).getTime()));
+                statement.setTimestamp(4, new Timestamp(new Date(ban.getExpires()).getTime()));
                 statement.setString(5, ban.getSource());
                 statement.execute();
             } catch (SQLException e) {
@@ -856,7 +853,7 @@ public class SqlUtil {
                 statement.execute();
                 statement.close();
             } catch (SQLException e) {
-                ErrorUtil.logError("SQL Error unban player method", e);
+                ErrorUtil.logError("SQL Error unbanPlayer player method", e);
             }
         });
     }
@@ -874,7 +871,7 @@ public class SqlUtil {
                 statement.execute();
                 statement.close();
             } catch (SQLException e) {
-                ErrorUtil.logError("SQL Error unban ip method", e);
+                ErrorUtil.logError("SQL Error unbanPlayer ip method", e);
             }
         });
     }
@@ -892,7 +889,7 @@ public class SqlUtil {
                 statement.execute();
                 statement.close();
             } catch (SQLException e) {
-                ErrorUtil.logError("SQL Error unban provider method", e);
+                ErrorUtil.logError("SQL Error unbanPlayer provider method", e);
             }
         });
     }
@@ -914,14 +911,14 @@ public class SqlUtil {
             Mute mute = null;
             while (result.next()) {
                 if (result.getInt("active") == 1) {
-                    mute = new Mute(uuid, username, true, result.getTimestamp("release").getTime(),
-                            result.getString("reason"), result.getString("source"));
+//                    mute = new Mute(uuid, username, true, result.getTimestamp("release").getTime(),
+//                            result.getString("reason"), result.getString("source"));
                 }
             }
             if (mute == null) {
                 result.close();
                 statement.close();
-                return new Mute(uuid, username, false, System.currentTimeMillis(), "", "");
+//                return new Mute(uuid, username, false, System.currentTimeMillis(), "", "");
             }
             result.close();
             statement.close();
@@ -941,7 +938,7 @@ public class SqlUtil {
         try (Connection connection = optConnection.get()) {
             PreparedStatement statement = connection.prepareStatement("INSERT INTO muted_players (uuid,`release`,source,reason) VALUES (?,?,?,?)");
             statement.setString(1, mute.getUniqueId().toString());
-            statement.setTimestamp(2, new Timestamp(mute.getRelease()));
+            statement.setTimestamp(2, new Timestamp(mute.getExpires()));
             statement.setString(3, mute.getSource());
             statement.setString(4, mute.getReason());
             statement.execute();

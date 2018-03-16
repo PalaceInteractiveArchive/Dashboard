@@ -73,7 +73,6 @@ public class Launcher {
 
         dashboard.loadConfiguration();
         dashboard.loadMOTD();
-        dashboard.loadServerTypes();
         dashboard.loadJoinServers();
         if (dashboard.isTestNetwork()) {
             dashboard.getLogger().info("Test network detected, disabling statistics collection!");

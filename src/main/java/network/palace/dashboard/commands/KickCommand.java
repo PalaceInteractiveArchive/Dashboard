@@ -36,7 +36,7 @@ public class KickCommand extends DashboardCommand {
         tp.kickPlayer(ChatColor.RED + "You have been disconnected for: " + ChatColor.AQUA + reason);
         try {
             dashboard.getModerationUtil().announceKick(tp.getUsername(), reason, player.getUsername());
-            dashboard.getSqlUtil().logKick(new Kick(tp.getUniqueId(), reason, player.getUsername()));
+            dashboard.getMongoHandler().logKick(new Kick(tp.getUniqueId(), reason, player.getUsername()));
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "That player isn't online!");
         }

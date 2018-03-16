@@ -40,7 +40,7 @@ public class ModlogCommand extends DashboardCommand {
             UUID uuid;
             if (tp == null) {
                 try {
-                    uuid = dashboard.getSqlUtil().uuidFromUsername(playername);
+                    uuid = dashboard.getMongoHandler().usernameToUUID(playername);
                 } catch (Exception e) {
                     player.sendMessage(ChatColor.RED + "Player not found!");
                     return;
@@ -49,7 +49,7 @@ public class ModlogCommand extends DashboardCommand {
                 uuid = tp.getUniqueId();
             }
             String action;
-            Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
+            Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
             if (!optConnection.isPresent()) {
                 ErrorUtil.logError("Unable to connect to mysql");
                 return;

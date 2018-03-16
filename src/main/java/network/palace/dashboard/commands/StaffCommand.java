@@ -31,10 +31,10 @@ public class StaffCommand extends DashboardCommand {
                     player.sendMessage(ChatColor.GREEN + "You're already logged in!");
                     return;
                 }
-                if (dashboard.getSqlUtil().verifyPassword(player.getUniqueId(), args[1])) {
+                if (dashboard.getMongoHandler().verifyPassword(player.getUniqueId(), args[1])) {
                     player.setDisabled(false);
                     player.sendMessage(ChatColor.GREEN + "You logged in!");
-                    dashboard.getSqlUtil().updateStaffIP(player);
+                    dashboard.getMongoHandler().updateStaffIP(player);
                     PacketDisablePlayer packet = new PacketDisablePlayer(player.getUniqueId(), false);
                     Dashboard.getInstance(player.getServer()).send(packet);
                     SlackMessage m = new SlackMessage("");
@@ -54,7 +54,7 @@ public class StaffCommand extends DashboardCommand {
                     if (trial >= 5) {
                         Ban ban = new Ban(player.getUniqueId(), player.getUsername(), true, System.currentTimeMillis(),
                                 "Locked out of staff account", "Dashboard");
-                        dashboard.getSqlUtil().banPlayer(ban);
+                        dashboard.getMongoHandler().banPlayer(ban);
                         dashboard.getModerationUtil().announceBan(ban);
                         player.kickPlayer(ChatColor.RED + "Locked out of staff account. Please contact management to unlock your account.");
                         SlackMessage m = new SlackMessage("<!channel> *" + player.getUsername() + " Locked Out*");
@@ -85,7 +85,7 @@ public class StaffCommand extends DashboardCommand {
                         player.sendMessage(ChatColor.RED + "This password is not secure enough! Make sure it has:\n- at least 8 characters\n- a lowercase letter\n- an uppercase letter\n- a number");
                         return;
                     }
-                    if (!dashboard.getSqlUtil().verifyPassword(player.getUniqueId(), oldp)) {
+                    if (!dashboard.getMongoHandler().verifyPassword(player.getUniqueId(), oldp)) {
                         player.sendMessage(ChatColor.RED + "Your existing password is incorrect!");
                         SlackMessage m = new SlackMessage("");
                         SlackAttachment a = new SlackAttachment("[Failed PW Change] *" + player.getRank().getName() + "* " +
@@ -94,7 +94,7 @@ public class StaffCommand extends DashboardCommand {
                         dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                         return;
                     }
-                    dashboard.getSqlUtil().changePassword(player.getUniqueId(), newp);
+                    dashboard.getMongoHandler().changePassword(player.getUniqueId(), newp);
                     player.sendMessage(ChatColor.GREEN + "Your password was successfully changed!");
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[PW Changed] *" + player.getRank().getName() + "* " +
@@ -105,13 +105,13 @@ public class StaffCommand extends DashboardCommand {
                 } else if (args[0].equalsIgnoreCase("force") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                     String username;
                     String pass = args[2];
-                    UUID uuid = dashboard.getSqlUtil().uuidFromUsername(args[1]);
+                    UUID uuid = dashboard.getMongoHandler().usernameToUUID(args[1]);
                     if (uuid == null) {
                         player.sendMessage(ChatColor.RED + "No player was found with the username '" +
                                 ChatColor.GREEN + args[1] + ChatColor.RED + "'!");
                         return;
                     }
-                    username = dashboard.getSqlUtil().usernameFromUUID(uuid);
+                    username = dashboard.getMongoHandler().uuidToUsername(uuid);
                     if (username.equalsIgnoreCase("unknown")) {
                         player.sendMessage(ChatColor.RED + "No player was found with the username '" +
                                 ChatColor.GREEN + args[1] + ChatColor.RED + "'!");
@@ -125,10 +125,10 @@ public class StaffCommand extends DashboardCommand {
                         player.sendMessage(ChatColor.RED + "This password is not secure enough! Make sure it has:\n- at least 8 characters\n- a lowercase letter\n- an uppercase letter\n- a number");
                         return;
                     }
-                    if (dashboard.getSqlUtil().hasPassword(uuid)) {
-                        dashboard.getSqlUtil().changePassword(uuid, pass);
+                    if (dashboard.getMongoHandler().hasPassword(uuid)) {
+                        dashboard.getMongoHandler().changePassword(uuid, pass);
                     } else {
-                        dashboard.getSqlUtil().setPassword(uuid, pass);
+                        dashboard.getMongoHandler().setPassword(uuid, pass);
                     }
                     player.sendMessage(ChatColor.GREEN + username + "'s password was successfully changed!");
                     SlackMessage m = new SlackMessage("");
