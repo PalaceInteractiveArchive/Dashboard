@@ -15,9 +15,11 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
+import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.IPUtil;
+import network.palace.dashboard.utils.InventoryUtil;
 import network.palace.dashboard.utils.MCLeakUtil;
 import org.bson.*;
 import org.bson.conversions.Bson;
@@ -652,6 +654,52 @@ public class MongoHandler {
     public void logAFK(UUID uuid) {
         playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()),
                 Updates.push("afklogs", System.currentTimeMillis()), new UpdateOptions().upsert(true));
+    }
+
+    /*
+    Park Methods
+     */
+
+    /**
+     * Get data for a specific section of park data. If no limit is provided, the entire parks section is returned.
+     *
+     * @param uuid  the uuid of the player
+     * @param limit a document specifying the limits of the search
+     * @return a document with the requested data
+     */
+    public Document getParkData(UUID uuid, Document limit) {
+        return getPlayer(uuid, new Document("parks", limit == null ? 1 : limit));
+    }
+
+    public Document getParkInventoryData(UUID uuid) {
+        return getParkData(uuid, new Document("inventories", 1));
+    }
+
+    public Document getParkInventory(UUID uuid, Resort resort) {
+        return playerCollection.find(new Document("uuid", uuid.toString()).append("parks.inventories.$.resort", resort.getId())).first();
+    }
+
+    public void setInventoryData(UUID uuid, ResortInventory inv) {
+        UpdateData data = InventoryUtil.getDataFromJson(inv.getBackpackJSON(), inv.getBackpackSize(),
+                inv.getLockerJSON(), inv.getLockerSize(), inv.getHotbarJSON());
+        setInventoryData(uuid, inv.getResort(), data);
+    }
+
+    public void setInventoryData(UUID uuid, Resort resort, UpdateData data) {
+        Document doc = new Document("packcontents", data.getPack()).append("packsize", data.getPackSize())
+                .append("lockercontents", data.getLocker()).append("lockersize", data.getLockerSize())
+                .append("hotbarcontents", data.getHotbar()).append("resort", resort);
+        playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.inventories.$.resort", resort),
+                new Document("parks.inventories.$", doc));
+    }
+
+    public void updateInventoryData(UUID uuid, InventoryUpdate update) {
+        HashMap<Resort, UpdateData> map = update.getMap();
+        for (Map.Entry<Resort, UpdateData> entry : map.entrySet()) {
+            Resort resort = entry.getKey();
+            UpdateData data = entry.getValue();
+            setInventoryData(uuid, resort, data);
+        }
     }
 
     public enum MongoFilter {
