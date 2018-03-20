@@ -24,7 +24,7 @@ public class BanProviderCommand extends DashboardCommand {
                 provider.append(" ");
             }
         }
-        ProviderBan ban = new ProviderBan(provider.toString(), player.getUsername());
+        ProviderBan ban = new ProviderBan(provider.toString(), player.getUniqueId().toString());
         dashboard.getSchedulerManager().runAsync(() -> {
             ProviderBan existing = dashboard.getMongoHandler().getProviderBan(provider.toString());
             if (existing != null) {

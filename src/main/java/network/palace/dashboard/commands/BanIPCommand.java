@@ -31,7 +31,8 @@ public class BanIPCommand extends DashboardCommand {
                         "is already banned! Unban it to change the reason.");
                 return;
             }
-            dashboard.getMongoHandler().banIP(ip, finalReason, player.getUsername());
+            AddressBan ban = new AddressBan(ip, finalReason, player.getUniqueId().toString());
+            dashboard.getMongoHandler().banAddress(ban);
             if (!ip.contains("*")) {
                 for (Player tp : dashboard.getOnlinePlayers()) {
                     if (tp.getAddress().equals(ip)) {
@@ -53,7 +54,7 @@ public class BanIPCommand extends DashboardCommand {
                     }
                 }
             }
-            dashboard.getModerationUtil().announceBan(new AddressBan(ip, finalReason, player.getUsername()));
+            dashboard.getModerationUtil().announceBan(ban);
         });
     }
 }

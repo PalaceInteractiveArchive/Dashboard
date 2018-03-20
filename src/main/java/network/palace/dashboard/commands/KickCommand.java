@@ -19,11 +19,7 @@ public class KickCommand extends DashboardCommand {
             return;
         }
         Player tp = dashboard.getPlayer(args[0]);
-        if (tp == null) {
-            player.sendMessage(ChatColor.RED + "I can't find that player!");
-            return;
-        }
-        if (tp.isKicking()) {
+        if (tp == null || tp.isKicking()) {
             player.sendMessage(ChatColor.RED + "I can't find that player!");
             return;
         }
@@ -36,7 +32,7 @@ public class KickCommand extends DashboardCommand {
         tp.kickPlayer(ChatColor.RED + "You have been disconnected for: " + ChatColor.AQUA + reason);
         try {
             dashboard.getModerationUtil().announceKick(tp.getUsername(), reason, player.getUsername());
-            dashboard.getMongoHandler().logKick(new Kick(tp.getUniqueId(), reason, player.getUsername()));
+            dashboard.getMongoHandler().kickPlayer(tp.getUniqueId(), new Kick(tp.getUniqueId(), reason, player.getUniqueId().toString()));
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "That player isn't online!");
         }

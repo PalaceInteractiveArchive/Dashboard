@@ -35,7 +35,7 @@ public class TempBanCommand extends DashboardCommand {
                 r.append(args[i]).append(" ");
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
-            String source = player.getUsername();
+            String source = player.getUniqueId().toString();
             Player tp = dashboard.getPlayer(username);
             UUID uuid;
             if (tp == null) {

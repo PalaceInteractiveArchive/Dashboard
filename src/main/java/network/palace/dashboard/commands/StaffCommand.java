@@ -34,7 +34,7 @@ public class StaffCommand extends DashboardCommand {
                 if (dashboard.getMongoHandler().verifyPassword(player.getUniqueId(), args[1])) {
                     player.setDisabled(false);
                     player.sendMessage(ChatColor.GREEN + "You logged in!");
-                    dashboard.getMongoHandler().updateStaffIP(player);
+                    dashboard.getMongoHandler().updateAddress(player.getUniqueId(), player.getAddress());
                     PacketDisablePlayer packet = new PacketDisablePlayer(player.getUniqueId(), false);
                     Dashboard.getInstance(player.getServer()).send(packet);
                     SlackMessage m = new SlackMessage("");
@@ -54,7 +54,7 @@ public class StaffCommand extends DashboardCommand {
                     if (trial >= 5) {
                         Ban ban = new Ban(player.getUniqueId(), player.getUsername(), true, System.currentTimeMillis(),
                                 "Locked out of staff account", "Dashboard");
-                        dashboard.getMongoHandler().banPlayer(ban);
+                        dashboard.getMongoHandler().banPlayer(player.getUniqueId(), ban);
                         dashboard.getModerationUtil().announceBan(ban);
                         player.kickPlayer(ChatColor.RED + "Locked out of staff account. Please contact management to unlock your account.");
                         SlackMessage m = new SlackMessage("<!channel> *" + player.getUsername() + " Locked Out*");
@@ -94,7 +94,7 @@ public class StaffCommand extends DashboardCommand {
                         dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
                         return;
                     }
-                    dashboard.getMongoHandler().changePassword(player.getUniqueId(), newp);
+                    dashboard.getMongoHandler().setPassword(player.getUniqueId(), newp);
                     player.sendMessage(ChatColor.GREEN + "Your password was successfully changed!");
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[PW Changed] *" + player.getRank().getName() + "* " +
@@ -125,11 +125,11 @@ public class StaffCommand extends DashboardCommand {
                         player.sendMessage(ChatColor.RED + "This password is not secure enough! Make sure it has:\n- at least 8 characters\n- a lowercase letter\n- an uppercase letter\n- a number");
                         return;
                     }
-                    if (dashboard.getMongoHandler().hasPassword(uuid)) {
-                        dashboard.getMongoHandler().changePassword(uuid, pass);
-                    } else {
-                        dashboard.getMongoHandler().setPassword(uuid, pass);
-                    }
+//                    if (dashboard.getMongoHandler().hasPassword(uuid)) {
+//                        dashboard.getMongoHandler().changePassword(uuid, pass);
+//                    } else {
+                    dashboard.getMongoHandler().setPassword(uuid, pass);
+//                    }
                     player.sendMessage(ChatColor.GREEN + username + "'s password was successfully changed!");
                     SlackMessage m = new SlackMessage("");
                     SlackAttachment a = new SlackAttachment("[PW Force-Changed] *" + username +

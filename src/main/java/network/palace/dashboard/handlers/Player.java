@@ -118,16 +118,6 @@ public class Player {
         }
     }
 
-    /**
-     * Get the name of the player
-     *
-     * @return the name of the player
-     * @deprecated Use `getUsername` instead.
-     */
-    public String getName() {
-        return username;
-    }
-
     public boolean hasMentions() {
         return mentions;
     }

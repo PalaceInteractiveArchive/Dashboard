@@ -39,7 +39,7 @@ public class BanCommand extends DashboardCommand {
                 banner.sendMessage(ChatColor.RED + "This player is already banned! Unban them to change the reason.");
                 return;
             }
-            Ban ban = new Ban(uuid, playername, true, System.currentTimeMillis(), System.currentTimeMillis(), finalReason, banner.getUsername());
+            Ban ban = new Ban(uuid, playername, true, System.currentTimeMillis(), System.currentTimeMillis(), finalReason, banner.getUniqueId().toString());
             dashboard.getMongoHandler().banPlayer(uuid, ban);
             Player tp = dashboard.getPlayer(uuid);
             if (tp != null) {

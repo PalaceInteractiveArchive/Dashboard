@@ -6,18 +6,7 @@ import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.utils.DateUtil;
-import network.palace.dashboard.utils.ErrorUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class ModlogCommand extends DashboardCommand {
@@ -28,6 +17,35 @@ public class ModlogCommand extends DashboardCommand {
     }
 
     @Override
+    public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
+        if (args.length < 1) {
+            player.sendMessage(ChatColor.RED + "/modlog [Username] [Bans/Mutes/Kicks]");
+            return;
+        }
+        String username = args[0];
+        Player tp = dashboard.getPlayer(username);
+        UUID uuid;
+        if (tp == null) {
+            uuid = dashboard.getMongoHandler().usernameToUUID(username);
+            if (uuid == null) {
+                player.sendMessage(ChatColor.RED + "Player not found!");
+                return;
+            }
+        } else {
+            uuid = tp.getUniqueId();
+            username = tp.getUsername();
+        }
+        if (args.length == 1) {
+            int bans = 0;
+            int mutes = 0;
+            int kicks = 0;
+            player.sendMessage(ChatColor.GOLD + "Mod Log for " + username + ":");
+        } else {
+        }
+    }
+
+    /*@Override
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         try {
@@ -206,5 +224,5 @@ public class ModlogCommand extends DashboardCommand {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }

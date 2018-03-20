@@ -235,6 +235,11 @@ public class MongoHandler {
         return new Ban(uuid, name, null);
     }
 
+    public void kickPlayer(UUID uuid, Kick kick) {
+        Document kickDocument = new Document("reason", kick.getReason()).append("time", System.currentTimeMillis()).append("source", kick.getSource());
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("kicks", kickDocument));
+    }
+
     public void unbanPlayer(UUID uuid) {
         BsonArray array = new BsonArray();
         for (Object o : getPlayer(uuid, new Document("bans", 1)).get("bans", ArrayList.class)) {
@@ -263,6 +268,14 @@ public class MongoHandler {
     public ProviderBan getProviderBan(String isp) {
         Document doc = bansCollection.find(new Document("type", "provider").append("data", isp)).first();
         return new ProviderBan(doc.getString("data"), doc.getString("source"));
+    }
+
+    public List<String> getBannedProviders() {
+        List<String> list = new ArrayList<>();
+        for (Document doc : bansCollection.find(new Document("type", "provider"))) {
+            list.add(doc.getString("data"));
+        }
+        return list;
     }
 
     public void unbanProvider(String isp) {
@@ -315,7 +328,7 @@ public class MongoHandler {
         dashboard.getSchedulerManager().runAsync(() -> {
 //            PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,friendRequestToggle,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
             Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("ip", 1)
-                    .append("username", 1).append("friendRequestToggle", 1).append("mentions", 1).append("onlinetime", 1)
+                    .append("username", 1).append("friendRequestToggle", 1).append("onlinetime", 1)
                     .append("tutorial", 1).append("mcversion", 1).append("settings", 1));
             long ot = doc.getLong("onlinetime");
             player.setOnlineTime(ot == 0 ? 1 : ot);
@@ -700,6 +713,36 @@ public class MongoHandler {
             UpdateData data = entry.getValue();
             setInventoryData(uuid, resort, data);
         }
+    }
+
+    public Document getSettings(UUID uuid) {
+        return getPlayer(uuid, new Document("settings", 1));
+    }
+
+    public void setSetting(UUID uuid, String key, Object value) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("settings." + key, value));
+    }
+
+    public void updateAddress(UUID uuid, String address) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("ip", address));
+    }
+
+    public boolean verifyPassword(UUID uuid, String pass) {
+        Document doc = getPlayer(uuid, new Document("staffPassword", 1));
+        if (doc == null || !doc.containsKey("staffPassword")) return false;
+        String dbPassword = doc.getString("staffPassword");
+        return Launcher.getDashboard().getPasswordUtil().validPassword(pass, dbPassword);
+    }
+
+    public boolean hasPassword(UUID uuid) {
+        return getPlayer(uuid, new Document("staffPassword", 1)).containsKey("staffPassword");
+    }
+
+    public void setPassword(UUID uuid, String pass) {
+        Dashboard dashboard = Launcher.getDashboard();
+        String salt = dashboard.getPasswordUtil().getNewSalt();
+        String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("staffPassword", hashed));
     }
 
     public enum MongoFilter {
