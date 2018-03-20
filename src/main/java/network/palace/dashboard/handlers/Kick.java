@@ -1,30 +1,20 @@
 package network.palace.dashboard.handlers;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 import java.util.UUID;
 
 /**
  * Created by Marc on 8/25/16
  */
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class Kick {
-    private UUID uuid;
-    private String reason;
-    private String source;
-
-    public Kick(UUID uuid, String reason, String source) {
-        this.uuid = uuid;
-        this.reason = reason;
-        this.source = source;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getSource() {
-        return source;
-    }
+    @Getter private final UUID uniqueId;
+    @Getter private final String reason;
+    @Getter private final String source;
+    @Getter @Setter private long time = 0;
 }

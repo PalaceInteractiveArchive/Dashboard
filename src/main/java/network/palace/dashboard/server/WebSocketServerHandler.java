@@ -200,7 +200,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketOnlineCount count = new PacketOnlineCount(dashboard.getOnlinePlayers().size());
                     List<String> servers = new ArrayList<>();
                     for (Server s : dashboard.getServers()) {
-                        servers.add(s.getName() + ":" + s.getAddress());
+                        servers.add(s.getName() + ";" + s.getAddress());
                     }
                     PacketServerList server = new PacketServerList(servers);
                     PacketTargetLobby lobby = new PacketTargetLobby(dashboard.getTargetServer());

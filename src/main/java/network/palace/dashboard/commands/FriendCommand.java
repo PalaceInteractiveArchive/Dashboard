@@ -38,7 +38,7 @@ public class FriendCommand extends DashboardCommand {
                                 player.sendMessage(ChatColor.YELLOW + "Friend Requests have been friendRequestToggle " +
                                         ChatColor.GREEN + "ON");
                             }
-                            FriendUtil.toggleRequests(player);
+                            dashboard.getMongoHandler().setFriendRequestToggle(player.getUniqueId(), player.hasFriendToggledOff());
                         });
                         return;
                     case "requests":

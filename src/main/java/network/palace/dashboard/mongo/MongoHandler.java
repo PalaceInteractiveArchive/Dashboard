@@ -24,6 +24,9 @@ import network.palace.dashboard.utils.MCLeakUtil;
 import org.bson.*;
 import org.bson.conversions.Bson;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -48,11 +51,37 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> votingCollection = null;
     @Getter private MongoCollection<Document> warpsCollection = null;
 
+    public MongoHandler() throws IOException {
+        String address = "";
+        String database = "";
+        String username = "";
+        String password = "";
+        try (BufferedReader br = new BufferedReader(new FileReader("db.txt"))) {
+            String line = br.readLine();
+            while (line != null) {
+                if (line.startsWith("address:")) {
+                    address = line.split("address:")[1];
+                }
+                if (line.startsWith("username:")) {
+                    username = line.split("username:")[1];
+                }
+                if (line.startsWith("password:")) {
+                    password = line.split("password:")[1];
+                }
+                if (line.startsWith("database:")) {
+                    database = line.split("database:")[1];
+                }
+                line = br.readLine();
+            }
+        }
+        connect("mongodb://" + username + ":" + password + "@" + address + "/" + database);
+    }
+
     public void connect(String uri) {
         MongoClientURI connectionString = new MongoClientURI(uri);
         client = new MongoClient(connectionString);
         database = client.getDatabase("palace");
-        playerCollection = database.getCollection("player");
+        playerCollection = database.getCollection("players");
         chatCollection = database.getCollection("chat");
         activityCollection = database.getCollection("activity");
         friendsCollection = database.getCollection("friends");
@@ -209,7 +238,7 @@ public class MongoHandler {
             doc.put("active", BsonBoolean.valueOf(false));
             array.add(doc);
         }
-        playerCollection.updateOne(Filters.eq("uuid", uuid), new Document("mutes", array));
+        playerCollection.updateOne(Filters.eq("uuid", uuid), Updates.set("mutes", array));
     }
 
     public void mutePlayer(UUID uuid, Mute mute) {
@@ -326,87 +355,107 @@ public class MongoHandler {
         }
 
         dashboard.getSchedulerManager().runAsync(() -> {
+            try {
+                System.out.println("A");
 //            PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,friendRequestToggle,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
-            Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("ip", 1)
-                    .append("username", 1).append("friendRequestToggle", 1).append("onlinetime", 1)
-                    .append("tutorial", 1).append("mcversion", 1).append("settings", 1));
-            long ot = doc.getLong("onlinetime");
-            player.setOnlineTime(ot == 0 ? 1 : ot);
-            Rank rank = Rank.fromString(doc.getString("rank"));
-            if (!rank.equals(Rank.SETTLER)) {
-                PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
-                player.send(packet);
-            }
-            boolean needsUpdate = false;
-            boolean isDifferentIP = !player.getAddress().equals(doc.getString("ip"));
-            boolean disable = isDifferentIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
-
-            int protocolVersion = doc.getInteger("mcversion");
-
-            if (isDifferentIP || !player.getUsername().equals(doc.getString("username")) ||
-                    player.getMcVersion() != protocolVersion) needsUpdate = true;
-
-            Document settings = (Document) doc.get("settings");
-
-            player.setDisabled(disable);
-            player.setRank(rank);
-            player.setFriendRequestToggle(settings.getBoolean("friendRequestToggle"));
-            player.setMentions(settings.getBoolean("mentions"));
-            player.setNewGuest(doc.getBoolean("tutorial"));
-            dashboard.addPlayer(player);
-            dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
-            dashboard.addToCache(player.getUniqueId(), player.getUsername());
-
-            String username = doc.getString("username");
-            if (!silent) {
-                if (needsUpdate) {
-                    update(player, doc.getString("ip"), username, protocolVersion);
+                Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("ip", 1)
+                        .append("username", 1).append("friendRequestToggle", 1).append("onlinetime", 1)
+                        .append("tutorial", 1).append("minecraftVersion", 1).append("settings", 1));
+                System.out.println("B");
+                long ot = doc.getLong("onlinetime");
+                System.out.println("M");
+                player.setOnlineTime(ot == 0 ? 1 : ot);
+                System.out.println("N");
+                Rank rank = Rank.fromString(doc.getString("rank"));
+                System.out.println("C");
+                if (!rank.equals(Rank.SETTLER)) {
+                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
+                    player.send(packet);
                 }
-                if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
-                    String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
-                    for (Player tp : dashboard.getOnlinePlayers()) {
-                        if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
-                            tp.sendMessage(msg);
+                System.out.println("D");
+                boolean needsUpdate = false;
+                boolean isDifferentIP = !player.getAddress().equals(doc.getString("ip"));
+                boolean disable = isDifferentIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
+                System.out.println("E");
+
+                int protocolVersion = doc.getInteger("minecraftVersion");
+
+                if (isDifferentIP || !player.getUsername().equals(doc.getString("username")) || player.getMcVersion() != protocolVersion) {
+                    needsUpdate = true;
+                }
+
+                Document settings = (Document) doc.get("settings");
+                System.out.println("F");
+
+                player.setDisabled(disable);
+                System.out.println("G");
+                player.setRank(rank);
+                System.out.println("H");
+                player.setFriendRequestToggle(settings.getBoolean("friendRequestToggle"));
+                System.out.println("I");
+                player.setMentions(settings.getBoolean("mentions"));
+                System.out.println("J");
+                player.setNewGuest(!doc.getBoolean("tutorial"));
+                System.out.println("K");
+                dashboard.addPlayer(player);
+                System.out.println("L");
+                dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
+                dashboard.addToCache(player.getUniqueId(), player.getUsername());
+
+                String username = doc.getString("username");
+                if (!silent) {
+                    if (needsUpdate) {
+                        update(player, player.getAddress(), username, protocolVersion);
+                    }
+                    if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
+                        String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                                rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
+                        for (Player tp : dashboard.getOnlinePlayers()) {
+                            if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
+                                tp.sendMessage(msg);
+                            }
+                        }
+                        staffClock(player.getUniqueId(), true);
+                        if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
+                            player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
                         }
                     }
-                    staffClock(player.getUniqueId(), true);
-                    if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
-                        player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
-                    }
                 }
-            }
 
-            List<IgnoreData> ignored = getIgnoreData(player);
-            player.setIgnoredUsers(ignored);
+                List<IgnoreData> ignored = getIgnoreData(player);
+                player.setIgnoredUsers(ignored);
 
-            HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
-            HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
-            player.setFriends(friends);
-            player.setRequests(requests);
-            HashMap<UUID, String> friendList = player.getFriends();
-            if (friendList != null && !silent) {
-                String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
-                dashboard.getFriendUtil().friendMessage(player, friendList, joinMessage);
-            }
-            Mute mute = getCurrentMute(player.getUniqueId(), player.getUsername());
-            player.setMute(mute);
-            if (disable) {
-                SlackMessage m = new SlackMessage("");
-                SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
-                        " connected from a new IP address " + player.getAddress());
-                a.color("warning");
-                dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
-                player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
-                        "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
-                        "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
+                HashMap<UUID, String> friends = getFriendList(player.getUniqueId());
+                HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
+                player.setFriends(friends);
+                player.setRequests(requests);
+                HashMap<UUID, String> friendList = player.getFriends();
+                if (friendList != null && !silent) {
+                    String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
+                    dashboard.getFriendUtil().friendMessage(player, friendList, joinMessage);
+                }
+                Mute mute = getCurrentMute(player.getUniqueId(), player.getUsername());
+                player.setMute(mute);
+                if (disable) {
+                    SlackMessage m = new SlackMessage("");
+                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
+                            " connected from a new IP address " + player.getAddress());
+                    a.color("warning");
+                    dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                    player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
+                            "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
+                            "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
+                }
+                dashboard.addPlayer(player);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
 
     private void update(Player player, String ipAddress, String username, int mcversion) {
         playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
-                new Document("ip", ipAddress).append("username", username).append("mcversion", mcversion));
+                new Document("$set", new Document("ip", ipAddress).append("username", username).append("minecraftVersion", new BsonInt32(mcversion))));
     }
 
     public void logout(Player player) {
@@ -490,7 +539,6 @@ public class MongoHandler {
     public List<UUID> getPlayersByRank(Rank... ranks) {
         List<UUID> foundPlayers = new ArrayList<>();
         for (Rank rank : ranks) {
-            if (playerCollection != null) return foundPlayers;
             playerCollection.find(Filters.eq("rank", rank.getDBName())).forEach((Block<Document>) document ->
                     foundPlayers.add(UUID.fromString(document.getString("uuid"))));
         }
@@ -639,7 +687,7 @@ public class MongoHandler {
 
     public void acceptFriendRequest(UUID receiver, UUID sender) {
         friendsCollection.updateOne(new Document("sender", sender.toString()).append("receiver", receiver.toString()),
-                new Document("started", System.currentTimeMillis()));
+                Updates.set("started", System.currentTimeMillis()));
     }
 
     public void denyFriendRequest(UUID receiver, UUID sender) {
@@ -648,6 +696,10 @@ public class MongoHandler {
 
     public boolean getFriendRequestToggle(UUID uuid) {
         return getPlayer(uuid, new Document("settings.friendRequestToggle", 1)).getBoolean("settings.friendRequestToggle");
+    }
+
+    public void setFriendRequestToggle(UUID uuid, boolean value) {
+        setSetting(uuid, "friendRequestToggle", value);
     }
 
     public void disconnect() {
@@ -703,7 +755,7 @@ public class MongoHandler {
                 .append("lockercontents", data.getLocker()).append("lockersize", data.getLockerSize())
                 .append("hotbarcontents", data.getHotbar()).append("resort", resort);
         playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.inventories.$.resort", resort),
-                new Document("parks.inventories.$", doc));
+                new Document("$set", new Document("parks.inventories.$", doc)));
     }
 
     public void updateInventoryData(UUID uuid, InventoryUpdate update) {
@@ -743,6 +795,28 @@ public class MongoHandler {
         String salt = dashboard.getPasswordUtil().getNewSalt();
         String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
         playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("staffPassword", hashed));
+    }
+
+    public ArrayList getBans(UUID uuid) {
+        return getPlayer(uuid, new Document("bans", 1)).get("bans", ArrayList.class);
+    }
+
+    public ArrayList getMutes(UUID uuid) {
+        return getPlayer(uuid, new Document("mutes", 1)).get("mutes", ArrayList.class);
+    }
+
+    public ArrayList getKicks(UUID uuid) {
+        return getPlayer(uuid, new Document("kicks", 1)).get("kicks", ArrayList.class);
+    }
+
+    public void addServer(Server server) {
+        Document serverDocument = new Document("name", server.getName()).append("type", server.getServerType())
+                .append("address", server.getAddress());
+        serversCollection.insertOne(serverDocument);
+    }
+
+    public void removeServer(String name) {
+        serversCollection.deleteMany(new Document("name", name));
     }
 
     public enum MongoFilter {

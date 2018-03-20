@@ -100,8 +100,8 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.MOD, Rank.SRMOD,
-                    Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
+            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.MOD, Rank.SRMOD, Rank.DEVELOPER,
+                    Rank.ADMIN, Rank.MANAGER);
             maintenanceWhitelist.addAll(staff);
         }
     }

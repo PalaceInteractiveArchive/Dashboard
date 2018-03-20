@@ -8,11 +8,7 @@ import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.dashboard.PacketRemoveServer;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
-import network.palace.dashboard.utils.ErrorUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 public class ServerCommand extends DashboardCommand {
@@ -27,15 +23,8 @@ public class ServerCommand extends DashboardCommand {
         if (args.length == 6 && args[0].equalsIgnoreCase("add") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
             final String name = args[1];
             final String address = args[2];
-            final int port;
             final boolean park;
             final String type = args[5];
-            try {
-                port = Integer.parseInt(args[3]);
-            } catch (Exception ignored) {
-                player.sendMessage(ChatColor.RED + "Please use a number for the port!");
-                return;
-            }
             try {
                 park = Boolean.parseBoolean(args[4]);
             } catch (Exception ignored) {
@@ -46,29 +35,12 @@ public class ServerCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.RED + "A server already exists called '" + name + "'!");
                 return;
             }
-            Server s = new Server(name, address, port, park, 0, type);
+            Server s = new Server(name, address, park, 0, type);
             dashboard.getServerUtil().addServer(s);
             dashboard.getSchedulerManager().runAsync(() -> {
-                Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
-                if (!optConnection.isPresent()) {
-                    ErrorUtil.logError("Unable to connect to mysql");
-                    return;
-                }
-                try (Connection connection = optConnection.get()) {
-                    PreparedStatement sql = connection.prepareStatement("INSERT INTO " + (dashboard.isTestNetwork() ?
-                            "playground" : "") + "servers (name,address,port,park,type) VALUES (?,?,?,?,?)");
-                    sql.setString(1, name);
-                    sql.setString(2, address);
-                    sql.setInt(3, port);
-                    sql.setInt(4, park ? 1 : 0);
-                    sql.setString(5, type);
-                    sql.execute();
-                    sql.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                dashboard.getMongoHandler().addServer(s);
                 player.sendMessage(ChatColor.GREEN + "'" + name + "' successfully created! Notifying Bungees...");
-                PacketAddServer packet = new PacketAddServer(name, address, port);
+                PacketAddServer packet = new PacketAddServer(name, address);
                 for (Object o : WebSocketServerHandler.getGroup()) {
                     DashboardSocketChannel dash = (DashboardSocketChannel) o;
                     if (!dash.getType().equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
@@ -97,20 +69,7 @@ public class ServerCommand extends DashboardCommand {
                         cancel();
                         dashboard.getServerUtil().removeServer(name);
                         dashboard.getSchedulerManager().runAsync(() -> {
-                            Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
-                            if (!optConnection.isPresent()) {
-                                ErrorUtil.logError("Unable to connect to mysql");
-                                return;
-                            }
-                            try (Connection connection = optConnection.get()) {
-                                PreparedStatement sql = connection.prepareStatement("DELETE FROM " +
-                                        (dashboard.isTestNetwork() ? "playground" : "") + "servers WHERE name=?");
-                                sql.setString(1, s.getName());
-                                sql.execute();
-                                sql.close();
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
+                            dashboard.getMongoHandler().removeServer(s.getName());
                             player.sendMessage(ChatColor.GREEN + "'" + name + "' successfully removed! Notifying Bungees...");
                             PacketRemoveServer packet = new PacketRemoveServer(name);
                             for (Object o : WebSocketServerHandler.getGroup()) {
@@ -140,7 +99,7 @@ public class ServerCommand extends DashboardCommand {
                     player.sendMessage(ChatColor.GREEN + "Server Commands:");
                     player.sendMessage(ChatColor.GREEN + "/server list " + ChatColor.AQUA +
                             "- List all servers and addresses");
-                    player.sendMessage(ChatColor.GREEN + "/server add [Name] [IP Address] [Port] [True/False] [Type] " +
+                    player.sendMessage(ChatColor.GREEN + "/server add [Name] [IP Address:Port] [True/False] [Type] " +
                             ChatColor.AQUA + "- Add a new server to all Bungees");
                     player.sendMessage(ChatColor.GREEN + "/server remove [Name] " + ChatColor.AQUA +
                             "- Remove a server from all Bungees");
@@ -152,7 +111,8 @@ public class ServerCommand extends DashboardCommand {
                     for (int i = 0; i < servers.size(); i++) {
                         Server s = servers.get(i);
                         ChatColor c = s.isOnline() ? ChatColor.GREEN : ChatColor.RED;
-                        msg.append("- ").append(c).append(s.getName()).append(ChatColor.GREEN).append(" - ").append(s.getAddress()).append(":").append(s.getPort()).append(" - ").append(s.getServerType());
+                        msg.append("- ").append(c).append(s.getName()).append(ChatColor.GREEN).append(" - ")
+                                .append(s.getAddress()).append(" - ").append(s.getServerType());
                         if (i < (servers.size() - 1)) {
                             msg.append("\n");
                         }

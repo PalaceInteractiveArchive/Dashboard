@@ -13,8 +13,7 @@ import network.palace.dashboard.handlers.ResortInventory;
 import network.palace.dashboard.handlers.UpdateData;
 import network.palace.dashboard.packets.inventory.PacketInventoryContent;
 import network.palace.dashboard.packets.inventory.Resort;
-import org.bson.BsonArray;
-import org.bson.Document;
+import org.bson.*;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
@@ -173,47 +172,28 @@ public class InventoryUtil {
     }
 
     public static UpdateData getDataFromJson(String backpackJSON, int backpackSize, String lockerJSON, int lockerSize, String hotbarJSON) {
-        BsonArray pack = new BsonArray();
-        BsonArray locker = new BsonArray();
-        BsonArray hotbar = new BsonArray();
+        BsonArray pack = jsonToArray(backpackJSON);
+        BsonArray locker = jsonToArray(lockerJSON);
+        BsonArray hotbar = jsonToArray(hotbarJSON);
 
-        JsonElement packElement = new JsonParser().parse(backpackJSON);
-        if (packElement.isJsonArray()) {
-            JsonArray packArray = packElement.getAsJsonArray();
+        return new UpdateData(pack, backpackSize, locker, lockerSize, hotbar);
+    }
 
-            int i = 0;
-            for (JsonElement e2 : packArray) {
-                JsonObject o = e2.getAsJsonObject();
-                Document item = InventoryUtil.getItemFromJson(o.toString());
-                i++;
-            }
-        }
-
-        JsonElement lockerElement = new JsonParser().parse(lockerJSON);
-        if (lockerElement.isJsonArray()) {
-            JsonArray lockerArray = lockerElement.getAsJsonArray();
-
-            int i = 0;
-            for (JsonElement e2 : lockerArray) {
-                JsonObject o = e2.getAsJsonObject();
-                Document item = InventoryUtil.getItemFromJson(o.toString());
-                i++;
-            }
-        }
-
-        JsonElement hotbarElement = new JsonParser().parse(hotbarJSON);
-        if (hotbarElement.isJsonArray()) {
-            JsonArray hotbarArray = hotbarElement.getAsJsonArray();
+    public static BsonArray jsonToArray(String json) {
+        BsonArray array = new BsonArray();
+        JsonElement element = new JsonParser().parse(json);
+        if (element.isJsonArray()) {
+            JsonArray hotbarArray = element.getAsJsonArray();
 
             int i = 0;
             for (JsonElement e2 : hotbarArray) {
                 JsonObject o = e2.getAsJsonObject();
-                Document item = InventoryUtil.getItemFromJson(o.toString());
+                BsonDocument item = InventoryUtil.getBsonFromJson(o.toString());
+                array.add(item);
                 i++;
             }
         }
-
-        return new UpdateData(pack, backpackSize, locker, lockerSize, hotbar);
+        return array;
     }
 
     /**
@@ -427,6 +407,28 @@ public class InventoryUtil {
         try {
             doc = new Document("a", o.get("a").getAsInt()).append("t", o.get("t").getAsInt()).append("da", o.get("da").getAsInt())
                     .append("du", o.get("du").getAsShort()).append("ta", o.get("ta").getAsString());
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+        return doc;
+    }
+
+    /**
+     * Convert a JSON string to a BsonDocument
+     *
+     * @param json the JSON string
+     * @return a Bsondocument
+     */
+    public static BsonDocument getBsonFromJson(String json) {
+        JsonObject o = new JsonParser().parse(json).getAsJsonObject();
+        if (!o.has("t")) {
+            return new BsonDocument();
+        }
+        BsonDocument doc;
+        try {
+            doc = new BsonDocument("a", new BsonInt32(o.get("a").getAsInt())).append("t", new BsonInt32(o.get("t").getAsInt()))
+                    .append("da", new BsonInt32(o.get("da").getAsInt())).append("du", new BsonInt32(o.get("du").getAsShort()))
+                    .append("ta", new BsonString(o.get("ta").getAsString()));
         } catch (IllegalArgumentException ignored) {
             return null;
         }

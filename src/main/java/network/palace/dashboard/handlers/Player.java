@@ -244,7 +244,7 @@ public class Player {
                     case 58: {
                         sendMessage(ChatColor.GREEN + "\nAfter you finish reviewing our rules, " +
                                 "you're finished with the tutorial! " + ChatColor.DARK_AQUA +
-                                "Note: New settlers must wait " + ChatColor.BOLD + "15 minutes " +
+                                "Note: New settlers must wait " + ChatColor.BOLD + "10 minutes " +
                                 ChatColor.DARK_AQUA + "before using chat. Read why: " +
                                 ChatColor.AQUA + "palace.network/rules#chat");
                         mention();
