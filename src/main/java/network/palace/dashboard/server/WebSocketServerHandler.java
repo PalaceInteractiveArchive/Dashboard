@@ -11,6 +11,8 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.discordSocket.DiscordCacheInfo;
+import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;
@@ -450,10 +452,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                     dashboard.getModerationUtil().rankChange(name, rank, source);
 
-                    /* TODO Discord stuff
+                    // TODO Discord stuff
                     DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
                     info.getMinecraft().setRank(rank.toString());
-                    SocketConnection.sendUpdate(info);*/
+                    SocketConnection.sendUpdate(info);
 
                     try {
                         dashboard.forum.updatePlayerRank(uuid.toString(), rank.getDBName());

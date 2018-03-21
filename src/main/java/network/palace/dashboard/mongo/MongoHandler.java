@@ -210,7 +210,8 @@ public class MongoHandler {
     }
 
     public boolean isPlayerMuted(UUID uuid) {
-        return getCurrentMute(uuid).isMuted();
+        Mute m = getCurrentMute(uuid);
+        return m != null && m.isMuted();
     }
 
     public boolean isPlayerBanned(UUID uuid) {
@@ -232,13 +233,7 @@ public class MongoHandler {
     }
 
     public void unmutePlayer(UUID uuid) {
-        BsonArray array = new BsonArray();
-        for (Object o : getPlayer(uuid, new Document("mutes", 1)).get("mutes", ArrayList.class)) {
-            BsonDocument doc = (BsonDocument) o;
-            doc.put("active", BsonBoolean.valueOf(false));
-            array.add(doc);
-        }
-        playerCollection.updateOne(Filters.eq("uuid", uuid), Updates.set("mutes", array));
+        playerCollection.updateMany(new Document("uuid", uuid.toString()).append("mutes.active", true), Updates.set("mutes.$.active", false));
     }
 
     public void mutePlayer(UUID uuid, Mute mute) {
@@ -247,7 +242,7 @@ public class MongoHandler {
         Document muteDocument = new Document("created", mute.getCreated()).append("expires", mute.getExpires())
                 .append("reason", mute.getReason()).append("source", mute.getSource()).append("active", true);
 
-        playerCollection.updateOne(Filters.eq("uuid", uuid), Updates.push("mutes", muteDocument));
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("mutes", muteDocument));
     }
 
     public Ban getCurrentBan(UUID uuid) {
@@ -261,7 +256,7 @@ public class MongoHandler {
             if (banDoc == null || !banDoc.getBoolean("active")) continue;
             return new Ban(uuid, name, banDoc);
         }
-        return new Ban(uuid, name, null);
+        return null;
     }
 
     public void kickPlayer(UUID uuid, Kick kick) {
@@ -270,13 +265,7 @@ public class MongoHandler {
     }
 
     public void unbanPlayer(UUID uuid) {
-        BsonArray array = new BsonArray();
-        for (Object o : getPlayer(uuid, new Document("bans", 1)).get("bans", ArrayList.class)) {
-            BsonDocument doc = (BsonDocument) o;
-            doc.put("active", BsonBoolean.valueOf(false));
-            array.add(doc);
-        }
-        playerCollection.updateOne(Filters.eq("uuid", uuid), new Document("bans", array));
+        playerCollection.updateMany(new Document("uuid", uuid.toString()).append("bans.active", true), Updates.set("bans.$.active", false));
     }
 
     public void banPlayer(UUID uuid, Ban ban) {
@@ -286,7 +275,7 @@ public class MongoHandler {
                 .append("permanent", ban.isPermanent()).append("reason", ban.getReason())
                 .append("source", ban.getSource()).append("active", true);
 
-        playerCollection.updateOne(Filters.eq("uuid", uuid), Updates.push("bans", banDocument));
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("bans", banDocument));
     }
 
     public void banProvider(ProviderBan ban) {
@@ -296,6 +285,7 @@ public class MongoHandler {
 
     public ProviderBan getProviderBan(String isp) {
         Document doc = bansCollection.find(new Document("type", "provider").append("data", isp)).first();
+        if (doc == null) return null;
         return new ProviderBan(doc.getString("data"), doc.getString("source"));
     }
 
@@ -318,6 +308,7 @@ public class MongoHandler {
 
     public AddressBan getAddressBan(String address) {
         Document doc = bansCollection.find(new Document("type", "ip").append("data", address)).first();
+        if (doc == null) return null;
         return new AddressBan(doc.getString("data"), doc.getString("reason"), doc.getString("source"));
     }
 
@@ -356,27 +347,20 @@ public class MongoHandler {
 
         dashboard.getSchedulerManager().runAsync(() -> {
             try {
-                System.out.println("A");
 //            PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,friendRequestToggle,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
                 Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("ip", 1)
-                        .append("username", 1).append("friendRequestToggle", 1).append("onlinetime", 1)
+                        .append("username", 1).append("friendRequestToggle", 1).append("onlineTime", 1)
                         .append("tutorial", 1).append("minecraftVersion", 1).append("settings", 1));
-                System.out.println("B");
-                long ot = doc.getLong("onlinetime");
-                System.out.println("M");
+                long ot = doc.getLong("onlineTime");
                 player.setOnlineTime(ot == 0 ? 1 : ot);
-                System.out.println("N");
                 Rank rank = Rank.fromString(doc.getString("rank"));
-                System.out.println("C");
                 if (!rank.equals(Rank.SETTLER)) {
                     PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
                     player.send(packet);
                 }
-                System.out.println("D");
                 boolean needsUpdate = false;
                 boolean isDifferentIP = !player.getAddress().equals(doc.getString("ip"));
                 boolean disable = isDifferentIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
-                System.out.println("E");
 
                 int protocolVersion = doc.getInteger("minecraftVersion");
 
@@ -385,20 +369,13 @@ public class MongoHandler {
                 }
 
                 Document settings = (Document) doc.get("settings");
-                System.out.println("F");
 
                 player.setDisabled(disable);
-                System.out.println("G");
                 player.setRank(rank);
-                System.out.println("H");
                 player.setFriendRequestToggle(settings.getBoolean("friendRequestToggle"));
-                System.out.println("I");
                 player.setMentions(settings.getBoolean("mentions"));
-                System.out.println("J");
                 player.setNewGuest(!doc.getBoolean("tutorial"));
-                System.out.println("K");
                 dashboard.addPlayer(player);
-                System.out.println("L");
                 dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
                 dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
@@ -602,7 +579,7 @@ public class MongoHandler {
 
     public BseenData getBseenInformation(UUID uuid) {
         Document player = getPlayer(uuid, new Document("username", 1).append("rank", 1).append("lastOnline", 1)
-                .append("ip", 1).append("mutes", new Document("currentMute", 1)).append("server", 1));
+                .append("ip", 1).append("mutes", 1).append("server", 1));
         if (player == null) return null;
         Rank rank = Rank.fromString(player.getString("rank"));
         long lastLogin = player.getLong("lastOnline");
@@ -827,7 +804,7 @@ public class MongoHandler {
                 case UUID:
                     return Filters.eq("uuid", s);
                 case USERNAME:
-                    return Filters.regex("username", s, "i");
+                    return Filters.regex("username", "^" + s + "$", "i");
                 case RANK:
                     return Filters.eq("rank", s);
             }

@@ -16,6 +16,7 @@ import org.bson.conversions.Bson;
 import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 /**
  * Created by Marc on 8/20/16
@@ -69,19 +70,19 @@ public class ModerationUtil {
 
     public void announceBan(Ban ban) {
         sendMessage(ChatColor.GREEN + ban.getName() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
-                ban.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason() +
+                verifySource(ban.getSource()) + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason() +
                 ChatColor.RED + " Expires: " + ChatColor.GREEN + (ban.isPermanent() ? "Permanent" :
                 DateUtil.formatDateDiff(ban.getExpires())));
     }
 
     public void announceBan(AddressBan ban) {
         sendMessage(ChatColor.GREEN + "IP " + ban.getAddress() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
-                ban.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason());
+                verifySource(ban.getSource()) + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason());
     }
 
     public void announceBan(ProviderBan ban) {
         sendMessage(ChatColor.GREEN + "ISP " + ban.getProvider() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
-                ban.getSource());
+                verifySource(ban.getSource()));
     }
 
     public void announceUnban(String name, String source) {
@@ -95,7 +96,7 @@ public class ModerationUtil {
 
     public void announceMute(Mute mute) {
         sendMessage(ChatColor.GREEN + mute.getName() + ChatColor.RED + " was muted by " + ChatColor.GREEN +
-                mute.getSource() + ChatColor.RED + " Reason: " + ChatColor.GREEN + mute.getReason() + ChatColor.RED +
+                verifySource(mute.getSource()) + ChatColor.RED + " Reason: " + ChatColor.GREEN + mute.getReason() + ChatColor.RED +
                 " Expires: " + ChatColor.GREEN + DateUtil.formatDateDiff(mute.getExpires()));
     }
 
@@ -136,5 +137,27 @@ public class ModerationUtil {
         SlackAttachment attachment = new SlackAttachment(message);
         attachment.color(muted ? "danger" : "good");
         Launcher.getDashboard().getSlackUtil().sendDashboardMessage(slackMessage, Collections.singletonList(attachment));
+    }
+
+    public static String verifySource(String source) {
+        Dashboard dashboard = Launcher.getDashboard();
+        source = source.trim();
+        if (source.length() == 36) {
+            try {
+                UUID sourceUUID = UUID.fromString(source);
+                String name = dashboard.getCachedName(sourceUUID);
+                if (name == null) {
+                    name = dashboard.getMongoHandler().uuidToUsername(sourceUUID);
+                    if (name == null) {
+                        name = "Unknown";
+                    } else {
+                        dashboard.addToCache(sourceUUID, name);
+                    }
+                }
+                source = name;
+            } catch (Exception ignored) {
+            }
+        }
+        return source;
     }
 }

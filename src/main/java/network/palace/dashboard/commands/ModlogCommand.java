@@ -7,6 +7,7 @@ import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.utils.DateUtil;
+import network.palace.dashboard.utils.ModerationUtil;
 import org.bson.Document;
 
 import java.text.DateFormat;
@@ -60,7 +61,7 @@ public class ModlogCommand extends DashboardCommand {
                         long expires = doc.getLong("expires");
                         boolean permanent = doc.getBoolean("permanent");
                         boolean active = doc.getBoolean("active");
-                        String source = verifySource(doc.getString("source"));
+                        String source = ModerationUtil.verifySource(doc.getString("source"));
                         Calendar createdCal = Calendar.getInstance();
                         createdCal.setTimeInMillis(created);
                         Calendar expiresCal = Calendar.getInstance();
@@ -91,7 +92,7 @@ public class ModlogCommand extends DashboardCommand {
                         long created = doc.getLong("created");
                         long expires = doc.getLong("expires");
                         boolean active = doc.getBoolean("active");
-                        String source = verifySource(doc.getString("source"));
+                        String source = ModerationUtil.verifySource(doc.getString("source"));
                         Calendar createdCal = Calendar.getInstance();
                         createdCal.setTimeInMillis(created);
                         Calendar expiresCal = Calendar.getInstance();
@@ -111,7 +112,7 @@ public class ModlogCommand extends DashboardCommand {
                         Document doc = (Document) o;
                         String reason = doc.getString("reason");
                         long time = doc.getLong("time");
-                        String source = verifySource(doc.getString("source"));
+                        String source = ModerationUtil.verifySource(doc.getString("source"));
                         player.sendMessage(ChatColor.RED + "Reason: " + ChatColor.GREEN + reason.trim() +
                                 ChatColor.RED + " | Source: " + ChatColor.GREEN + source + ChatColor.RED + " | Time: " +
                                 ChatColor.GREEN + df.format(time));
@@ -124,23 +125,5 @@ public class ModlogCommand extends DashboardCommand {
                 }
             }
         }
-    }
-
-    private String verifySource(String source) {
-        Dashboard dashboard = Launcher.getDashboard();
-        if (source.length() >= 36) {
-            UUID sourceUUID = UUID.fromString(source);
-            String name = dashboard.getCachedName(sourceUUID);
-            if (name == null) {
-                name = dashboard.getMongoHandler().uuidToUsername(sourceUUID);
-                if (name == null) {
-                    name = "Unknown";
-                } else {
-                    dashboard.addToCache(sourceUUID, name);
-                }
-            }
-            source = name;
-        }
-        return source;
     }
 }

@@ -35,7 +35,7 @@ public class SocketConnection {
             dashboard.getLogger().info("Got delink request");
             DiscordCacheInfo json = gson.fromJson(args[0].toString(), DiscordCacheInfo.class);
             //TODO Discord stuff
-//            dashboard.getMongoHandler().selectAndRemoveDiscord(json);
+            dashboard.getMongoHandler().selectAndRemoveDiscord(json);
         });
         socket.on(Socket.EVENT_CONNECT, args ->
                 dashboard.getLogger().info(ChatColor.DARK_GREEN + "Discord link socket connected"))
@@ -50,10 +50,11 @@ public class SocketConnection {
         socket.emit("discord:remove", gson.toJson(info));
     }
 
-    public static void sendLink(DiscordUserInfo info) {
-        if (socket == null) return;
-        if (!socket.connected()) return;
+    public static boolean sendLink(DiscordUserInfo info) {
+        if (socket == null) return false;
+        if (!socket.connected()) return false;
         socket.emit("discord:link", gson.toJson(info));
+        return true;
     }
 
     public static void sendNewlink(DiscordCacheInfo info) {

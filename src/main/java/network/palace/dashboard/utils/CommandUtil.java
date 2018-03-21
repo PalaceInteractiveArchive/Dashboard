@@ -71,7 +71,7 @@ public class CommandUtil {
         register("store", new StoreCommand());
         register("strict", new StrictCommand());
         register("tempban", new TempBanCommand());
-        register("unbanPlayer", new UnbanCommand());
+        register("unban", new UnbanCommand());
         register("unbanip", new UnbanIPCommand());
         register("unbanprovider", new UnbanProviderCommand());
         register("unmute", new UnmuteCommand());

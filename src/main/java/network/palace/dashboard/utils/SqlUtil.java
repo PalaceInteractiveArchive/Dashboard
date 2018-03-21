@@ -1043,78 +1043,78 @@ public class SqlUtil {
 
     public void selectAndRemoveDiscord(final DiscordCacheInfo cacheInfo) {
         Dashboard dashboard = Launcher.getDashboard();
-        dashboard.getSchedulerManager().runAsync(() -> {
-            SocketConnection.sendRemove(cacheInfo);
-            Optional<Connection> optConnection = getConnection();
-            if (!optConnection.isPresent()) {
-                ErrorUtil.logError("Unable to connect to mysql");
-                return;
-            }
-            try (Connection connection = optConnection.get()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
-                statement.setString(1, cacheInfo.getMinecraft().getUuid());
-                ResultSet result = statement.executeQuery();
-                DiscordDatabaseInfo databaseInfo;
-                if (!result.next()) {
-                    result.close();
-                    statement.close();
-                } else {
-                    boolean failed = false;
-                    if (result.getString("minecraftUsername") == null) failed = true;
-                    if (result.getString("minecraftUUID") == null) failed = true;
-                    if (result.getString("discordUsername") == null) failed = true;
-                    if (failed) {
-                        result.close();
-                        statement.close();
-                    } else {
-                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                        result.close();
-                        statement.close();
-                        removeDiscord(databaseInfo);
-                        DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
-                        SocketConnection.sendRemove(info);
-                    }
-                }
-            } catch (SQLException e) {
-                ErrorUtil.logError("SQL Error select and remove discord method 1", e);
-            }
-            optConnection = getConnection();
-            if (!optConnection.isPresent()) {
-                ErrorUtil.logError("Unable to connect to mysql");
-                return;
-            }
-            try (Connection connection = optConnection.get()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM discord WHERE discordUsername=?");
-                statement.setString(1, cacheInfo.getDiscord().getUsername());
-                ResultSet result = statement.executeQuery();
-                DiscordDatabaseInfo databaseInfo;
-                if (!result.next()) {
-                    result.close();
-                    statement.close();
-                } else {
-                    boolean failed = false;
-                    if (result.getString("minecraftUsername") == null) failed = true;
-                    if (result.getString("minecraftUUID") == null) failed = true;
-                    if (result.getString("discordUsername") == null) failed = true;
-                    if (failed) {
-                        result.close();
-                        statement.close();
-                    } else {
-                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
-                        result.close();
-                        statement.close();
-                        removeDiscord(databaseInfo);
-                        DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
-                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
-                        SocketConnection.sendRemove(info);
-                    }
-                }
-            } catch (SQLException e) {
-                ErrorUtil.logError("SQL Error select and remove discord method 2", e);
-            }
-            insertDiscord(cacheInfo);
-        });
+//        dashboard.getSchedulerManager().runAsync(() -> {
+//            SocketConnection.sendRemove(cacheInfo);
+//            Optional<Connection> optConnection = getConnection();
+//            if (!optConnection.isPresent()) {
+//                ErrorUtil.logError("Unable to connect to mysql");
+//                return;
+//            }
+//            try (Connection connection = optConnection.get()) {
+//                PreparedStatement statement = connection.prepareStatement("SELECT * FROM discord WHERE minecraftUUID=?");
+//                statement.setString(1, cacheInfo.getMinecraft().getUuid());
+//                ResultSet result = statement.executeQuery();
+//                DiscordDatabaseInfo databaseInfo;
+//                if (!result.next()) {
+//                    result.close();
+//                    statement.close();
+//                } else {
+//                    boolean failed = false;
+//                    if (result.getString("minecraftUsername") == null) failed = true;
+//                    if (result.getString("minecraftUUID") == null) failed = true;
+//                    if (result.getString("discordUsername") == null) failed = true;
+//                    if (failed) {
+//                        result.close();
+//                        statement.close();
+//                    } else {
+//                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+//                        result.close();
+//                        statement.close();
+//                        removeDiscord(databaseInfo);
+//                        DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+//                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+//                        SocketConnection.sendRemove(info);
+//                    }
+//                }
+//            } catch (SQLException e) {
+//                ErrorUtil.logError("SQL Error select and remove discord method 1", e);
+//            }
+//            optConnection = getConnection();
+//            if (!optConnection.isPresent()) {
+//                ErrorUtil.logError("Unable to connect to mysql");
+//                return;
+//            }
+//            try (Connection connection = optConnection.get()) {
+//                PreparedStatement statement = connection.prepareStatement("SELECT * FROM discord WHERE discordUsername=?");
+//                statement.setString(1, cacheInfo.getDiscord().getUsername());
+//                ResultSet result = statement.executeQuery();
+//                DiscordDatabaseInfo databaseInfo;
+//                if (!result.next()) {
+//                    result.close();
+//                    statement.close();
+//                } else {
+//                    boolean failed = false;
+//                    if (result.getString("minecraftUsername") == null) failed = true;
+//                    if (result.getString("minecraftUUID") == null) failed = true;
+//                    if (result.getString("discordUsername") == null) failed = true;
+//                    if (failed) {
+//                        result.close();
+//                        statement.close();
+//                    } else {
+//                        databaseInfo = new DiscordDatabaseInfo(result.getString("minecraftUsername"), result.getString("minecraftUUID"), result.getString("discordUsername"));
+//                        result.close();
+//                        statement.close();
+//                        removeDiscord(databaseInfo);
+//                        DiscordCacheInfo info = new DiscordCacheInfo(new DiscordCacheInfo.Minecraft(databaseInfo.getMinecraftUsername(), databaseInfo.getMinecraftUUID(), ""),
+//                                new DiscordCacheInfo.Discord(databaseInfo.getDiscordUsername()));
+//                        SocketConnection.sendRemove(info);
+//                    }
+//                }
+//            } catch (SQLException e) {
+//                ErrorUtil.logError("SQL Error select and remove discord method 2", e);
+//            }
+//            insertDiscord(cacheInfo);
+//        });
     }
 
     public void removeDiscord(final DiscordDatabaseInfo databaseInfo) {
