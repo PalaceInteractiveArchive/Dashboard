@@ -13,6 +13,7 @@ import com.mongodb.client.model.Updates;
 import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
 import network.palace.dashboard.packets.inventory.Resort;
@@ -795,6 +796,26 @@ public class MongoHandler {
     public void removeServer(String name) {
         serversCollection.deleteMany(new Document("name", name));
     }
+
+    public void insertDiscord(final DiscordCacheInfo info) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(info.getMinecraft().getUuid()),
+                Updates.set("discordUsername", info.getDiscord().getUsername()));
+    }
+
+    public void removeDiscord(DiscordCacheInfo info) {
+        String discordUsername = info.getDiscord().getUsername();
+        playerCollection.updateMany(Filters.or(MongoFilter.UUID.getFilter(info.getMinecraft().getUuid()),
+                new Document("discordUsername", discordUsername)), Updates.unset("discordUsername"));
+    }
+
+    public DiscordCacheInfo getUserFromPlayer(Player player) {
+        DiscordCacheInfo.Minecraft mc = new DiscordCacheInfo.Minecraft(player.getUsername(),
+                player.getUniqueId().toString(), player.getRank().getDBName());
+        Document doc = getPlayer(player.getUniqueId(), new Document("discordUsername", 1));
+        if (doc == null || !doc.containsKey("discordUsername")) return null;
+        return new DiscordCacheInfo(mc, new DiscordCacheInfo.Discord(doc.getString("discordUsername")));
+    }
+
 
     public enum MongoFilter {
         UUID, USERNAME, RANK;

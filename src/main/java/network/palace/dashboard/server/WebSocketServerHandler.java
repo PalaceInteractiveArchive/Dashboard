@@ -452,10 +452,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     }
                     dashboard.getModerationUtil().rankChange(name, rank, source);
 
-                    // TODO Discord stuff
                     DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
-                    info.getMinecraft().setRank(rank.toString());
-                    SocketConnection.sendUpdate(info);
+                    if (info != null) {
+                        info.getMinecraft().setRank(rank.toString());
+                        SocketConnection.sendUpdate(info);
+                    }
 
                     try {
                         dashboard.forum.updatePlayerRank(uuid.toString(), rank.getDBName());

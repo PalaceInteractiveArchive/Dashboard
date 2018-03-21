@@ -60,7 +60,7 @@ public class Dashboard {
     @Getter @Setter private double strictThreshold;
     @Getter private JaroWinkler chatAlgorithm = new JaroWinkler();
 
-    @Getter private String socketURL = "";
+    @Getter private String discordSocketURL = "";
 
     @Getter @Setter public Forum forum;
     @Getter @Setter private Random random;
@@ -90,8 +90,8 @@ public class Dashboard {
                     maintenance = Boolean.parseBoolean(line.split("maintenance:")[1]);
                 } else if (line.startsWith("test-network:")) {
                     testNetwork = Boolean.parseBoolean(line.split("test-network:")[1]);
-                } else if (line.startsWith("socketURL:")) {
-                    socketURL = line.split("socketURL:")[1];
+                } else if (line.startsWith("discordSocketURL:")) {
+                    discordSocketURL = line.split("discordSocketURL:")[1];
                 }
                 line = br.readLine();
             }
