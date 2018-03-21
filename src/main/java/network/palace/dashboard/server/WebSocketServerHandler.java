@@ -686,7 +686,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
                 if (!exists)
                     dashboard.getPlayerLog().error("Received request to verify player that doesn't exist " + uuid);
-                channel.send(new PacketConfirmPlayer(uuid, true));
+                channel.send(new PacketConfirmPlayer(uuid, exists));
                 break;
             }
             /*

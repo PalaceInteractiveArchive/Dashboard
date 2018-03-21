@@ -461,7 +461,6 @@ public class MongoHandler {
                             "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
                             "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
                 }
-                dashboard.addPlayer(player);
             } catch (Exception e) {
                 e.printStackTrace();
             }
