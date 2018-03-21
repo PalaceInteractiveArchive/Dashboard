@@ -99,11 +99,15 @@ public class MongoHandler {
     }
 
     public void createPlayer(Player player) {
+        player.setNewGuest(true);
+        player.setOnlineTime(1);
+
         Document playerDocument = new Document();
-        playerDocument.put("uuid", player.getUniqueId());
+        playerDocument.put("uuid", player.getUniqueId().toString());
         playerDocument.put("username", player.getUsername());
-        playerDocument.put("tokens", 0);
+        playerDocument.put("previousNames", new ArrayList<>());
         playerDocument.put("balance", 250);
+        playerDocument.put("tokens", 0);
         playerDocument.put("server", player.getServer().isEmpty() ? "Unknown" : player.getServer());
         playerDocument.put("isp", "");
         playerDocument.put("country", "");
@@ -116,60 +120,87 @@ public class MongoHandler {
         playerDocument.put("ip", player.getAddress());
         playerDocument.put("rank", player.getRank().getDBName());
         playerDocument.put("lastOnline", System.currentTimeMillis());
-        playerDocument.put("isVisible", true); // XXX: Maybe this should be in redis
-        playerDocument.put("staffPassword", null);
-        playerDocument.put("tutorial", true);
-        playerDocument.put("kicks", new ArrayList<>());
+        playerDocument.put("onlineTime", 1L);
 
         Map<String, String> skinData = new HashMap<>();
         skinData.put("hash", "");
         skinData.put("signature", "");
         playerDocument.put("skin", skinData);
 
-        Map<String, Object> mutes = new HashMap<>();
-        mutes.put("currentMute", null);
-        mutes.put("previousMutes", new ArrayList<>());
+        List<Object> kicks = new ArrayList<>();
+        List<Object> mutes = new ArrayList<>();
+        List<Object> bans = new ArrayList<>();
+        playerDocument.put("kicks", kicks);
         playerDocument.put("mutes", mutes);
-
-        Map<String, Object> bans = new HashMap<>();
-        bans.put("currentBan", null);
-        bans.put("previousBans", new ArrayList<>());
         playerDocument.put("bans", bans);
 
-        Map<String, Object> parks = new HashMap<>();
-        parks.put("inventories", new ArrayList<>()); // TODO: @lego
-        parks.put("buildMode", false);
-        Map<String, Object> fastPass = new HashMap<>();
-        fastPass.put("slow", 0);
-        fastPass.put("moderate", 0);
-        fastPass.put("thrill", 0);
-        parks.put("fastpass", fastPass);
-        parks.put("outfit", "0,0,0,0");
-        parks.put("outfitPurchases", new ArrayList<>());
+        Map<String, Object> parkData = new HashMap<>();
+        List<Object> inventoryData = new ArrayList<>();
+        parkData.put("inventories", inventoryData);
 
-        Map<String, Object> settings = new HashMap<>();
-        settings.put("visibility", true);
-        settings.put("flash", true);
-        settings.put("hotel", true);
-        parks.put("settings", settings);
-        playerDocument.put("parks", parks);
+        Map<String, String> magicBandData = new HashMap<>();
+        magicBandData.put("bandtype", "blue");
+        magicBandData.put("namecolor", "orange");
+        parkData.put("magicband", magicBandData);
 
-        playerDocument.put("gameData", new HashMap<>());
+        Map<String, Integer> fpData = new HashMap<>();
+        fpData.put("slow", 0);
+        fpData.put("moderate", 0);
+        fpData.put("thrill", 0);
+        fpData.put("sday", 0);
+        fpData.put("mday", 0);
+        fpData.put("tday", 0);
+        parkData.put("fastpass", fpData);
 
-        Map<String, Integer> monthlyRewards = new HashMap<>();
-        monthlyRewards.put("settler", 0);
-        monthlyRewards.put("dweller", 0);
-        monthlyRewards.put("noble", 0);
-        monthlyRewards.put("majestic", 0);
-        monthlyRewards.put("honorable", 0);
+        List<Object> rideData = new ArrayList<>();
+        parkData.put("rides", rideData);
+
+        parkData.put("outfit", "0,0,0,0");
+        List<Object> outfitData = new ArrayList<>();
+        parkData.put("outfitPurchases", outfitData);
+
+        Map<String, Object> parkSettings = new HashMap<>();
+        parkSettings.put("visibility", true);
+        parkSettings.put("flash", true);
+        parkSettings.put("hotel", true);
+        parkSettings.put("pack", "");
+        parkData.put("settings", parkSettings);
+
+        playerDocument.put("parks", parkData);
+
+        Map<String, Object> voteData = new HashMap<>();
+        voteData.put("lastTime", 0L);
+        voteData.put("lastSite", 0);
+        playerDocument.put("vote", voteData);
+
+        Map<String, Long> monthlyRewards = new HashMap<>();
+        monthlyRewards.put("settler", 0L);
         playerDocument.put("monthlyRewards", monthlyRewards);
 
-        playerDocument.put("achievements", new ArrayList<>());
-        playerDocument.put("autographs", new ArrayList<>());
-        playerDocument.put("rides", new ArrayList<>());
-        playerDocument.put("transactions", new ArrayList<>());
+        playerDocument.put("tutorial", false);
 
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("mentions", true);
+        settings.put("friendRequestToggle", true);
+        playerDocument.put("settings", settings);
+
+        List<Object> achievements = new ArrayList<>();
+        playerDocument.put("achievements", achievements);
+
+        List<Object> autographs = new ArrayList<>();
+        playerDocument.put("autographs", autographs);
+
+        List<Object> transactions = new ArrayList<>();
+        playerDocument.put("transactions", transactions);
+
+        List<Object> ignoring = new ArrayList<>();
+        playerDocument.put("ignoring", ignoring);
+
+        System.out.println(System.currentTimeMillis());
         playerCollection.insertOne(playerDocument);
+        System.out.println(System.currentTimeMillis());
+
+        Launcher.getDashboard().addPlayer(player);
     }
 
     public Document getPlayer(Player player) {
@@ -266,7 +297,8 @@ public class MongoHandler {
     }
 
     public void unbanPlayer(UUID uuid) {
-        playerCollection.updateMany(new Document("uuid", uuid.toString()).append("bans.active", true), Updates.set("bans.$.active", false));
+        playerCollection.updateMany(new Document("uuid", uuid.toString()).append("bans.active", true),
+                new Document("$set", new Document("bans.$.active", false).append("expires", System.currentTimeMillis())));
     }
 
     public void banPlayer(UUID uuid, Ban ban) {
@@ -321,7 +353,7 @@ public class MongoHandler {
         Document doc = new Document("isp", data.getIsp()).append("country", data.getCountry())
                 .append("region", data.getRegion()).append("regionName", data.getRegionName())
                 .append("timezone", data.getTimezone());
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), doc);
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("$set", doc));
     }
 
     public void login(Player player) {
@@ -348,10 +380,13 @@ public class MongoHandler {
 
         dashboard.getSchedulerManager().runAsync(() -> {
             try {
-//            PreparedStatement sql = connection.prepareStatement("SELECT rank,ipAddress,username,friendRequestToggle,mentions,onlinetime,tutorial,mcversion FROM player_data WHERE uuid=?");
                 Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("ip", 1)
                         .append("username", 1).append("friendRequestToggle", 1).append("onlineTime", 1)
                         .append("tutorial", 1).append("minecraftVersion", 1).append("settings", 1));
+                if (doc == null) {
+                    createPlayer(player);
+                    return;
+                }
                 long ot = doc.getLong("onlineTime");
                 player.setOnlineTime(ot == 0 ? 1 : ot);
                 Rank rank = Rank.fromString(doc.getString("rank"));
@@ -359,44 +394,46 @@ public class MongoHandler {
                     PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
                     player.send(packet);
                 }
-                boolean needsUpdate = false;
-                boolean isDifferentIP = !player.getAddress().equals(doc.getString("ip"));
-                boolean disable = isDifferentIP && rank.getRankId() >= Rank.TRAINEE.getRankId();
 
+                String ip = doc.getString("ip");
                 int protocolVersion = doc.getInteger("minecraftVersion");
+                String username = doc.getString("username");
 
-                if (isDifferentIP || !player.getUsername().equals(doc.getString("username")) || player.getMcVersion() != protocolVersion) {
-                    needsUpdate = true;
+                boolean disable = !player.getAddress().equals(doc.getString("ip")) && rank.getRankId() >= Rank.TRAINEE.getRankId();
+
+                if (!disable && (!ip.equals(player.getAddress()) || protocolVersion != player.getMcVersion() ||
+                        !username.equals(player.getUsername()))) {
+                    playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
+                            new Document("$set", new Document("ip", player.getAddress())
+                                    .append("username", player.getUsername())
+                                    .append("minecraftVersion", new BsonInt32(player.getMcVersion()))));
+                    if (!username.equals(player.getUsername())) {
+                        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
+                                Updates.push("previousNames", username), new UpdateOptions().upsert(true));
+                    }
                 }
-
                 Document settings = (Document) doc.get("settings");
 
                 player.setDisabled(disable);
                 player.setRank(rank);
-                player.setFriendRequestToggle(settings.getBoolean("friendRequestToggle"));
+                player.setFriendRequestToggle(!settings.getBoolean("friendRequestToggle"));
                 player.setMentions(settings.getBoolean("mentions"));
                 player.setNewGuest(!doc.getBoolean("tutorial"));
                 dashboard.addPlayer(player);
                 dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
                 dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
-                String username = doc.getString("username");
-                if (!silent) {
-                    if (needsUpdate) {
-                        update(player, player.getAddress(), username, protocolVersion);
+                if (!silent && rank.getRankId() >= Rank.CHARACTER.getRankId()) {
+                    String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                            rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
+                    for (Player tp : dashboard.getOnlinePlayers()) {
+                        if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
+                            tp.sendMessage(msg);
+                        }
                     }
-                    if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
-                        String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
-                                rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
-                        for (Player tp : dashboard.getOnlinePlayers()) {
-                            if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
-                                tp.sendMessage(msg);
-                            }
-                        }
-                        staffClock(player.getUniqueId(), true);
-                        if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
-                            player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
-                        }
+                    staffClock(player.getUniqueId(), true);
+                    if (rank.getRankId() >= Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isChatMuted("ParkChat")) {
+                        player.sendMessage(ChatColor.RED + "\n\n\nChat is currently muted!\n\n\n");
                     }
                 }
 
@@ -429,11 +466,6 @@ public class MongoHandler {
                 e.printStackTrace();
             }
         });
-    }
-
-    private void update(Player player, String ipAddress, String username, int mcversion) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
-                new Document("$set", new Document("ip", ipAddress).append("username", username).append("minecraftVersion", new BsonInt32(mcversion))));
     }
 
     public void logout(Player player) {
@@ -483,7 +515,7 @@ public class MongoHandler {
     public UUID usernameToUUID(String username) {
         try {
             FindIterable<Document> list = playerCollection.find(MongoFilter.USERNAME.getFilter(username));
-            if (list.first() == null) return null;
+            if (list == null || list.first() == null) return null;
             return UUID.fromString(list.first().getString("uuid"));
         } catch (IllegalArgumentException e) {
             return null;
@@ -499,7 +531,7 @@ public class MongoHandler {
     public String uuidToUsername(UUID uuid) {
         try {
             FindIterable<Document> list = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString()));
-            if (list.first() == null) return null;
+            if (list == null || list.first() == null) return null;
             return list.first().getString("username");
         } catch (IllegalArgumentException e) {
             return null;
@@ -507,11 +539,11 @@ public class MongoHandler {
     }
 
     public List<String> getPlayersOnIP(String ip) {
-        List<String> addresses = new ArrayList<>();
+        List<String> players = new ArrayList<>();
 
-        playerCollection.find(Filters.eq("ipAddress", ip))
-                .forEach((Block<Document>) document -> addresses.add(document.getString("ipAddress")));
-        return addresses;
+        playerCollection.find(Filters.eq("ip", ip)).projection(new Document("username", 1))
+                .forEach((Block<Document>) document -> players.add(document.getString("username")));
+        return players;
     }
 
     public List<UUID> getPlayersByRank(Rank... ranks) {
@@ -595,7 +627,9 @@ public class MongoHandler {
     }
 
     public void ignorePlayer(Player player, UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()), Updates.push("ignoring", new Document("uuid", uuid.toString()).append("started", System.currentTimeMillis())));
+        long time = System.currentTimeMillis();
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()), Updates.push("ignoring", new Document("uuid", uuid.toString()).append("started", time)));
+        player.addIgnoreData(new IgnoreData(player.getUniqueId(), uuid, time));
     }
 
     public void unignorePlayer(Player player, UUID uuid) {
@@ -653,7 +687,7 @@ public class MongoHandler {
 
     public void addFriendRequest(UUID sender, UUID receiver) {
         friendsCollection.insertOne(new Document("sender", sender.toString()).append("receiver", receiver.toString())
-                .append("started", 0));
+                .append("started", 0L));
     }
 
     public void removeFriend(UUID sender, UUID receiver) {
@@ -669,7 +703,7 @@ public class MongoHandler {
     }
 
     public void denyFriendRequest(UUID receiver, UUID sender) {
-        friendsCollection.deleteOne(new Document("sender", sender.toString()).append("receiver", receiver.toString()).append("started", 0));
+        friendsCollection.deleteOne(new Document("sender", sender.toString()).append("receiver", receiver.toString()).append("started", 0L));
     }
 
     public boolean getFriendRequestToggle(UUID uuid) {
@@ -687,10 +721,10 @@ public class MongoHandler {
     public void logChat(UUID uuid, List<String> list) {
         if (list.isEmpty()) return;
         BsonArray array = new BsonArray();
-        for (int i = 1; i < list.size(); i++) {
-            array.add(new BsonDocument("message", new BsonString(list.remove(i))).append("time", new BsonInt64(System.currentTimeMillis() / 1000)));
+        while (!list.isEmpty()) {
+            array.add(new BsonDocument("message", new BsonString(list.remove(0))).append("time", new BsonInt64(System.currentTimeMillis() / 1000)));
         }
-        chatCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("messages", array),
+        chatCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pushEach("messages", array),
                 new UpdateOptions().upsert(true));
     }
 
@@ -750,11 +784,12 @@ public class MongoHandler {
     }
 
     public void setSetting(UUID uuid, String key, Object value) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("settings." + key, value));
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("settings." + key, value),
+                new UpdateOptions().upsert(true));
     }
 
     public void updateAddress(UUID uuid, String address) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("ip", address));
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("ip", address));
     }
 
     public boolean verifyPassword(UUID uuid, String pass) {
@@ -772,7 +807,7 @@ public class MongoHandler {
         Dashboard dashboard = Launcher.getDashboard();
         String salt = dashboard.getPasswordUtil().getNewSalt();
         String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("staffPassword", hashed));
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("staffPassword", hashed), new UpdateOptions().upsert(true));
     }
 
     public ArrayList getBans(UUID uuid) {

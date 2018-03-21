@@ -22,7 +22,7 @@ public class ProcessesCommand extends DashboardCommand {
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
             String type = "";
-            String ip = dash.remoteAddress().getAddress().getHostAddress();
+            String ip = dash.remoteAddress().getAddress().getHostAddress() + ":" + dash.remoteAddress().getPort();
             switch (dash.getType()) {
                 case BUNGEECORD:
                     type = "BungeeCord - " + ip;

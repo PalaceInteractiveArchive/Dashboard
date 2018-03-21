@@ -20,7 +20,7 @@ public class ServerCommand extends DashboardCommand {
     @Override
     public void execute(final Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (args.length == 6 && args[0].equalsIgnoreCase("add") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
+        if (args.length == 5 && args[0].equalsIgnoreCase("add") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
             final String name = args[1];
             final String address = args[2];
             final boolean park;
@@ -38,17 +38,21 @@ public class ServerCommand extends DashboardCommand {
             Server s = new Server(name, address, park, 0, type);
             dashboard.getServerUtil().addServer(s);
             dashboard.getSchedulerManager().runAsync(() -> {
-                dashboard.getMongoHandler().addServer(s);
-                player.sendMessage(ChatColor.GREEN + "'" + name + "' successfully created! Notifying Bungees...");
-                PacketAddServer packet = new PacketAddServer(name, address);
-                for (Object o : WebSocketServerHandler.getGroup()) {
-                    DashboardSocketChannel dash = (DashboardSocketChannel) o;
-                    if (!dash.getType().equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
-                        continue;
+                try {
+                    dashboard.getMongoHandler().addServer(s);
+                    player.sendMessage(ChatColor.GREEN + "'" + name + "' successfully created! Notifying Bungees...");
+                    PacketAddServer packet = new PacketAddServer(name, address);
+                    for (Object o : WebSocketServerHandler.getGroup()) {
+                        DashboardSocketChannel dash = (DashboardSocketChannel) o;
+                        if (!dash.getType().equals(PacketConnectionType.ConnectionType.BUNGEECORD)) {
+                            continue;
+                        }
+                        dash.send(packet);
                     }
-                    dash.send(packet);
+                    player.sendMessage(ChatColor.GREEN + "All Bungees notified! Server '" + name + "' can now be joined.");
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                player.sendMessage(ChatColor.GREEN + "All Bungees notified! Server '" + name + "' can now be joined.");
             });
             return;
         }
@@ -91,7 +95,7 @@ public class ServerCommand extends DashboardCommand {
                 dashboard.getServerUtil().unmuteServer(serverName);
                 return;
             }
-            dashboard.getServerUtil().muteServer(serverName);
+            dashboard.getServerUtil().muteServer(player.getUniqueId(), serverName);
         }
         if (args.length == 1) {
             if (player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
@@ -103,6 +107,8 @@ public class ServerCommand extends DashboardCommand {
                             ChatColor.AQUA + "- Add a new server to all Bungees");
                     player.sendMessage(ChatColor.GREEN + "/server remove [Name] " + ChatColor.AQUA +
                             "- Remove a server from all Bungees");
+                    player.sendMessage(ChatColor.GREEN + "/server mute [Name] " + ChatColor.AQUA +
+                            "- Don't display server start/stop (re-enables when you log out)");
                     return;
                 } else if (args[0].equalsIgnoreCase("list")) {
                     StringBuilder msg = new StringBuilder(ChatColor.GREEN + "Server List:\n");

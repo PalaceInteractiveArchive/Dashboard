@@ -32,13 +32,13 @@ public class FriendCommand extends DashboardCommand {
                         dashboard.getSchedulerManager().runAsync(() -> {
                             player.setFriendRequestToggle(!player.hasFriendToggledOff());
                             if (player.hasFriendToggledOff()) {
-                                player.sendMessage(ChatColor.YELLOW + "Friend Requests have been friendRequestToggle " +
+                                player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
                                         ChatColor.RED + "OFF");
                             } else {
-                                player.sendMessage(ChatColor.YELLOW + "Friend Requests have been friendRequestToggle " +
+                                player.sendMessage(ChatColor.YELLOW + "Friend Requests have been toggled " +
                                         ChatColor.GREEN + "ON");
                             }
-                            dashboard.getMongoHandler().setFriendRequestToggle(player.getUniqueId(), player.hasFriendToggledOff());
+                            dashboard.getMongoHandler().setFriendRequestToggle(player.getUniqueId(), !player.hasFriendToggledOff());
                         });
                         return;
                     case "requests":

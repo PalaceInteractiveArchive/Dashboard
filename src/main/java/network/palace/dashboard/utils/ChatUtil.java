@@ -352,7 +352,7 @@ public class ChatUtil {
             } else {
                 String response = DashboardConstants.MUTED_PLAYER;
                 response = response.replaceAll("<TIME>", DateUtil.formatDateDiff(mute.getExpires()));
-                if (!mute.getReason().equals(""))
+                if (!mute.getReason().isEmpty())
                     response += DashboardConstants.MUTE_REASON.replaceAll("<REASON>", player.getMute().getReason());
                 player.sendMessage(response);
                 return true;

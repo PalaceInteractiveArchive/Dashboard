@@ -242,16 +242,18 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     player.kickPlayer("You are already connected to The Palace Network!");
                     return;
                 }
+                dashboard.getMongoHandler().login(player);
                 dashboard.getSchedulerManager().runAsync(() -> {
                     IPUtil.ProviderData data = IPUtil.getProviderData(packet.getAddress());
                     player.setIsp(data.getIsp());
-                    ProviderBan ban = dashboard.getMongoHandler().getProviderBan(player.getIsp());
-                    if (ban != null) {
-                        player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                    if (!player.getIsp().isEmpty()) {
+                        ProviderBan ban = dashboard.getMongoHandler().getProviderBan(player.getIsp());
+                        if (ban != null) {
+                            player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                        }
                     }
                     dashboard.getMongoHandler().updateProviderData(player.getUniqueId(), data);
                 });
-                dashboard.getMongoHandler().login(player);
                 if (dashboard.isStrictMode()) player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
                 break;
             }

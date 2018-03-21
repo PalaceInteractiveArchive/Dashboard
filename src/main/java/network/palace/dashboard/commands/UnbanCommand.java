@@ -21,7 +21,7 @@ public class UnbanCommand extends DashboardCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 1) {
-            player.sendMessage(ChatColor.RED + "/unbanPlayer [Username]");
+            player.sendMessage(ChatColor.RED + "/unban [Player] [Username]");
             return;
         }
         String username = args[0];

@@ -162,7 +162,7 @@ public class VoteUtil {
     private void vote(UUID uuid, int serverId) {
         Dashboard dashboard = Launcher.getDashboard();
         try {
-            long lastVote = dashboard.getMongoHandler().getPlayer(uuid, new Document("vote.lasttime", 1)).getLong("lastTime");
+            long lastVote = dashboard.getMongoHandler().getPlayer(uuid, new Document("vote.lastTime", 1)).getLong("lastTime");
             boolean cancel = false;
             if (System.currentTimeMillis() - lastVote <= 21600000) {
                 cancel = true;
@@ -174,8 +174,8 @@ public class VoteUtil {
                 }
                 return;
             }
-            Document update = new Document("$inc", new Document("tokens", 5)).append("vote", new Document("lastTime",
-                    System.currentTimeMillis()).append("lastSite", serverId));
+            Document update = new Document("$inc", new Document("tokens", 5)).append("$set", new Document("vote", new Document("lastTime",
+                    System.currentTimeMillis()).append("lastSite", serverId)));
             dashboard.getMongoHandler().getPlayerCollection().updateOne(MongoHandler.MongoFilter.UUID.getFilter(uuid.toString()), update);
             dashboard.getMongoHandler().logTransaction(uuid, 5, "Vote", CurrencyType.TOKENS, false);
             if (p == null) {

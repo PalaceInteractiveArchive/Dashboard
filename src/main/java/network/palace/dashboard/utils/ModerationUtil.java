@@ -65,7 +65,7 @@ public class ModerationUtil {
                     }
                 }
             }
-        }, 60000L, 600000L);
+        }, 10000L, 600000L);
     }
 
     public void announceBan(Ban ban) {
@@ -131,7 +131,7 @@ public class ModerationUtil {
 
     public void displayServerMute(String name, boolean muted) {
         ChatColor prefix = muted ? ChatColor.RED : ChatColor.GREEN;
-        String message = muted ? name + " has been muted!" : name + " has been unmuted!";
+        String message = name + " will " + (muted ? "not" : "now") + " announce connects and disconnects to/from Dashboard.";
         sendMessage(prefix + message);
         SlackMessage slackMessage = new SlackMessage("");
         SlackAttachment attachment = new SlackAttachment(message);

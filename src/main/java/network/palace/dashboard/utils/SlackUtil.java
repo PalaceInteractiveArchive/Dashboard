@@ -26,7 +26,7 @@ public class SlackUtil {
 
     public void sendDashboardMessage(SlackMessage msg, List<SlackAttachment> attachments, boolean status) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (dashboard.isTestNetwork() && status) {
+        if (dashboard.isTestNetwork() && status || true) {
             return;
         }
         for (SlackAttachment a : attachments) {

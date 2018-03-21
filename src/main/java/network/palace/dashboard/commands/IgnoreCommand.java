@@ -81,6 +81,7 @@ public class IgnoreCommand extends DashboardCommand {
                     return;
                 }
                 name = dashboard.getCachedName(uuid) == null ? dashboard.getMongoHandler().uuidToUsername(uuid) : dashboard.getCachedName(uuid);
+                dashboard.addToCache(uuid, name);
                 player.ignorePlayer(uuid);
                 player.sendMessage(ChatColor.GREEN + "You have ignored " + name);
                 if (dashboard.getServer(player.getServer()).getServerType().equals("Creative"))
@@ -99,6 +100,7 @@ public class IgnoreCommand extends DashboardCommand {
                     return;
                 }
                 name = dashboard.getCachedName(uuid) == null ? dashboard.getMongoHandler().uuidToUsername(uuid) : dashboard.getCachedName(uuid);
+                dashboard.addToCache(uuid, name);
                 dashboard.getSchedulerManager().runAsync(() -> {
                     player.unignorePlayer(uuid);
                     player.sendMessage(ChatColor.GREEN + "You have unignored " + name);
@@ -116,7 +118,7 @@ public class IgnoreCommand extends DashboardCommand {
 
     private String format(long started) {
         Calendar c = new GregorianCalendar();
-        c.setTime(new Date(started * 1000));
+        c.setTime(new Date(started));
         c.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         int hour = c.get(Calendar.HOUR_OF_DAY);
         String am = "am";

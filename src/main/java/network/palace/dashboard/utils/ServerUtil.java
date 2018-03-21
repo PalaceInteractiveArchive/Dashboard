@@ -22,7 +22,7 @@ public class ServerUtil {
     private int lastCount = 0;
     private int lastServerCount = 0;
 
-    private Map<String, Integer> mutedServers = new HashMap<>();
+    private Map<String, UUID> mutedServers = new HashMap<>();
 
     public ServerUtil() {
         Dashboard dashboard = Launcher.getDashboard();
@@ -111,14 +111,15 @@ public class ServerUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                List<String> expiredServers = mutedServers.entrySet().stream().filter(entry -> entry.getValue().equals(30)).map(Map.Entry::getKey).collect(Collectors.toList());
-                expiredServers.forEach(server -> {
+                for (Map.Entry<String, UUID> entry : mutedServers.entrySet()) {
+                    Player tp = dashboard.getPlayer(entry.getValue());
+                    if (tp != null) continue;
+                    String server = entry.getKey();
                     mutedServers.remove(server);
-                    Launcher.getDashboard().getModerationUtil().displayServerMute(server, false);
-                });
-                new HashMap<>(mutedServers).forEach((server, time) -> mutedServers.put(server, time + 1));
+                    dashboard.getModerationUtil().displayServerMute(server, false);
+                }
             }
-        }, 0, 60000);
+        }, 0, 10 * 1000);
         /*
          * Game Server Timer
          */
@@ -236,8 +237,8 @@ public class ServerUtil {
         return mutedServers.containsKey(server);
     }
 
-    public void muteServer(String server) {
-        mutedServers.put(server, 0);
+    public void muteServer(UUID uuid, String server) {
+        mutedServers.put(server, uuid);
         Launcher.getDashboard().getModerationUtil().displayServerMute(server, true);
     }
 
