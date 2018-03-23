@@ -21,6 +21,10 @@ public class ServerUtil {
     private HashMap<String, Server> servers = new HashMap<>();
     private int lastCount = 0;
     private int lastServerCount = 0;
+    private int lastParks = 0;
+    private int lastCreative = 0;
+    private int lastArcade = 0;
+    private HashMap<String, Integer> lastHubs = new HashMap<>();
 
     private Map<String, UUID> mutedServers = new HashMap<>();
 
@@ -120,6 +124,56 @@ public class ServerUtil {
                 }
             }
         }, 0, 10 * 1000);
+        /*
+         * Lobby Data Timer
+         */
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                int parks = 43;
+                int creative = 28;
+                int arcade = 17;
+                HashMap<String, Integer> hubs = new HashMap<>();
+                boolean update = false;
+                if (parks != lastParks || creative != lastCreative || arcade != lastArcade) {
+                    update = true;
+                }
+                if (!update) {
+                    for (Map.Entry<String, Integer> entry : hubs.entrySet()) {
+                        if (!lastHubs.get(entry.getKey()).equals(entry.getValue())) {
+                            update = true;
+                            break;
+                        }
+                    }
+                }
+                if (!update) {
+                    return;
+                }
+                lastParks = parks;
+                lastCreative = creative;
+                lastArcade = arcade;
+                lastHubs = hubs;
+                for (Server s : getServers()) {
+                    if (!s.isOnline()) continue;
+                    if (s.getName().startsWith("Creative")) {
+                        creative += s.getCount();
+                    } else if (s.getName().startsWith("Arcade") || s.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) {
+                        arcade += s.getCount();
+                    } else if (s.getName().startsWith("Hub")) {
+                        hubs.put(s.getName(), s.getCount());
+                    } else if (s.isPark()) {
+                        parks += s.getCount();
+                    }
+                }
+                PacketLobbyData packet = new PacketLobbyData(parks, creative, arcade, hubs);
+                for (Server s : getServers()) {
+                    if (s.getName().startsWith("Hub")) {
+                        DashboardSocketChannel channel = Dashboard.getInstance(s.getName());
+                        if (channel != null) channel.send(packet);
+                    }
+                }
+            }
+        }, 5000, 5 * 1000);
         /*
          * Game Server Timer
          */

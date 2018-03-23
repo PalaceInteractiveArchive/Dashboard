@@ -850,7 +850,6 @@ public class MongoHandler {
         return new DiscordCacheInfo(mc, new DiscordCacheInfo.Discord(doc.getString("discordUsername")));
     }
 
-
     public enum MongoFilter {
         UUID, USERNAME, RANK;
 
