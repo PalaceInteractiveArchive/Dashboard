@@ -24,9 +24,9 @@ public class ServerCommand extends DashboardCommand {
             final String name = args[1];
             final String address = args[2];
             final boolean park;
-            final String type = args[5];
+            final String type = args[4];
             try {
-                park = Boolean.parseBoolean(args[4]);
+                park = Boolean.parseBoolean(args[3]);
             } catch (Exception ignored) {
                 player.sendMessage(ChatColor.RED + "Please use true or false to state if it is a Park server or not!");
                 return;

@@ -853,7 +853,10 @@ public class MongoHandler {
 
     public void addServer(Server server) {
         Document serverDocument = new Document("name", server.getName()).append("type", server.getServerType())
-                .append("address", server.getAddress());
+                .append("address", server.getAddress()).append("park", server.isPark());
+        if (Launcher.getDashboard().isTestNetwork()) {
+            serverDocument.append("playground", true);
+        }
         serversCollection.insertOne(serverDocument);
     }
 
