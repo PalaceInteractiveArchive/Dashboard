@@ -22,6 +22,7 @@ import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.IPUtil;
 import network.palace.dashboard.utils.InventoryUtil;
 import network.palace.dashboard.utils.MCLeakUtil;
+import network.palace.dashboard.utils.NameUtil;
 import org.bson.*;
 import org.bson.conversions.Bson;
 
@@ -43,7 +44,6 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> friendsCollection = null;
     @Getter private MongoCollection<Document> bansCollection = null;
     @Getter private MongoCollection<Document> permissionCollection = null;
-    @Getter private MongoCollection<Document> cosmeticsCollection = null;
     @Getter private MongoCollection<Document> resourcePackCollection = null;
     @Getter private MongoCollection<Document> honorMappingCollection = null;
     @Getter private MongoCollection<Document> outfitsCollection = null;
@@ -88,7 +88,6 @@ public class MongoHandler {
         friendsCollection = database.getCollection("friends");
         bansCollection = database.getCollection("bans");
         permissionCollection = database.getCollection("permissions");
-        cosmeticsCollection = database.getCollection("cosmetics");
         resourcePackCollection = database.getCollection("resourcepacks");
         honorMappingCollection = database.getCollection("honormapping");
         outfitsCollection = database.getCollection("outfits");
@@ -126,6 +125,9 @@ public class MongoHandler {
         skinData.put("hash", "");
         skinData.put("signature", "");
         playerDocument.put("skin", skinData);
+
+        List<Integer> cosmeticData = new ArrayList<>();
+        playerDocument.put("cosmetics", cosmeticData);
 
         List<Object> kicks = new ArrayList<>();
         List<Object> mutes = new ArrayList<>();
@@ -200,7 +202,11 @@ public class MongoHandler {
         playerCollection.insertOne(playerDocument);
         System.out.println(System.currentTimeMillis());
 
-        Launcher.getDashboard().addPlayer(player);
+        Dashboard dashboard = Launcher.getDashboard();
+
+        dashboard.addPlayer(player);
+
+        updatePreviousUsernames(player);
     }
 
     public Document getPlayer(Player player) {
@@ -239,6 +245,26 @@ public class MongoHandler {
         FindIterable<Document> doc = playerCollection.find(MongoFilter.USERNAME.getFilter(player)).projection(limit);
         if (doc == null) return null;
         return doc.first();
+    }
+
+    /**
+     * Set previous usernames for a player
+     *
+     * @param uuid the uuid
+     * @param list the list of previous usernames
+     */
+    public void setPreviousNames(UUID uuid, List<String> list) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("previousNames", list));
+    }
+
+    public void updatePreviousUsernames(Player player) {
+        Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
+            List<String> list = NameUtil.getNames(player.getUsername());
+            list.remove(player.getUsername());
+            list.remove(player.getUniqueId().toString().replaceAll("-", ""));
+            Collections.reverse(list);
+            setPreviousNames(player.getUniqueId(), list);
+        });
     }
 
     public boolean isPlayerMuted(UUID uuid) {
@@ -408,8 +434,7 @@ public class MongoHandler {
                                     .append("username", player.getUsername())
                                     .append("minecraftVersion", new BsonInt32(player.getMcVersion()))));
                     if (!username.equals(player.getUsername())) {
-                        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
-                                Updates.push("previousNames", username), new UpdateOptions().upsert(true));
+                        updatePreviousUsernames(player);
                     }
                 }
                 Document settings = (Document) doc.get("settings");
@@ -640,8 +665,13 @@ public class MongoHandler {
     }
 
     public List<Server> getServers() {
+        return getServers(false);
+    }
+
+    public List<Server> getServers(boolean playground) {
         List<Server> list = new ArrayList<>();
         for (Document doc : serversCollection.find()) {
+            if (playground && (!doc.containsKey("playground") || !doc.getBoolean("playground"))) continue;
             list.add(new Server(doc.getString("name"), doc.getString("address"),
                     doc.getBoolean("park"), 0, doc.getString("type")));
         }

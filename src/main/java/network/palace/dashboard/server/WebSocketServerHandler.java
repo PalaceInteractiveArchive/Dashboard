@@ -406,6 +406,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         game.setGameNeedsUpdate(true);
                     }
                 }
+                if (name.startsWith("Hub")) {
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            dashboard.getServerUtil().runLobbyDataTask();
+                        }
+                    }, 5000);
+                }
                 break;
             }
             /*

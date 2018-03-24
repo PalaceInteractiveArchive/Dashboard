@@ -25,6 +25,7 @@ public class ServerUtil {
     private int lastCreative = 0;
     private int lastArcade = 0;
     private HashMap<String, Integer> lastHubs = new HashMap<>();
+    private TimerTask lobbyDataTask;
 
     private Map<String, UUID> mutedServers = new HashMap<>();
 
@@ -127,32 +128,13 @@ public class ServerUtil {
         /*
          * Lobby Data Timer
          */
-        new Timer().schedule(new TimerTask() {
+        lobbyDataTask = new TimerTask() {
             @Override
             public void run() {
-                int parks = 43;
-                int creative = 28;
-                int arcade = 17;
+                int parks = 0;
+                int creative = 0;
+                int arcade = 0;
                 HashMap<String, Integer> hubs = new HashMap<>();
-                boolean update = false;
-                if (parks != lastParks || creative != lastCreative || arcade != lastArcade) {
-                    update = true;
-                }
-                if (!update) {
-                    for (Map.Entry<String, Integer> entry : hubs.entrySet()) {
-                        if (!lastHubs.get(entry.getKey()).equals(entry.getValue())) {
-                            update = true;
-                            break;
-                        }
-                    }
-                }
-                if (!update) {
-                    return;
-                }
-                lastParks = parks;
-                lastCreative = creative;
-                lastArcade = arcade;
-                lastHubs = hubs;
                 for (Server s : getServers()) {
                     if (!s.isOnline()) continue;
                     if (s.getName().startsWith("Creative")) {
@@ -165,6 +147,26 @@ public class ServerUtil {
                         parks += s.getCount();
                     }
                 }
+
+                if (parks == lastParks && creative == lastCreative && arcade == lastArcade) {
+                    boolean stop = true;
+                    if (hubs.isEmpty() && lastHubs.isEmpty()) {
+                        stop = false;
+                    }
+                    for (Map.Entry<String, Integer> entry : hubs.entrySet()) {
+                        if (!lastHubs.containsKey(entry.getKey()) ||
+                                !lastHubs.get(entry.getKey()).equals(entry.getValue())) {
+                            stop = false;
+                            break;
+                        }
+                    }
+                    if (stop) return;
+                }
+
+                lastParks = parks;
+                lastCreative = creative;
+                lastArcade = arcade;
+                lastHubs = hubs;
                 PacketLobbyData packet = new PacketLobbyData(parks, creative, arcade, hubs);
                 for (Server s : getServers()) {
                     if (s.getName().startsWith("Hub")) {
@@ -173,7 +175,8 @@ public class ServerUtil {
                     }
                 }
             }
-        }, 5000, 5 * 1000);
+        };
+        new Timer().schedule(lobbyDataTask, 5000, 5 * 1000);
         /*
          * Game Server Timer
          */
@@ -311,7 +314,7 @@ public class ServerUtil {
         servers.clear();
         Dashboard dashboard = Launcher.getDashboard();
         try {
-            List<Server> servers = dashboard.getMongoHandler().getServers();
+            List<Server> servers = dashboard.getMongoHandler().getServers(dashboard.isTestNetwork());
             for (Server s : servers) {
                 this.servers.put(s.getName(), s);
             }
@@ -399,5 +402,13 @@ public class ServerUtil {
             }
         }
         return s;
+    }
+
+    public void runLobbyDataTask() {
+        lastParks = 0;
+        lastCreative = 0;
+        lastArcade = 0;
+        lastHubs = new HashMap<>();
+        lobbyDataTask.run();
     }
 }
