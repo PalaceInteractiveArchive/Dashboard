@@ -198,9 +198,7 @@ public class MongoHandler {
         List<Object> ignoring = new ArrayList<>();
         playerDocument.put("ignoring", ignoring);
 
-        System.out.println(System.currentTimeMillis());
         playerCollection.insertOne(playerDocument);
-        System.out.println(System.currentTimeMillis());
 
         Dashboard dashboard = Launcher.getDashboard();
 
@@ -770,32 +768,56 @@ public class MongoHandler {
      * Get data for a specific section of park data. If no limit is provided, the entire parks section is returned.
      *
      * @param uuid  the uuid of the player
-     * @param limit a document specifying the limits of the search
+     * @param limit a string specifying the limits of the search
      * @return a document with the requested data
      */
-    public Document getParkData(UUID uuid, Document limit) {
-        return getPlayer(uuid, new Document("parks", limit == null ? 1 : limit));
+    public Document getParkData(UUID uuid, String limit) {
+        if (limit == null || limit.isEmpty()) {
+            return (Document) getPlayer(uuid, new Document("parks", 1)).get("parks");
+        }
+        Document current = (Document) getPlayer(uuid, new Document("parks." + limit, 1)).get("parks");
+        String[] split;
+        if (limit.contains(".")) {
+            split = limit.split(".");
+        } else {
+            split = new String[]{limit};
+        }
+        for (String s : split) {
+            current = (Document) current.get(s);
+        }
+        return current;
     }
 
     public Document getParkInventoryData(UUID uuid) {
-        return getParkData(uuid, new Document("inventories", 1));
+        return getParkData(uuid, null);
     }
 
     public Document getParkInventory(UUID uuid, Resort resort) {
         return playerCollection.find(new Document("uuid", uuid.toString()).append("parks.inventories.$.resort", resort.getId())).first();
     }
 
-    public void setInventoryData(UUID uuid, ResortInventory inv) {
-        UpdateData data = InventoryUtil.getDataFromJson(inv.getBackpackJSON(), inv.getBackpackSize(),
-                inv.getLockerJSON(), inv.getLockerSize(), inv.getHotbarJSON());
-        setInventoryData(uuid, inv.getResort(), data);
+    public void setInventoryData(UUID uuid, ResortInventory inv, boolean create) {
+        try {
+            UpdateData data = InventoryUtil.getDataFromJson(inv.getBackpackJSON(), inv.getBackpackSize(),
+                    inv.getLockerJSON(), inv.getLockerSize(), inv.getHotbarJSON());
+            if (create) {
+                Document doc = new Document("packcontents", data.getPack()).append("packsize", data.getPackSize())
+                        .append("lockercontents", data.getLocker()).append("lockersize", data.getLockerSize())
+                        .append("hotbarcontents", data.getHotbar()).append("resort", inv.getResort().getId());
+                playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("parks.inventories", doc));
+            } else {
+                setInventoryData(uuid, inv.getResort(), data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setInventoryData(UUID uuid, Resort resort, UpdateData data) {
         Document doc = new Document("packcontents", data.getPack()).append("packsize", data.getPackSize())
                 .append("lockercontents", data.getLocker()).append("lockersize", data.getLockerSize())
-                .append("hotbarcontents", data.getHotbar()).append("resort", resort);
-        playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.inventories.$.resort", resort),
+                .append("hotbarcontents", data.getHotbar()).append("resort", resort.getId());
+        playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.inventories.resort", resort.getId()),
                 new Document("$set", new Document("parks.inventories.$", doc)));
     }
 

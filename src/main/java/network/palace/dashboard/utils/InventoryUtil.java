@@ -168,7 +168,7 @@ public class InventoryUtil {
                     }
                 }
             }
-        }, 1000, 60000);
+        }, 1000, 10000);
     }
 
     public static UpdateData getDataFromJson(String backpackJSON, int backpackSize, String lockerJSON, int lockerSize, String hotbarJSON) {
@@ -210,6 +210,8 @@ public class InventoryUtil {
             }
             ResortInventory inv = new ResortInventory();
             inv.setResort(packet.getResort());
+            inv.setBackpackSize(packet.getBackpackSize());
+            inv.setLockerSize(packet.getLockerSize());
             if (packet.getBackpackHash().equals("")) {
                 inv.setBackpackHash(cache.getBackpackHash());
                 inv.setBackpackJSON(cache.getBackpackJSON());
@@ -283,21 +285,27 @@ public class InventoryUtil {
      * @return the inventory of the player. Defaults to a blank string if none is present
      */
     public ResortInventory getInventory(UUID uuid, Resort resort) {
-        InventoryCache cache = cachedInventories.get(uuid);
-        if (cache == null) {
-            cache = getInventoryFromDatabase(uuid);
+        try {
+            InventoryCache cache = cachedInventories.get(uuid);
+            if (cache == null) {
+                cache = getInventoryFromDatabase(uuid);
+            }
+            ResortInventory inv = cache.getResorts().get(resort);
+            if (inv == null) {
+                return createResortInventory(uuid, resort);
+            }
+            return inv;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResortInventory();
         }
-        ResortInventory inv = cache.getResorts().get(resort);
-        if (inv == null) {
-            return createResortInventory(uuid, resort);
-        }
-        return inv;
     }
 
     private ResortInventory createResortInventory(UUID uuid, Resort resort) {
         Dashboard dashboard = Launcher.getDashboard();
         ResortInventory inv = new ResortInventory();
-        dashboard.getMongoHandler().setInventoryData(uuid, inv);
+        inv.setResort(resort);
+        dashboard.getMongoHandler().setInventoryData(uuid, inv, true);
         return inv;
     }
 
@@ -314,14 +322,55 @@ public class InventoryUtil {
         for (Object o : invData.get("inventories", ArrayList.class)) {
             Document inv = (Document) o;
             int resortID = inv.getInteger("resort");
-            String backpack = inv.get("packcontents", Document.class).toString();
-            String locker = inv.get("lockercontents", Document.class).toString();
-            String hotbar = inv.get("hotbarcontents", Document.class).toString();
+            StringBuilder backpack = new StringBuilder("[");
+            ArrayList packcontents = inv.get("packcontents", ArrayList.class);
+            for (int i = 0; i < packcontents.size(); i++) {
+                Document item = (Document) packcontents.get(i);
+                if (item.getInteger("a") == null) {
+                    backpack.append("{}");
+                } else {
+                    backpack.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                }
+                if (i < (packcontents.size() - 1)) {
+                    backpack.append(",");
+                }
+            }
+            backpack.append("]");
+            StringBuilder locker = new StringBuilder("[");
+            ArrayList lockercontents = inv.get("lockercontents", ArrayList.class);
+            for (int i = 0; i < lockercontents.size(); i++) {
+                Document item = (Document) lockercontents.get(i);
+                if (item.getInteger("a") == null) {
+                    locker.append("{}");
+                } else {
+                    locker.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                }
+                if (i < (lockercontents.size() - 1)) {
+                    locker.append(",");
+                }
+            }
+            locker.append("]");
+            StringBuilder hotbar = new StringBuilder("[");
+            ArrayList hotbarcontents = inv.get("hotbarcontents", ArrayList.class);
+            for (int i = 0; i < hotbarcontents.size(); i++) {
+                Document item = (Document) hotbarcontents.get(i);
+                if (item.getInteger("a") == null) {
+                    hotbar.append("{}");
+                } else {
+                    hotbar.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                }
+                if (i < (hotbarcontents.size() - 1)) {
+                    hotbar.append(",");
+                }
+            }
+            hotbar.append("]");
+//            String locker = inv.get("lockercontents", ArrayList.class).toString();
+//            String hotbar = inv.get("hotbarcontents", ArrayList.class).toString();
             int packsize = inv.getInteger("packsize");
-            int lockersize = inv.getInteger("lockrsize");
+            int lockersize = inv.getInteger("lockersize");
             Resort resort = Resort.fromId(resortID);
-            ResortInventory resortInventory = new ResortInventory(resort, backpack, generateHash(backpack), "",
-                    packsize, locker, generateHash(locker), "", lockersize, hotbar, generateHash(hotbar), "");
+            ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "",
+                    packsize, locker.toString(), generateHash(locker.toString()), "", lockersize, hotbar.toString(), generateHash(hotbar.toString()), "");
             map.put(resort, resortInventory);
         }
         return new InventoryCache(uuid, map);
@@ -389,7 +438,11 @@ public class InventoryUtil {
      * @param update class containing all values to change
      */
     private void updateData(UUID uuid, InventoryUpdate update) {
-        Launcher.getDashboard().getMongoHandler().updateInventoryData(uuid, update);
+        try {
+            Launcher.getDashboard().getMongoHandler().updateInventoryData(uuid, update);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
