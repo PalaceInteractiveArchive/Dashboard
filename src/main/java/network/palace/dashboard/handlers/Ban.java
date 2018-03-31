@@ -1,6 +1,7 @@
 package network.palace.dashboard.handlers;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bson.Document;
 
 import java.util.UUID;
@@ -13,6 +14,7 @@ public class Ban {
     @Getter private long expires;
     @Getter private String reason;
     @Getter private String source;
+    @Getter @Setter private boolean active;
 
     public Ban(UUID uuid, String name, boolean permanent, long expires, String reason, String source) {
         this(uuid, name, permanent, System.currentTimeMillis(), expires, reason, source);

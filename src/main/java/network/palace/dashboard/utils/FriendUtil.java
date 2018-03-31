@@ -63,7 +63,7 @@ public class FriendUtil {
         for (Map.Entry<UUID, String> entry : friends.entrySet()) {
             Player tp = dashboard.getPlayer(entry.getKey());
             if (tp == null) {
-                currentFriends.add(entry.getValue());
+                currentFriends.add(entry.getValue() == null ? "unknown" : entry.getValue());
             } else {
                 currentFriends.add(entry.getValue() + ":" + tp.getServer());
             }

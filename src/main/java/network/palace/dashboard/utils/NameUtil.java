@@ -41,9 +41,11 @@ public class NameUtil {
         List<String> names = new ArrayList<>();
         String namesData = readUrl("https://api.mojang.com/user/profiles/" + uuid + "/names");
         JsonArray pastNames = gson.fromJson(namesData, JsonArray.class);
-        names.add(uuid);
-        for (JsonElement pastName : pastNames) {
-            JsonElement element = gson.fromJson(pastName, JsonElement.class);
+        if (pastNames == null) {
+            return names;
+        }
+        for (int i = 0; i < pastNames.size(); i++) {
+            JsonElement element = gson.fromJson(pastNames.get(i), JsonElement.class);
             JsonObject nameObj = element.getAsJsonObject();
             String name = nameObj.get("name").getAsString();
             names.add(name);
@@ -52,17 +54,13 @@ public class NameUtil {
     }
 
     public static String readUrl(String urlString) throws Exception {
-        BufferedReader reader = null;
-        try {
-            URL url = new URL(urlString);
-            reader = new BufferedReader(new InputStreamReader(url.openStream()));
+        URL url = new URL(urlString);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
             StringBuilder buffer = new StringBuilder();
             int read;
             char[] chars = new char[1024];
             while ((read = reader.read(chars)) != -1) buffer.append(chars, 0, read);
             return buffer.toString();
-        } finally {
-            if (reader != null) reader.close();
         }
     }
 }

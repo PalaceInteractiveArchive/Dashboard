@@ -64,6 +64,7 @@ public class Launcher {
         try {
             dashboard.getLogger().info("Initializing MongoDB Handler");
             dashboard.setMongoHandler(new MongoHandler());
+            dashboard.setSqlUtil(new SqlUtil());
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);

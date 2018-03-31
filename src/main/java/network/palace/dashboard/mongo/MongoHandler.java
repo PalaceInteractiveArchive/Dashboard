@@ -204,7 +204,7 @@ public class MongoHandler {
 
         dashboard.addPlayer(player);
 
-        updatePreviousUsernames(player);
+        updatePreviousUsernames(player.getUniqueId(), player.getUsername());
     }
 
     public Document getPlayer(Player player) {
@@ -255,13 +255,20 @@ public class MongoHandler {
         playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("previousNames", list));
     }
 
-    public void updatePreviousUsernames(Player player) {
+    public void updatePreviousUsernames(UUID uuid, String username) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
-            List<String> list = NameUtil.getNames(player.getUsername());
-            list.remove(player.getUsername());
-            list.remove(player.getUniqueId().toString().replaceAll("-", ""));
-            Collections.reverse(list);
-            setPreviousNames(player.getUniqueId(), list);
+            String current = "";
+            try {
+                List<String> list = NameUtil.getNames(username, uuid.toString().replaceAll("-", ""));
+                Collections.reverse(list);
+                current = list.get(0);
+                setPreviousNames(uuid, list.subList(1, list.size()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (!username.isEmpty() && !current.equals(username)) {
+                playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("username", current));
+            }
         });
     }
 
@@ -432,7 +439,7 @@ public class MongoHandler {
                                     .append("username", player.getUsername())
                                     .append("minecraftVersion", new BsonInt32(player.getMcVersion()))));
                     if (!username.equals(player.getUsername())) {
-                        updatePreviousUsernames(player);
+                        updatePreviousUsernames(player.getUniqueId(), player.getUsername());
                     }
                 }
                 Document settings = (Document) doc.get("settings");
@@ -639,8 +646,7 @@ public class MongoHandler {
         Rank rank = Rank.fromString(player.getString("rank"));
         long lastLogin = player.getLong("lastOnline");
         String ipAddress = player.getString("ip");
-        Mute mute = new Mute(uuid, player.getString("username"), (Document) ((BasicDBObject) player.get("mutes"))
-                .getOrDefault("currentMute", null));
+        Mute mute = getCurrentMute(uuid);
         String server = player.getString("server");
         return new BseenData(uuid, rank, lastLogin, ipAddress, mute, server);
     }

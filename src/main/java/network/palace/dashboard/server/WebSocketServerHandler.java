@@ -339,7 +339,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (tp == null) {
                         return;
                     }
-                    dashboard.getLogger().info(command + " " + String.join(", ", args) + " " + String.join(", ", results));
                     String last = "";
                     if (args.size() > 0) {
                         last = args.get(args.size() - 1);

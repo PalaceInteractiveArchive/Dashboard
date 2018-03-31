@@ -52,6 +52,7 @@ public class Dashboard {
     @Getter @Setter private AFKUtil afkUtil;
     @Getter @Setter private StatUtil statUtil;
     @Getter @Setter private VoteUtil voteUtil;
+    @Getter @Setter private SqlUtil sqlUtil;
     @Getter @Setter private SocketConnection socketConnection;
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
