@@ -1,5 +1,6 @@
 package network.palace.dashboard.commands;
 
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.mongo.MongoHandler;
+import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.utils.SqlUtil;
 import org.bson.*;
 
@@ -33,6 +35,200 @@ public class ConvertCommand extends DashboardCommand {
             MongoHandler mongoHandler = dashboard.getMongoHandler();
             try (Connection connection = sqlUtil.getConnection().get()) {
                 switch (convert.toLowerCase()) {
+                    case "activity": {
+                        player.sendMessage(ChatColor.GREEN + "Loading activity data...");
+                        HashMap<UUID, BsonArray> activityData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM activity;");
+                        ResultSet result = sql.executeQuery();
+                        while (result.next()) {
+                            UUID uuid = UUID.fromString(result.getString("uuid"));
+                            String action = result.getString("action");
+                            String description = result.getString("description");
+                            long time = result.getTimestamp("time").getTime();
+                            BsonDocument entry = new BsonDocument("uuid", new BsonString(uuid.toString()))
+                                    .append("action", new BsonString(action)).append("description", new BsonString(description))
+                                    .append("time", new BsonInt64(time));
+                            BsonArray array;
+                            if (activityData.containsKey(uuid)) {
+                                array = activityData.remove(uuid);
+                            } else {
+                                array = new BsonArray();
+                            }
+                            array.add(entry);
+                            activityData.put(uuid, array);
+                        }
+                        result.close();
+                        sql.close();
+                        player.sendMessage(ChatColor.GREEN + "Activity data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo activity data...");
+                        for (Map.Entry<UUID, BsonArray> entry : activityData.entrySet()) {
+                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()),
+                                    Updates.set("transactions", entry.getValue()));
+                            player.sendMessage(ChatColor.GREEN + "Updated activity data for " + entry.getKey().toString());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo activity data!");
+                        break;
+                    }
+                    case "transactions": {
+                        player.sendMessage(ChatColor.GREEN + "Loading transaction data...");
+                        HashMap<UUID, BsonArray> transactionData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM economy_logs;");
+                        ResultSet result = sql.executeQuery();
+                        while (result.next()) {
+                            UUID uuid = UUID.fromString(result.getString("uuid"));
+                            int amount = result.getInt("amount");
+                            String type = result.getString("type");
+                            String source = result.getString("source");
+                            String server = result.getString("server");
+                            long timestamp = result.getTimestamp("timestamp").getTime() / 1000;
+                            BsonDocument transaction = new BsonDocument("amount", new BsonInt32(amount))
+                                    .append("type", new BsonString(type)).append("source", new BsonString(source))
+                                    .append("server", new BsonString(server)).append("timestamp", new BsonInt64(timestamp));
+                            BsonArray array;
+                            if (transactionData.containsKey(uuid)) {
+                                array = transactionData.remove(uuid);
+                            } else {
+                                array = new BsonArray();
+                            }
+                            array.add(transaction);
+                            transactionData.put(uuid, array);
+                        }
+                        result.close();
+                        sql.close();
+                        player.sendMessage(ChatColor.GREEN + "Transaction data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo transaction data...");
+                        for (Map.Entry<UUID, BsonArray> entry : transactionData.entrySet()) {
+                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()),
+                                    Updates.set("transactions", entry.getValue()));
+                            player.sendMessage(ChatColor.GREEN + "Updated transaction data for " + entry.getKey().toString());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo transaction data!");
+                        break;
+                    }
+                    case "autographs": {
+                        player.sendMessage(ChatColor.GREEN + "Loading autograph data...");
+                        HashMap<UUID, BsonArray> autographData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM autographs;");
+                        ResultSet result = sql.executeQuery();
+                        while (result.next()) {
+                            UUID uuid = UUID.fromString(result.getString("user"));
+                            String author = result.getString("sender");
+                            String message = result.getString("message");
+                            BsonDocument autograph = new BsonDocument("author", new BsonString(author))
+                                    .append("message", new BsonString(message));
+                            BsonArray array;
+                            if (autographData.containsKey(uuid)) {
+                                array = autographData.remove(uuid);
+                            } else {
+                                array = new BsonArray();
+                            }
+                            array.add(autograph);
+                            autographData.put(uuid, array);
+                        }
+                        result.close();
+                        sql.close();
+                        player.sendMessage(ChatColor.GREEN + "Autograph data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo autograph data...");
+                        for (Map.Entry<UUID, BsonArray> entry : autographData.entrySet()) {
+                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()),
+                                    Updates.set("autographs", entry.getValue()));
+                            player.sendMessage(ChatColor.GREEN + "Updated autograph data for " + entry.getKey().toString());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo autograph data!");
+                        break;
+                    }
+                    case "achievements": {
+                        player.sendMessage(ChatColor.GREEN + "Loading achievement data...");
+                        HashMap<UUID, BsonArray> achievementData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM achievements;");
+                        ResultSet result = sql.executeQuery();
+                        while (result.next()) {
+                            UUID uuid = UUID.fromString(result.getString("uuid"));
+                            int id = result.getInt("achid");
+                            long time = result.getLong("time");
+                            BsonDocument achievement = new BsonDocument("id", new BsonInt32(id)).append("time", new BsonInt64(time));
+                            BsonArray array;
+                            if (achievementData.containsKey(uuid)) {
+                                array = achievementData.remove(uuid);
+                            } else {
+                                array = new BsonArray();
+                            }
+                            array.add(achievement);
+                            achievementData.put(uuid, array);
+                        }
+                        result.close();
+                        sql.close();
+                        player.sendMessage(ChatColor.GREEN + "Achievement data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo achievement data...");
+                        for (Map.Entry<UUID, BsonArray> entry : achievementData.entrySet()) {
+                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()),
+                                    Updates.set("achievements", entry.getValue()));
+                            player.sendMessage(ChatColor.GREEN + "Updated achievement data for " + entry.getKey().toString());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo achievement data!");
+                        break;
+                    }
+                    case "ridecounter": {
+                        player.sendMessage(ChatColor.GREEN + "Loading ride counter data...");
+                        HashMap<UUID, BsonArray> rideData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM ride_counter;");
+                        ResultSet result = sql.executeQuery();
+                        while (result.next()) {
+                            UUID uuid = UUID.fromString(result.getString("uuid"));
+                            String rideName = result.getString("name");
+                            String server = result.getString("server");
+                            long time = result.getLong("time");
+                            BsonDocument ride = new BsonDocument("name", new BsonString(rideName))
+                                    .append("server", new BsonString(server))
+                                    .append("time", new BsonInt64(time));
+                            BsonArray array;
+                            if (rideData.containsKey(uuid)) {
+                                array = rideData.remove(uuid);
+                            } else {
+                                array = new BsonArray();
+                            }
+                            array.add(ride);
+                            rideData.put(uuid, array);
+                        }
+                        result.close();
+                        sql.close();
+                        player.sendMessage(ChatColor.GREEN + "Ride counter data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo ride counter data...");
+                        for (Map.Entry<UUID, BsonArray> entry : rideData.entrySet()) {
+                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()),
+                                    Updates.set("parks.rides", entry.getValue()));
+                            player.sendMessage(ChatColor.GREEN + "Updated ride counter data for " + entry.getKey().toString());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo ride counter data!");
+                        break;
+                    }
+                    case "inventories": {
+                        player.sendMessage(ChatColor.GREEN + "Loading storage data...");
+                        HashMap<UUID, ResortInventory> storageData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM storage2 GROUP BY uuid;");
+                        ResultSet result = sql.executeQuery();
+                        while (result.next()) {
+                            UUID uuid = UUID.fromString(result.getString("uuid"));
+                            String backpack = result.getString("pack");
+                            String locker = result.getString("locker");
+                            String hotbar = result.getString("hotbar");
+                            Resort resort = Resort.fromId(result.getInt("resort"));
+                            ResortInventory inv = new ResortInventory(resort, backpack, "", "",
+                                    result.getInt("packsize"), locker, "", "",
+                                    result.getInt("lockersize"), hotbar, "", "");
+                            storageData.put(uuid, inv);
+                        }
+                        result.close();
+                        sql.close();
+                        player.sendMessage(ChatColor.GREEN + "Storage data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo storage data...");
+                        for (Map.Entry<UUID, ResortInventory> entry : storageData.entrySet()) {
+                            mongoHandler.setInventoryData(entry.getKey(), entry.getValue(), true);
+                            player.sendMessage(ChatColor.GREEN + "Updated inventory for " + entry.getKey().toString());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo storage data!");
+                        break;
+                    }
                     case "chat": {
                         player.sendMessage(ChatColor.GREEN + "Loading user data...");
                         List<UUID> players = new ArrayList<>();
@@ -58,7 +254,7 @@ public class ConvertCommand extends DashboardCommand {
                             result.close();
                             sql.close();
                             if (messages.isEmpty()) continue;
-                            dashboard.getMongoHandler().getChatCollection().updateOne(MongoHandler.MongoFilter.UUID.getFilter(uuid.toString()),
+                            mongoHandler.getChatCollection().updateOne(MongoHandler.MongoFilter.UUID.getFilter(uuid.toString()),
                                     Updates.pushEach("messages", messages), new UpdateOptions().upsert(true));
                             player.sendMessage(ChatColor.GREEN + "Finished " + uuid.toString() + " (" + messages.size() + " messages)");
                         }
