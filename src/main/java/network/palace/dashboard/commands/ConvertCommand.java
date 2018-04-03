@@ -35,9 +35,28 @@ public class ConvertCommand extends DashboardCommand {
             MongoHandler mongoHandler = dashboard.getMongoHandler();
             try (Connection connection = sqlUtil.getConnection().get()) {
                 switch (convert.toLowerCase()) {
+                    case "bans": {
+                        player.sendMessage(ChatColor.GREEN + "Loading ban data...");
+                        List<Document> banData = new ArrayList<>();
+                        PreparedStatement ipSql = connection.prepareStatement("SELECT * FROM banned_ips;");
+                        ResultSet ipResult = ipSql.executeQuery();
+                        while (ipResult.next()) {
+                            Document doc = new Document("type", "ip").append("data", ipResult.getString("ipAddress"))
+                                    .append("reason", ipResult.getString("reason"))
+                                    .append("source", ipResult.getString("source"));
+                            banData.add(doc);
+                        }
+                        ipResult.close();
+                        ipSql.close();
+                        player.sendMessage(ChatColor.GREEN + "Ban data loaded! " + banData.size() + " entries");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo ban data...");
+                        mongoHandler.getActivityCollection().insertMany(banData);
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo ban data!");
+                        break;
+                    }
                     case "activity": {
                         player.sendMessage(ChatColor.GREEN + "Loading activity data...");
-                        HashMap<UUID, BsonArray> activityData = new HashMap<>();
+                        List<Document> activityData = new ArrayList<>();
                         PreparedStatement sql = connection.prepareStatement("SELECT * FROM activity;");
                         ResultSet result = sql.executeQuery();
                         while (result.next()) {
@@ -45,27 +64,15 @@ public class ConvertCommand extends DashboardCommand {
                             String action = result.getString("action");
                             String description = result.getString("description");
                             long time = result.getTimestamp("time").getTime();
-                            BsonDocument entry = new BsonDocument("uuid", new BsonString(uuid.toString()))
-                                    .append("action", new BsonString(action)).append("description", new BsonString(description))
-                                    .append("time", new BsonInt64(time));
-                            BsonArray array;
-                            if (activityData.containsKey(uuid)) {
-                                array = activityData.remove(uuid);
-                            } else {
-                                array = new BsonArray();
-                            }
-                            array.add(entry);
-                            activityData.put(uuid, array);
+                            Document entry = new Document("uuid", uuid.toString()).append("action", action)
+                                    .append("description", description).append("time", time);
+                            activityData.add(entry);
                         }
                         result.close();
                         sql.close();
-                        player.sendMessage(ChatColor.GREEN + "Activity data loaded!");
+                        player.sendMessage(ChatColor.GREEN + "Activity data loaded! " + activityData.size() + " entries");
                         player.sendMessage(ChatColor.GREEN + "Updating Mongo activity data...");
-                        for (Map.Entry<UUID, BsonArray> entry : activityData.entrySet()) {
-                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()),
-                                    Updates.set("transactions", entry.getValue()));
-                            player.sendMessage(ChatColor.GREEN + "Updated activity data for " + entry.getKey().toString());
-                        }
+                        mongoHandler.getActivityCollection().insertMany(activityData);
                         player.sendMessage(ChatColor.GREEN + "Finished updating Mongo activity data!");
                         break;
                     }
@@ -232,7 +239,7 @@ public class ConvertCommand extends DashboardCommand {
                     case "chat": {
                         player.sendMessage(ChatColor.GREEN + "Loading user data...");
                         List<UUID> players = new ArrayList<>();
-                        PreparedStatement playerSql = connection.prepareStatement("SELECT user FROM chat GROUP BY user LIMIT 0,10");
+                        PreparedStatement playerSql = connection.prepareStatement("SELECT user FROM chat GROUP BY user");
                         ResultSet playerResult = playerSql.executeQuery();
                         while (playerResult.next()) {
                             players.add(UUID.fromString(playerResult.getString("user")));
@@ -313,6 +320,8 @@ public class ConvertCommand extends DashboardCommand {
                         break;
                     }
                     case "players": {
+                        int min = Integer.parseInt(args[1]);
+                        int max = Integer.parseInt(args[2]);
                         player.sendMessage(ChatColor.GREEN + "Loading ignore data...");
                         List<IgnoreData> ignoreList = new ArrayList<>();
                         PreparedStatement ignoreSql = connection.prepareStatement("SELECT * FROM ignored_players;");
@@ -424,10 +433,10 @@ public class ConvertCommand extends DashboardCommand {
                         player.sendMessage(ChatColor.GREEN + "Outfit purchases data loaded!");
 
                         player.sendMessage(ChatColor.GREEN + "Processing players...!");
-                        int start = 0;
-                        PreparedStatement playerSql = connection.prepareStatement("SELECT * FROM player_data WHERE ipAddress!='no ip' AND username='Legobuilder0813' GROUP BY uuid ORDER BY id ASC LIMIT " + start + ",1;");
+                        PreparedStatement playerSql = connection.prepareStatement("SELECT * FROM player_data WHERE ipAddress!='no ip' GROUP BY uuid ORDER BY id ASC LIMIT " + min + "," + max + ";");
                         ResultSet playerResult = playerSql.executeQuery();
                         List<Document> documents = new ArrayList<>();
+                        int id = 0;
                         while (playerResult.next()) {
                             UUID uuid = UUID.fromString(playerResult.getString("uuid"));
                             String username = playerResult.getString("username");
@@ -590,10 +599,10 @@ public class ConvertCommand extends DashboardCommand {
                             playerDocument.put("ignoring", ignoring);
 
                             documents.add(playerDocument);
-                            player.sendMessage(ChatColor.GREEN + "Finished " + username);
-                            player.sendMessage(ChatColor.GREEN + "Requesting past usernames...");
-                            mongoHandler.updatePreviousUsernames(uuid, username);
-                            player.sendMessage(ChatColor.GREEN + "Past usernames updated!");
+                            player.sendMessage(ChatColor.GREEN + "" + (++id) + " Finished " + username);
+//                            player.sendMessage(ChatColor.GREEN + "Requesting past usernames...");
+//                            mongoHandler.updatePreviousUsernames(uuid, username);
+//                            player.sendMessage(ChatColor.GREEN + "Past usernames updated!");
                         }
                         playerResult.close();
                         playerSql.close();
