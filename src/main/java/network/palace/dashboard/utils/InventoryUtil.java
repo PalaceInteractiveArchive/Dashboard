@@ -129,17 +129,25 @@ public class InventoryUtil {
             @Override
             public void run() {
                 for (InventoryCache cache : new ArrayList<>(cachedInventories.values())) {
+                    System.out.println("A");
                     if (cache == null || cache.getResorts() == null) {
+                        System.out.println("B");
                         continue;
                     }
+                    System.out.println("C");
                     InventoryUpdate update = new InventoryUpdate();
                     for (ResortInventory inv : cache.getResorts().values()) {
+                        System.out.println("D");
                         if (inv == null) {
+                            System.out.println("E");
                             continue;
                         }
+                        System.out.println("F");
                         if (!inv.getDbBackpackHash().equals(inv.getBackpackHash()) ||
                                 !inv.getDbLockerHash().equals(inv.getLockerHash()) ||
                                 !inv.getDbHotbarHash().equals(inv.getHotbarHash())) {
+
+                            System.out.println("G");
 
                             String backpackJSON = inv.getBackpackJSON();
                             int packSize = inv.getBackpackSize();
@@ -156,13 +164,18 @@ public class InventoryUtil {
                         }
                     }
                     boolean updated = false;
+                    System.out.println("H");
                     if (update.shouldUpdate()) {
+                        System.out.println("I");
                         updated = true;
                         dashboard.getSchedulerManager().runAsync(() -> updateData(cache.getUuid(), update));
                     }
+                    System.out.println("J");
                     if (dashboard.getPlayer(cache.getUuid()) == null) {
+                        System.out.println("K");
                         cachedInventories.remove(cache.getUuid());
                         if (!updated) {
+                            System.out.println("L");
                             dashboard.getSchedulerManager().runAsync(() -> updateData(cache.getUuid(), update));
                         }
                     }
@@ -317,61 +330,63 @@ public class InventoryUtil {
      */
     private InventoryCache getInventoryFromDatabase(UUID uuid) {
         HashMap<Resort, ResortInventory> map = new HashMap<>();
-        Dashboard dashboard = Launcher.getDashboard();
-        Document invData = dashboard.getMongoHandler().getParkInventoryData(uuid);
-        for (Object o : invData.get("inventories", ArrayList.class)) {
-            Document inv = (Document) o;
-            int resortID = inv.getInteger("resort");
-            StringBuilder backpack = new StringBuilder("[");
-            ArrayList packcontents = inv.get("packcontents", ArrayList.class);
-            for (int i = 0; i < packcontents.size(); i++) {
-                Document item = (Document) packcontents.get(i);
-                if (item.getInteger("a") == null) {
-                    backpack.append("{}");
-                } else {
-                    backpack.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+        try {
+            Dashboard dashboard = Launcher.getDashboard();
+            Document invData = dashboard.getMongoHandler().getParkInventoryData(uuid);
+            for (Object o : invData.get("inventories", ArrayList.class)) {
+                Document inv = (Document) o;
+                int resortID = inv.getInteger("resort");
+                StringBuilder backpack = new StringBuilder("[");
+                ArrayList packcontents = inv.get("packcontents", ArrayList.class);
+                for (int i = 0; i < packcontents.size(); i++) {
+                    Document item = (Document) packcontents.get(i);
+                    if (item.getInteger("a") == null) {
+                        backpack.append("{}");
+                    } else {
+                        backpack.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                    }
+                    if (i < (packcontents.size() - 1)) {
+                        backpack.append(",");
+                    }
                 }
-                if (i < (packcontents.size() - 1)) {
-                    backpack.append(",");
+                backpack.append("]");
+                StringBuilder locker = new StringBuilder("[");
+                ArrayList lockercontents = inv.get("lockercontents", ArrayList.class);
+                for (int i = 0; i < lockercontents.size(); i++) {
+                    Document item = (Document) lockercontents.get(i);
+                    if (item.getInteger("a") == null) {
+                        locker.append("{}");
+                    } else {
+                        locker.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                    }
+                    if (i < (lockercontents.size() - 1)) {
+                        locker.append(",");
+                    }
                 }
+                locker.append("]");
+                StringBuilder hotbar = new StringBuilder("[");
+                ArrayList hotbarcontents = inv.get("hotbarcontents", ArrayList.class);
+                for (int i = 0; i < hotbarcontents.size(); i++) {
+                    Document item = (Document) hotbarcontents.get(i);
+                    if (item.getInteger("a") == null) {
+                        hotbar.append("{}");
+                    } else {
+                        hotbar.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                    }
+                    if (i < (hotbarcontents.size() - 1)) {
+                        hotbar.append(",");
+                    }
+                }
+                hotbar.append("]");
+                int packsize = inv.getInteger("packsize");
+                int lockersize = inv.getInteger("lockersize");
+                Resort resort = Resort.fromId(resortID);
+                ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "",
+                        packsize, locker.toString(), generateHash(locker.toString()), "", lockersize, hotbar.toString(), generateHash(hotbar.toString()), "");
+                map.put(resort, resortInventory);
             }
-            backpack.append("]");
-            StringBuilder locker = new StringBuilder("[");
-            ArrayList lockercontents = inv.get("lockercontents", ArrayList.class);
-            for (int i = 0; i < lockercontents.size(); i++) {
-                Document item = (Document) lockercontents.get(i);
-                if (item.getInteger("a") == null) {
-                    locker.append("{}");
-                } else {
-                    locker.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
-                }
-                if (i < (lockercontents.size() - 1)) {
-                    locker.append(",");
-                }
-            }
-            locker.append("]");
-            StringBuilder hotbar = new StringBuilder("[");
-            ArrayList hotbarcontents = inv.get("hotbarcontents", ArrayList.class);
-            for (int i = 0; i < hotbarcontents.size(); i++) {
-                Document item = (Document) hotbarcontents.get(i);
-                if (item.getInteger("a") == null) {
-                    hotbar.append("{}");
-                } else {
-                    hotbar.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
-                }
-                if (i < (hotbarcontents.size() - 1)) {
-                    hotbar.append(",");
-                }
-            }
-            hotbar.append("]");
-//            String locker = inv.get("lockercontents", ArrayList.class).toString();
-//            String hotbar = inv.get("hotbarcontents", ArrayList.class).toString();
-            int packsize = inv.getInteger("packsize");
-            int lockersize = inv.getInteger("lockersize");
-            Resort resort = Resort.fromId(resortID);
-            ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "",
-                    packsize, locker.toString(), generateHash(locker.toString()), "", lockersize, hotbar.toString(), generateHash(hotbar.toString()), "");
-            map.put(resort, resortInventory);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return new InventoryCache(uuid, map);
     }

@@ -23,6 +23,10 @@ public class ConvertCommand extends DashboardCommand {
         super(Rank.MANAGER);
     }
 
+    public static long roundUp(long num, long divisor) {
+        return (num + divisor - 1) / divisor;
+    }
+
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length < 1) {
@@ -38,29 +42,36 @@ public class ConvertCommand extends DashboardCommand {
                     case "bans": {
                         player.sendMessage(ChatColor.GREEN + "Loading ban data...");
                         List<Document> banData = new ArrayList<>();
-                        PreparedStatement ipSql = connection.prepareStatement("SELECT * FROM banned_ips;");
+                        PreparedStatement ipSql = connection.prepareStatement("SELECT * FROM banned_ips WHERE active=1;");
                         ResultSet ipResult = ipSql.executeQuery();
                         while (ipResult.next()) {
                             Document doc = new Document("type", "ip").append("data", ipResult.getString("ipAddress"))
-                                    .append("reason", ipResult.getString("reason"))
-                                    .append("source", ipResult.getString("source"));
+                                    .append("reason", ipResult.getString("reason").trim())
+                                    .append("source", ipResult.getString("source").trim());
                             banData.add(doc);
                         }
                         ipResult.close();
                         ipSql.close();
                         player.sendMessage(ChatColor.GREEN + "Ban data loaded! " + banData.size() + " entries");
                         player.sendMessage(ChatColor.GREEN + "Updating Mongo ban data...");
-                        mongoHandler.getActivityCollection().insertMany(banData);
+                        mongoHandler.getBansCollection().insertMany(banData);
                         player.sendMessage(ChatColor.GREEN + "Finished updating Mongo ban data!");
                         break;
                     }
                     case "activity": {
                         player.sendMessage(ChatColor.GREEN + "Loading activity data...");
                         List<Document> activityData = new ArrayList<>();
-                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM activity;");
+                        int min = Integer.parseInt(args[1]);
+                        int max = Integer.parseInt(args[2]);
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM activity LIMIT " + min + "," + max + ";");
                         ResultSet result = sql.executeQuery();
                         while (result.next()) {
-                            UUID uuid = UUID.fromString(result.getString("uuid"));
+                            UUID uuid;
+                            try {
+                                uuid = UUID.fromString(result.getString("uuid"));
+                            } catch (Exception e) {
+                                continue;
+                            }
                             String action = result.getString("action");
                             String description = result.getString("description");
                             long time = result.getTimestamp("time").getTime();
@@ -122,7 +133,7 @@ public class ConvertCommand extends DashboardCommand {
                             String author = result.getString("sender");
                             String message = result.getString("message");
                             BsonDocument autograph = new BsonDocument("author", new BsonString(author))
-                                    .append("message", new BsonString(message));
+                                    .append("message", new BsonString(message)).append("time", new BsonInt64(System.currentTimeMillis()));
                             BsonArray array;
                             if (autographData.containsKey(uuid)) {
                                 array = autographData.remove(uuid);
@@ -237,7 +248,68 @@ public class ConvertCommand extends DashboardCommand {
                         break;
                     }
                     case "chat": {
-                        player.sendMessage(ChatColor.GREEN + "Loading user data...");
+                        int size = Integer.parseInt(args[1]);
+                        int increments = Integer.parseInt(args[2]);
+
+                        int times = (int) roundUp(size, increments);
+                        for (int i = 0; i < times; i++) {
+                            HashMap<UUID, List<Document>> messagesData = new HashMap<>();
+                            Connection sqlConnection = sqlUtil.getConnection().get();
+                            try {
+                                int startAt = i * increments;
+
+                                player.sendMessage(ChatColor.GREEN + "Loading chat data trial " + i + "... (will take a while)");
+                                String query = "SELECT * FROM `chat` LIMIT " + startAt + "," + increments;
+//                                String query = "SELECT * FROM chat";
+                                player.sendMessage(query);
+                                PreparedStatement sql = sqlConnection.prepareStatement(query);
+                                player.sendMessage(ChatColor.GREEN + "Executing query...");
+                                ResultSet result = sql.executeQuery();
+                                player.sendMessage(ChatColor.GREEN + "Looping through results...");
+                                while (result.next()) {
+                                    UUID uuid;
+                                    try {
+                                        uuid = UUID.fromString(result.getString("user"));
+                                    } catch (Exception e) {
+                                        continue;
+                                    }
+                                    String message = result.getString("message");
+                                    long time = result.getTimestamp("timestamp").getTime() / 1000;
+                                    List<Document> list;
+                                    if (messagesData.containsKey(uuid)) {
+                                        list = messagesData.get(uuid);
+                                    } else {
+                                        list = new ArrayList<>();
+                                    }
+                                    list.add(new Document("message", message).append("time", time));
+                                    messagesData.put(uuid, list);
+                                }
+                                result.close();
+                                sql.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            sqlConnection.close();
+                            player.sendMessage(ChatColor.GREEN + "Finished loading chat data!");
+                            long t = System.currentTimeMillis();
+                            player.sendMessage(ChatColor.GREEN + "Now inserting into database... (" + messagesData.size() + " entries)");
+                            for (Map.Entry<UUID, List<Document>> entry : messagesData.entrySet()) {
+                                UUID uuid = entry.getKey();
+                                List<Document> list = entry.getValue();
+                                if (list.isEmpty()) continue;
+                                BsonArray array = new BsonArray();
+                                while (!list.isEmpty()) {
+                                    Document doc = list.remove(0);
+                                    array.add(new BsonDocument("message", new BsonString(doc.getString("message"))).append("time", new BsonInt64(doc.getLong("time"))));
+                                }
+                                mongoHandler.getChatCollection().updateOne(MongoHandler.MongoFilter.UUID.getFilter(uuid.toString()),
+                                        Updates.pushEach("messages", array), new UpdateOptions().upsert(true));
+//                                mongoHandler.getChatCollection().insertOne(new Document("uuid", uuid.toString()).append("messages", list));
+                            }
+                            player.sendMessage(ChatColor.GREEN + "Finished inserting into Mongo Database in " + (System.currentTimeMillis() - t) + "ms");
+                        }
+                        player.sendMessage(ChatColor.GREEN + "All done!");
+                        /*player.sendMessage(ChatColor.GREEN + "Loading user data...");
                         List<UUID> players = new ArrayList<>();
                         PreparedStatement playerSql = connection.prepareStatement("SELECT user FROM chat GROUP BY user");
                         ResultSet playerResult = playerSql.executeQuery();
@@ -265,7 +337,7 @@ public class ConvertCommand extends DashboardCommand {
                                     Updates.pushEach("messages", messages), new UpdateOptions().upsert(true));
                             player.sendMessage(ChatColor.GREEN + "Finished " + uuid.toString() + " (" + messages.size() + " messages)");
                         }
-                        player.sendMessage(ChatColor.GREEN + "Finished processing players!");
+                        player.sendMessage(ChatColor.GREEN + "Finished processing players!");*/
                         break;
                     }
                     case "friends": {
@@ -461,7 +533,7 @@ public class ConvertCommand extends DashboardCommand {
                             playerDocument.put("rank", rank.getDBName());
                             Timestamp lastSeen = playerResult.getTimestamp("lastseen");
                             playerDocument.put("lastOnline", lastSeen.getTime());
-                            playerDocument.put("onlineTime", playerResult.getInt("onlinetime"));
+                            playerDocument.put("onlineTime", (long) playerResult.getInt("onlinetime"));
 
                             Map<String, String> skinData = new HashMap<>();
                             skinData.put("hash", "");
