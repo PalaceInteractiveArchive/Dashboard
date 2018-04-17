@@ -129,25 +129,17 @@ public class InventoryUtil {
             @Override
             public void run() {
                 for (InventoryCache cache : new ArrayList<>(cachedInventories.values())) {
-                    System.out.println("A");
                     if (cache == null || cache.getResorts() == null) {
-                        System.out.println("B");
                         continue;
                     }
-                    System.out.println("C");
                     InventoryUpdate update = new InventoryUpdate();
                     for (ResortInventory inv : cache.getResorts().values()) {
-                        System.out.println("D");
                         if (inv == null) {
-                            System.out.println("E");
                             continue;
                         }
-                        System.out.println("F");
                         if (!inv.getDbBackpackHash().equals(inv.getBackpackHash()) ||
                                 !inv.getDbLockerHash().equals(inv.getLockerHash()) ||
                                 !inv.getDbHotbarHash().equals(inv.getHotbarHash())) {
-
-                            System.out.println("G");
 
                             String backpackJSON = inv.getBackpackJSON();
                             int packSize = inv.getBackpackSize();
@@ -164,18 +156,13 @@ public class InventoryUtil {
                         }
                     }
                     boolean updated = false;
-                    System.out.println("H");
                     if (update.shouldUpdate()) {
-                        System.out.println("I");
                         updated = true;
                         dashboard.getSchedulerManager().runAsync(() -> updateData(cache.getUuid(), update));
                     }
-                    System.out.println("J");
                     if (dashboard.getPlayer(cache.getUuid()) == null) {
-                        System.out.println("K");
                         cachedInventories.remove(cache.getUuid());
                         if (!updated) {
-                            System.out.println("L");
                             dashboard.getSchedulerManager().runAsync(() -> updateData(cache.getUuid(), update));
                         }
                     }
@@ -302,6 +289,7 @@ public class InventoryUtil {
             InventoryCache cache = cachedInventories.get(uuid);
             if (cache == null) {
                 cache = getInventoryFromDatabase(uuid);
+                cachedInventories.put(uuid, cache);
             }
             ResortInventory inv = cache.getResorts().get(resort);
             if (inv == null) {
@@ -319,6 +307,11 @@ public class InventoryUtil {
         ResortInventory inv = new ResortInventory();
         inv.setResort(resort);
         dashboard.getMongoHandler().setInventoryData(uuid, inv, true);
+        InventoryCache cache = cachedInventories.get(uuid);
+        if (cache != null) {
+            cache.setInventory(resort, inv);
+            cachedInventories.put(uuid, cache);
+        }
         return inv;
     }
 

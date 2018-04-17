@@ -799,7 +799,15 @@ public class MongoHandler {
     }
 
     public Document getParkInventory(UUID uuid, Resort resort) {
-        return playerCollection.find(new Document("uuid", uuid.toString()).append("parks.inventories.$.resort", resort.getId())).first();
+        Document doc = null;
+        for (Object o : getPlayer(uuid, new Document("parks.inventories", true)).get("parks.inventories", ArrayList.class)) {
+            Document inv = (Document) o;
+            if (inv.getInteger("resort") == resort.getId()) {
+                doc = inv;
+                break;
+            }
+        }
+        return doc;
     }
 
     public void setInventoryData(UUID uuid, ResortInventory inv, boolean create) {

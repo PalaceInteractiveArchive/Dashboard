@@ -14,7 +14,10 @@ import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.utils.SqlUtil;
 import org.bson.*;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class ConvertCommand extends DashboardCommand {
@@ -222,8 +225,8 @@ public class ConvertCommand extends DashboardCommand {
                     }
                     case "inventories": {
                         player.sendMessage(ChatColor.GREEN + "Loading storage data...");
-                        HashMap<UUID, ResortInventory> storageData = new HashMap<>();
-                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM storage2 GROUP BY uuid;");
+                        HashMap<UUID, InventoryCache> storageData = new HashMap<>();
+                        PreparedStatement sql = connection.prepareStatement("SELECT * FROM storage2 WHERE uuid='9ab3b4c4-71d8-47c9-9e7d-adf040c53d2b' GROUP BY resort,uuid;");
                         ResultSet result = sql.executeQuery();
                         while (result.next()) {
                             UUID uuid = UUID.fromString(result.getString("uuid"));
@@ -231,18 +234,29 @@ public class ConvertCommand extends DashboardCommand {
                             String locker = result.getString("locker");
                             String hotbar = result.getString("hotbar");
                             Resort resort = Resort.fromId(result.getInt("resort"));
+                            InventoryCache cache;
+                            if (storageData.containsKey(uuid)) {
+                                cache = storageData.get(uuid);
+                            } else {
+                                cache = new InventoryCache(uuid, new HashMap<>());
+                            }
                             ResortInventory inv = new ResortInventory(resort, backpack, "", "",
                                     result.getInt("packsize"), locker, "", "",
                                     result.getInt("lockersize"), hotbar, "", "");
-                            storageData.put(uuid, inv);
+                            cache.setInventory(resort, inv);
+                            storageData.put(uuid, cache);
                         }
                         result.close();
                         sql.close();
                         player.sendMessage(ChatColor.GREEN + "Storage data loaded!");
                         player.sendMessage(ChatColor.GREEN + "Updating Mongo storage data...");
-                        for (Map.Entry<UUID, ResortInventory> entry : storageData.entrySet()) {
-                            mongoHandler.setInventoryData(entry.getKey(), entry.getValue(), true);
-                            player.sendMessage(ChatColor.GREEN + "Updated inventory for " + entry.getKey().toString());
+                        int i = 1;
+                        int size = storageData.size();
+                        for (Map.Entry<UUID, InventoryCache> entry : storageData.entrySet()) {
+                            for (ResortInventory inv : entry.getValue().getResorts().values()) {
+                                mongoHandler.setInventoryData(entry.getKey(), inv, true);
+                            }
+                            player.sendMessage(ChatColor.GREEN + "" + i + "/" + size + " Updated inventory for " + entry.getKey().toString());
                         }
                         player.sendMessage(ChatColor.GREEN + "Finished updating Mongo storage data!");
                         break;
@@ -513,7 +527,8 @@ public class ConvertCommand extends DashboardCommand {
                             UUID uuid = UUID.fromString(playerResult.getString("uuid"));
                             String username = playerResult.getString("username");
                             Rank rank = Rank.fromString(playerResult.getString("rank"));
-                            player.sendMessage(ChatColor.GREEN + "Starting processing " + username + "...");
+                            dashboard.getLogger().info("Starting processing " + username + "...");
+//                            player.sendMessage(ChatColor.GREEN + "Starting processing " + username + "...");
                             Document playerDocument = new Document();
                             playerDocument.put("uuid", uuid.toString());
                             playerDocument.put("username", username);
@@ -671,7 +686,11 @@ public class ConvertCommand extends DashboardCommand {
                             playerDocument.put("ignoring", ignoring);
 
                             documents.add(playerDocument);
-                            player.sendMessage(ChatColor.GREEN + "" + (++id) + " Finished " + username);
+                            if (id % 500 == 0) {
+                                player.sendMessage(ChatColor.GREEN + "" + id);
+                            }
+                            dashboard.getLogger().info((++id) + " Finished " + username);
+
 //                            player.sendMessage(ChatColor.GREEN + "Requesting past usernames...");
 //                            mongoHandler.updatePreviousUsernames(uuid, username);
 //                            player.sendMessage(ChatColor.GREEN + "Past usernames updated!");
@@ -685,7 +704,7 @@ public class ConvertCommand extends DashboardCommand {
                         break;
                     }
                 }
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
