@@ -23,7 +23,8 @@ import java.util.regex.Matcher;
 public class ChatUtil {
     private HashMap<UUID, Long> time = new HashMap<>();
     private HashMap<UUID, String> messageCache = new HashMap<>();
-    private HashMap<UUID, List<String>> messages = new HashMap<>();
+    //    private HashMap<UUID, List<String>> messages = new HashMap<>();
+    private LinkedList<ChatMessage> messages = new LinkedList<>();
     private List<String> mutedChats = new ArrayList<>();
 
     private List<String> swearList = new ArrayList<>();
@@ -61,11 +62,19 @@ public class ChatUtil {
             @Override
             public void run() {
                 try {
-                    HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
-                    messages.clear();
-                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
-                        dashboard.getMongoHandler().logChat(entry.getKey(), entry.getValue());
+                    int size = messages.size();
+                    List<ChatMessage> localMessages = new ArrayList<>();
+                    for (int i = 0; i < size; i++) {
+                        localMessages.add(messages.pop());
                     }
+                    for (ChatMessage msg : localMessages) {
+                        dashboard.getMongoHandler().logChat(msg);
+                    }
+//                    HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
+//                    messages.clear();
+//                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
+//                        dashboard.getMongoHandler().logChat(entry.getKey(), entry.getValue());
+//                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     dashboard.getErrors().error("Error logging chat: " + e.getMessage());
@@ -427,15 +436,16 @@ public class ChatUtil {
     }
 
     public void logMessage(UUID uuid, String msg) {
-        if (messages.containsKey(uuid)) {
-            List<String> msgs = messages.get(uuid);
-            msgs.add(msg);
-            messages.put(uuid, msgs);
-            return;
-        }
-        List<String> list = new ArrayList<>();
-        list.add(msg);
-        messages.put(uuid, list);
+        messages.add(new ChatMessage(uuid, msg, System.currentTimeMillis() / 1000));
+//        if (messages.containsKey(uuid)) {
+//            List<String> msgs = messages.get(uuid);
+//            msgs.add(msg);
+//            messages.put(uuid, msgs);
+//            return;
+//        }
+//        List<String> list = new ArrayList<>();
+//        list.add(msg);
+//        messages.put(uuid, list);
     }
 
     private void swearMessage(String name, String msg) {

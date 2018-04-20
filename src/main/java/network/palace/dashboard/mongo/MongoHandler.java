@@ -23,7 +23,8 @@ import network.palace.dashboard.utils.IPUtil;
 import network.palace.dashboard.utils.InventoryUtil;
 import network.palace.dashboard.utils.MCLeakUtil;
 import network.palace.dashboard.utils.NameUtil;
-import org.bson.*;
+import org.bson.BsonInt32;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.io.BufferedReader;
@@ -751,14 +752,21 @@ public class MongoHandler {
         client.close();
     }
 
-    public void logChat(UUID uuid, List<String> list) {
-        if (list.isEmpty()) return;
+    public void logChat(ChatMessage msg) {
+        chatCollection.insertOne(new Document("uuid", msg.getUuid().toString()).append("message", msg.getMessage()).append("time", msg.getTime()));
+
+        /*if (list.isEmpty()) return;
+        List<Document> documents = new ArrayList<>();
+        for (String s : list) {
+            documents.add(new Document("uuid", uuid.toString()).append("message", s).append("time", System.currentTimeMillis() / 1000));
+        }
+
         BsonArray array = new BsonArray();
         while (!list.isEmpty()) {
             array.add(new BsonDocument("message", new BsonString(list.remove(0))).append("time", new BsonInt64(System.currentTimeMillis() / 1000)));
         }
         chatCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pushEach("messages", array),
-                new UpdateOptions().upsert(true));
+                new UpdateOptions().upsert(true));*/
     }
 
     public void logAFK(UUID uuid) {
