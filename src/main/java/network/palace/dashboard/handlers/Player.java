@@ -76,7 +76,7 @@ public class Player {
             Launcher.getDashboard().getLogger().info("CANCELLED PACKET EVENT INVALID BUNGEE '" + bungeeID + "' '" + uuid + "' '" + username + "'");
             return;
         }
-        bungee.send(packet.getJSON().toString());
+        bungee.send(packet);
     }
 
     public UUID getUniqueId() {

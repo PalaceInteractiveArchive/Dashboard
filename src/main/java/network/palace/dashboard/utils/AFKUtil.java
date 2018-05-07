@@ -47,9 +47,22 @@ public class AFKUtil {
         String blank = "";
         String msg = ChatColor.YELLOW + "" + ChatColor.BOLD + "Type anything in chat (it won't be seen by others)";
         final List<String> msgs = Arrays.asList(blank, blank, afk, blank, msg, blank, blank, blank, blank, blank);
-        final Timer id = new Timer();
+        final Timer t1 = new Timer();
+        final Timer t2 = new Timer();
         player.setAFK(true);
-        id.schedule(new TimerTask() {
+        t2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                t1.cancel();
+                if (player != null && player.isAFK()) {
+                    player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
+                    dashboard.getMongoHandler().logAFK(player.getUniqueId());
+                } else {
+                    cancel();
+                }
+            }
+        }, 300000);
+        t1.schedule(new TimerTask() {
             int i = 0;
 
             @Override
@@ -71,17 +84,5 @@ public class AFKUtil {
                 }
             }
         }, 0, 60000);
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                id.cancel();
-                if (player != null && player.isAFK()) {
-                    player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
-                    dashboard.getMongoHandler().logAFK(player.getUniqueId());
-                } else {
-                    cancel();
-                }
-            }
-        }, 300000);
     }
 }

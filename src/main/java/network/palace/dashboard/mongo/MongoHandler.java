@@ -50,6 +50,7 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> outfitsCollection = null;
     @Getter private MongoCollection<Document> hotelCollection = null;
     @Getter private MongoCollection<Document> serversCollection = null;
+    @Getter private MongoCollection<Document> staffLoginCollection = null;
     @Getter private MongoCollection<Document> votingCollection = null;
     @Getter private MongoCollection<Document> warpsCollection = null;
 
@@ -94,6 +95,7 @@ public class MongoHandler {
         outfitsCollection = database.getCollection("outfits");
         hotelCollection = database.getCollection("hotels");
         serversCollection = database.getCollection("servers");
+        staffLoginCollection = database.getCollection("stafflogin");
         votingCollection = database.getCollection("voting");
         warpsCollection = database.getCollection("warps");
     }
@@ -170,6 +172,17 @@ public class MongoHandler {
         parkData.put("settings", parkSettings);
 
         playerDocument.put("parks", parkData);
+
+        Map<String, Object> creativeData = new HashMap<>();
+        creativeData.put("particle", "none");
+        creativeData.put("rptag", false);
+        creativeData.put("rplimit", 5);
+        creativeData.put("showcreator", false);
+        creativeData.put("creator", false);
+        creativeData.put("creatortag", false);
+        creativeData.put("resourcepack", "none");
+
+        playerDocument.put("creative", creativeData);
 
         Map<String, Object> voteData = new HashMap<>();
         voteData.put("lastTime", 0L);
@@ -457,6 +470,9 @@ public class MongoHandler {
                 if (!silent && rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
+                    if (disable) {
+                        msg += ChatColor.GRAY + " (not logged in)";
+                    }
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                             tp.sendMessage(msg);
@@ -653,6 +669,7 @@ public class MongoHandler {
     }
 
     public void staffClock(UUID uuid, boolean b) {
+        staffLoginCollection.insertOne(new Document("uuid", uuid.toString()).append("time", System.currentTimeMillis()).append("login", b));
     }
 
     public void ignorePlayer(Player player, UUID uuid) {

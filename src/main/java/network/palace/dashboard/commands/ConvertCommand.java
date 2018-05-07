@@ -1,5 +1,7 @@
 package network.palace.dashboard.commands;
 
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +33,7 @@ public class ConvertCommand extends DashboardCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length < 1) {
-            player.sendMessage(ChatColor.GREEN + "/convert [bans, activity, chat, friends, warps, players]");
+            player.sendMessage(ChatColor.GREEN + "/convert [creative, servers, outfits, bans, activity, chat, friends, warps, players, stafflogin]");
             return;
         }
         Dashboard dashboard = Launcher.getDashboard();
@@ -41,6 +43,101 @@ public class ConvertCommand extends DashboardCommand {
             MongoHandler mongoHandler = dashboard.getMongoHandler();
             try (Connection connection = sqlUtil.getConnection().get()) {
                 switch (convert.toLowerCase()) {
+                    case "creative": {
+                        player.sendMessage(ChatColor.GREEN + "Loading creative data...");
+                        HashMap<UUID, Document> creativeData = new HashMap<>();
+                        PreparedStatement creativeSql = connection.prepareStatement("SELECT * FROM creative;");
+                        ResultSet creativeResult = creativeSql.executeQuery();
+                        while (creativeResult.next()) {
+                            Document doc = new Document("particle", creativeResult.getString("particle"))
+                                    .append("rptag", creativeResult.getInt("rptag") == 1)
+                                    .append("rplimit", creativeResult.getInt("rplimit"))
+                                    .append("showcreator", creativeResult.getInt("showcreator") == 1)
+                                    .append("creator", creativeResult.getInt("creator") == 1)
+                                    .append("creatortag", creativeResult.getInt("creatortag") == 1)
+                                    .append("resourcepack", creativeResult.getString("resourcepack"));
+                            creativeData.put(UUID.fromString(creativeResult.getString("uuid")), doc);
+                        }
+                        creativeResult.close();
+                        creativeSql.close();
+                        player.sendMessage(ChatColor.GREEN + "Creative data loaded! " + creativeData.size() + " entries");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo creative data...");
+                        int i = 1;
+                        for (Map.Entry<UUID, Document> entry : creativeData.entrySet()) {
+                            mongoHandler.getPlayerCollection().updateOne(Filters.eq("uuid", entry.getKey().toString()), Updates.set("creative", entry.getValue()));
+                            player.sendMessage(ChatColor.GREEN + "" + i++ + " / " + creativeData.size());
+                        }
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo creative data!");
+                        break;
+                    }
+                    case "servers": {
+                        player.sendMessage(ChatColor.GREEN + "Processing server data...");
+                        List<Document> staffData = new ArrayList<>();
+                        PreparedStatement staffSql = connection.prepareStatement("SELECT * FROM servers;");
+                        ResultSet staffResult = staffSql.executeQuery();
+                        int c = 0;
+                        while (staffResult.next()) {
+                            mongoHandler.addServer(new Server(staffResult.getString("name"),
+                                    staffResult.getString("address") + ":" + staffResult.getInt("port"),
+                                    staffResult.getInt("park") == 1, 0,
+                                    staffResult.getString("type")));
+                            c++;
+                        }
+                        staffResult.close();
+                        staffSql.close();
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo server data! " + c + " entries");
+                        break;
+                    }
+                    case "outfits": {
+                        player.sendMessage(ChatColor.GREEN + "Loading outfit data...");
+                        List<Document> outfitData = new ArrayList<>();
+                        PreparedStatement outfitSql = connection.prepareStatement("SELECT * FROM outfits;");
+                        ResultSet outfitResult = outfitSql.executeQuery();
+                        while (outfitResult.next()) {
+                            Document doc = new Document("id", outfitResult.getInt("id"))
+                                    .append("name", outfitResult.getString("name"))
+                                    .append("headID", outfitResult.getInt("hid"))
+                                    .append("headData", outfitResult.getInt("hdata"))
+                                    .append("head", outfitResult.getString("head"))
+                                    .append("chestID", outfitResult.getInt("cid"))
+                                    .append("chestData", outfitResult.getInt("cdata"))
+                                    .append("chest", outfitResult.getString("chestplate"))
+                                    .append("leggingsID", outfitResult.getInt("lid"))
+                                    .append("leggingsData", outfitResult.getInt("ldata"))
+                                    .append("leggings", outfitResult.getString("leggings"))
+                                    .append("bootsID", outfitResult.getInt("bid"))
+                                    .append("bootsData", outfitResult.getInt("bdata"))
+                                    .append("boots", outfitResult.getString("boots"))
+                                    .append("resort", outfitResult.getInt("resort"));
+                            outfitData.add(doc);
+                        }
+                        outfitResult.close();
+                        outfitSql.close();
+                        player.sendMessage(ChatColor.GREEN + "Outfit data loaded! " + outfitData.size() + " entries");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo outfit data...");
+                        mongoHandler.getOutfitsCollection().insertMany(outfitData);
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo outfit data!");
+                        break;
+                    }
+                    case "stafflogin": {
+                        player.sendMessage(ChatColor.GREEN + "Loading ban data...");
+                        List<Document> staffData = new ArrayList<>();
+                        PreparedStatement staffSql = connection.prepareStatement("SELECT * FROM staffclock;");
+                        ResultSet staffResult = staffSql.executeQuery();
+                        while (staffResult.next()) {
+                            Document doc = new Document("uuid", staffResult.getString("user"))
+                                    .append("time", staffResult.getLong("time") * 1000)
+                                    .append("login", staffResult.getString("action").equalsIgnoreCase("login"));
+                            staffData.add(doc);
+                        }
+                        staffResult.close();
+                        staffSql.close();
+                        player.sendMessage(ChatColor.GREEN + "Staff data loaded! " + staffData.size() + " entries");
+                        player.sendMessage(ChatColor.GREEN + "Updating Mongo staff data...");
+                        mongoHandler.getStaffLoginCollection().insertMany(staffData);
+                        player.sendMessage(ChatColor.GREEN + "Finished updating Mongo staff data!");
+                        break;
+                    }
                     case "bans": {
                         player.sendMessage(ChatColor.GREEN + "Loading ban data...");
                         List<Document> banData = new ArrayList<>();
@@ -653,7 +750,7 @@ public class ConvertCommand extends DashboardCommand {
 
                         player.sendMessage(ChatColor.GREEN + "Loading storage data...");
                         HashMap<UUID, InventoryCache> storageData = new HashMap<>();
-                        PreparedStatement storageSql = connection.prepareStatement("SELECT * FROM storage2 WHERE uuid='9ab3b4c4-71d8-47c9-9e7d-adf040c53d2b' GROUP BY resort,uuid;");
+                        PreparedStatement storageSql = connection.prepareStatement("SELECT * FROM storage2 GROUP BY resort,uuid;");
                         ResultSet storageResult = storageSql.executeQuery();
                         while (storageResult.next()) {
                             UUID uuid = UUID.fromString(storageResult.getString("uuid"));
@@ -676,6 +773,24 @@ public class ConvertCommand extends DashboardCommand {
                         storageResult.close();
                         storageSql.close();
                         player.sendMessage(ChatColor.GREEN + "Storage data loaded!");
+
+                        player.sendMessage(ChatColor.GREEN + "Loading creative data...");
+                        HashMap<UUID, Document> creativePlayerData = new HashMap<>();
+                        PreparedStatement creativeSql = connection.prepareStatement("SELECT * FROM creative;");
+                        ResultSet creativeResult = creativeSql.executeQuery();
+                        while (creativeResult.next()) {
+                            Document doc = new Document("particle", creativeResult.getString("particle"))
+                                    .append("rptag", creativeResult.getInt("rptag") == 1)
+                                    .append("rplimit", creativeResult.getInt("rplimit"))
+                                    .append("showcreator", creativeResult.getInt("showcreator") == 1)
+                                    .append("creator", creativeResult.getInt("creator") == 1)
+                                    .append("creatortag", creativeResult.getInt("creatortag") == 1)
+                                    .append("resourcepack", creativeResult.getString("resourcepack"));
+                            creativePlayerData.put(UUID.fromString(creativeResult.getString("uuid")), doc);
+                        }
+                        creativeResult.close();
+                        creativeSql.close();
+                        player.sendMessage(ChatColor.GREEN + "Creative data loaded!");
 
                         player.sendMessage(ChatColor.GREEN + "Loading staff passwords...");
                         HashMap<UUID, String> passwordData = new HashMap<>();
@@ -887,6 +1002,14 @@ public class ConvertCommand extends DashboardCommand {
                             parkData.put("settings", parkSettings);
 
                             playerDocument.put("parks", parkData);
+
+                            Document creativeData = creativePlayerData.remove(uuid);
+                            if (creativeData == null) {
+                                creativeData = new Document("particle", "none").append("rptag", false).append("rplimit", 5)
+                                        .append("showcreator", false).append("creator", false).append("creatortag", false)
+                                        .append("resourcepack", "none");
+                            }
+                            playerDocument.put("creative", creativeData);
 
                             Map<String, Object> voteData = new HashMap<>();
                             voteData.put("lastTime", playerResult.getLong("vote"));

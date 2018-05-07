@@ -155,8 +155,8 @@ public class ChatUtil {
         if (player.isNewGuest() && !message.startsWith("/")) return;
 
         Rank rank = player.getRank();
-        boolean squire = rank.getRankId() >= Rank.TRAINEE.getRankId();
-        if (squire) {
+        boolean trainee = rank.getRankId() >= Rank.TRAINEE.getRankId();
+        if (trainee) {
             if (player.isAFK()) {
                 player.setAFK(false);
                 player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Your AFK Timer has been reset!");
@@ -217,7 +217,7 @@ public class ChatUtil {
             dashboard.getLogger().info("CANCELLED CHAT EVENT PLAYER MUTED");
             return;
         }
-        if (!squire) {
+        if (!trainee) {
             //Muted Chat Check
             String server = player.getServer();
             if (dashboard.getServer(server).isPark()) {

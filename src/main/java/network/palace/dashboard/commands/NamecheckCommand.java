@@ -26,13 +26,13 @@ public class NamecheckCommand extends DashboardCommand {
                 ChatColor.GREEN + " from Mojang...");
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             List<String> names = NameUtil.getNames(args[0]);
-            if (names.size() < 2 || names.isEmpty()) {
+            if (names.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "That user could not be found!");
                 return;
             }
             StringBuilder msg = new StringBuilder(ChatColor.GREEN + "Previous usernames of " + args[0] + " are:");
-            for (int i = 1; i < names.size(); i++) {
-                msg.append(ChatColor.AQUA).append("\n- ").append(ChatColor.GREEN).append(names.get(i));
+            for (int i = 0; i < names.size(); i++) {
+                msg.append(ChatColor.AQUA).append("\n").append(i + 1).append(": ").append(ChatColor.GREEN).append(names.get(i));
             }
             player.sendMessage(msg.toString());
         });

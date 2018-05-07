@@ -34,6 +34,7 @@ public class Ban {
         this.uuid = uuid;
         this.name = name;
         if (structure == null) return;
+        this.permanent = structure.getBoolean("permanent");
         this.created = structure.getLong("created");
         this.expires = structure.getLong("expires");
         this.reason = structure.getString("reason");

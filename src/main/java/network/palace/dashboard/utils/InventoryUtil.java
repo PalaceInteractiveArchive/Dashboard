@@ -181,6 +181,7 @@ public class InventoryUtil {
 
     public static BsonArray jsonToArray(String json) {
         BsonArray array = new BsonArray();
+        if (json == null) return array;
         JsonElement element = new JsonParser().parse(json);
         if (element.isJsonArray()) {
             JsonArray hotbarArray = element.getAsJsonArray();
@@ -489,8 +490,9 @@ public class InventoryUtil {
         try {
             doc = new BsonDocument("a", new BsonInt32(o.get("a").getAsInt())).append("t", new BsonInt32(o.get("t").getAsInt()))
                     .append("da", new BsonInt32(o.get("da").getAsInt())).append("du", new BsonInt32(o.get("du").getAsShort()))
-                    .append("ta", new BsonString(o.get("ta").getAsString()));
-        } catch (IllegalArgumentException ignored) {
+                    .append("ta", o.get("ta") == null ? new BsonString("") : new BsonString(o.get("ta").getAsString()));
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
             return null;
         }
         return doc;
