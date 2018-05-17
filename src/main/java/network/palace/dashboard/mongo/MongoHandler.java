@@ -14,6 +14,7 @@ import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
+import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
 import network.palace.dashboard.packets.inventory.Resort;
@@ -693,7 +694,11 @@ public class MongoHandler {
     public List<Server> getServers(boolean playground) {
         List<Server> list = new ArrayList<>();
         for (Document doc : serversCollection.find()) {
-            if (playground && (!doc.containsKey("playground") || !doc.getBoolean("playground"))) continue;
+            if (playground) {
+                if (!doc.containsKey("playground") || !doc.getBoolean("playground")) continue;
+            } else {
+                if (doc.containsKey("playground") && doc.getBoolean("playground")) continue;
+            }
             list.add(new Server(doc.getString("name"), doc.getString("address"),
                     doc.getBoolean("park"), 0, doc.getString("type")));
         }
@@ -926,6 +931,7 @@ public class MongoHandler {
     }
 
     public void insertDiscord(final DiscordCacheInfo info) {
+        SocketConnection.sendNewlink(info);
         playerCollection.updateOne(MongoFilter.UUID.getFilter(info.getMinecraft().getUuid()),
                 Updates.set("discordUsername", info.getDiscord().getUsername()));
     }
