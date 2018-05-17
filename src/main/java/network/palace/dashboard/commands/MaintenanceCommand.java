@@ -12,7 +12,10 @@ import network.palace.dashboard.packets.dashboard.PacketMaintenanceWhitelist;
 import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
-import java.util.*;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 
 /**
  * Created by Marc on 9/12/16
@@ -29,14 +32,10 @@ public class MaintenanceCommand extends DashboardCommand {
         dashboard.setMaintenance(!dashboard.isMaintenance());
         PacketMaintenance packet = new PacketMaintenance(dashboard.isMaintenance());
         if (dashboard.isMaintenance()) {
-            HashMap<Rank, List<UUID>> staff = dashboard.getSqlUtil().getPlayersByRanks(Rank.TRAINEE, Rank.MOD,
+            List<UUID> staff = dashboard.getMongoHandler().getPlayersByRank(Rank.TRAINEE, Rank.MOD,
                     Rank.SRMOD, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
-            List<UUID> list = new ArrayList<>();
-            for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
-                list.addAll(entry.getValue());
-            }
-            dashboard.setMaintenanceWhitelist(list);
-            PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(list);
+            dashboard.setMaintenanceWhitelist(staff);
+            PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(staff);
             player.sendMessage(ChatColor.GREEN + "Maintenance Mode enabled! Notifying Bungees...");
             for (Object o : WebSocketServerHandler.getGroup()) {
                 DashboardSocketChannel bungee = (DashboardSocketChannel) o;

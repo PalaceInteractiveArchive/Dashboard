@@ -23,7 +23,7 @@ public class Player {
     @Getter private int mcVersion;
     @Getter @Setter private boolean newGuest = false;
     @Getter @Setter private Timer tutorial = null;
-    @Getter @Setter private boolean toggled = true;
+    @Getter @Setter private boolean friendRequestToggle = true;
     @Setter private boolean mentions = true;
     @Getter private long loginTime = System.currentTimeMillis();
     @Getter @Setter private UUID reply;
@@ -76,7 +76,7 @@ public class Player {
             Launcher.getDashboard().getLogger().info("CANCELLED PACKET EVENT INVALID BUNGEE '" + bungeeID + "' '" + uuid + "' '" + username + "'");
             return;
         }
-        bungee.send(packet.getJSON().toString());
+        bungee.send(packet);
     }
 
     public UUID getUniqueId() {
@@ -96,7 +96,7 @@ public class Player {
 
     public Mute getMute() {
         if (mute == null) {
-            return new Mute(uuid, username, false, System.currentTimeMillis(), "", "");
+            return new Mute(uuid, username, false, System.currentTimeMillis(), System.currentTimeMillis(), "", "");
         }
         return mute;
     }
@@ -118,16 +118,6 @@ public class Player {
         }
     }
 
-    /**
-     * Get the name of the player
-     *
-     * @return the name of the player
-     * @deprecated Use `getUsername` instead.
-     */
-    public String getName() {
-        return username;
-    }
-
     public boolean hasMentions() {
         return mentions;
     }
@@ -137,7 +127,7 @@ public class Player {
     }
 
     public boolean hasFriendToggledOff() {
-        return toggled;
+        return friendRequestToggle;
     }
 
     public boolean canRecieveMessages() {
@@ -164,7 +154,7 @@ public class Player {
     }
 
     public void ignorePlayer(UUID uuid) {
-        Launcher.getDashboard().getSqlUtil().ignorePlayer(this, uuid);
+        Launcher.getDashboard().getMongoHandler().ignorePlayer(this, uuid);
     }
 
     public void unignorePlayer(UUID uuid) {
@@ -174,7 +164,7 @@ public class Player {
                 break;
             }
         }
-        Launcher.getDashboard().getSqlUtil().unignorePlayer(this, uuid);
+        Launcher.getDashboard().getMongoHandler().unignorePlayer(this, uuid);
     }
 
     public List<IgnoreData> getIgnoreData() {
@@ -254,12 +244,12 @@ public class Player {
                     case 58: {
                         sendMessage(ChatColor.GREEN + "\nAfter you finish reviewing our rules, " +
                                 "you're finished with the tutorial! " + ChatColor.DARK_AQUA +
-                                "Note: New settlers must wait " + ChatColor.BOLD + "15 minutes " +
+                                "Note: New settlers must wait " + ChatColor.BOLD + "10 minutes " +
                                 ChatColor.DARK_AQUA + "before using chat. Read why: " +
                                 ChatColor.AQUA + "palace.network/rules#chat");
                         mention();
                         setNewGuest(false);
-                        Launcher.getDashboard().getSqlUtil().completeTutorial(getUniqueId());
+                        Launcher.getDashboard().getMongoHandler().completeTutorial(getUniqueId());
                         cancel();
                     }
                 }

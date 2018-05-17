@@ -8,9 +8,6 @@ import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.packets.dashboard.PacketTitle;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -50,9 +47,22 @@ public class AFKUtil {
         String blank = "";
         String msg = ChatColor.YELLOW + "" + ChatColor.BOLD + "Type anything in chat (it won't be seen by others)";
         final List<String> msgs = Arrays.asList(blank, blank, afk, blank, msg, blank, blank, blank, blank, blank);
-        final Timer id = new Timer();
+        final Timer t1 = new Timer();
+        final Timer t2 = new Timer();
         player.setAFK(true);
-        id.schedule(new TimerTask() {
+        t2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                t1.cancel();
+                if (player != null && player.isAFK()) {
+                    player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
+                    dashboard.getMongoHandler().logAFK(player.getUniqueId());
+                } else {
+                    cancel();
+                }
+            }
+        }, 300000);
+        t1.schedule(new TimerTask() {
             int i = 0;
 
             @Override
@@ -74,32 +84,5 @@ public class AFKUtil {
                 }
             }
         }, 0, 60000);
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                id.cancel();
-                try {
-                    if (player != null && player.isAFK()) {
-                        player.kickPlayer(ChatColor.RED + "You have been AFK for 30 minutes. Please try not to be AFK while on our servers.");
-                        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-                        if (!optConnection.isPresent()) {
-                            ErrorUtil.logError("Unable to connect to mysql");
-                            return;
-                        }
-                        try (Connection connection = optConnection.get()) {
-                            PreparedStatement sql = connection.prepareStatement("INSERT INTO afklogs (`user`) VALUES('" +
-                                    uuid + "')");
-                            sql.execute();
-                            sql.close();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        cancel();
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-        }, 300000);
     }
 }

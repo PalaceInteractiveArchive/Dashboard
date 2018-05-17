@@ -42,7 +42,7 @@ public enum Rank {
         return SETTLER;
     }
 
-    public String getSqlName() {
+    public String getDBName() {
         return name.toLowerCase().replaceAll(" ", "");
     }
 

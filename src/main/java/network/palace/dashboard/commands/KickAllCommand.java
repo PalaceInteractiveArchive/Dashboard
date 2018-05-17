@@ -33,9 +33,7 @@ public class KickAllCommand extends DashboardCommand {
         r = new StringBuilder(ChatColor.translateAlternateColorCodes('&', r.toString().trim()));
         player.sendMessage(ChatColor.GREEN + "Disconnecting all players for " + r);
         for (Player tp : dashboard.getOnlinePlayers()) {
-            if (tp.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
-                continue;
-            }
+            if (tp.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) continue;
             tp.kickPlayer(r.toString());
         }
         new Timer().schedule(new TimerTask() {

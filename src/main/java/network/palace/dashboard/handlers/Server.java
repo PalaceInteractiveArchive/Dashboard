@@ -15,7 +15,6 @@ public class Server {
     private UUID uuid = UUID.randomUUID();
     @Getter private String name;
     @Getter private String address;
-    @Getter private int port;
     @Getter private boolean park;
     @Getter @Setter private int count;
     @Getter private String serverType;
@@ -24,10 +23,9 @@ public class Server {
     @Getter @Setter private GameState gameState = GameState.LOBBY;
     @Getter @Setter private boolean gameNeedsUpdate = true;
 
-    public Server(String name, String address, int port, boolean park, int count, String serverType) {
+    public Server(String name, String address, boolean park, int count, String serverType) {
         this.name = name;
         this.address = address;
-        this.port = port;
         this.park = park;
         this.count = count;
         this.serverType = serverType;

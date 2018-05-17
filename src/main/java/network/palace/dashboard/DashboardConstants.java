@@ -25,7 +25,7 @@ public class DashboardConstants {
     public static final String MESSAGE_REPEAT = ChatColor.RED + "Please do not repeat the same message!";
     public static final String SKYPE_INFORMATION = ChatColor.RED + "Please do not ask for Skype information!";
     public static final String MUTED_PLAYER = ChatColor.RED + "You are muted! You will be unmuted in <TIME>.";
-    public static final String MUTE_REASON = ChatColor.RED + "Mute Reason: <REASON>";
+    public static final String MUTE_REASON = ChatColor.RED + " Mute Reason: <REASON>";
 
     public static final Pattern LINK_PATTERN = Pattern.compile("((\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?)|(([0-9a-z:/]+(\\.|\\(dot\\)\\(\\.\\" +
             ")))+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|network|org|pro|tel|travel|ac|ad|ae|" +

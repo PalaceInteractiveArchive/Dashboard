@@ -7,6 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
+import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.scheduler.SchedulerManager;
 import network.palace.dashboard.server.DashboardServerSocketChannel;
@@ -22,7 +23,6 @@ import org.apache.log4j.PatternLayout;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Timer;
@@ -62,9 +62,10 @@ public class Launcher {
         dashboard.setRandom(new Random());
         dashboard.setSchedulerManager(new SchedulerManager());
         try {
-            dashboard.getLogger().info("Initializing SQL Connections");
+            dashboard.getLogger().info("Initializing MongoDB Handler");
+            dashboard.setMongoHandler(new MongoHandler());
             dashboard.setSqlUtil(new SqlUtil());
-        } catch (SQLException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
@@ -73,7 +74,6 @@ public class Launcher {
 
         dashboard.loadConfiguration();
         dashboard.loadMOTD();
-        dashboard.loadServerTypes();
         dashboard.loadJoinServers();
         if (dashboard.isTestNetwork()) {
             dashboard.getLogger().info("Test network detected, disabling statistics collection!");
@@ -130,7 +130,7 @@ public class Launcher {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            dashboard.getSqlUtil().stop();
+            dashboard.getMongoHandler().disconnect();
 
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

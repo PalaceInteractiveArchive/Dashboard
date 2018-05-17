@@ -83,5 +83,20 @@
     "groupId": "com.squareup.okio",
     "artifactId": "okio",
     "version": "1.11.0"
+  },
+  {
+    "groupId": "org.mongodb",
+    "artifactId": "mongodb-driver-core",
+    "version": "3.5.0"
+  },
+  {
+    "groupId": "org.mongodb",
+    "artifactId": "mongodb-driver",
+    "version": "3.5.0"
+  },
+  {
+    "groupId": "org.mongodb",
+    "artifactId": "bson",
+    "version": "3.5.0"
   }
 ]

@@ -19,28 +19,28 @@ public class StrictCommand extends DashboardCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length < 1) {
-            player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You must supply an argument! /strict [toggle:threshold] [args...]");
+            player.sendMessage(ChatColor.RED + "You must supply an argument! /strict [toggle:threshold] [args...]");
             return;
         }
 
         Dashboard dashboard = Launcher.getDashboard();
         if (args[0].equalsIgnoreCase("toggle")) {
-            String response = dashboard.isStrictMode() ? ChatColor.GREEN + "" + ChatColor.BOLD + "Leaving strict mode..." :
-                    ChatColor.RED + "" + ChatColor.BOLD + "Entering strict mode... Matching level: " + dashboard.getStrictThreshold();
+            String response = dashboard.isStrictMode() ? ChatColor.GREEN + "Leaving strict mode..." :
+                    ChatColor.RED + "Entering strict mode... Matching level: " + dashboard.getStrictThreshold();
             dashboard.setStrictMode(!dashboard.isStrictMode());
             player.sendMessage(response);
         } else if (args[0].equalsIgnoreCase("threshold")) {
             if (args.length < 2) {
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You must supply a threshold! /strict threshold [threshold]");
+                player.sendMessage(ChatColor.RED + "You must supply a threshold! /strict threshold [threshold]");
                 return;
             }
             if (!isDouble(args[1])) {
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Invalid threshold!");
+                player.sendMessage(ChatColor.RED + "Invalid threshold!");
                 return;
             }
             double threshold = Double.parseDouble(args[1]);
             dashboard.setStrictThreshold(threshold);
-            player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Strict mode threshold has been set to " + threshold);
+            player.sendMessage(ChatColor.GREEN + "Strict mode threshold has been set to " + threshold);
         }
     }
 

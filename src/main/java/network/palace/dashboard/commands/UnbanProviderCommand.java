@@ -27,7 +27,7 @@ public class UnbanProviderCommand extends DashboardCommand {
                 provider.append(" ");
             }
         }
-        dashboard.getSqlUtil().unbanProvider(provider.toString());
+        dashboard.getMongoHandler().unbanProvider(provider.toString());
         dashboard.getModerationUtil().announceUnban("Provider " + provider.toString(), player.getUsername());
     }
 }

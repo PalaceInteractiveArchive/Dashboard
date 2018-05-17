@@ -14,8 +14,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -25,7 +23,8 @@ import java.util.regex.Matcher;
 public class ChatUtil {
     private HashMap<UUID, Long> time = new HashMap<>();
     private HashMap<UUID, String> messageCache = new HashMap<>();
-    private HashMap<UUID, List<String>> messages = new HashMap<>();
+    //    private HashMap<UUID, List<String>> messages = new HashMap<>();
+    private LinkedList<ChatMessage> messages = new LinkedList<>();
     private List<String> mutedChats = new ArrayList<>();
 
     private List<String> swearList = new ArrayList<>();
@@ -62,47 +61,23 @@ public class ChatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-                if (!optConnection.isPresent()) {
-                    ErrorUtil.logError("Unable to connect to mysql");
-                    return;
-                }
-                StringBuilder statement = new StringBuilder();
-                try (Connection connection = optConnection.get()) {
-                    if (messages.isEmpty()) {
-                        return;
+                try {
+                    int size = messages.size();
+                    List<ChatMessage> localMessages = new ArrayList<>();
+                    for (int i = 0; i < size; i++) {
+                        localMessages.add(messages.pop());
                     }
-                    final HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
-                    int amount = 0;
-                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
-                        amount += entry.getValue().size();
+                    for (ChatMessage msg : localMessages) {
+                        dashboard.getMongoHandler().logChat(msg);
                     }
-                    statement = new StringBuilder("INSERT INTO chat (user, message) VALUES ");
-                    int i = 0;
-                    HashMap<Integer, String> lastList = new HashMap<>();
-                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
-                        if (entry == null || entry.getKey() == null || localMessages == null) {
-                            continue;
-                        }
-                        for (String s : new ArrayList<>(messages.remove(entry.getKey()))) {
-                            statement.append("(?, ?)");
-                            if (((i / 2) + 1) < amount) {
-                                statement.append(", ");
-                            }
-                            lastList.put(i += 1, entry.getKey().toString());
-                            lastList.put(i += 1, s);
-                        }
-                    }
-                    statement.append(";");
-                    PreparedStatement sql = connection.prepareStatement(statement.toString());
-                    for (Map.Entry<Integer, String> entry : new HashSet<>(lastList.entrySet())) {
-                        sql.setString(entry.getKey(), entry.getValue());
-                    }
-                    sql.execute();
-                    sql.close();
+//                    HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
+//                    messages.clear();
+//                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
+//                        dashboard.getMongoHandler().logChat(entry.getKey(), entry.getValue());
+//                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    dashboard.getErrors().error("Error with Chat SQL Query: '" + statement.toString() + "'");
+                    dashboard.getErrors().error("Error logging chat: " + e.getMessage());
                 }
             }
         }, 0, 5000);
@@ -180,8 +155,8 @@ public class ChatUtil {
         if (player.isNewGuest() && !message.startsWith("/")) return;
 
         Rank rank = player.getRank();
-        boolean squire = rank.getRankId() >= Rank.TRAINEE.getRankId();
-        if (squire) {
+        boolean trainee = rank.getRankId() >= Rank.TRAINEE.getRankId();
+        if (trainee) {
             if (player.isAFK()) {
                 player.setAFK(false);
                 player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Your AFK Timer has been reset!");
@@ -242,7 +217,7 @@ public class ChatUtil {
             dashboard.getLogger().info("CANCELLED CHAT EVENT PLAYER MUTED");
             return;
         }
-        if (!squire) {
+        if (!trainee) {
             //Muted Chat Check
             String server = player.getServer();
             if (dashboard.getServer(server).isPark()) {
@@ -378,15 +353,15 @@ public class ChatUtil {
         Dashboard dashboard = Launcher.getDashboard();
         Mute mute = player.getMute();
         if (mute != null && mute.isMuted()) {
-            long releaseTime = mute.getRelease();
+            long releaseTime = mute.getExpires();
             Date currentTime = new Date();
             if (currentTime.getTime() > releaseTime) {
-                dashboard.getSqlUtil().unmutePlayer(player.getUniqueId());
+                dashboard.getMongoHandler().unmutePlayer(player.getUniqueId());
                 player.getMute().setMuted(false);
             } else {
                 String response = DashboardConstants.MUTED_PLAYER;
-                response = response.replaceAll("<TIME>", DateUtil.formatDateDiff(mute.getRelease()));
-                if (!mute.getReason().equals(""))
+                response = response.replaceAll("<TIME>", DateUtil.formatDateDiff(mute.getExpires()));
+                if (!mute.getReason().isEmpty())
                     response += DashboardConstants.MUTE_REASON.replaceAll("<REASON>", player.getMute().getReason());
                 player.sendMessage(response);
                 return true;
@@ -461,15 +436,16 @@ public class ChatUtil {
     }
 
     public void logMessage(UUID uuid, String msg) {
-        if (messages.containsKey(uuid)) {
-            List<String> msgs = messages.get(uuid);
-            msgs.add(msg);
-            messages.put(uuid, msgs);
-            return;
-        }
-        List<String> list = new ArrayList<>();
-        list.add(msg);
-        messages.put(uuid, list);
+        messages.add(new ChatMessage(uuid, msg, System.currentTimeMillis() / 1000));
+//        if (messages.containsKey(uuid)) {
+//            List<String> msgs = messages.get(uuid);
+//            msgs.add(msg);
+//            messages.put(uuid, msgs);
+//            return;
+//        }
+//        List<String> list = new ArrayList<>();
+//        list.add(msg);
+//        messages.put(uuid, list);
     }
 
     private void swearMessage(String name, String msg) {
@@ -677,7 +653,7 @@ public class ChatUtil {
     public void socialSpyParty(Player player, Party party, String message, String command) {
         Dashboard dashboard = Launcher.getDashboard();
         if (dashboard.getServer(player.getServer()).isPark()) {
-            String msg = ChatColor.WHITE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
+            String msg = "" + ChatColor.BOLD + ChatColor.YELLOW + "[P]" + ChatColor.LIGHT_PURPLE + player.getUsername() + ": /" + command + " " + party.getLeader().getUsername() +
                     " " + message;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.getRank().getRankId() < Rank.TRAINEE.getRankId() || tp.getServer() == null ||

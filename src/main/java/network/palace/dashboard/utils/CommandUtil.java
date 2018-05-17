@@ -32,6 +32,7 @@ public class CommandUtil {
         register("chatreload", new ChatReloadCommand());
         register("chatstatus", new ChatStatusCommand());
         register("cmds", new CmdsCommand());
+//        register("convert", new ConvertCommand());
         register("dashboardversion", new DashboardVersion());
         register("discord", new DiscordCommand());
         register("find", new FindCommand());
@@ -135,9 +136,6 @@ public class CommandUtil {
     }
 
     public void register(String label, DashboardCommand command) {
-        if (commands.containsKey(label.toLowerCase())) {
-            commands.remove(label.toLowerCase());
-        }
         commands.put(label.toLowerCase(), command);
     }
 

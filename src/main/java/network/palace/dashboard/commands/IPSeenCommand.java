@@ -21,11 +21,11 @@ public class IPSeenCommand extends DashboardCommand {
             return;
         }
         dashboard.getSchedulerManager().runAsync(() -> {
-            AddressBan ban = dashboard.getSqlUtil().getAddressBan(args[0]);
+            AddressBan ban = dashboard.getMongoHandler().getAddressBan(args[0]);
             if (ban != null) {
                 player.sendMessage(ChatColor.RED + "This IP Address is banned for " + ChatColor.AQUA + ban.getReason());
             }
-            List<String> users = dashboard.getSqlUtil().getNamesFromIP(args[0]);
+            List<String> users = dashboard.getMongoHandler().getPlayersOnIP(args[0]);
             if (users == null || users.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "No users found on that IP Address.");
                 return;

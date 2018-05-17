@@ -27,7 +27,7 @@ public class UnmuteCommand extends DashboardCommand {
         Player tp = dashboard.getPlayer(username);
         UUID uuid;
         if (tp == null) {
-            uuid = dashboard.getSqlUtil().uuidFromUsername(username);
+            uuid = dashboard.getMongoHandler().usernameToUUID(username);
         } else {
             uuid = tp.getUniqueId();
             username = tp.getUsername();
@@ -36,7 +36,7 @@ public class UnmuteCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
-        dashboard.getSqlUtil().unmutePlayer(uuid);
+        dashboard.getMongoHandler().unmutePlayer(uuid);
         tp.getMute().setMuted(false);
         dashboard.getModerationUtil().announceUnmute(username, player.getUsername());
     }

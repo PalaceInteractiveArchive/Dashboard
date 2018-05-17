@@ -62,7 +62,7 @@ public class DateUtil {
     }
 
     public static long parseDateDiff(String time, boolean future) {
-        Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?(?:([0-9]+)\\s*(?:s[a-z]*)?)?", 2);
+        Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
         Matcher m = timePattern.matcher(time);
         int years = 0;
         int months = 0;
@@ -107,28 +107,28 @@ public class DateUtil {
         }
         Calendar c = new GregorianCalendar();
         if (years > 0) {
-            c.add(1, years * (future ? 1 : -1));
+            c.add(Calendar.YEAR, years * (future ? 1 : -1));
         }
         if (months > 0) {
-            c.add(2, months * (future ? 1 : -1));
+            c.add(Calendar.MONTH, months * (future ? 1 : -1));
         }
         if (weeks > 0) {
-            c.add(3, weeks * (future ? 1 : -1));
+            c.add(Calendar.WEEK_OF_YEAR, weeks * (future ? 1 : -1));
         }
         if (days > 0) {
-            c.add(5, days * (future ? 1 : -1));
+            c.add(Calendar.DATE, days * (future ? 1 : -1));
         }
         if (hours > 0) {
-            c.add(11, hours * (future ? 1 : -1));
+            c.add(Calendar.HOUR_OF_DAY, hours * (future ? 1 : -1));
         }
         if (minutes > 0) {
-            c.add(12, minutes * (future ? 1 : -1));
+            c.add(Calendar.MINUTE, minutes * (future ? 1 : -1));
         }
         if (seconds > 0) {
-            c.add(13, seconds * (future ? 1 : -1));
+            c.add(Calendar.SECOND, seconds * (future ? 1 : -1));
         }
         Calendar max = new GregorianCalendar();
-        max.add(1, 10);
+        max.add(Calendar.YEAR, 10);
         if (c.after(max)) {
             return max.getTimeInMillis();
         }

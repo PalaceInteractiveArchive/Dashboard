@@ -24,7 +24,7 @@ public class UnbanIPCommand extends DashboardCommand {
             return;
         }
         String address = args[0];
-        dashboard.getSqlUtil().unbanIP(address);
+        dashboard.getMongoHandler().unbanAddress(address);
         dashboard.getModerationUtil().announceUnban("IP " + address, player.getUsername());
     }
 }

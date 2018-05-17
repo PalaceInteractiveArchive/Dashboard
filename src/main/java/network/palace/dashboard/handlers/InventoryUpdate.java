@@ -8,18 +8,16 @@ import java.util.HashMap;
  * Created by Marc on 6/10/17.
  */
 public class InventoryUpdate {
-    private HashMap<Resort, HashMap<String, String>> resorts = new HashMap<>();
+    private HashMap<Resort, UpdateData> resorts = new HashMap<>();
 
-    public void setValue(Resort resort, String key, String value) {
-        HashMap<String, String> res = resorts.remove(resort);
-        if (res == null) {
-            res = new HashMap<>();
+    public void setData(Resort resort, UpdateData data) {
+        if (resorts.containsKey(resort)) {
+            return;
         }
-        res.put(key, value);
-        resorts.put(resort, res);
+        resorts.put(resort, data);
     }
 
-    public HashMap<String, String> getChanges(Resort resort) {
+    public UpdateData getData(Resort resort) {
         return resorts.get(resort);
     }
 
@@ -27,7 +25,7 @@ public class InventoryUpdate {
         return !resorts.isEmpty();
     }
 
-    public HashMap<Resort, HashMap<String, String>> getMap() {
+    public HashMap<Resort, UpdateData> getMap() {
         return resorts;
     }
 }

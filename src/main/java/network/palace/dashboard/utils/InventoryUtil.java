@@ -1,6 +1,7 @@
 package network.palace.dashboard.utils;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
@@ -9,18 +10,16 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.InventoryCache;
 import network.palace.dashboard.handlers.InventoryUpdate;
 import network.palace.dashboard.handlers.ResortInventory;
+import network.palace.dashboard.handlers.UpdateData;
 import network.palace.dashboard.packets.inventory.PacketInventoryContent;
 import network.palace.dashboard.packets.inventory.Resort;
+import org.bson.*;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.FileReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -47,15 +46,15 @@ public class InventoryUtil {
                         Resort resort = Resort.fromId(ob.get("resort").getAsInt());
                         String packJSON;
                         String packHash;
-                        String sqlPackHash;
+                        String dbPackHash;
                         int packsize;
                         String lockerJSON;
                         String lockerHash;
-                        String sqlLockerHash;
+                        String dbLockerHash;
                         int lockersize;
                         String hotbarJSON;
                         String hotbarHash;
-                        String sqlHotbarHash;
+                        String dbHotbarHash;
                         if (ob.get("packJSON").isJsonNull()) {
                             packJSON = "";
                         } else {
@@ -66,10 +65,10 @@ public class InventoryUtil {
                         } else {
                             packHash = ob.get("packHash").getAsString();
                         }
-                        if (ob.get("sqlPackHash").isJsonNull()) {
-                            sqlPackHash = "";
+                        if (ob.get("dbPackHash").isJsonNull()) {
+                            dbPackHash = "";
                         } else {
-                            sqlPackHash = ob.get("sqlPackHash").getAsString();
+                            dbPackHash = ob.get("dbPackHash").getAsString();
                         }
                         if (ob.get("packsize").isJsonNull()) {
                             packsize = 0;
@@ -87,10 +86,10 @@ public class InventoryUtil {
                         } else {
                             lockerHash = ob.get("lockerHash").getAsString();
                         }
-                        if (ob.get("sqlLockerHash").isJsonNull()) {
-                            sqlLockerHash = "";
+                        if (ob.get("dbLockerHash").isJsonNull()) {
+                            dbLockerHash = "";
                         } else {
-                            sqlLockerHash = ob.get("sqlLockerHash").getAsString();
+                            dbLockerHash = ob.get("dbLockerHash").getAsString();
                         }
                         if (ob.get("lockersize").isJsonNull()) {
                             lockersize = 0;
@@ -108,14 +107,14 @@ public class InventoryUtil {
                         } else {
                             hotbarHash = ob.get("hotbarHash").getAsString();
                         }
-                        if (ob.get("sqlHotbarHash").isJsonNull()) {
-                            sqlHotbarHash = "";
+                        if (ob.get("dbHotbarHash").isJsonNull()) {
+                            dbHotbarHash = "";
                         } else {
-                            sqlHotbarHash = ob.get("sqlHotbarHash").getAsString();
+                            dbHotbarHash = ob.get("dbHotbarHash").getAsString();
                         }
 
-                        map.put(resort, new ResortInventory(resort, packJSON, packHash, sqlPackHash, packsize, lockerJSON,
-                                lockerHash, sqlLockerHash, lockersize, hotbarJSON, hotbarHash, sqlHotbarHash));
+                        map.put(resort, new ResortInventory(resort, packJSON, packHash, dbPackHash, packsize, lockerJSON,
+                                lockerHash, dbLockerHash, lockersize, hotbarJSON, hotbarHash, dbHotbarHash));
                     }
                     InventoryCache cache = new InventoryCache(uuid, map);
                     cachedInventories.put(uuid, cache);
@@ -138,50 +137,71 @@ public class InventoryUtil {
                         if (inv == null) {
                             continue;
                         }
-                        if (!inv.getSqlBackpackHash().equals(inv.getBackpackHash())) {
-                            update.setValue(inv.getResort(), "backpack", inv.getBackpackJSON());
-                            inv.setSqlBackpackHash(inv.getBackpackHash());
-                        }
-                        if (!inv.getSqlLockerHash().equals(inv.getLockerHash())) {
-                            update.setValue(inv.getResort(), "locker", inv.getLockerJSON());
-                            inv.setSqlLockerHash(inv.getLockerHash());
-                        }
-                        if (!inv.getSqlHotbarHash().equals(inv.getHotbarHash())) {
-                            update.setValue(inv.getResort(), "hotbar", inv.getHotbarJSON());
-                            inv.setSqlHotbarHash(inv.getHotbarHash());
+                        if (!inv.getDbBackpackHash().equals(inv.getBackpackHash()) ||
+                                !inv.getDbLockerHash().equals(inv.getLockerHash()) ||
+                                !inv.getDbHotbarHash().equals(inv.getHotbarHash())) {
+
+                            String backpackJSON = inv.getBackpackJSON();
+                            int packSize = inv.getBackpackSize();
+                            String lockerJSON = inv.getLockerJSON();
+                            int lockerSize = inv.getLockerSize();
+                            String hotbarJSON = inv.getHotbarJSON();
+
+                            UpdateData data = getDataFromJson(backpackJSON, packSize, lockerJSON, lockerSize, hotbarJSON);
+                            update.setData(inv.getResort(), data);
+
+                            inv.setDbBackpackHash(inv.getBackpackHash());
+                            inv.setDbLockerHash(inv.getLockerHash());
+                            inv.setDbHotbarHash(inv.getHotbarHash());
                         }
                     }
                     boolean updated = false;
                     if (update.shouldUpdate()) {
                         updated = true;
-                        dashboard.getSchedulerManager().runAsync(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateData(cache.getUuid(), update);
-                            }
-                        });
+                        dashboard.getSchedulerManager().runAsync(() -> updateData(cache.getUuid(), update));
                     }
                     if (dashboard.getPlayer(cache.getUuid()) == null) {
                         cachedInventories.remove(cache.getUuid());
                         if (!updated) {
-                            dashboard.getSchedulerManager().runAsync(new Runnable() {
-                                @Override
-                                public void run() {
-                                    updateData(cache.getUuid(), update);
-                                }
-                            });
+                            dashboard.getSchedulerManager().runAsync(() -> updateData(cache.getUuid(), update));
                         }
                     }
                 }
             }
-        }, 1000, 60000);
+        }, 1000, 10000);
+    }
+
+    public static UpdateData getDataFromJson(String backpackJSON, int backpackSize, String lockerJSON, int lockerSize, String hotbarJSON) {
+        BsonArray pack = jsonToArray(backpackJSON);
+        BsonArray locker = jsonToArray(lockerJSON);
+        BsonArray hotbar = jsonToArray(hotbarJSON);
+
+        return new UpdateData(pack, backpackSize, locker, lockerSize, hotbar);
+    }
+
+    public static BsonArray jsonToArray(String json) {
+        BsonArray array = new BsonArray();
+        if (json == null) return array;
+        JsonElement element = new JsonParser().parse(json);
+        if (element.isJsonArray()) {
+            JsonArray hotbarArray = element.getAsJsonArray();
+
+            int i = 0;
+            for (JsonElement e2 : hotbarArray) {
+                JsonObject o = e2.getAsJsonObject();
+                BsonDocument item = InventoryUtil.getBsonFromJson(o.toString());
+                array.add(item);
+                i++;
+            }
+        }
+        return array;
     }
 
     /**
      * Cache a player's inventory
      *
-     * @param uuid      the uuid of the player to cache
-     * @param inventory the player's inventory
+     * @param uuid   the uuid of the player to cache
+     * @param packet A packet containing the player's inventory data
      */
     public void cacheInventory(UUID uuid, PacketInventoryContent packet) {
         if (cachedInventories.containsKey(uuid)) {
@@ -191,32 +211,34 @@ public class InventoryUtil {
             }
             ResortInventory inv = new ResortInventory();
             inv.setResort(packet.getResort());
+            inv.setBackpackSize(packet.getBackpackSize());
+            inv.setLockerSize(packet.getLockerSize());
             if (packet.getBackpackHash().equals("")) {
                 inv.setBackpackHash(cache.getBackpackHash());
                 inv.setBackpackJSON(cache.getBackpackJSON());
-                inv.setSqlBackpackHash(cache.getSqlBackpackHash());
+                inv.setDbBackpackHash(cache.getDbBackpackHash());
             } else {
                 inv.setBackpackHash(packet.getBackpackHash());
                 inv.setBackpackJSON(packet.getBackpackJson());
-                inv.setSqlBackpackHash("");
+                inv.setDbBackpackHash("");
             }
             if (packet.getLockerHash().equals("")) {
                 inv.setLockerHash(cache.getLockerHash());
                 inv.setLockerJSON(cache.getLockerJSON());
-                inv.setSqlLockerHash(cache.getSqlLockerHash());
+                inv.setDbLockerHash(cache.getDbLockerHash());
             } else {
                 inv.setLockerHash(packet.getLockerHash());
                 inv.setLockerJSON(packet.getLockerJson());
-                inv.setSqlLockerHash("");
+                inv.setDbLockerHash("");
             }
             if (packet.getHotbarHash().equals("")) {
                 inv.setHotbarHash(cache.getHotbarHash());
                 inv.setHotbarJSON(cache.getHotbarJSON());
-                inv.setSqlHotbarHash(cache.getSqlHotbarHash());
+                inv.setDbHotbarHash(cache.getDbHotbarHash());
             } else {
                 inv.setHotbarHash(packet.getHotbarHash());
                 inv.setHotbarJSON(packet.getHotbarJson());
-                inv.setSqlHotbarHash("");
+                inv.setDbHotbarHash("");
             }
             cachedInventories.get(uuid).setInventory(packet.getResort(), inv);
             return;
@@ -264,37 +286,34 @@ public class InventoryUtil {
      * @return the inventory of the player. Defaults to a blank string if none is present
      */
     public ResortInventory getInventory(UUID uuid, Resort resort) {
-        InventoryCache cache = cachedInventories.get(uuid);
-        if (cache == null) {
-            cache = getInventoryFromDatabase(uuid);
+        try {
+            InventoryCache cache = cachedInventories.get(uuid);
+            if (cache == null) {
+                cache = getInventoryFromDatabase(uuid);
+                cachedInventories.put(uuid, cache);
+            }
+            ResortInventory inv = cache.getResorts().get(resort);
+            if (inv == null) {
+                return createResortInventory(uuid, resort);
+            }
+            return inv;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResortInventory();
         }
-        ResortInventory inv = cache.getResorts().get(resort);
-        if (inv == null) {
-            return createResortInventory(uuid, resort);
-        }
-        return inv;
     }
 
     private ResortInventory createResortInventory(UUID uuid, Resort resort) {
-        Optional<Connection> optConnection = Launcher.getDashboard().getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return new ResortInventory();
+        Dashboard dashboard = Launcher.getDashboard();
+        ResortInventory inv = new ResortInventory();
+        inv.setResort(resort);
+        dashboard.getMongoHandler().setInventoryData(uuid, inv, true);
+        InventoryCache cache = cachedInventories.get(uuid);
+        if (cache != null) {
+            cache.setInventory(resort, inv);
+            cachedInventories.put(uuid, cache);
         }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO storage2 (uuid, pack, packsize, " +
-                    "locker, lockersize, hotbar, resort) VALUES (?,?,0,?,0,?,?)");
-            sql.setString(1, uuid.toString());
-            sql.setString(2, "{}");
-            sql.setString(3, "{}");
-            sql.setString(4, "{}");
-            sql.setInt(5, resort.getId());
-            sql.execute();
-            sql.close();
-        } catch (SQLException e) {
-            ErrorUtil.logError("Error in InventoryUtil method createResortInventory", e);
-        }
-        return new ResortInventory();
+        return inv;
     }
 
     /**
@@ -305,55 +324,63 @@ public class InventoryUtil {
      */
     private InventoryCache getInventoryFromDatabase(UUID uuid) {
         HashMap<Resort, ResortInventory> map = new HashMap<>();
-        List<Integer> deleteRowIds = new ArrayList<>();
-        Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return new InventoryCache(uuid, map);
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=?");
-            sql.setString(1, uuid.toString());
-            ResultSet result = sql.executeQuery();
-            List<Integer> previousIds = new ArrayList<>();
-            while (result.next()) {
-                int id = result.getInt("id");
-                String backpack = result.getString("pack");
-                String locker = result.getString("locker");
-                String hotbar = result.getString("hotbar");
-                Resort resort = Resort.fromId(result.getInt("resort"));
-                previousIds.add(id);
-                if (map.get(resort) != null) {
-                    deleteRowIds.add(previousIds.get(previousIds.size() - 1));
-                }
-                ResortInventory inv = new ResortInventory(resort, backpack, generateHash(backpack), "",
-                        result.getInt("packsize"), locker, generateHash(locker), "",
-                        result.getInt("lockersize"), hotbar, generateHash(hotbar), "");
-                map.put(resort, inv);
-            }
-            result.close();
-            sql.close();
-            if (!deleteRowIds.isEmpty()) {
-                StringBuilder q = new StringBuilder("DELETE FROM storage2 WHERE ");
-                for (int i = 0; i < deleteRowIds.size(); i++) {
-                    q.append("id=?");
-                    if (i < (deleteRowIds.size() - 1)) {
-                        q.append(" OR ");
+        try {
+            Dashboard dashboard = Launcher.getDashboard();
+            Document invData = dashboard.getMongoHandler().getParkInventoryData(uuid);
+            for (Object o : invData.get("inventories", ArrayList.class)) {
+                Document inv = (Document) o;
+                int resortID = inv.getInteger("resort");
+                StringBuilder backpack = new StringBuilder("[");
+                ArrayList packcontents = inv.get("packcontents", ArrayList.class);
+                for (int i = 0; i < packcontents.size(); i++) {
+                    Document item = (Document) packcontents.get(i);
+                    if (item.getInteger("a") == null) {
+                        backpack.append("{}");
+                    } else {
+                        backpack.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                    }
+                    if (i < (packcontents.size() - 1)) {
+                        backpack.append(",");
                     }
                 }
-                PreparedStatement delete = connection.prepareStatement(q.toString());
-                int slot = 1;
-                for (Integer deleteRowId : deleteRowIds) {
-                    delete.setInt(slot, deleteRowId);
-                    slot++;
+                backpack.append("]");
+                StringBuilder locker = new StringBuilder("[");
+                ArrayList lockercontents = inv.get("lockercontents", ArrayList.class);
+                for (int i = 0; i < lockercontents.size(); i++) {
+                    Document item = (Document) lockercontents.get(i);
+                    if (item.getInteger("a") == null) {
+                        locker.append("{}");
+                    } else {
+                        locker.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                    }
+                    if (i < (lockercontents.size() - 1)) {
+                        locker.append(",");
+                    }
                 }
-                System.out.println("DELETE " + q);
-                delete.execute();
-                delete.close();
+                locker.append("]");
+                StringBuilder hotbar = new StringBuilder("[");
+                ArrayList hotbarcontents = inv.get("hotbarcontents", ArrayList.class);
+                for (int i = 0; i < hotbarcontents.size(); i++) {
+                    Document item = (Document) hotbarcontents.get(i);
+                    if (item.getInteger("a") == null) {
+                        hotbar.append("{}");
+                    } else {
+                        hotbar.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                    }
+                    if (i < (hotbarcontents.size() - 1)) {
+                        hotbar.append(",");
+                    }
+                }
+                hotbar.append("]");
+                int packsize = inv.getInteger("packsize");
+                int lockersize = inv.getInteger("lockersize");
+                Resort resort = Resort.fromId(resortID);
+                ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "",
+                        packsize, locker.toString(), generateHash(locker.toString()), "", lockersize, hotbar.toString(), generateHash(hotbar.toString()), "");
+                map.put(resort, resortInventory);
             }
-        } catch (SQLException e) {
-            ErrorUtil.logError("Error in InventoryUtil method getInventoryFromDatabase", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return new InventoryCache(uuid, map);
     }
@@ -367,35 +394,20 @@ public class InventoryUtil {
      */
     private ResortInventory getResortInventoryFromDatabase(UUID uuid, Resort resort) {
         Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return new ResortInventory();
-        }
-        ResortInventory inv = null;
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT id,pack,packsize,locker,lockersize,hotbar,resort FROM storage2 WHERE uuid=? AND resort=?");
-            sql.setString(1, uuid.toString());
-            sql.setInt(2, resort.getId());
-            ResultSet result = sql.executeQuery();
-            if (!result.next()) {
-                result.close();
-                sql.close();
-                return new ResortInventory();
-            }
-            int id = result.getInt("id");
-            String backpack = result.getString("pack");
-            String locker = result.getString("locker");
-            String hotbar = result.getString("hotbar");
-            inv = new ResortInventory(resort, backpack, generateHash(backpack), "",
-                    result.getInt("packsize"), locker, generateHash(locker), "",
-                    result.getInt("lockersize"), hotbar, generateHash(hotbar), "");
-            result.close();
-            sql.close();
-        } catch (SQLException e) {
-            ErrorUtil.logError("Error in InventoryUtil method getResortInventoryFromDatabase", e);
-        }
-        return inv;
+        Document doc = dashboard.getMongoHandler().getParkInventory(uuid, resort);
+
+        BsonArray pack = doc.get("packcontents", BsonArray.class);
+        int backpackSize = doc.getInteger("packsize");
+        BsonArray locker = doc.get("lockercontents", BsonArray.class);
+        int lockerSize = doc.getInteger("lockersize");
+        BsonArray hotbar = doc.get("hotbarcontents", BsonArray.class);
+
+        String backpackJSON = pack.toString();
+        String lockerJSON = locker.toString();
+        String hotbarJSON = hotbar.toString();
+
+        return new ResortInventory(resort, backpackJSON, generateHash(backpackJSON), "", backpackSize, lockerJSON,
+                generateHash(lockerJSON), "", lockerSize, hotbarJSON, generateHash(hotbarJSON), "");
     }
 
     /**
@@ -435,36 +447,54 @@ public class InventoryUtil {
      * @param update class containing all values to change
      */
     private void updateData(UUID uuid, InventoryUpdate update) {
-        HashMap<Resort, HashMap<String, String>> map = update.getMap();
-        for (Map.Entry<Resort, HashMap<String, String>> entry : map.entrySet()) {
-            HashMap<String, String> valueMap = entry.getValue();
-            StringBuilder values = new StringBuilder();
-            List<String> keys = new ArrayList<>(valueMap.keySet());
-            for (int i = 0; i < valueMap.size(); i++) {
-                values.append(keys.get(i).replace("backpack", "pack")).append("=?");
-                if (i < (valueMap.size() - 1)) {
-                    values.append(", ");
-                }
-            }
-            Optional<Connection> optConnection = Launcher.getDashboard().getSqlUtil().getConnection();
-            if (!optConnection.isPresent()) {
-                ErrorUtil.logError("Unable to connect to mysql");
-                return;
-            }
-            try (Connection connection = optConnection.get()) {
-                PreparedStatement sql = connection.prepareStatement("UPDATE storage2 SET " + values + " WHERE uuid=? AND resort=?");
-                int i = 1;
-                for (String s : valueMap.values()) {
-                    sql.setString(i, s);
-                    i++;
-                }
-                sql.setString(i, uuid.toString());
-                sql.setInt(i += 1, entry.getKey().getId());
-                sql.execute();
-                sql.close();
-            } catch (SQLException e) {
-                ErrorUtil.logError("Error in InventoryUtil method updateData", e);
-            }
+        try {
+            Launcher.getDashboard().getMongoHandler().updateInventoryData(uuid, update);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    /**
+     * Convert a JSON string to a Mongo Document
+     *
+     * @param json the JSON string
+     * @return a Mongo document
+     */
+    public static Document getItemFromJson(String json) {
+        JsonObject o = new JsonParser().parse(json).getAsJsonObject();
+        if (!o.has("t")) {
+            return new Document();
+        }
+        Document doc;
+        try {
+            doc = new Document("a", o.get("a").getAsInt()).append("t", o.get("t").getAsInt()).append("da", o.get("da").getAsInt())
+                    .append("du", o.get("du").getAsShort()).append("ta", o.get("ta").getAsString());
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+        return doc;
+    }
+
+    /**
+     * Convert a JSON string to a BsonDocument
+     *
+     * @param json the JSON string
+     * @return a Bsondocument
+     */
+    public static BsonDocument getBsonFromJson(String json) {
+        JsonObject o = new JsonParser().parse(json).getAsJsonObject();
+        if (!o.has("t")) {
+            return new BsonDocument();
+        }
+        BsonDocument doc;
+        try {
+            doc = new BsonDocument("a", new BsonInt32(o.get("a").getAsInt())).append("t", new BsonInt32(o.get("t").getAsInt()))
+                    .append("da", new BsonInt32(o.get("da").getAsInt())).append("du", new BsonInt32(o.get("du").getAsShort()))
+                    .append("ta", o.get("ta") == null ? new BsonString("") : new BsonString(o.get("ta").getAsString()));
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return doc;
     }
 }
