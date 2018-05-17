@@ -31,7 +31,9 @@ public class DiscordCommand extends DashboardCommand {
             }
             if (fullName.toString().contains("#") && fullName.toString().matches("(.*)#(\\d+)")) {
                 DiscordUserInfo userInfo = new DiscordUserInfo(fullName.toString(), player.getUsername(), player.getUniqueId().toString(), player.getRank().toString());
-                SocketConnection.sendLink(userInfo);
+                if (SocketConnection.sendLink(userInfo)) {
+                    player.sendMessage(ChatColor.GREEN + "");
+                }
             } else {
                 player.sendMessage(ChatColor.DARK_RED + "Please specify a valid Discord ID!");
             }

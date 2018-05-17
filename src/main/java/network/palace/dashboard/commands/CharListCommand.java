@@ -26,11 +26,12 @@ public class CharListCommand extends DashboardCommand {
             if (tp.getRank().name().toLowerCase().contains("character")) {
                 String server = tp.getServer();
                 if (servers.containsKey(server)) {
-                    List<String> characters = servers.get(server);
+                    List<String> characters = servers.remove(server);
                     characters.add(tp.getUsername());
-                    servers.replace(server, characters);
+                    servers.put(server, characters);
                 } else {
-                    servers.put(server, Collections.singletonList(tp.getUsername()));
+                    List<String> list = new ArrayList<>(Collections.singletonList(tp.getUsername()));
+                    servers.put(server, list);
                 }
             }
         }

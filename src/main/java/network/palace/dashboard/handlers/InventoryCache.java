@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class InventoryCache {
     @Getter private UUID uuid;
-    @Getter private HashMap<Resort, ResortInventory> resorts = new HashMap<>();
+    @Getter private HashMap<Resort, ResortInventory> resorts;
 
     public void setInventory(Resort resort, ResortInventory inv) {
         resorts.put(resort, inv);

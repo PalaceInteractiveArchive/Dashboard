@@ -21,7 +21,7 @@ public class SocketConnection {
             IO.Options options = new IO.Options();
             options.forceNew = true;
             options.reconnectionAttempts = 1000000;
-            socket = IO.socket(dashboard.getSocketURL(), options);
+            socket = IO.socket(dashboard.getDiscordSocketURL(), options);
         } catch (URISyntaxException e) {
             dashboard.getLogger().info(ChatColor.DARK_RED + "Discord link socket uri syntax error!");
             socket = null;
@@ -34,7 +34,8 @@ public class SocketConnection {
         socket.on("discord:delinkrequest", args -> {
             dashboard.getLogger().info("Got delink request");
             DiscordCacheInfo json = gson.fromJson(args[0].toString(), DiscordCacheInfo.class);
-            dashboard.getSqlUtil().selectAndRemoveDiscord(json);
+            dashboard.getMongoHandler().removeDiscord(json);
+            dashboard.getMongoHandler().insertDiscord(json);
         });
         socket.on(Socket.EVENT_CONNECT, args ->
                 dashboard.getLogger().info(ChatColor.DARK_GREEN + "Discord link socket connected"))
@@ -49,10 +50,11 @@ public class SocketConnection {
         socket.emit("discord:remove", gson.toJson(info));
     }
 
-    public static void sendLink(DiscordUserInfo info) {
-        if (socket == null) return;
-        if (!socket.connected()) return;
+    public static boolean sendLink(DiscordUserInfo info) {
+        if (socket == null) return false;
+        if (!socket.connected()) return false;
         socket.emit("discord:link", gson.toJson(info));
+        return true;
     }
 
     public static void sendNewlink(DiscordCacheInfo info) {

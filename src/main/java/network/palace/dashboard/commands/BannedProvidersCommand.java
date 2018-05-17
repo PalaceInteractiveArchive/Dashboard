@@ -18,7 +18,7 @@ public class BannedProvidersCommand extends DashboardCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
-        List<String> bannedProviders = dashboard.getSqlUtil().getBannedProviders();
+        List<String> bannedProviders = dashboard.getMongoHandler().getBannedProviders();
         if (bannedProviders.isEmpty()) {
             player.sendMessage(ChatColor.GREEN + "No Banned Providers!");
             return;

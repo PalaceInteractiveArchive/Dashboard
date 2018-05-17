@@ -10,17 +10,15 @@ import network.palace.dashboard.packets.PacketID;
 public class PacketAddServer extends BasePacket {
     private String name;
     private String address;
-    private int port;
 
     public PacketAddServer() {
-        this("", "", 0);
+        this("", "");
     }
 
-    public PacketAddServer(String name, String address, int port) {
+    public PacketAddServer(String name, String address) {
         this.id = PacketID.Dashboard.ADDSERVER.getID();
         this.name = name;
         this.address = address;
-        this.port = port;
     }
 
     public String getName() {
@@ -31,14 +29,9 @@ public class PacketAddServer extends BasePacket {
         return address;
     }
 
-    public int getPort() {
-        return port;
-    }
-
     public PacketAddServer fromJSON(JsonObject obj) {
         this.name = obj.get("name").getAsString();
         this.address = obj.get("address").getAsString();
-        this.port = obj.get("port").getAsInt();
         return this;
     }
 
@@ -48,7 +41,6 @@ public class PacketAddServer extends BasePacket {
             obj.addProperty("id", this.id);
             obj.addProperty("name", this.name);
             obj.addProperty("address", this.address);
-            obj.addProperty("port", this.port);
         } catch (Exception e) {
             return null;
         }

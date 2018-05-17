@@ -24,23 +24,27 @@ public class BanProviderCommand extends DashboardCommand {
                 provider.append(" ");
             }
         }
-        ProviderBan ban = new ProviderBan(provider.toString(), player.getUsername());
+        ProviderBan ban = new ProviderBan(provider.toString(), player.getUniqueId().toString());
         dashboard.getSchedulerManager().runAsync(() -> {
-            ProviderBan existing = dashboard.getSqlUtil().getProviderBan(provider.toString());
-            if (existing != null) {
-                player.sendMessage(ChatColor.RED + "This provider is already banned!");
-                return;
-            }
-            dashboard.getSqlUtil().banProvider(ban);
-            for (Player tp : dashboard.getOnlinePlayers()) {
-                if (tp.getIsp().trim().equalsIgnoreCase(provider.toString().trim())) {
-                    try {
-                        tp.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
-                    } catch (Exception ignored) {
+            try {
+                ProviderBan existing = dashboard.getMongoHandler().getProviderBan(provider.toString());
+                if (existing != null) {
+                    player.sendMessage(ChatColor.RED + "This provider is already banned!");
+                    return;
+                }
+                dashboard.getMongoHandler().banProvider(ban);
+                for (Player tp : dashboard.getOnlinePlayers()) {
+                    if (tp.getIsp().trim().equalsIgnoreCase(provider.toString().trim())) {
+                        try {
+                            tp.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                        } catch (Exception ignored) {
+                        }
                     }
                 }
+                dashboard.getModerationUtil().announceBan(ban);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            dashboard.getModerationUtil().announceBan(ban);
         });
     }
 }

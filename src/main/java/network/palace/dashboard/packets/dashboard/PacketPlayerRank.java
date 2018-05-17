@@ -44,7 +44,7 @@ public class PacketPlayerRank extends BasePacket {
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
-            obj.addProperty("rank", this.rank.getSqlName());
+            obj.addProperty("rank", this.rank.getDBName());
         } catch (Exception e) {
             return null;
         }

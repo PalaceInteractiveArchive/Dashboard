@@ -10,6 +10,7 @@ import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -22,10 +23,6 @@ import network.palace.dashboard.utils.chat.JaroWinkler;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,11 +33,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "1.6.6";
+    @Getter public static final String version = "1.8";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
-    @Getter @Setter private SqlUtil sqlUtil = null;
+    @Getter @Setter private MongoHandler mongoHandler;
     @Getter @Setter private ServerUtil serverUtil = null;
     @Getter @Setter private ChatUtil chatUtil = null;
     @Getter @Setter private CommandUtil commandUtil = null;
@@ -48,7 +45,6 @@ public class Dashboard {
     @Getter @Setter private ModerationUtil moderationUtil = null;
     @Getter @Setter private SchedulerManager schedulerManager = null;
     @Getter @Setter private FriendUtil friendUtil;
-    @Getter @Setter private ActivityUtil activityUtil;
     @Getter @Setter private PartyUtil partyUtil;
     @Getter @Setter private SlackUtil slackUtil;
     @Getter @Setter private WarningUtil warningUtil;
@@ -56,6 +52,7 @@ public class Dashboard {
     @Getter @Setter private AFKUtil afkUtil;
     @Getter @Setter private StatUtil statUtil;
     @Getter @Setter private VoteUtil voteUtil;
+    @Getter @Setter private SqlUtil sqlUtil;
     @Getter @Setter private SocketConnection socketConnection;
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
@@ -64,14 +61,13 @@ public class Dashboard {
     @Getter @Setter private double strictThreshold;
     @Getter private JaroWinkler chatAlgorithm = new JaroWinkler();
 
-    @Getter private String socketURL = "";
+    @Getter private String discordSocketURL = "";
 
     @Getter @Setter public Forum forum;
     @Getter @Setter private Random random;
     @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
     @Getter @Setter private Logger errors = Logger.getLogger("Dashboard-Errors");
     @Getter @Setter private Logger playerLog = Logger.getLogger("Dashboard-Players");
-    @Setter private List<String> serverTypes = new ArrayList<>();
     private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
@@ -95,8 +91,8 @@ public class Dashboard {
                     maintenance = Boolean.parseBoolean(line.split("maintenance:")[1]);
                 } else if (line.startsWith("test-network:")) {
                     testNetwork = Boolean.parseBoolean(line.split("test-network:")[1]);
-                } else if (line.startsWith("socketURL:")) {
-                    socketURL = line.split("socketURL:")[1];
+                } else if (line.startsWith("discordSocketURL:")) {
+                    discordSocketURL = line.split("discordSocketURL:")[1];
                 }
                 line = br.readLine();
             }
@@ -105,11 +101,9 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            HashMap<Rank, List<UUID>> staff = getSqlUtil().getPlayersByRanks(Rank.TRAINEE, Rank.MOD, Rank.SRMOD,
-                    Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
-            for (Map.Entry<Rank, List<UUID>> entry : staff.entrySet()) {
-                maintenanceWhitelist.addAll(entry.getValue());
-            }
+            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.MOD, Rank.SRMOD, Rank.DEVELOPER,
+                    Rank.ADMIN, Rank.MANAGER);
+            maintenanceWhitelist.addAll(staff);
         }
     }
 
@@ -137,27 +131,6 @@ public class Dashboard {
         }
     }
 
-    public void loadServerTypes() {
-        serverTypes.clear();
-        Optional<Connection> optConnection = getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return;
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("SELECT name FROM servertypes");
-            ResultSet result = sql.executeQuery();
-            while (result.next()) {
-                serverTypes.add(result.getString("name"));
-            }
-            result.close();
-            sql.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-    }
-
     public void loadJoinServers() {
         joinServers.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("servers.txt"))) {
@@ -181,10 +154,6 @@ public class Dashboard {
 
     public String getCachedName(UUID uuid) {
         return cache.get(uuid);
-    }
-
-    public List<String> getServerTypes() {
-        return new ArrayList<>(serverTypes);
     }
 
     public static List<DashboardSocketChannel> getChannels(PacketConnectionType.ConnectionType type) {
@@ -279,7 +248,7 @@ public class Dashboard {
                 if (s != null) s.changeCount(-1);
             }
             if (player.getTutorial() != null) player.getTutorial().cancel();
-            sqlUtil.logout(player);
+            mongoHandler.logout(player);
         }
         PacketKick packet = new PacketKick("See ya real soon!");
         PacketContainer kick = new PacketContainer(uuid, packet.getJSON().toString());

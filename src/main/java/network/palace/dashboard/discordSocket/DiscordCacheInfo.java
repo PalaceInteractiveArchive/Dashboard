@@ -12,13 +12,13 @@ public class DiscordCacheInfo {
 
     @AllArgsConstructor
     public static class Minecraft {
-        @Getter private String username = "";
-        @Getter private String uuid = "";
-        @Getter @Setter private String rank = "";
+        @Getter private String username;
+        @Getter private String uuid;
+        @Getter @Setter private String rank;
     }
 
     @AllArgsConstructor
     public static class Discord {
-        @Getter private String username = "";
+        @Getter private String username;
     }
 }

@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DiscordUserInfo {
 
-    private String discordID = "";
-    private String minecraftUsername = "";
-    private String minecraftUUID = "";
-    private String minecraftRank = "";
+    private String discordID;
+    private String minecraftUsername;
+    private String minecraftUUID;
+    private String minecraftRank;
 
     @Override
     public String toString() {

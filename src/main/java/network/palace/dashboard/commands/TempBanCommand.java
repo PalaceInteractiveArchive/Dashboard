@@ -5,7 +5,6 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.utils.DateUtil;
 
-import java.sql.Date;
 import java.util.UUID;
 
 public class TempBanCommand extends DashboardCommand {
@@ -36,11 +35,11 @@ public class TempBanCommand extends DashboardCommand {
                 r.append(args[i]).append(" ");
             }
             reason = (r.substring(0, 1).toUpperCase() + r.substring(1)).trim();
-            String source = player.getUsername();
+            String source = player.getUniqueId().toString();
             Player tp = dashboard.getPlayer(username);
             UUID uuid;
             if (tp == null) {
-                uuid = dashboard.getSqlUtil().uuidFromUsername(username);
+                uuid = dashboard.getMongoHandler().usernameToUUID(username);
             } else {
                 uuid = tp.getUniqueId();
             }
@@ -50,7 +49,7 @@ public class TempBanCommand extends DashboardCommand {
                         ". " + ChatColor.RED + "Your Temporary Ban Will Expire in " + ChatColor.AQUA +
                         DateUtil.formatDateDiff(timestamp));
             }
-            dashboard.getSqlUtil().banPlayer(uuid, reason, false, new Date(timestamp), source);
+            dashboard.getMongoHandler().banPlayer(uuid, ban);
             dashboard.getModerationUtil().announceBan(ban);
         });
     }

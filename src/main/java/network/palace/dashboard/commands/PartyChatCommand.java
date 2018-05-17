@@ -42,14 +42,14 @@ public class PartyChatCommand extends DashboardCommand {
             return;
         }
         if (mute.isMuted()) {
-            long releaseTime = mute.getRelease();
+            long releaseTime = mute.getExpires();
             Date currentTime = new Date();
             if (currentTime.getTime() > releaseTime) {
-                dashboard.getSqlUtil().unmutePlayer(player.getUniqueId());
+                dashboard.getMongoHandler().unmutePlayer(player.getUniqueId());
                 player.getMute().setMuted(false);
             } else {
                 String msg = ChatColor.RED + "You are silenced! You will be unsilenced in " +
-                        DateUtil.formatDateDiff(mute.getRelease()) + ".";
+                        DateUtil.formatDateDiff(mute.getExpires()) + ".";
                 if (!mute.getReason().equals("")) {
                     msg += " Reason: " + player.getMute().getReason();
                 }

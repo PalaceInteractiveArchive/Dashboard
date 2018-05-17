@@ -21,16 +21,16 @@ public class UnbanCommand extends DashboardCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 1) {
-            player.sendMessage(ChatColor.RED + "/unban [Username]");
+            player.sendMessage(ChatColor.RED + "/unban [Player] [Username]");
             return;
         }
         String username = args[0];
-        UUID uuid = dashboard.getSqlUtil().uuidFromUsername(username);
+        UUID uuid = dashboard.getMongoHandler().usernameToUUID(username);
         if (uuid == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return;
         }
-        dashboard.getSqlUtil().unbanPlayer(uuid);
+        dashboard.getMongoHandler().unbanPlayer(uuid);
         dashboard.getModerationUtil().announceUnban(username, player.getUsername());
     }
 }

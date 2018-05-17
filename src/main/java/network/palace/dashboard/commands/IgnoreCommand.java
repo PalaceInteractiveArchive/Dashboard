@@ -33,8 +33,8 @@ public class IgnoreCommand extends DashboardCommand {
                 list.sort((o1, o2) -> {
                     String name1 = dashboard.getCachedName(o1.getIgnored());
                     String name2 = dashboard.getCachedName(o2.getIgnored());
-                    if (name1 == null) name1 = dashboard.getSqlUtil().usernameFromUUID(o1.getIgnored());
-                    if (name2 == null) name2 = dashboard.getSqlUtil().usernameFromUUID(o2.getIgnored());
+                    if (name1 == null) name1 = dashboard.getMongoHandler().uuidToUsername(o1.getIgnored());
+                    if (name2 == null) name2 = dashboard.getMongoHandler().uuidToUsername(o2.getIgnored());
                     return name1.toLowerCase().compareTo(name2.toLowerCase());
                 });
                 int listSize = list.size();
@@ -70,17 +70,18 @@ public class IgnoreCommand extends DashboardCommand {
                     return;
                 }
                 String name;
-                UUID uuid = dashboard.getSqlUtil().uuidFromUsername(args[1]);
+                UUID uuid = dashboard.getMongoHandler().usernameToUUID(args[1]);
                 if (uuid == null) {
                     player.sendMessage(ChatColor.RED + "That player can't be found!");
                     return;
                 }
-                Rank rank = dashboard.getSqlUtil().getRank(uuid);
+                Rank rank = dashboard.getMongoHandler().getRank(uuid);
                 if (rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     player.sendMessage(ChatColor.RED + "You can't ignore that player!");
                     return;
                 }
-                name = dashboard.getCachedName(uuid) == null ? dashboard.getSqlUtil().usernameFromUUID(uuid) : dashboard.getCachedName(uuid);
+                name = dashboard.getCachedName(uuid) == null ? dashboard.getMongoHandler().uuidToUsername(uuid) : dashboard.getCachedName(uuid);
+                dashboard.addToCache(uuid, name);
                 player.ignorePlayer(uuid);
                 player.sendMessage(ChatColor.GREEN + "You have ignored " + name);
                 if (dashboard.getServer(player.getServer()).getServerType().equals("Creative"))
@@ -93,12 +94,13 @@ public class IgnoreCommand extends DashboardCommand {
                     return;
                 }
                 String name;
-                UUID uuid = dashboard.getSqlUtil().uuidFromUsername(args[1]);
+                UUID uuid = dashboard.getMongoHandler().usernameToUUID(args[1]);
                 if (uuid == null) {
                     player.sendMessage(ChatColor.RED + "That player can't be found!");
                     return;
                 }
-                name = dashboard.getCachedName(uuid) == null ? dashboard.getSqlUtil().usernameFromUUID(uuid) : dashboard.getCachedName(uuid);
+                name = dashboard.getCachedName(uuid) == null ? dashboard.getMongoHandler().uuidToUsername(uuid) : dashboard.getCachedName(uuid);
+                dashboard.addToCache(uuid, name);
                 dashboard.getSchedulerManager().runAsync(() -> {
                     player.unignorePlayer(uuid);
                     player.sendMessage(ChatColor.GREEN + "You have unignored " + name);
@@ -116,7 +118,7 @@ public class IgnoreCommand extends DashboardCommand {
 
     private String format(long started) {
         Calendar c = new GregorianCalendar();
-        c.setTime(new Date(started * 1000));
+        c.setTime(new Date(started));
         c.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         int hour = c.get(Calendar.HOUR_OF_DAY);
         String am = "am";
@@ -141,7 +143,7 @@ public class IgnoreCommand extends DashboardCommand {
         List<String> list = new ArrayList<>();
         for (IgnoreData data : sender.getIgnoreData()) {
             UUID uuid = data.getIgnored();
-            String name = dashboard.getCachedName(uuid) == null ? dashboard.getSqlUtil().usernameFromUUID(uuid) : dashboard.getCachedName(uuid);
+            String name = dashboard.getCachedName(uuid) == null ? dashboard.getMongoHandler().uuidToUsername(uuid) : dashboard.getCachedName(uuid);
             list.add(name);
         }
         Collections.sort(list);
