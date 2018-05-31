@@ -397,7 +397,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (!s.getServerType().equals(s.getName())) {
                         running = " running " + s.getServerType();
                     }
-                    if (!name.matches(MINIGAME_REGEX)) {
+                    if (!name.matches(MINIGAME_REGEX) && !dashboard.getServerUtil().isMuted(name)) {
                         dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                                 ") has connected to dashboard.");
                     }
@@ -774,8 +774,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     running = " running " + s.getServerType();
                 }
                 s.setOnline(false);
-                if (!name.matches(MINIGAME_REGEX)) {
-                    if (dashboard.getServerUtil().isMuted(name)) return;
+                if (!name.matches(MINIGAME_REGEX) && !dashboard.getServerUtil().isMuted(name)) {
                     dashboard.getModerationUtil().sendMessage(ChatColor.RED +
                             "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
                     SlackMessage m = new SlackMessage("");
