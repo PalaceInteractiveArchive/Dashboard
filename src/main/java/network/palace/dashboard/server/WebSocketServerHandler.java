@@ -572,7 +572,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     String staff = ChatColor.WHITE + "[" + ChatColor.AQUA + source + ChatColor.WHITE + "] " +
                             ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message);
                     for (Player tp : dashboard.getOnlinePlayers()) {
-                        if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.MOD.getRankId()) {
+                        if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                             tp.sendMessage(staff);
                         } else {
                             tp.sendMessage(msg);

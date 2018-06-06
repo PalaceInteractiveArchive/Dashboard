@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "1.8.1";
+    @Getter public static final String version = "1.8.2";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -101,8 +101,8 @@ public class Dashboard {
         }
         if (maintenance) {
             maintenanceWhitelist.clear();
-            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.MOD, Rank.SRMOD, Rank.DEVELOPER,
-                    Rank.ADMIN, Rank.MANAGER);
+            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.SRMOD,
+                    Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
             maintenanceWhitelist.addAll(staff);
         }
     }

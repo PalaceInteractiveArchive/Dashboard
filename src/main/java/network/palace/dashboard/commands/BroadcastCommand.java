@@ -28,7 +28,7 @@ public class BroadcastCommand extends DashboardCommand {
                     sname + ChatColor.WHITE + "] " + ChatColor.GREEN +
                     ChatColor.translateAlternateColorCodes('&', message.toString());
             for (Player tp : dashboard.getOnlinePlayers()) {
-                if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.MOD.getRankId()) {
+                if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                     tp.sendMessage(staff);
                 } else {
                     tp.sendMessage(msg);

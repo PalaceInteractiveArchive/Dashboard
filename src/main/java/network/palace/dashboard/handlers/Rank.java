@@ -6,11 +6,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Rank {
 
-    MANAGER("Manager", ChatColor.RED + "Manager ", ChatColor.RED, ChatColor.YELLOW, true, 11),
-    ADMIN("Admin", ChatColor.RED + "Admin ", ChatColor.RED, ChatColor.YELLOW, true, 11),
-    DEVELOPER("Developer", ChatColor.GOLD + "Developer ", ChatColor.GOLD, ChatColor.YELLOW, true, 11),
-    SRMOD("Sr Mod", ChatColor.YELLOW + "Sr Mod ", ChatColor.YELLOW, ChatColor.GREEN, true, 10),
-    MOD("Mod", ChatColor.GREEN + "Mod ", ChatColor.GREEN, ChatColor.GREEN, true, 9),
+    MANAGER("Manager", ChatColor.RED + "Manager ", ChatColor.RED, ChatColor.YELLOW, true, 12),
+    ADMIN("Admin", ChatColor.RED + "Admin ", ChatColor.RED, ChatColor.YELLOW, true, 12),
+    DEVELOPER("Developer", ChatColor.GOLD + "Developer ", ChatColor.GOLD, ChatColor.YELLOW, true, 12),
+    SRMOD("Sr Mod", ChatColor.YELLOW + "Sr Mod ", ChatColor.YELLOW, ChatColor.GREEN, true, 11),
+    MOD("Mod", ChatColor.GREEN + "Mod ", ChatColor.GREEN, ChatColor.GREEN, true, 10),
+    TRAINEEBUILD("Trainee", ChatColor.DARK_GREEN + "Trainee ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 9),
     TRAINEE("Trainee", ChatColor.DARK_GREEN + "Trainee ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 8),
     CHARACTER("Character", ChatColor.BLUE + "Character ", ChatColor.BLUE, ChatColor.BLUE, false, 7),
     SPECIALGUEST("Special Guest", ChatColor.DARK_PURPLE + "SG ", ChatColor.DARK_PURPLE, ChatColor.WHITE, false, 6),
@@ -36,19 +37,20 @@ public enum Rank {
      * @return rank object
      */
     public static Rank fromString(String name) {
+        if (name == null) return SETTLER;
+        String rankName = name.replaceAll(" ", "");
+
         for (Rank rank : Rank.values()) {
-            if (rank.getName().replaceAll(" ", "").equalsIgnoreCase(name)) return rank;
+            if (rank.getDBName().equalsIgnoreCase(rankName)) return rank;
         }
         return SETTLER;
     }
 
     public String getDBName() {
+        if (this.equals(TRAINEEBUILD)) {
+            return "traineebuild";
+        }
         return name.toLowerCase().replaceAll(" ", "");
-    }
-
-    @Deprecated
-    public String getNameWithBrackets() {
-        return getFormattedName();
     }
 
     /**

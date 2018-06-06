@@ -198,9 +198,9 @@ public class FriendUtil {
                     player.sendMessage(ChatColor.RED + "You have already sent this player a Friend Request!");
                     return;
                 }
-                if (player.getRank().getRankId() < Rank.MOD.getRankId()) {
+                if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
                     if (!dashboard.getMongoHandler().getFriendRequestToggle(tuuid)) {
-                        player.sendMessage(ChatColor.RED + "That player has Friend Requests friendRequestToggle off!");
+                        player.sendMessage(ChatColor.RED + "That player has Friend Requests toggled off!");
                         return;
                     }
                 }
@@ -218,9 +218,9 @@ public class FriendUtil {
             player.sendMessage(ChatColor.RED + "You have already sent this player a Friend Request!");
             return;
         }
-        if (player.getRank().getRankId() < Rank.MOD.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             if (tp.hasFriendToggledOff()) {
-                player.sendMessage(ChatColor.RED + "That player has Friend Requests friendRequestToggle off!");
+                player.sendMessage(ChatColor.RED + "That player has Friend Requests toggled off!");
                 return;
             }
         }
