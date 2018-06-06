@@ -239,13 +239,13 @@ public class ChatUtil {
                 }
             }
             //ChatDelay Check
-            if (time.containsKey(player.getUniqueId()) && System.currentTimeMillis() < time.get(player.getUniqueId())) {
+            if (rank.getRankId() < Rank.CHARACTER.getRankId() && time.containsKey(player.getUniqueId()) && System.currentTimeMillis() - time.get(player.getUniqueId()) < chatDelay) {
                 String response = DashboardConstants.CHAT_DELAY.replaceAll("<TIME>", String.valueOf(chatDelay / 1000));
                 player.sendMessage(response);
                 dashboard.getLogger().info("CANCELLED CHAT EVENT CHAT DELAY");
                 return;
             }
-            time.put(player.getUniqueId(), System.currentTimeMillis() + chatDelay);
+            time.put(player.getUniqueId(), System.currentTimeMillis());
             msg = new StringBuilder(removeCaps(player, msg.toString()));
             String temp = message.trim();
             if (containsSwear(player, temp) || isAdvert(player, temp) ||
