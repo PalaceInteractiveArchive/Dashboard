@@ -492,6 +492,12 @@ public class MongoHandler {
                 HashMap<UUID, String> requests = getRequestList(player.getUniqueId());
                 player.setFriends(friends);
                 player.setRequests(requests);
+                if (requests.size() > 0) {
+                    player.sendMessage(ChatColor.AQUA + "You have " + ChatColor.YELLOW + "" + ChatColor.BOLD +
+                            requests.size() + " " + ChatColor.AQUA +
+                            "pending friend requests! View them with " + ChatColor.YELLOW + ChatColor.BOLD +
+                            "/friend requests");
+                }
                 HashMap<UUID, String> friendList = player.getFriends();
                 if (friendList != null && !silent) {
                     String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
@@ -721,7 +727,9 @@ public class MongoHandler {
             UUID sender = UUID.fromString(doc.getString("sender"));
             UUID receiver = UUID.fromString(doc.getString("receiver"));
             boolean friend = doc.getLong("started") > 0;
-            if ((id == 0 && !friend) || (id == 1 && friend)) {
+            if (id == 0 && !friend && receiver.equals(uuid)) {
+                list.add(sender);
+            } else if (id == 1 && friend) {
                 if (uuid.equals(sender)) {
                     list.add(receiver);
                 } else {
@@ -752,6 +760,11 @@ public class MongoHandler {
                 new Document("receiver", sender.toString()).append("sender", receiver.toString())
         ));
     }
+
+    /*
+    Lego: 9ab3b4c4-71d8-47c9-9e7d-adf040c53d2b
+    Jump: 9be1aee3-6b62-40ad-a7df-ead6314f8bd5
+     */
 
     public void acceptFriendRequest(UUID receiver, UUID sender) {
         friendsCollection.updateOne(new Document("sender", sender.toString()).append("receiver", receiver.toString()),
