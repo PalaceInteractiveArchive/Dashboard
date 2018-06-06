@@ -39,7 +39,7 @@ public class MsgCommand extends DashboardCommand {
             if (dashboard.getChatUtil().isMuted(player)) {
                 return;
             }
-            if (!tp.canRecieveMessages() || tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()) {
+            if (!tp.canRecieveMessages() || (tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId())) {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
             }
@@ -68,6 +68,9 @@ public class MsgCommand extends DashboardCommand {
         }
         if (tp.hasMentions()) {
             tp.mention();
+        }
+        if (player.isIgnored(tp.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "You ignore this player, they won't be able to respond!");
         }
         tp.sendMessage(player.getRank().getFormattedName() + ChatColor.GRAY + " " + player.getUsername() +
                 ChatColor.GREEN + " -> " + ChatColor.LIGHT_PURPLE + "You: " + ChatColor.WHITE + msg);

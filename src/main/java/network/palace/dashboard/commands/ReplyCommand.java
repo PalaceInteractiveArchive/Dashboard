@@ -61,12 +61,16 @@ public class ReplyCommand extends DashboardCommand {
         if (tp.hasMentions()) {
             tp.mention();
         }
+        if (player.isIgnored(tp.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "You ignore this player, they won't be able to respond!");
+        }
         tp.sendMessage(player.getRank().getFormattedName() + ChatColor.GRAY + " " + player.getUsername() +
                 ChatColor.GREEN + " -> " + ChatColor.LIGHT_PURPLE + "You: " + ChatColor.WHITE + msg);
         player.sendMessage(ChatColor.LIGHT_PURPLE + "You " + ChatColor.GREEN + "-> " +
                 tp.getRank().getFormattedName() + ChatColor.GRAY + " " + tp.getUsername() + ": " +
                 ChatColor.WHITE + msg);
         tp.setReply(player.getUniqueId());
+        player.setReply(tp.getUniqueId());
         dashboard.getChatUtil().socialSpyMessage(player, tp, msg.toString(), "reply");
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/reply " + tp.getUsername() + " " + msg);
     }
