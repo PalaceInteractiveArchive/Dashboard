@@ -68,7 +68,19 @@ public class FriendUtil {
                 currentFriends.add(entry.getValue() + ":" + tp.getServer());
             }
         }
-        Collections.sort(currentFriends);
+        currentFriends.sort((o1, o2) -> {
+            boolean c1 = o1.contains(":");
+            boolean c2 = o2.contains(":");
+            if (c1 && c2) {
+                return o1.compareTo(o2);
+            } else if (c1 && !c2) {
+                return -1;
+            } else if (!c1 && c2) {
+                return 1;
+            } else {
+                return o1.compareTo(o2);
+            }
+        });
         List<String> fsOnPage = new ArrayList<>(currentFriends.subList(startAmount, endAmount));
         PacketListFriendCommand packet = new PacketListFriendCommand(player.getUniqueId(), page, maxPage, fsOnPage);
         player.send(packet);

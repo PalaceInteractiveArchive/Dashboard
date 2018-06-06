@@ -78,6 +78,7 @@ public class CommandUtil {
         register("unmute", new UnmuteCommand());
         register("updatehashes", new UpdateHashesCommand());
         register("uptime", new UptimeCommand());
+        register("warn", new WarnCommand());
         register("whereami", new WhereAmICommand());
     }
 

@@ -104,6 +104,10 @@ public class ModerationUtil {
         sendMessage(ChatColor.GREEN + name + ChatColor.RED + " has been unmuted by " + ChatColor.RED + source);
     }
 
+    public void announceWarning(String name, String reason, String source) {
+        sendMessage(ChatColor.GREEN + name + ChatColor.RED + " was issued a warning by " + ChatColor.GREEN + source +
+                ChatColor.RED + " Reason: " + ChatColor.GREEN + reason);
+    }
 
     public void changeChatDelay(int time, String source) {
         sendMessage(ChatColor.GREEN + "The chat delay was set to " + time + " seconds by " + source);

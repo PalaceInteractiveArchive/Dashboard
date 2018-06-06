@@ -59,8 +59,6 @@ public class Launcher {
         }
         dashboard.getLogger().info("Starting up Dashboard...");
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
-        dashboard.setRandom(new Random());
-        dashboard.setSchedulerManager(new SchedulerManager());
         try {
             dashboard.getLogger().info("Initializing MongoDB Handler");
             dashboard.setMongoHandler(new MongoHandler());
@@ -69,10 +67,12 @@ public class Launcher {
             e.printStackTrace();
             System.exit(0);
         }
+        dashboard.loadConfiguration();
+        dashboard.setRandom(new Random());
+        dashboard.setSchedulerManager(new SchedulerManager());
         dashboard.setInventoryUtil(new InventoryUtil());
         dashboard.setModerationUtil(new ModerationUtil());
 
-        dashboard.loadConfiguration();
         dashboard.loadMOTD();
         dashboard.loadJoinServers();
         if (dashboard.isTestNetwork()) {

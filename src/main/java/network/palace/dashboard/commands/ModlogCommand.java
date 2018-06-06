@@ -26,7 +26,7 @@ public class ModlogCommand extends DashboardCommand {
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 1) {
-            player.sendMessage(ChatColor.RED + "/modlog [Username] [Bans/Mutes/Kicks]");
+            player.sendMessage(ChatColor.RED + "/modlog [Username] [Bans/Mutes/Kicks/Warns]");
             return;
         }
         String username = args[0];
@@ -46,8 +46,9 @@ public class ModlogCommand extends DashboardCommand {
             int bans = dashboard.getMongoHandler().getBans(uuid).size();
             int mutes = dashboard.getMongoHandler().getMutes(uuid).size();
             int kicks = dashboard.getMongoHandler().getKicks(uuid).size();
+            int warns = dashboard.getMongoHandler().getWarnings(uuid).size();
             player.sendMessage(ChatColor.GREEN + "Moderation Log for " + username + ": " + ChatColor.YELLOW +
-                    bans + " Bans, " + mutes + " Mutes, " + kicks + " Kicks");
+                    bans + " Bans, " + mutes + " Mutes, " + kicks + " Kicks, " + warns + " Warnings");
         } else {
             String type = args[1].toLowerCase();
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
@@ -119,8 +120,22 @@ public class ModlogCommand extends DashboardCommand {
                     }
                     break;
                 }
+                case "warns":
+                case "warnings": {
+                    player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Warning Log for " + username + ":");
+                    for (Object o : dashboard.getMongoHandler().getWarnings(uuid)) {
+                        Document doc = (Document) o;
+                        String reason = doc.getString("reason");
+                        long time = doc.getLong("time");
+                        String source = ModerationUtil.verifySource(doc.getString("source"));
+                        player.sendMessage(ChatColor.RED + "Reason: " + ChatColor.GREEN + reason.trim() +
+                                ChatColor.RED + " | Source: " + ChatColor.GREEN + source + ChatColor.RED + " | Time: " +
+                                ChatColor.GREEN + df.format(time));
+                    }
+                    break;
+                }
                 default: {
-                    player.sendMessage(ChatColor.RED + "/modlog [Username] [Bans/Mutes/Kicks]");
+                    player.sendMessage(ChatColor.RED + "/modlog [Username] [Bans/Mutes/Kicks/Warns]");
                     break;
                 }
             }

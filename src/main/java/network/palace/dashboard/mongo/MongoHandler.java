@@ -338,8 +338,18 @@ public class MongoHandler {
     }
 
     public void kickPlayer(UUID uuid, Kick kick) {
-        Document kickDocument = new Document("reason", kick.getReason()).append("time", System.currentTimeMillis()).append("source", kick.getSource());
+        Document kickDocument = new Document("reason", kick.getReason())
+                .append("time", System.currentTimeMillis())
+                .append("source", kick.getSource());
         playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("kicks", kickDocument));
+    }
+
+    public void warnPlayer(Warning warning) {
+        Document warningDocument = new Document("reason", warning.getReason())
+                .append("time", System.currentTimeMillis())
+                .append("source", warning.getSource());
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(warning.getUniqueId().toString()),
+                Updates.push("warnings", warningDocument), new UpdateOptions().upsert(true));
     }
 
     public void unbanPlayer(UUID uuid) {
@@ -495,8 +505,8 @@ public class MongoHandler {
                 if (requests.size() > 0) {
                     player.sendMessage(ChatColor.AQUA + "You have " + ChatColor.YELLOW + "" + ChatColor.BOLD +
                             requests.size() + " " + ChatColor.AQUA +
-                            "pending friend requests! View them with " + ChatColor.YELLOW + ChatColor.BOLD +
-                            "/friend requests");
+                            "pending friend request" + (requests.size() > 1 ? "s" : "") + "! View them with " +
+                            ChatColor.YELLOW + ChatColor.BOLD + "/friend requests");
                 }
                 HashMap<UUID, String> friendList = player.getFriends();
                 if (friendList != null && !silent) {
@@ -776,7 +786,15 @@ public class MongoHandler {
     }
 
     public boolean getFriendRequestToggle(UUID uuid) {
-        return getPlayer(uuid, new Document("settings.friendRequestToggle", 1)).getBoolean("settings.friendRequestToggle");
+        Document doc = getPlayer(uuid, new Document("settings", 1));
+        if (doc == null) {
+            return false;
+        }
+        Document settings = (Document) doc.get("settings");
+        if (settings == null) {
+            return false;
+        }
+        return settings.getBoolean("friendRequestToggle");
     }
 
     public void setFriendRequestToggle(UUID uuid, boolean value) {
@@ -928,6 +946,14 @@ public class MongoHandler {
 
     public ArrayList getKicks(UUID uuid) {
         return getPlayer(uuid, new Document("kicks", 1)).get("kicks", ArrayList.class);
+    }
+
+    public ArrayList getWarnings(UUID uuid) {
+        Document doc = getPlayer(uuid, new Document("warnings", 1));
+        if (doc == null || !doc.containsKey("warnings")) {
+            return new ArrayList();
+        }
+        return doc.get("warnings", ArrayList.class);
     }
 
     public void addServer(Server server) {

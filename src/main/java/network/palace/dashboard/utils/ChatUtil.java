@@ -452,7 +452,7 @@ public class ChatUtil {
         Dashboard dashboard = Launcher.getDashboard();
         UUID id = UUID.randomUUID();
         String response = DashboardConstants.SWEAR_WARNING;
-        Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
+        ClickWarning warning = new ClickWarning(id, name, msg, response, System.currentTimeMillis() + 300000);
         dashboard.getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "possibly swears");
         for (Object o : WebSocketServerHandler.getGroup()) {
@@ -468,7 +468,7 @@ public class ChatUtil {
         Dashboard dashboard = Launcher.getDashboard();
         UUID id = UUID.randomUUID();
         String response = DashboardConstants.LINK_WARNING;
-        Warning warning = new Warning(id, name, msg, response, System.currentTimeMillis() + 300000);
+        ClickWarning warning = new ClickWarning(id, name, msg, response, System.currentTimeMillis() + 300000);
         dashboard.getWarningUtil().trackWarning(warning);
         PacketWarning packet = new PacketWarning(id, name, msg, "advertises");
         for (Object o : WebSocketServerHandler.getGroup()) {
