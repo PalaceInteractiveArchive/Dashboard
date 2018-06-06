@@ -162,7 +162,13 @@ public class VoteUtil {
     private void vote(UUID uuid, int serverId) {
         Dashboard dashboard = Launcher.getDashboard();
         try {
-            long lastVote = dashboard.getMongoHandler().getPlayer(uuid, new Document("vote.lastTime", 1)).getLong("lastTime");
+            long lastVote;
+            Document voteDoc = dashboard.getMongoHandler().getPlayer(uuid, new Document("vote", 1));
+            if (voteDoc == null || !voteDoc.containsKey("vote.lastTime")) {
+                lastVote = 0;
+            } else {
+                lastVote = voteDoc.getLong("vote.lastTime");
+            }
             boolean cancel = false;
             if (System.currentTimeMillis() - lastVote <= 21600000) {
                 cancel = true;
