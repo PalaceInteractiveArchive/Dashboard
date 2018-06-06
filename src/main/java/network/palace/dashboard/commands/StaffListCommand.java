@@ -28,6 +28,7 @@ public class StaffListCommand extends DashboardCommand {
             Rank r = tp.getRank();
             if (r.getRankId() >= Rank.TRAINEE.getRankId()) {
                 switch (r) {
+                    case TRAINEEBUILD:
                     case TRAINEE:
                         trainee.add(tp.getUsername() + ":" + tp.getServer());
                         break;
