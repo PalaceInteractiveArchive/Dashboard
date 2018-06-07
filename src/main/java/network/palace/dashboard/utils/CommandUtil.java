@@ -60,6 +60,7 @@ public class CommandUtil {
         register("pchat", new PartyChatCommand());
         register("pmtoggle", new PMToggleCommand());
         register("processes", new ProcessesCommand());
+        register("punishments", new PunishmentsCommand());
         register("reboot", new RebootCommand());
         register("reloadicon", new ReloadIconCommand());
         register("reply", new ReplyCommand());
