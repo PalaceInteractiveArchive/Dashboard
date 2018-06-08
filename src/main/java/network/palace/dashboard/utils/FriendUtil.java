@@ -65,7 +65,11 @@ public class FriendUtil {
             if (tp == null) {
                 currentFriends.add(entry.getValue() == null ? "unknown" : entry.getValue());
             } else {
-                currentFriends.add(entry.getValue() + ":" + tp.getServer());
+                String sname = dashboard.getServer(tp.getServer()).getServerType();
+                if (sname.startsWith("New")) {
+                    sname = sname.replaceAll("New", "");
+                }
+                currentFriends.add(entry.getValue() + ":" + sname);
             }
         }
         currentFriends.sort((o1, o2) -> {
