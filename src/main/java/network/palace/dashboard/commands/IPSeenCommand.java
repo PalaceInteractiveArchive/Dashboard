@@ -30,6 +30,10 @@ public class IPSeenCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.RED + "No users found on that IP Address.");
                 return;
             }
+            if (users.size() > 30) {
+                player.sendMessage(ChatColor.RED + "There are more than 30 players on that IP Address! If you need the list message Legobuilder0813 on Slack.");
+                return;
+            }
             PacketIPSeenCommand packet = new PacketIPSeenCommand(player.getUniqueId(), users, args[0]);
             player.send(packet);
         });
