@@ -65,7 +65,12 @@ public class ChatUtil {
                     int size = messages.size();
                     List<ChatMessage> localMessages = new ArrayList<>();
                     for (int i = 0; i < size; i++) {
-                        localMessages.add(messages.pop());
+                        try {
+                            localMessages.add(messages.pop());
+                        } catch (NoSuchElementException e2) {
+                            e2.printStackTrace();
+                            break;
+                        }
                     }
                     for (ChatMessage msg : localMessages) {
                         dashboard.getMongoHandler().logChat(msg);
@@ -76,6 +81,7 @@ public class ChatUtil {
 //                        dashboard.getMongoHandler().logChat(entry.getKey(), entry.getValue());
 //                    }
                 } catch (Exception e) {
+                    messages.clear();
                     e.printStackTrace();
                     dashboard.getErrors().error("Error logging chat: " + e.getMessage());
                 }
@@ -462,6 +468,7 @@ public class ChatUtil {
             }
             dash.send(packet);
         }
+        dashboard.getSchedulerManager().runAsync(() -> dashboard.getMongoHandler().logInfraction(name, msg));
     }
 
     private void advertMessage(String name, String msg) {
