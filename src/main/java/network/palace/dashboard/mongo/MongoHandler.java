@@ -54,6 +54,7 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> staffLoginCollection = null;
     @Getter private MongoCollection<Document> votingCollection = null;
     @Getter private MongoCollection<Document> warpsCollection = null;
+    @Getter private MongoCollection<Document> infractionsCollection = null;
 
     public MongoHandler() throws IOException {
         String address = "";
@@ -99,6 +100,11 @@ public class MongoHandler {
         staffLoginCollection = database.getCollection("stafflogin");
         votingCollection = database.getCollection("voting");
         warpsCollection = database.getCollection("warps");
+        infractionsCollection = database.getCollection("infractions");
+    }
+
+    public void logInfraction(String name, String message) {
+        infractionsCollection.insertOne(new Document("name", name).append("message", message));
     }
 
     public void createPlayer(Player player) {
