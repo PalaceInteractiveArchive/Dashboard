@@ -54,7 +54,7 @@ public class EmojiUtil {
         return msg;
     }
 
-    public void tabComplete(Player player, String cmd, List<String> args, List<String> results) {
+    public void tabComplete(Player player, int transactionId, String cmd, List<String> args, List<String> results) {
         if (player.getRank().getRankId() < emojiRank.getRankId()) return;
         Dashboard dashboard = Launcher.getDashboard();
 
@@ -79,7 +79,7 @@ public class EmojiUtil {
             results.clear();
             results.addAll(list);
         }
-        PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), cmd, args, results);
+        PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), transactionId, cmd, args, results);
         player.send(packet);
     }
 }

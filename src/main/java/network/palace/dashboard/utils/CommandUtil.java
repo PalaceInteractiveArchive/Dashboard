@@ -141,7 +141,7 @@ public class CommandUtil {
         commands.put(label.toLowerCase(), command);
     }
 
-    public void tabComplete(Player player, String command, List<String> args, List<String> results) {
+    public void tabComplete(Player player, int transactionId, String command, List<String> args, List<String> results) {
         DashboardCommand cmd = null;
         if (!commands.containsKey(command)) {
             for (DashboardCommand c : new ArrayList<>(commands.values())) {
@@ -165,7 +165,7 @@ public class CommandUtil {
             results.clear();
             results.addAll(list);
         }
-        PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), command, args, results);
+        PacketTabComplete packet = new PacketTabComplete(player.getUniqueId(), transactionId, command, args, results);
         player.send(packet);
     }
 

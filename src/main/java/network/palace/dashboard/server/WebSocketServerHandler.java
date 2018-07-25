@@ -106,7 +106,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 return;
             }
             int id = object.get("id").getAsInt();
-            dashboard.getLogger().info(object.toString());
+//            dashboard.getLogger().info(object.toString());
+            System.out.println(object.toString());
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
                 /*
@@ -332,6 +333,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 case 43: {
                     PacketTabComplete packet = new PacketTabComplete().fromJSON(object);
                     UUID uuid = packet.getUniqueId();
+                    int transactionId = packet.getTransactionId();
                     String command = packet.getCommand();
                     List<String> args = packet.getArgs();
                     List<String> results = packet.getResults();
@@ -349,9 +351,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         last = command;
                     }
                     if (last.isEmpty()) {
-                        dashboard.getCommandUtil().tabComplete(tp, command, args, results);
+                        dashboard.getCommandUtil().tabComplete(tp, transactionId, command, args, results);
                     } else {
-                        dashboard.getEmojiUtil().tabComplete(tp, command, args, results);
+                        dashboard.getEmojiUtil().tabComplete(tp, transactionId, command, args, results);
                     }
                     break;
                 }

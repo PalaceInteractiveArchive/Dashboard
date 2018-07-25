@@ -105,7 +105,7 @@ public class JoinCommand extends DashboardCommand {
         String arg = args.get(args.size() - 1);
         for (String s : list) {
             if (s.toLowerCase().startsWith(arg.toLowerCase())) {
-                l2.add(s.toLowerCase());
+                l2.add(s);
             }
         }
         Collections.sort(l2);
