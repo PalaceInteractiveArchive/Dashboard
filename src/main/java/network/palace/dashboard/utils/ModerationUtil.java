@@ -43,26 +43,30 @@ public class ModerationUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                UpdateResult banResult = dashboard.getMongoHandler().getPlayerCollection().updateMany(banFilter, banUpdate);
-                long banCount = banResult.getModifiedCount();
+                try {
+                    UpdateResult banResult = dashboard.getMongoHandler().getPlayerCollection().updateMany(banFilter, banUpdate);
+                    long banCount = banResult.getModifiedCount();
 
-                UpdateResult muteResult = dashboard.getMongoHandler().getPlayerCollection().updateMany(muteFilter, muteUpdate);
-                long muteCount = muteResult.getModifiedCount();
+                    UpdateResult muteResult = dashboard.getMongoHandler().getPlayerCollection().updateMany(muteFilter, muteUpdate);
+                    long muteCount = muteResult.getModifiedCount();
 
-                if (banCount != 0) {
-                    sendMessage(ChatColor.YELLOW + "" + banCount + ChatColor.GREEN +
-                            (banCount == 1 ? " ban that expired was removed" : " bans that expired were removed"));
-                }
+                    if (banCount != 0) {
+                        sendMessage(ChatColor.YELLOW + "" + banCount + ChatColor.GREEN +
+                                (banCount == 1 ? " ban that expired was removed" : " bans that expired were removed"));
+                    }
 
-                if (muteCount != 0) {
-                    sendMessage(ChatColor.YELLOW + "" + muteCount + ChatColor.GREEN +
-                            (muteCount == 1 ? " mute that expired was removed" : " mutes that expired were removed"));
-                    for (Player tp : dashboard.getOnlinePlayers()) {
-                        Mute m = tp.getMute();
-                        if (m.isMuted() && m.getExpires() <= System.currentTimeMillis()) {
-                            m.setMuted(false);
+                    if (muteCount != 0) {
+                        sendMessage(ChatColor.YELLOW + "" + muteCount + ChatColor.GREEN +
+                                (muteCount == 1 ? " mute that expired was removed" : " mutes that expired were removed"));
+                        for (Player tp : dashboard.getOnlinePlayers()) {
+                            Mute m = tp.getMute();
+                            if (m.isMuted() && m.getExpires() <= System.currentTimeMillis()) {
+                                m.setMuted(false);
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }, 10000L, 600000L);
