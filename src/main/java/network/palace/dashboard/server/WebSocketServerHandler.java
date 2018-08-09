@@ -247,14 +247,16 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getMongoHandler().login(player);
                     dashboard.getSchedulerManager().runAsync(() -> {
                         IPUtil.ProviderData data = IPUtil.getProviderData(packet.getAddress());
-                        player.setIsp(data.getIsp());
-                        if (!player.getIsp().isEmpty()) {
-                            ProviderBan ban = dashboard.getMongoHandler().getProviderBan(player.getIsp());
-                            if (ban != null) {
-                                player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                        if (data != null) {
+                            player.setIsp(data.getIsp());
+                            dashboard.getMongoHandler().updateProviderData(player.getUniqueId(), data);
+                            if (!player.getIsp().isEmpty()) {
+                                ProviderBan ban = dashboard.getMongoHandler().getProviderBan(player.getIsp());
+                                if (ban != null) {
+                                    player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
+                                }
                             }
                         }
-                        dashboard.getMongoHandler().updateProviderData(player.getUniqueId(), data);
                     });
                     if (dashboard.isStrictMode())
                         player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
