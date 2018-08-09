@@ -19,7 +19,7 @@ public class PacketTabComplete extends BasePacket {
     private int transactionId;
     private String command;
     private List<String> args;
-    private List<String> results = new ArrayList<>();
+    private List<String> results;
 
     public PacketTabComplete() {
         this(null, 0, "", new ArrayList<>(), new ArrayList<>());
@@ -60,15 +60,19 @@ public class PacketTabComplete extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
-        this.transactionId = obj.get("transactionId").getAsInt();
+        if (obj.get("transactionId") != null) {
+            this.transactionId = obj.get("transactionId").getAsInt();
+        }
         this.command = obj.get("command").getAsString();
         JsonArray args = obj.get("args").getAsJsonArray();
         for (JsonElement e : args) {
             this.args.add(e.getAsString());
         }
-        JsonArray list = obj.get("results").getAsJsonArray();
-        for (JsonElement e : list) {
-            this.results.add(e.getAsString());
+        if (obj.get("results") != null) {
+            JsonArray list = obj.get("results").getAsJsonArray();
+            for (JsonElement e : list) {
+                this.results.add(e.getAsString());
+            }
         }
         return this;
     }

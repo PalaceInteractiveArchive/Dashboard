@@ -65,10 +65,13 @@ public class ChatUtil {
                     int size = messages.size();
                     List<ChatMessage> localMessages = new ArrayList<>();
                     for (int i = 0; i < size; i++) {
+                        if (messages.isEmpty()) break;
                         try {
-                            localMessages.add(messages.pop());
+                            ChatMessage msg = messages.pop();
+                            localMessages.add(msg);
                         } catch (NoSuchElementException e2) {
                             e2.printStackTrace();
+                            messages.clear();
                             break;
                         }
                     }
