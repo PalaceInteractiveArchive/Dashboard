@@ -68,6 +68,7 @@ public class CommandUtil {
         register("send", new SendCommand());
         register("server", new ServerCommand());
         register("social", new SocialCommand());
+        register("spamip", new SpamIPCommand());
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
         register("store", new StoreCommand());

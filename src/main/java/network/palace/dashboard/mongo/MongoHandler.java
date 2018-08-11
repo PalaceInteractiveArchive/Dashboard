@@ -55,6 +55,7 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> votingCollection = null;
     @Getter private MongoCollection<Document> warpsCollection = null;
     @Getter private MongoCollection<Document> infractionsCollection = null;
+    @Getter private MongoCollection<Document> spamIpWhitelist = null;
 
     public MongoHandler() throws IOException {
         String address = "";
@@ -101,6 +102,7 @@ public class MongoHandler {
         votingCollection = database.getCollection("voting");
         warpsCollection = database.getCollection("warps");
         infractionsCollection = database.getCollection("infractions");
+        spamIpWhitelist = database.getCollection("spamipwhitelist");
     }
 
     public void logInfraction(String name, String message) {
@@ -993,6 +995,20 @@ public class MongoHandler {
         Document doc = getPlayer(player.getUniqueId(), new Document("discordUsername", 1));
         if (doc == null || !doc.containsKey("discordUsername")) return null;
         return new DiscordCacheInfo(mc, new DiscordCacheInfo.Discord(doc.getString("discordUsername")));
+    }
+
+    public void addSpamIPWhitelist(SpamIPWhitelist whitelist) {
+        spamIpWhitelist.insertOne(new Document("ip", whitelist.getAddress()).append("limit", whitelist.getLimit()));
+    }
+
+    public SpamIPWhitelist getSpamIPWhitelist(String address) {
+        Document doc = spamIpWhitelist.find(Filters.eq("ip", address)).first();
+        if (doc == null) return null;
+        return new SpamIPWhitelist(doc.getString("ip"), doc.getInteger("limit"));
+    }
+
+    public void removeSpamIPWhitelist(String address) {
+        spamIpWhitelist.deleteMany(Filters.eq("ip", address));
     }
 
     public enum MongoFilter {

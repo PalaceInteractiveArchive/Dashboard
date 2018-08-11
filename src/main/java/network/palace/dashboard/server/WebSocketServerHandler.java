@@ -249,15 +249,48 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         IPUtil.ProviderData data = IPUtil.getProviderData(packet.getAddress());
                         if (data != null) {
                             player.setIsp(data.getIsp());
-                            dashboard.getMongoHandler().updateProviderData(player.getUniqueId(), data);
                             if (!player.getIsp().isEmpty()) {
                                 ProviderBan ban = dashboard.getMongoHandler().getProviderBan(player.getIsp());
                                 if (ban != null) {
                                     player.kickPlayer(ChatColor.RED + "Your ISP (Internet Service Provider) Has Been Blocked From Our Network");
                                 }
                             }
+                            dashboard.getMongoHandler().updateProviderData(player.getUniqueId(), data);
                         }
                     });
+
+                    String address = player.getAddress();
+
+                    int count = 1;
+
+                    for (Player p : dashboard.getOnlinePlayers()) {
+                        if (p.getRank().getRankId() >= Rank.CHARACTER.getRankId()) {
+                            count = 0;
+                            break;
+                        }
+                        if (!p.getUniqueId().equals(player.getUniqueId()) && p.getAddress().equalsIgnoreCase(address)) {
+                            count++;
+                        }
+                    }
+
+                    if (count > 5) {
+                        SpamIPWhitelist whitelist = dashboard.getMongoHandler().getSpamIPWhitelist(address);
+                        int limit = whitelist == null ? 5 : whitelist.getLimit();
+                        if (count > limit) {
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    dashboard.getModerationUtil().announceSpamIPConnect(limit, address);
+                                    player.kickPlayer(ChatColor.RED + "There are already " + ChatColor.GREEN + "" +
+                                            ChatColor.BOLD + limit + " " + ChatColor.RED + "accounts connected from this IP Address.\n" +
+                                            ChatColor.RED + "If you need more than " + ChatColor.GREEN + "" +
+                                            ChatColor.BOLD + limit + " " + ChatColor.RED + "accounts online at a time, email us at " +
+                                            ChatColor.AQUA + "support@thepalacemc.com.");
+                                }
+                            }, 2000L);
+                        }
+                    }
+
                     if (dashboard.isStrictMode())
                         player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
                     break;

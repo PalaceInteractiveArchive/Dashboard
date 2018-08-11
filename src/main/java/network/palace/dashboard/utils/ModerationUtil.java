@@ -130,6 +130,7 @@ public class ModerationUtil {
                 player.sendMessage(msg);
             }
         }
+        dashboard.getLogger().warn(msg);
     }
 
     public void togglePrivate(boolean enabled, String name) {
@@ -167,5 +168,19 @@ public class ModerationUtil {
             }
         }
         return source;
+    }
+
+    public void announceSpamWhitelistAdd(SpamIPWhitelist whitelist) {
+        sendMessage(ChatColor.GREEN + whitelist.getAddress() + " is now whitelisted from Spam IP protection with a limit of " +
+                ChatColor.YELLOW + whitelist.getLimit() + ChatColor.GREEN + " accounts.");
+    }
+
+    public void announceSpamWhitelistRemove(String ip) {
+        sendMessage(ChatColor.GREEN + ip + " is no longer whitelisted from Spam IP protection.");
+    }
+
+    public void announceSpamIPConnect(int limit, String address) {
+        sendMessage(ChatColor.RED + "IP " + ChatColor.GREEN + address + ChatColor.RED +
+                " reached its maximum allowed player count of " + ChatColor.GREEN + limit + ChatColor.RED + " players.");
     }
 }

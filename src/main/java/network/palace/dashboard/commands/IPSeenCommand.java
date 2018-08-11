@@ -25,6 +25,11 @@ public class IPSeenCommand extends DashboardCommand {
             if (ban != null) {
                 player.sendMessage(ChatColor.RED + "This IP Address is banned for " + ChatColor.AQUA + ban.getReason());
             }
+            SpamIPWhitelist spamIPWhitelist = dashboard.getMongoHandler().getSpamIPWhitelist(args[0]);
+            if (spamIPWhitelist != null) {
+                player.sendMessage(ChatColor.GREEN + "This IP Address is whitelisted from Spam IP protection with a player limit of " +
+                        spamIPWhitelist.getLimit() + " players.");
+            }
             List<String> users = dashboard.getMongoHandler().getPlayersOnIP(args[0]);
             if (users == null || users.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "No users found on that IP Address.");
