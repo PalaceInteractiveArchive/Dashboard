@@ -22,8 +22,7 @@ import java.util.regex.Matcher;
  */
 public class ChatUtil {
     private HashMap<UUID, Long> time = new HashMap<>();
-    private HashMap<UUID, String> messageCache = new HashMap<>();
-    //    private HashMap<UUID, List<String>> messages = new HashMap<>();
+    private HashMap<UUID, ChatMessage> messageCache = new HashMap<>();
     private LinkedList<ChatMessage> messages = new LinkedList<>();
     private List<String> mutedChats = new ArrayList<>();
 
@@ -206,7 +205,7 @@ public class ChatUtil {
                         s.startsWith("/eval") || s.startsWith("/evaluate") || s.startsWith("/solve") ||
                         s.startsWith("worldedit:/calc") || s.startsWith("worldedit:/calculate") ||
                         s.startsWith("worldedit:/eval") || s.startsWith("worldedit:/evaluate") ||
-                        s.startsWith("worldedit:/solve"))) {
+                        s.startsWith("worldedit:/solve") || s.startsWith("train") || s.startsWith("cart"))) {
                     player.sendMessage(ChatColor.RED + "That command is disabled.");
                     return;
                 }
@@ -238,14 +237,41 @@ public class ChatUtil {
                 return;
             }
 
-            if (dashboard.isStrictMode()) {
-                String lastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 1];
-                double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
-                if (distance >= dashboard.getStrictThreshold()) {
-                    swearMessage(player.getUsername(), message);
-                    dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
-                    return;
+            if (dashboard.isStrictMode() && !messageCache.isEmpty() && message.length() >= 10) {
+
+                ChatMessage chatMessage = null;
+                for (ChatMessage cached : messageCache.values()) {
+                    if (chatMessage == null) {
+                        chatMessage = cached;
+                        continue;
+                    }
+                    if (cached.getTime() > chatMessage.getTime()) {
+                        chatMessage = cached;
+                    }
                 }
+
+//                ChatMessage chatMessage = (ChatMessage) this.messageCache.values().toArray()[messageCache.size() - 1];
+
+                //Only strict-check messages said within the last 10 seconds
+                if (chatMessage != null && System.currentTimeMillis() - chatMessage.getTime() < 10 * 1000) {
+                    String lastMessage = chatMessage.getMessage();
+                    double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
+                    if (distance >= dashboard.getStrictThreshold()) {
+                        player.sendMessage(ChatColor.RED + "Your message was similar to another recently said in chat and was marked as spam. We apologize if this was done in error, we're constantly improving our chat filter.");
+//                    swearMessage(player.getUsername(), message);
+                        dashboard.getModerationUtil().announceSpamMessage(player.getUsername(), message);
+                        dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
+                        return;
+                    }
+                }
+                /*String secondLastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 2];
+                double secondDistance = dashboard.getChatAlgorithm().similarity(message, secondLastMessage);
+                //Slightly less strict second check
+                if (secondDistance >= (dashboard.getStrictThreshold() * 1.4)) {
+                    swearMessage(player.getUsername(), message);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT SECOND STRICT MODE");
+                    return;
+                }*/
             }
             //ChatDelay Check
             if (rank.getRankId() < Rank.CHARACTER.getRankId() && time.containsKey(player.getUniqueId()) && System.currentTimeMillis() - time.get(player.getUniqueId()) < chatDelay) {
@@ -255,7 +281,21 @@ public class ChatUtil {
                 return;
             }
             time.put(player.getUniqueId(), System.currentTimeMillis());
+
             msg = new StringBuilder(removeCaps(player, msg.toString()));
+            String msgString = msg.toString();
+
+            //Duplicate Message Check
+            if (messageCache.containsKey(player.getUniqueId())) {
+                ChatMessage cachedMessage = messageCache.get(player.getUniqueId());
+                //Block saying the same message within a minute
+                if ((System.currentTimeMillis() - cachedMessage.getTime() < 60 * 1000) && msgString.equalsIgnoreCase(cachedMessage.getMessage())) {
+                    player.sendMessage(DashboardConstants.MESSAGE_REPEAT);
+                    dashboard.getLogger().info("CANCELLED CHAT EVENT DUPLICATE");
+                    return;
+                }
+            }
+
             String temp = message.trim();
             if (containsSwear(player, temp) || isAdvert(player, temp) ||
                     spamCheck(player, temp) || containsUnicode(player, temp)) {
@@ -269,15 +309,8 @@ public class ChatUtil {
                 dashboard.getLogger().info("CANCELLED CHAT EVENT SKYPE");
                 return;
             }
-            //Duplicate Message Check
-            if (messageCache.containsKey(player.getUniqueId())) {
-                if (msg.toString().equalsIgnoreCase(messageCache.get(player.getUniqueId()))) {
-                    player.sendMessage(DashboardConstants.MESSAGE_REPEAT);
-                    dashboard.getLogger().info("CANCELLED CHAT EVENT DUPLICATE");
-                    return;
-                }
-            }
-            messageCache.put(player.getUniqueId(), msg.toString());
+
+            messageCache.put(player.getUniqueId(), new ChatMessage(msgString, System.currentTimeMillis()));
         } else {
             if (msg.toString().startsWith(":warn-")) {
                 dashboard.getWarningUtil().handle(player, msg.toString());
@@ -736,5 +769,10 @@ public class ChatUtil {
 
     public List<String> getMutedChats() {
         return new ArrayList<>(mutedChats);
+    }
+
+    public void logout(UUID uuid) {
+        messageCache.remove(uuid);
+        time.remove(uuid);
     }
 }

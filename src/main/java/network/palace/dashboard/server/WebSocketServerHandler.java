@@ -290,9 +290,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             }, 2000L);
                         }
                     }
-
-                    if (dashboard.isStrictMode())
-                        player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
                     break;
                 }
                 /*

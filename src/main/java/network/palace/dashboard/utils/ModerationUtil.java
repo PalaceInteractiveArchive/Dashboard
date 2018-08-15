@@ -183,4 +183,8 @@ public class ModerationUtil {
         sendMessage(ChatColor.RED + "IP " + ChatColor.GREEN + address + ChatColor.RED +
                 " reached its maximum allowed player count of " + ChatColor.GREEN + limit + ChatColor.RED + " players.");
     }
+
+    public void announceSpamMessage(String username, String message) {
+        sendMessage(ChatColor.GREEN + username + "'s " + ChatColor.RED + "message " + ChatColor.AQUA + message + ChatColor.GREEN + " was marked as potential spam.");
+    }
 }

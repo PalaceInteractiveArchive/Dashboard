@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "1.8.7";
+    @Getter public static final String version = "1.8.8";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -241,6 +241,7 @@ public class Dashboard {
 
     public void logout(UUID uuid) {
         StaffCommand.logout(uuid);
+        chatUtil.logout(uuid);
         Player player = getPlayer(uuid);
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {

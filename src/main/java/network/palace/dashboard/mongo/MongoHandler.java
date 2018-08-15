@@ -459,6 +459,9 @@ public class MongoHandler {
                     player.send(packet);
                 }
 
+                if (dashboard.isStrictMode() && rank.getRankId() >= Rank.TRAINEE.getRankId())
+                    player.sendMessage(ChatColor.RED + "Chat is currently in strict mode!");
+
                 String ip = doc.getString("ip");
                 int protocolVersion = doc.getInteger("minecraftVersion");
                 String username = doc.getString("username");
