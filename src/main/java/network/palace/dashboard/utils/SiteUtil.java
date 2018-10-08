@@ -44,6 +44,8 @@ public class SiteUtil implements HttpHandler {
             List<String> admin = new ArrayList<>();
             List<String> developer = new ArrayList<>();
             List<String> srmod = new ArrayList<>();
+            List<String> srbuilder = new ArrayList<>();
+            List<String> builder = new ArrayList<>();
             List<String> mod = new ArrayList<>();
             List<String> trainee = new ArrayList<>();
             for (Player tp : dashboard.getOnlinePlayers()) {
@@ -56,6 +58,12 @@ public class SiteUtil implements HttpHandler {
                             break;
                         case MOD:
                             mod.add(tp.getUsername());
+                            break;
+                        case BUILDER:
+                            builder.add(tp.getUsername());
+                            break;
+                        case SRBUILDER:
+                            srbuilder.add(tp.getUsername());
                             break;
                         case SRMOD:
                             srmod.add(tp.getUsername());
@@ -75,6 +83,8 @@ public class SiteUtil implements HttpHandler {
             Collections.sort(admin);
             Collections.sort(developer);
             Collections.sort(srmod);
+            Collections.sort(srbuilder);
+            Collections.sort(builder);
             Collections.sort(mod);
             Collections.sort(trainee);
             JsonArray array = new JsonArray();
@@ -133,6 +143,34 @@ public class SiteUtil implements HttpHandler {
                 obj.addProperty("title", "Sr. Mod");
                 obj.addProperty("text", names.toString());
                 obj.addProperty("color", getColor(Rank.SRMOD));
+                array.add(obj);
+            }
+            if (!srbuilder.isEmpty()) {
+                StringBuilder names = new StringBuilder();
+                for (int i = 0; i < srbuilder.size(); i++) {
+                    names.append(srbuilder.get(i));
+                    if (i < (srbuilder.size() - 1)) {
+                        names.append(", ");
+                    }
+                }
+                JsonObject obj = new JsonObject();
+                obj.addProperty("title", "Sr. Builder");
+                obj.addProperty("text", names.toString());
+                obj.addProperty("color", getColor(Rank.SRBUILDER));
+                array.add(obj);
+            }
+            if (!builder.isEmpty()) {
+                StringBuilder names = new StringBuilder();
+                for (int i = 0; i < builder.size(); i++) {
+                    names.append(builder.get(i));
+                    if (i < (builder.size() - 1)) {
+                        names.append(", ");
+                    }
+                }
+                JsonObject obj = new JsonObject();
+                obj.addProperty("title", "Builder");
+                obj.addProperty("text", names.toString());
+                obj.addProperty("color", getColor(Rank.BUILDER));
                 array.add(obj);
             }
             if (!mod.isEmpty()) {
@@ -200,7 +238,9 @@ public class SiteUtil implements HttpHandler {
             case DEVELOPER:
                 return "#FFAA00";
             case SRMOD:
+            case SRBUILDER:
                 return "#FFFF00";
+            case BUILDER:
             case MOD:
                 return "#00FF00";
             case TRAINEE:

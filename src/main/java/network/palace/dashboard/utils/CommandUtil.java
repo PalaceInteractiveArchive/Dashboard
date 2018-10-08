@@ -160,6 +160,7 @@ public class CommandUtil {
         Iterable<String> l = cmd.onTabComplete(player, args);
         List<String> list = new ArrayList<>();
         for (String s : l) {
+            if (s.isEmpty()) continue;
             list.add(s);
         }
         if (!list.isEmpty()) {
