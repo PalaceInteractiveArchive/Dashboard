@@ -20,6 +20,8 @@ public class PacketStaffListCommand extends BasePacket {
     private List<String> admins = new ArrayList<>();
     private List<String> developers = new ArrayList<>();
     private List<String> srmods = new ArrayList<>();
+    private List<String> srbuilders = new ArrayList<>();
+    private List<String> builders = new ArrayList<>();
     private List<String> mods = new ArrayList<>();
     private List<String> trainees = new ArrayList<>();
 
@@ -29,13 +31,15 @@ public class PacketStaffListCommand extends BasePacket {
     }
 
     public PacketStaffListCommand(UUID uuid, List<String> managers, List<String> admins, List<String> developers,
-                                  List<String> srmods, List<String> mods, List<String> trainees) {
+                                  List<String> srmods, List<String> srbuilders, List<String> builders, List<String> mods, List<String> trainees) {
         this.id = PacketID.Dashboard.STAFFLISTCOMMAND.getID();
         this.uuid = uuid;
         this.managers = managers;
         this.admins = admins;
         this.developers = developers;
         this.srmods = srmods;
+        this.srbuilders = srbuilders;
+        this.builders = builders;
         this.mods = mods;
         this.trainees = trainees;
     }
@@ -60,6 +64,14 @@ public class PacketStaffListCommand extends BasePacket {
         return srmods;
     }
 
+    public List<String> getSrbuilders() {
+        return srbuilders;
+    }
+
+    public List<String> getBuilders() {
+        return builders;
+    }
+
     public List<String> getMods() {
         return mods;
     }
@@ -74,28 +86,36 @@ public class PacketStaffListCommand extends BasePacket {
         } catch (Exception e) {
             this.uuid = null;
         }
-        JsonArray may = obj.get("managers").getAsJsonArray();
-        for (JsonElement e : may) {
+        JsonArray man = obj.get("managers").getAsJsonArray();
+        for (JsonElement e : man) {
             this.managers.add(e.getAsString());
         }
-        JsonArray man = obj.get("admins").getAsJsonArray();
-        for (JsonElement e : man) {
+        JsonArray adm = obj.get("admins").getAsJsonArray();
+        for (JsonElement e : adm) {
             this.admins.add(e.getAsString());
         }
         JsonArray dev = obj.get("developers").getAsJsonArray();
         for (JsonElement e : dev) {
             this.developers.add(e.getAsString());
         }
-        JsonArray crd = obj.get("srmods").getAsJsonArray();
-        for (JsonElement e : crd) {
+        JsonArray srm = obj.get("srmods").getAsJsonArray();
+        for (JsonElement e : srm) {
             this.srmods.add(e.getAsString());
         }
-        JsonArray cas = obj.get("mods").getAsJsonArray();
-        for (JsonElement e : cas) {
+        JsonArray srb = obj.get("srbuilders").getAsJsonArray();
+        for (JsonElement e : srb) {
+            this.srbuilders.add(e.getAsString());
+        }
+        JsonArray bldr = obj.get("builders").getAsJsonArray();
+        for (JsonElement e : bldr) {
+            this.builders.add(e.getAsString());
+        }
+        JsonArray mod = obj.get("mods").getAsJsonArray();
+        for (JsonElement e : mod) {
             this.mods.add(e.getAsString());
         }
-        JsonArray ear = obj.get("trainees").getAsJsonArray();
-        for (JsonElement e : ear) {
+        JsonArray trn = obj.get("trainees").getAsJsonArray();
+        for (JsonElement e : trn) {
             this.trainees.add(e.getAsString());
         }
         return this;
@@ -111,6 +131,8 @@ public class PacketStaffListCommand extends BasePacket {
             obj.add("admins", gson.toJsonTree(this.admins).getAsJsonArray());
             obj.add("developers", gson.toJsonTree(this.developers).getAsJsonArray());
             obj.add("srmods", gson.toJsonTree(this.srmods).getAsJsonArray());
+            obj.add("srbuilders", gson.toJsonTree(this.srbuilders).getAsJsonArray());
+            obj.add("builders", gson.toJsonTree(this.builders).getAsJsonArray());
             obj.add("mods", gson.toJsonTree(this.mods).getAsJsonArray());
             obj.add("trainees", gson.toJsonTree(this.trainees).getAsJsonArray());
         } catch (Exception e) {
