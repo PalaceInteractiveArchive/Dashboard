@@ -20,7 +20,7 @@ public class PacketStaffListCommand extends BasePacket {
     private List<String> admins = new ArrayList<>();
     private List<String> developers = new ArrayList<>();
     private List<String> srmods = new ArrayList<>();
-    private List<String> srbuilders = new ArrayList<>();
+    private List<String> architect = new ArrayList<>();
     private List<String> builders = new ArrayList<>();
     private List<String> mods = new ArrayList<>();
     private List<String> trainees = new ArrayList<>();
@@ -31,14 +31,14 @@ public class PacketStaffListCommand extends BasePacket {
     }
 
     public PacketStaffListCommand(UUID uuid, List<String> managers, List<String> admins, List<String> developers,
-                                  List<String> srmods, List<String> srbuilders, List<String> builders, List<String> mods, List<String> trainees) {
+                                  List<String> srmods, List<String> architect, List<String> builders, List<String> mods, List<String> trainees) {
         this.id = PacketID.Dashboard.STAFFLISTCOMMAND.getID();
         this.uuid = uuid;
         this.managers = managers;
         this.admins = admins;
         this.developers = developers;
         this.srmods = srmods;
-        this.srbuilders = srbuilders;
+        this.architect = architect;
         this.builders = builders;
         this.mods = mods;
         this.trainees = trainees;
@@ -64,8 +64,8 @@ public class PacketStaffListCommand extends BasePacket {
         return srmods;
     }
 
-    public List<String> getSrbuilders() {
-        return srbuilders;
+    public List<String> getArchitect() {
+        return architect;
     }
 
     public List<String> getBuilders() {
@@ -102,9 +102,9 @@ public class PacketStaffListCommand extends BasePacket {
         for (JsonElement e : srm) {
             this.srmods.add(e.getAsString());
         }
-        JsonArray srb = obj.get("srbuilders").getAsJsonArray();
+        JsonArray srb = obj.get("architect").getAsJsonArray();
         for (JsonElement e : srb) {
-            this.srbuilders.add(e.getAsString());
+            this.architect.add(e.getAsString());
         }
         JsonArray bldr = obj.get("builders").getAsJsonArray();
         for (JsonElement e : bldr) {
@@ -131,7 +131,7 @@ public class PacketStaffListCommand extends BasePacket {
             obj.add("admins", gson.toJsonTree(this.admins).getAsJsonArray());
             obj.add("developers", gson.toJsonTree(this.developers).getAsJsonArray());
             obj.add("srmods", gson.toJsonTree(this.srmods).getAsJsonArray());
-            obj.add("srbuilders", gson.toJsonTree(this.srbuilders).getAsJsonArray());
+            obj.add("architect", gson.toJsonTree(this.architect).getAsJsonArray());
             obj.add("builders", gson.toJsonTree(this.builders).getAsJsonArray());
             obj.add("mods", gson.toJsonTree(this.mods).getAsJsonArray());
             obj.add("trainees", gson.toJsonTree(this.trainees).getAsJsonArray());
