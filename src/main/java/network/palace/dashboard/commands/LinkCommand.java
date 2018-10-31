@@ -14,7 +14,7 @@ public class LinkCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        if (player.getRank().getRankId() < Rank.DEVELOPER.getRankId()) {
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
             player.sendMessage(ChatColor.YELLOW + "You will be able to link your forum account with your Minecraft account soon!");
             return;
         }
