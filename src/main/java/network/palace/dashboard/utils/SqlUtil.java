@@ -222,9 +222,9 @@ public class SqlUtil {
             sql.execute();
             sql.close();
         }
-        if (username) {
-            Launcher.getDashboard().getForum().updatePlayerName(player.getUniqueId().toString(), player.getUsername());
-        }
+//        if (username) {
+//            Launcher.getDashboard().getForum().updatePlayerName(player.getUniqueId().toString(), player.getUsername());
+//        }
     }
 
     public void updateStaffIP(Player player) {
@@ -911,12 +911,12 @@ public class SqlUtil {
             statement.setString(1, uuid.toString());
             ResultSet result = statement.executeQuery();
             Mute mute = null;
-            while (result.next()) {
-                if (result.getInt("active") == 1) {
+//            while (result.next()) {
+//                if (result.getInt("active") == 1) {
 //                    mute = new Mute(uuid, username, true, result.getTimestamp("release").getTime(),
 //                            result.getString("reason"), result.getString("source"));
-                }
-            }
+//                }
+//            }
             if (mute == null) {
                 result.close();
                 statement.close();

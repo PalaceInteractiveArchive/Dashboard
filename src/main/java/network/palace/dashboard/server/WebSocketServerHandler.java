@@ -15,6 +15,7 @@ import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.BasePacket;
+import network.palace.dashboard.packets.arcade.GameState;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketGetPlayer;
@@ -31,7 +32,6 @@ import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.IPUtil;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -503,11 +503,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             SocketConnection.sendUpdate(info);
                         }
 
-                        try {
+                        /*try {
                             dashboard.forum.updatePlayerRank(uuid.toString(), rank.getDBName());
                         } catch (SQLException e) {
                             e.printStackTrace();
-                        }
+                        }*/
                     });
 
                     break;
@@ -543,7 +543,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         if (tp.getServer().equals(server.getName())) {
                             Server target = dashboard.getServerUtil().getServerByType(name.replaceAll("\\d*$", ""), server.getUniqueId());
                             if (target == null) {
-                                if (server.getServerType().equalsIgnoreCase("hub")) {
+                                if (server.getServerType().equalsIgnoreCase("hub") || name.matches(MINIGAME_REGEX)) {
                                     target = dashboard.getServerUtil().getServerByType("Arcade");
                                 } else {
                                     target = dashboard.getServerUtil().getServerByType("Hub");
@@ -674,7 +674,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (s == null) return;
                     s.setGameState(packet.getState());
                     s.setCount(packet.getPlayerAmount());
+                    s.setGameMaxPlayers(packet.getMaxPlayers());
                     s.setGameNeedsUpdate(true);
+                    for (DashboardSocketChannel ch : Dashboard.getChannels(PacketConnectionType.ConnectionType.INSTANCE)) {
+                        if (!ch.getServerName().startsWith("Arcade")) continue;
+                        ch.send(packet);
+                    }
                     break;
                 }
                 /*
@@ -808,14 +813,22 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     running = " running " + s.getServerType();
                 }
                 s.setOnline(false);
-                if (!name.matches(MINIGAME_REGEX) && !dashboard.getServerUtil().isMuted(name)) {
-                    dashboard.getModerationUtil().sendMessage(ChatColor.RED +
-                            "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
-                    SlackMessage m = new SlackMessage("");
-                    SlackAttachment a = new SlackAttachment("A server instance (" + name + running +
-                            ") has disconnected from Dashboard! #devs");
-                    a.color("danger");
-                    dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
+                if (name.matches(MINIGAME_REGEX)) {
+                    PacketGameStatus packet = new PacketGameStatus(GameState.RESTARTING, 0, 0, name);
+                    for (DashboardSocketChannel ch : Dashboard.getChannels(PacketConnectionType.ConnectionType.INSTANCE)) {
+                        if (!ch.getServerName().startsWith("Arcade")) continue;
+                        ch.send(packet);
+                    }
+                } else {
+                    if (!dashboard.getServerUtil().isMuted(name)) {
+                        dashboard.getModerationUtil().sendMessage(ChatColor.RED +
+                                "A server instance (" + name + running + ") has disconnected from Dashboard!" + addon);
+                        SlackMessage m = new SlackMessage("");
+                        SlackAttachment a = new SlackAttachment("A server instance (" + name + running +
+                                ") has disconnected from Dashboard! #devs");
+                        a.color("danger");
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
+                    }
                 }
                 break;
             }

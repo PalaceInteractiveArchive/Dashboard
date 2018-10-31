@@ -169,7 +169,7 @@ public class ServerUtil {
                 lastHubs = hubs;
                 PacketLobbyData packet = new PacketLobbyData(parks, creative, arcade, hubs);
                 for (Server s : getServers()) {
-                    if (s.getName().startsWith("Hub")) {
+                    if (s.getName().startsWith("Hub") || s.getName().startsWith("Arcade")) {
                         DashboardSocketChannel channel = Dashboard.getInstance(s.getName());
                         if (channel != null) channel.send(packet);
                     }
@@ -186,7 +186,7 @@ public class ServerUtil {
                 List<Server> arcades = getServers().stream().filter(s -> s.getName().startsWith("Arcade")).collect(Collectors.toList());
                 for (Server s : getServers()) {
                     if (!s.getName().matches(WebSocketServerHandler.MINIGAME_REGEX) || !s.isGameNeedsUpdate()) continue;
-                    PacketGameStatus status = new PacketGameStatus(s.getGameState(), s.getCount(), s.getName());
+                    PacketGameStatus status = new PacketGameStatus(s.getGameState(), s.getCount(), s.getGameMaxPlayers(), s.getName());
                     s.setGameNeedsUpdate(false);
                     for (Server arcade : arcades) {
                         DashboardSocketChannel socketChannel = Dashboard.getInstance(arcade.getName());
@@ -345,7 +345,7 @@ public class ServerUtil {
         Server s = null;
         List<Server> servers = new ArrayList<>(this.servers.values());
         for (Server server : servers) {
-            if ((exclude != null && server.getUniqueId().equals(exclude)) || !server.isOnline()) {
+            if ((server.getUniqueId().equals(exclude)) || !server.isOnline()) {
                 continue;
             }
             if (server.getServerType().equalsIgnoreCase(type)) {
@@ -395,7 +395,7 @@ public class ServerUtil {
         Server s = null;
         List<Server> servers = new ArrayList<>(this.servers.values());
         for (Server server : servers) {
-            if ((exclude != null && server.getUniqueId().equals(exclude)) || !server.isOnline()) {
+            if ((server.getUniqueId().equals(exclude)) || !server.isOnline()) {
                 continue;
             }
             if (!server.isPark()) {

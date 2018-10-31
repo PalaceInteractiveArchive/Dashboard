@@ -14,13 +14,14 @@ import network.palace.dashboard.packets.PacketID;
 public class PacketGameStatus extends BasePacket {
 
     public PacketGameStatus() {
-        this(GameState.LOBBY, 0, "");
+        this(GameState.LOBBY, 0, 0, "");
     }
 
-    public PacketGameStatus(GameState state, int playerAmount, String serverName) {
+    public PacketGameStatus(GameState state, int playerAmount, int maxPlayers, String serverName) {
         this.id = PacketID.Arcade.GAMESTATUS.getID();
         this.state = state;
         this.playerAmount = playerAmount;
+        this.maxPlayers = maxPlayers;
         this.serverName = serverName;
     }
 
@@ -33,6 +34,10 @@ public class PacketGameStatus extends BasePacket {
      */
     @Getter private int playerAmount;
     /**
+     * The max number of players that can join.
+     */
+    @Getter private int maxPlayers;
+    /**
      * The full-name of the server: mini-oneshot1
      */
     @Getter private String serverName;
@@ -41,6 +46,7 @@ public class PacketGameStatus extends BasePacket {
     public PacketGameStatus fromJSON(JsonObject obj) {
         this.id = obj.get("id").getAsInt();
         this.playerAmount = obj.get("playerAmount").getAsInt();
+        this.maxPlayers = obj.get("maxPlayers").getAsInt();
         this.serverName = obj.get("serverName").getAsString();
         this.state = GameState.stateFromInt(obj.get("state").getAsInt());
         return this;
@@ -52,6 +58,7 @@ public class PacketGameStatus extends BasePacket {
         try {
             obj.addProperty("id", this.id);
             obj.addProperty("playerAmount", this.playerAmount);
+            obj.addProperty("maxPlayers", this.maxPlayers);
             obj.addProperty("serverName", this.serverName);
             obj.addProperty("state", this.state.getId());
         } catch (Exception e) {

@@ -63,7 +63,7 @@ public class Dashboard {
 
     @Getter private String discordSocketURL = "";
 
-    @Getter @Setter public Forum forum;
+    @Getter @Setter private Forum forum;
     @Getter @Setter private Random random;
     @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
     @Getter @Setter private Logger errors = Logger.getLogger("Dashboard-Errors");

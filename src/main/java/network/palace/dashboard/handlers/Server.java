@@ -17,6 +17,7 @@ public class Server {
     @Getter private String address;
     @Getter private boolean park;
     @Getter @Setter private int count;
+    @Getter @Setter private int gameMaxPlayers;
     @Getter private String serverType;
     @Getter @Setter private boolean online = false;
     @Getter @Setter private boolean inventory = false;

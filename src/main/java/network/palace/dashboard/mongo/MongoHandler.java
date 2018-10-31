@@ -475,6 +475,10 @@ public class MongoHandler {
                                     .append("username", player.getUsername())
                                     .append("minecraftVersion", new BsonInt32(player.getMcVersion()))));
                     if (!username.equals(player.getUsername())) {
+                        int member_id = getForumMemberId(player.getUniqueId());
+                        if (member_id != -1) {
+                            dashboard.getForum().updatePlayerName(player.getUniqueId(), member_id, player.getUsername());
+                        }
                         updatePreviousUsernames(player.getUniqueId(), player.getUsername());
                     }
                 }
@@ -531,7 +535,7 @@ public class MongoHandler {
                     SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
                             " connected from a new IP address " + player.getAddress());
                     a.color("warning");
-                    dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                    dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
                             "You connected with a new IP address, type " + ChatColor.GREEN + "" + ChatColor.BOLD +
                             "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
@@ -1012,6 +1016,44 @@ public class MongoHandler {
 
     public void removeSpamIPWhitelist(String address) {
         spamIpWhitelist.deleteMany(Filters.eq("ip", address));
+    }
+
+    public int getForumMemberId(UUID uuid) {
+        try {
+            Document forumDoc = getPlayer(uuid, new Document("forums", 1));
+            Document forums = (Document) forumDoc.get("forums");
+            return forums.getInteger("member_id");
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    public String getForumLinkingCode(UUID uuid) {
+        try {
+            Document forumDoc = getPlayer(uuid, new Document("forums", 1));
+            Document forums = (Document) forumDoc.get("forums");
+            return forums.getString("linking-code");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setForumLinkingCode(UUID uuid, int member_id, String code) {
+        Document forumDoc = new Document("member_id", member_id).append("linking-code", code);
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("forums", forumDoc));
+    }
+
+    public void setForumAccountData(UUID uuid, int member_id) {
+        Document forumDoc = new Document("member_id", member_id);
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("forums", forumDoc));
+    }
+
+    public void unsetForumLinkingCode(UUID uuid) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.unset("forums.linking-code"));
+    }
+
+    public void unlinkForumAccount(UUID uuid) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.unset("forums"));
     }
 
     public enum MongoFilter {
