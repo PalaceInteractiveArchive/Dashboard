@@ -503,11 +503,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             SocketConnection.sendUpdate(info);
                         }
 
-                        /*try {
-                            dashboard.forum.updatePlayerRank(uuid.toString(), rank.getDBName());
-                        } catch (SQLException e) {
+                        try {
+                            int member_id = dashboard.getMongoHandler().getForumMemberId(player.getUniqueId());
+                            if (member_id != -1) {
+                                dashboard.getForum().updatePlayerRank(uuid, member_id, rank);
+                            }
+                        } catch (Exception e) {
                             e.printStackTrace();
-                        }*/
+                        }
                     });
 
                     break;

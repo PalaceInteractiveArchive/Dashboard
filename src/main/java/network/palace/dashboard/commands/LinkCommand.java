@@ -5,7 +5,6 @@ import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
 
 /**
  * Created by Marc on 12/12/16.
@@ -14,10 +13,10 @@ public class LinkCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
-            player.sendMessage(ChatColor.YELLOW + "You will be able to link your forum account with your Minecraft account soon!");
-            return;
-        }
+//        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
+//            player.sendMessage(ChatColor.YELLOW + "You will be able to link your forum account with your Minecraft account soon!");
+//            return;
+//        }
         if (args.length == 0) {
             player.sendMessage(ChatColor.RED + "/link [email address]");
             return;

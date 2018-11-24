@@ -247,6 +247,22 @@ public class Forum {
         }
     }
 
+    public void updatePlayerRank(UUID uuid, int member_id, Rank rank) {
+        if (rank.getRankId() >= Rank.DEVELOPER.getRankId()) {
+            return;
+        }
+        try (Connection connection = connectionPool.getConnection()) {
+            int forumGroup = getForumGroup(rank);
+            PreparedStatement setForumGroupSql = connection.prepareStatement("UPDATE core_members SET member_group_id=? WHERE member_id=?");
+            setForumGroupSql.setInt(1, forumGroup);
+            setForumGroupSql.setInt(2, member_id);
+            setForumGroupSql.execute();
+            setForumGroupSql.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private int getForumGroup(Rank rank) {
         switch (rank) {
             case MANAGER:
