@@ -98,5 +98,10 @@
     "groupId": "org.mongodb",
     "artifactId": "bson",
     "version": "3.5.0"
+  },
+  {
+    "groupId": "com.goebl",
+    "artifactId": "david-webb",
+    "version": "1.3.0"
   }
 ]

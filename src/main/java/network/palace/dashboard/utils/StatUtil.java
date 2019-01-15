@@ -1,7 +1,9 @@
 package network.palace.dashboard.utils;
 
+import com.goebl.david.Webb;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +17,8 @@ import java.util.TimerTask;
  */
 public class StatUtil {
     private int playerCount = 0;
+    private static final String statsEndpoint = "https://api.palace.network/stats/player";
+    private static final String apiKey = "aXDaexCS5NAS9mIOTRf3As9GS8exI7pMDYGtvS8N60Vl1ZbBcbBjPLEihADgNqmE";
 
     public StatUtil() {
         Dashboard dashboard = Launcher.getDashboard();
@@ -24,18 +28,22 @@ public class StatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                int count;
                 try {
-                    count = dashboard.getOnlinePlayers().size();
+                    playerCount = dashboard.getOnlinePlayers().size();
                 } catch (Exception e) {
-                    count = 0;
+                    playerCount = 0;
                 }
-                if (count != playerCount) {
-                    playerCount = count;
-                }
+                dashboard.getSchedulerManager().runAsync(() -> postToCachet(playerCount));
                 dashboard.getSchedulerManager().runAsync(() -> setValue(playerCount));
             }
-        }, 60000, 60000);
+        }, 10000, 60000);
+    }
+
+    private void postToCachet(int value) {
+        Webb webb = Webb.create();
+        Launcher.getDashboard().getLogger().info("Sending request to API...");
+        JSONObject response = webb.get(statsEndpoint + "/" + value + "?key=" + apiKey).asJsonObject().getBody();
+        Launcher.getDashboard().getLogger().info("Request sent! Response: " + response.toString());
     }
 
     private void setValue(int value) {
