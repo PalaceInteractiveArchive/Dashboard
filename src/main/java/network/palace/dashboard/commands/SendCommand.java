@@ -105,4 +105,9 @@ public class SendCommand extends DashboardCommand {
         }
         return list;
     }
+
+    @Override
+    public boolean doesTabComplete() {
+        return true;
+    }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.Getter;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
 
@@ -14,25 +15,27 @@ import java.util.List;
  * Created by Marc on 9/3/16
  */
 public class PacketCommandList extends BasePacket {
-    private List<String> commands = new ArrayList<>();
+    @Getter private List<String> tabPlayerCommands;
+    @Getter private List<String> generalTabCommands;
 
     public PacketCommandList() {
-        this(new ArrayList<>());
+        this(new ArrayList<>(), new ArrayList<>());
     }
 
-    public PacketCommandList(List<String> commands) {
+    public PacketCommandList(List<String> tabPlayerCommands, List<String> generalTabCommands) {
         this.id = PacketID.Dashboard.COMMANDLIST.getID();
-        this.commands = commands;
-    }
-
-    public List<String> getCommands() {
-        return commands;
+        this.tabPlayerCommands = tabPlayerCommands;
+        this.generalTabCommands = generalTabCommands;
     }
 
     public PacketCommandList fromJSON(JsonObject obj) {
-        JsonArray list = obj.get("commands").getAsJsonArray();
-        for (JsonElement e : list) {
-            this.commands.add(e.getAsString());
+        JsonArray tabPlayerCommands = obj.get("tabPlayerCommands").getAsJsonArray();
+        for (JsonElement e : tabPlayerCommands) {
+            this.tabPlayerCommands.add(e.getAsString());
+        }
+        JsonArray generalTabCommands = obj.get("generalTabCommands").getAsJsonArray();
+        for (JsonElement e : generalTabCommands) {
+            this.generalTabCommands.add(e.getAsString());
         }
         return this;
     }
@@ -42,7 +45,8 @@ public class PacketCommandList extends BasePacket {
         try {
             obj.addProperty("id", this.id);
             Gson gson = new Gson();
-            obj.add("commands", gson.toJsonTree(this.commands).getAsJsonArray());
+            obj.add("tabPlayerCommands", gson.toJsonTree(this.tabPlayerCommands).getAsJsonArray());
+            obj.add("generalTabCommands", gson.toJsonTree(this.generalTabCommands).getAsJsonArray());
         } catch (Exception e) {
             return null;
         }

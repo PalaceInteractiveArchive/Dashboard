@@ -87,4 +87,9 @@ public class ChatCommand extends DashboardCommand {
         }
         return list;
     }
+
+    @Override
+    public boolean doesTabComplete() {
+        return true;
+    }
 }

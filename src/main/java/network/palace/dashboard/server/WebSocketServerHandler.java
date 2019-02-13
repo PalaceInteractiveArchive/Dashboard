@@ -162,13 +162,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     channel.setType(type);
                     switch (type) {
                         case BUNGEECORD: {
-                            dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
-                                    "A new BungeeCord instance has connected to Dashboard.");
-                            SlackMessage m = new SlackMessage("");
-                            SlackAttachment a = new SlackAttachment("A new BungeeCord instance has connected to Dashboard from the IP Address " +
-                                    channel.remoteAddress().getAddress().toString());
-                            a.color("good");
-                            dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                             break;
                         }
                         case DAEMON: {
@@ -208,7 +201,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         }
                         PacketServerList server = new PacketServerList(servers);
                         PacketTargetLobby lobby = new PacketTargetLobby(dashboard.getTargetServer());
-                        PacketCommandList commands = new PacketCommandList(new ArrayList<>(dashboard.getCommandUtil().getCommandsAndAliases()));
+                        PacketCommandList commands = dashboard.getCommandUtil().getTabCompleteCommandPacket();
                         PacketMaintenance maintenance = new PacketMaintenance(dashboard.isMaintenance());
                         PacketBungeeID bungeeID = new PacketBungeeID(channel.getBungeeID());
                         String base64 = Launcher.getDashboard().getServerIconBase64();
@@ -425,29 +418,44 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketServerName packet = new PacketServerName().fromJSON(object);
                     String name = packet.getName();
                     channel.setServerName(name);
-                    Server s = dashboard.getServer(name);
-                    s.setOnline(true);
-                    String running = "";
-                    if (!s.getServerType().equals(s.getName())) {
-                        running = " running " + s.getServerType();
-                    }
-                    if (!name.matches(MINIGAME_REGEX) && !dashboard.getServerUtil().isMuted(name)) {
-                        dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
-                                ") has connected to dashboard.");
-                    }
-                    if (name.startsWith("Arcade")) {
-                        for (Server game : dashboard.getServerUtil().getServers()) {
-                            if (!game.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) continue;
-                            game.setGameNeedsUpdate(true);
+                    switch (channel.getType()) {
+                        case BUNGEECORD: {
+                            dashboard.getModerationUtil().sendMessage(ChatColor.GREEN +
+                                    "A new BungeeCord instance (" + name + ") has connected to Dashboard.");
+                            SlackMessage m = new SlackMessage("");
+                            SlackAttachment a = new SlackAttachment("A new BungeeCord instance (" + name + ") has connected to Dashboard from the IP Address " +
+                                    channel.remoteAddress().getAddress().toString());
+                            a.color("good");
+                            dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
+                            break;
                         }
-                    }
-                    if (name.startsWith("Hub")) {
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                dashboard.getServerUtil().runLobbyDataTask();
+                        case INSTANCE: {
+                            Server s = dashboard.getServer(name);
+                            s.setOnline(true);
+                            String running = "";
+                            if (!s.getServerType().equals(s.getName())) {
+                                running = " running " + s.getServerType();
                             }
-                        }, 5000);
+                            if (!name.matches(MINIGAME_REGEX) && !dashboard.getServerUtil().isMuted(name)) {
+                                dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
+                                        ") has connected to dashboard.");
+                            }
+                            if (name.startsWith("Arcade")) {
+                                for (Server game : dashboard.getServerUtil().getServers()) {
+                                    if (!game.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) continue;
+                                    game.setGameNeedsUpdate(true);
+                                }
+                            }
+                            if (name.startsWith("Hub")) {
+                                new Timer().schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        dashboard.getServerUtil().runLobbyDataTask();
+                                    }
+                                }, 5000);
+                            }
+                            break;
+                        }
                     }
                     break;
                 }

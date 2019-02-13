@@ -1,5 +1,6 @@
 package network.palace.dashboard.handlers;
 
+import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public abstract class DashboardCommand {
     protected List<String> aliases = new ArrayList<>();
     private Rank rank;
-    public boolean tabCompletePlayers = false;
+    @Getter protected boolean tabCompletePlayers = false;
 
     public DashboardCommand() {
         rank = Rank.SETTLER;
@@ -30,7 +31,7 @@ public abstract class DashboardCommand {
         return new ArrayList<>(aliases);
     }
 
-    public boolean doTabCompletePlayers() {
+    public boolean doesTabComplete() {
         return tabCompletePlayers;
     }
 

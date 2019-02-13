@@ -4,6 +4,7 @@ import network.palace.dashboard.commands.*;
 import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.packets.dashboard.PacketCommandList;
 import network.palace.dashboard.packets.dashboard.PacketTabComplete;
 
 import java.util.*;
@@ -99,17 +100,7 @@ public class CommandUtil {
                 args[i] = s;
                 i++;
             }
-            DashboardCommand cmd = null;
-            if (!commands.containsKey(command)) {
-                for (DashboardCommand c : new ArrayList<>(commands.values())) {
-                    if (c.getAliases().contains(command)) {
-                        cmd = c;
-                        break;
-                    }
-                }
-            } else {
-                cmd = commands.get(command);
-            }
+            DashboardCommand cmd = findCommand(command);
             if (cmd == null) {
                 return false;
             }
@@ -143,17 +134,7 @@ public class CommandUtil {
     }
 
     public void tabComplete(Player player, int transactionId, String command, List<String> args, List<String> results) {
-        DashboardCommand cmd = null;
-        if (!commands.containsKey(command)) {
-            for (DashboardCommand c : new ArrayList<>(commands.values())) {
-                if (c.getAliases().contains(command)) {
-                    cmd = c;
-                    break;
-                }
-            }
-        } else {
-            cmd = commands.get(command);
-        }
+        DashboardCommand cmd = findCommand(command);
         if (cmd == null) {
             return;
         }
@@ -171,12 +152,34 @@ public class CommandUtil {
         player.send(packet);
     }
 
-    public List<String> getCommandsAndAliases() {
-        List<String> list = new ArrayList<>();
-        for (Map.Entry<String, DashboardCommand> entry : commands.entrySet()) {
-            list.add(entry.getKey());
-            list.addAll(entry.getValue().getAliases());
+    private DashboardCommand findCommand(String s) {
+        DashboardCommand cmd = null;
+        if (!commands.containsKey(s)) {
+            for (DashboardCommand c : new ArrayList<>(commands.values())) {
+                if (c.getAliases().contains(s)) {
+                    cmd = c;
+                    break;
+                }
+            }
+        } else {
+            cmd = commands.get(s);
         }
-        return list;
+        return cmd;
+    }
+
+    public PacketCommandList getTabCompleteCommandPacket() {
+        List<String> tabPlayerCommands = new ArrayList<>();
+        List<String> generalTabCommands = new ArrayList<>();
+        for (Map.Entry<String, DashboardCommand> entry : commands.entrySet()) {
+            DashboardCommand cmd = entry.getValue();
+            if (cmd.isTabCompletePlayers()) {
+                tabPlayerCommands.add(entry.getKey());
+                tabPlayerCommands.addAll(cmd.getAliases());
+            } else if (cmd.doesTabComplete()) {
+                generalTabCommands.add(entry.getKey());
+                generalTabCommands.addAll(cmd.getAliases());
+            }
+        }
+        return new PacketCommandList(tabPlayerCommands, generalTabCommands);
     }
 }

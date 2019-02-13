@@ -44,8 +44,7 @@ public class BungeeCountsCommand extends DashboardCommand {
                     break;
                 }
             }
-            String addr = channel.remoteAddress().getAddress().getHostAddress() + ":" + channel.remoteAddress().getPort();
-            player.sendMessage(ChatColor.GREEN + "Bungee (" + addr + ") " + counts.get(channel.getBungeeID()));
+            player.sendMessage(ChatColor.GREEN + "Bungee (" + channel.getServerName() + "): " + counts.get(channel.getBungeeID()));
         }
     }
 }

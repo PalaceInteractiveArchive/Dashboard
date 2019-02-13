@@ -175,4 +175,9 @@ public class ServerCommand extends DashboardCommand {
         Collections.sort(l2);
         return l2;
     }
+
+    @Override
+    public boolean doesTabComplete() {
+        return true;
+    }
 }

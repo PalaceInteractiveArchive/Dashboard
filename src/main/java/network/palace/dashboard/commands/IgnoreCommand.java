@@ -137,6 +137,15 @@ public class IgnoreCommand extends DashboardCommand {
                 c.get(Calendar.YEAR) + " at " + hour + ":" + min + am;
     }
 
+    public void helpMenu(Player player) {
+        player.sendMessage(ChatColor.YELLOW + "Use /ignore to hide messages from players\n" +
+                ChatColor.GREEN + "Ignore Commands:\n" + ChatColor.YELLOW + "/ignore list [page] " +
+                ChatColor.AQUA + "- List ignored players\n" + ChatColor.YELLOW + "/ignore add [player] " +
+                ChatColor.AQUA + "- Ignore a player\n" + ChatColor.YELLOW + "/ignore remove [player] " +
+                ChatColor.AQUA + "- Unignore a player\n" + ChatColor.YELLOW + "/ignore help " +
+                ChatColor.AQUA + "- Show this help menu");
+    }
+
     @Override
     public Iterable<String> onTabComplete(Player sender, List<String> args) {
         Dashboard dashboard = Launcher.getDashboard();
@@ -161,12 +170,8 @@ public class IgnoreCommand extends DashboardCommand {
         return l2;
     }
 
-    public void helpMenu(Player player) {
-        player.sendMessage(ChatColor.YELLOW + "Use /ignore to hide messages from players\n" +
-                ChatColor.GREEN + "Ignore Commands:\n" + ChatColor.YELLOW + "/ignore list [page] " +
-                ChatColor.AQUA + "- List ignored players\n" + ChatColor.YELLOW + "/ignore add [player] " +
-                ChatColor.AQUA + "- Ignore a player\n" + ChatColor.YELLOW + "/ignore remove [player] " +
-                ChatColor.AQUA + "- Unignore a player\n" + ChatColor.YELLOW + "/ignore help " +
-                ChatColor.AQUA + "- Show this help menu");
+    @Override
+    public boolean doesTabComplete() {
+        return true;
     }
 }

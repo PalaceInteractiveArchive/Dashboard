@@ -73,7 +73,7 @@ public class JoinCommand extends DashboardCommand {
         String t = s.replaceAll("\\d", "");
         if (t.length() < 4 && !t.equalsIgnoreCase("hub")) {
             for (char c : s.toCharArray()) {
-                ns.append(Character.toString(Character.toUpperCase(c)));
+                ns.append(Character.toUpperCase(c));
             }
             return ns.toString();
         }
@@ -81,13 +81,13 @@ public class JoinCommand extends DashboardCommand {
         for (char c : s.toCharArray()) {
             if (last == null) {
                 last = c;
-                ns.append(Character.toString(Character.toUpperCase(c)));
+                ns.append(Character.toUpperCase(c));
                 continue;
             }
             if (Character.toString(last).equals(" ")) {
-                ns.append(Character.toString(Character.toUpperCase(c)));
+                ns.append(Character.toUpperCase(c));
             } else {
-                ns.append(Character.toString(c));
+                ns.append(c);
             }
             last = c;
         }
@@ -110,5 +110,10 @@ public class JoinCommand extends DashboardCommand {
         }
         Collections.sort(l2);
         return l2;
+    }
+
+    @Override
+    public boolean doesTabComplete() {
+        return true;
     }
 }
