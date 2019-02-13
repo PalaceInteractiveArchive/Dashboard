@@ -15,7 +15,7 @@ import java.util.UUID;
  * Created by Marc on 12/3/16
  */
 public class PacketPlayerListInfo extends BasePacket {
-    private List<Player> players = new ArrayList<>();
+    private List<Player> players;
 
     public PacketPlayerListInfo() {
         this(new ArrayList<>());

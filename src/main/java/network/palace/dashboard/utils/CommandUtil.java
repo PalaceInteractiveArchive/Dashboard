@@ -23,6 +23,7 @@ public class CommandUtil {
         register("banip", new BanIPCommand());
         register("bannedproviders", new BannedProvidersCommand());
         register("banprovider", new BanProviderCommand());
+        register("bconfig", new BConfigCommand());
         register("bseen", new BseenCommand());
         register("bug", new Bugcommand());
         register("bungeecounts", new BungeeCountsCommand());
