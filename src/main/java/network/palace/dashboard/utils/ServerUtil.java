@@ -183,7 +183,7 @@ public class ServerUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                List<Server> arcades = getServers().stream().filter(s -> s.getName().startsWith("Arcade")).collect(Collectors.toList());
+                List<Server> arcades = getServers().stream().filter(Server::isArcade).collect(Collectors.toList());
                 for (Server s : getServers()) {
                     if (!s.getName().matches(WebSocketServerHandler.MINIGAME_REGEX) || !s.isGameNeedsUpdate()) continue;
                     PacketGameStatus status = new PacketGameStatus(s.getGameState(), s.getCount(), s.getGameMaxPlayers(), s.getName());

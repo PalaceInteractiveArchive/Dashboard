@@ -23,6 +23,7 @@ public class Server {
     @Getter @Setter private boolean inventory = false;
     @Getter @Setter private GameState gameState = GameState.LOBBY;
     @Getter @Setter private boolean gameNeedsUpdate = true;
+    @Getter @Setter private boolean arcade = false;
 
     public Server(String name, String address, boolean park, int count, String serverType) {
         this.name = name;

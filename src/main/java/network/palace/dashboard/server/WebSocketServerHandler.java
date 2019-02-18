@@ -440,12 +440,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                                         ") has connected to dashboard.");
                             }
-                            if (name.startsWith("Arcade")) {
-                                for (Server game : dashboard.getServerUtil().getServers()) {
-                                    if (!game.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) continue;
-                                    game.setGameNeedsUpdate(true);
-                                }
-                            }
                             if (name.startsWith("Hub")) {
                                 new Timer().schedule(new TimerTask() {
                                     @Override
@@ -683,6 +677,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketGameStatus packet = new PacketGameStatus().fromJSON(object);
                     Server s = dashboard.getServerUtil().getServer(packet.getServerName());
                     if (s == null) return;
+                    if (s.getName().startsWith("Arcade")) {
+                        s.setArcade(true);
+                        for (Server game : dashboard.getServerUtil().getServers()) {
+                            if (!game.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) continue;
+                            game.setGameNeedsUpdate(true);
+                        }
+                        break;
+                    }
                     s.setGameState(packet.getState());
                     s.setCount(packet.getPlayerAmount());
                     s.setGameMaxPlayers(packet.getMaxPlayers());
@@ -824,6 +826,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     running = " running " + s.getServerType();
                 }
                 s.setOnline(false);
+                s.setInventory(false);
+                s.setGameState(GameState.LOBBY);
+                s.setGameNeedsUpdate(true);
+                s.setArcade(false);
                 if (name.matches(MINIGAME_REGEX)) {
                     PacketGameStatus packet = new PacketGameStatus(GameState.RESTARTING, 0, 0, name);
                     for (DashboardSocketChannel ch : Dashboard.getChannels(PacketConnectionType.ConnectionType.INSTANCE)) {
