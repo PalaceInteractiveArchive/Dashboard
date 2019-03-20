@@ -677,7 +677,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketGameStatus packet = new PacketGameStatus().fromJSON(object);
                     Server s = dashboard.getServerUtil().getServer(packet.getServerName());
                     if (s == null) return;
-                    if (s.getName().startsWith("Arcade")) {
+                    if (s.getName().equals("Arcade")) {
                         s.setArcade(true);
                         for (Server game : dashboard.getServerUtil().getServers()) {
                             if (!game.getName().matches(WebSocketServerHandler.MINIGAME_REGEX)) continue;
