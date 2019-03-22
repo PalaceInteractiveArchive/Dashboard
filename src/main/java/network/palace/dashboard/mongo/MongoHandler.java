@@ -362,7 +362,7 @@ public class MongoHandler {
 
     public void unbanPlayer(UUID uuid) {
         playerCollection.updateMany(new Document("uuid", uuid.toString()).append("bans.active", true),
-                new Document("$set", new Document("bans.$.active", false).append("expires", System.currentTimeMillis())));
+                new Document("$set", new Document("bans.$.active", false).append("bans.$.expires", System.currentTimeMillis())));
     }
 
     public void banPlayer(UUID uuid, Ban ban) {
@@ -424,6 +424,12 @@ public class MongoHandler {
         login(player, false);
     }
 
+    /**
+     * Initial login method where all player data is collected from the database and stored properly
+     *
+     * @param player The player object
+     * @param silent true if processing after Dashboard restart where no login messages should be sent, false if normal login
+     */
     public void login(Player player, boolean silent) {
         Dashboard dashboard = Launcher.getDashboard();
 
@@ -432,12 +438,18 @@ public class MongoHandler {
                 // Check if the uuid is from MCLeaks before we continue.
                 boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
                 if (isMCLeaks) {
-                    // UUID is in MCLeaks, temp ban the account
-                    Ban ban = new Ban(player.getUniqueId(), player.getUsername(), true, System.currentTimeMillis(), "MCLeaks Account", "Dashboard");
-                    banPlayer(player.getUniqueId(), ban);
-                    dashboard.getModerationUtil().announceBan(ban);
-                    player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on the Palace Network\n" +
-                            ChatColor.AQUA + "If you think were banned incorrectly, submit an appeal at palnet.us/appeal");
+                    // UUID is in MCLeaks, temp ban the account for 3 days
+                    Ban tempBan = new Ban(player.getUniqueId(), player.getUsername(), false, System.currentTimeMillis() + (3 * 24 * 60 * 60 * 1000), "MCLeaks Account", "Dashboard");
+                    banPlayer(player.getUniqueId(), tempBan);
+                    dashboard.getModerationUtil().announceBan(tempBan);
+
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            player.kickPlayer(ChatColor.RED + "MCLeaks Accounts are not allowed on Palace Network\n" +
+                                    ChatColor.AQUA + "If you think you were banned incorrectly, submit an appeal at palnet.us/appeal");
+                        }
+                    }, 1000);
                 }
             });
         }
