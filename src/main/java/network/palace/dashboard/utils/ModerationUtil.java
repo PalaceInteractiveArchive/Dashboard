@@ -24,14 +24,7 @@ import java.util.UUID;
 public class ModerationUtil {
 
     public ModerationUtil() {
-        Bson banFilter = Filters.elemMatch("bans", new BsonDocument("active", new BsonBoolean(true))
-                .append("permanent", new BsonBoolean(false))
-                .append("expires", new BsonDocument("$lt", new BsonInt64(System.currentTimeMillis()))));
-
         Bson banUpdate = Updates.set("bans.$.active", new BsonBoolean(false));
-
-        Bson muteFilter = Filters.elemMatch("mutes", new BsonDocument("active", new BsonBoolean(true))
-                .append("expires", new BsonDocument("$lt", new BsonInt64(System.currentTimeMillis()))));
 
         Bson muteUpdate = Updates.set("mutes.$.active", new BsonBoolean(false));
 
@@ -43,6 +36,13 @@ public class ModerationUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
+                Bson banFilter = Filters.elemMatch("bans", new BsonDocument("active", new BsonBoolean(true))
+                        .append("permanent", new BsonBoolean(false))
+                        .append("expires", new BsonDocument("$lt", new BsonInt64(System.currentTimeMillis()))));
+
+                Bson muteFilter = Filters.elemMatch("mutes", new BsonDocument("active", new BsonBoolean(true))
+                        .append("expires", new BsonDocument("$lt", new BsonInt64(System.currentTimeMillis()))));
+
                 try {
                     UpdateResult banResult = dashboard.getMongoHandler().getPlayerCollection().updateMany(banFilter, banUpdate);
                     long banCount = banResult.getModifiedCount();
@@ -69,7 +69,7 @@ public class ModerationUtil {
                     e.printStackTrace();
                 }
             }
-        }, 10000L, 600000L);
+        }, 10 * 1000, 600 * 1000L);
     }
 
     public void announceBan(Ban ban) {
