@@ -39,34 +39,22 @@ public class BseenCommand extends DashboardCommand {
                     return;
                 }
                 Rank rank;
+                SponsorTier tier;
                 long lastLogin;
                 String ip;
                 Mute mute;
                 String server;
                 if (online) {
                     rank = tp.getRank();
+                    tier = tp.getSponsorTier();
                     lastLogin = tp.getLoginTime();
                     ip = tp.getAddress();
                     mute = tp.getMute();
                     server = tp.getServer();
                 } else {
-//                try (Connection connection = optConnection.get()) {
-//                    PreparedStatement sql = connection.prepareStatement("SELECT rank,lastseen,ipAddress,server FROM player_data WHERE uuid=?");
-//                    sql.setString(1, uuid.toString());
-//                    ResultSet result = sql.executeQuery();
-//                    if (result.next()) {
-//                        rank = Rank.fromString(result.getString("rank"));
-//                        lastLogin = result.getTimestamp("lastseen").getTime();
-//                        ip = result.getString("ipAddress");
-//                        server = result.getString("server");
-//                    }
-//                    result.close();
-//                    sql.close();
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
                     BseenData data = dashboard.getMongoHandler().getBseenInformation(uuid);
                     rank = data.getRank();
+                    tier = data.getSponsorTier();
                     lastLogin = data.getLastLogin();
                     ip = data.getIpAddress();
                     server = data.getServer();
@@ -88,6 +76,8 @@ public class BseenCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.GREEN + name + " has been " + (online ? "online" : "away") + " for " +
                         DateUtil.formatDateDiff(lastLogin));
                 player.sendMessage(ChatColor.RED + "Rank: " + rank.getFormattedName());
+                if (!tier.equals(SponsorTier.NONE))
+                    player.sendMessage(ChatColor.RED + "Sponsor: " + tier.getColor() + tier.getName());
                 player.send(packet);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -456,8 +456,8 @@ public class MongoHandler {
 
         dashboard.getSchedulerManager().runAsync(() -> {
             try {
-                Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("ip", 1)
-                        .append("username", 1).append("friendRequestToggle", 1).append("onlineTime", 1)
+                Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("sponsor", 1)
+                        .append("ip", 1).append("username", 1).append("friendRequestToggle", 1).append("onlineTime", 1)
                         .append("tutorial", 1).append("minecraftVersion", 1).append("settings", 1));
                 if (doc == null) {
                     createPlayer(player);
@@ -465,9 +465,17 @@ public class MongoHandler {
                 }
                 long ot = doc.getLong("onlineTime");
                 player.setOnlineTime(ot == 0 ? 1 : ot);
+
                 Rank rank = Rank.fromString(doc.getString("rank"));
-                if (!rank.equals(Rank.SETTLER)) {
-                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank);
+                SponsorTier tier;
+                if (doc.containsKey("sponsor")) {
+                    tier = SponsorTier.fromString(doc.getString("sponsor"));
+                } else {
+                    tier = SponsorTier.NONE;
+                }
+
+                if (!rank.equals(Rank.SETTLER) || !tier.equals(SponsorTier.NONE)) {
+                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank, tier);
                     player.send(packet);
                 }
 
@@ -498,6 +506,7 @@ public class MongoHandler {
 
                 player.setDisabled(disable);
                 player.setRank(rank);
+                player.setSponsorTier(tier);
                 player.setFriendRequestToggle(!settings.getBoolean("friendRequestToggle"));
                 player.setMentions(settings.getBoolean("mentions"));
                 player.setNewGuest(!doc.getBoolean("tutorial"));
@@ -667,9 +676,21 @@ public class MongoHandler {
      */
     public Rank getRank(UUID uuid) {
         if (uuid == null) return Rank.SETTLER;
-        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).first();
-        if (result == null) return Rank.SETTLER;
+        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(new Document("rank", 1)).first();
+        if (result == null || !result.containsKey("rank")) return Rank.SETTLER;
         return Rank.fromString(result.getString("rank"));
+    }
+
+    public SponsorTier getSponsorTier(UUID uuid) {
+        if (uuid == null) return SponsorTier.NONE;
+        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(new Document("sponsor", 1)).first();
+        if (result == null || !result.containsKey("sponsor")) return SponsorTier.NONE;
+        return SponsorTier.fromString(result.getString("sponsor"));
+    }
+
+    public void setSponsorTier(UUID uuid, SponsorTier tier) {
+        if (uuid == null || tier == null) return;
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), tier.equals(SponsorTier.NONE) ? Updates.unset("sponsor") : Updates.set("sponsor", tier.getDBName()));
     }
 
     /**
@@ -701,15 +722,16 @@ public class MongoHandler {
     }
 
     public BseenData getBseenInformation(UUID uuid) {
-        Document player = getPlayer(uuid, new Document("username", 1).append("rank", 1).append("lastOnline", 1)
-                .append("ip", 1).append("mutes", 1).append("server", 1));
+        Document player = getPlayer(uuid, new Document("username", 1).append("rank", 1).append("sponsor", 1)
+                .append("lastOnline", 1).append("ip", 1).append("mutes", 1).append("server", 1));
         if (player == null) return null;
         Rank rank = Rank.fromString(player.getString("rank"));
+        SponsorTier tier = SponsorTier.fromString(player.getString("sponsor"));
         long lastLogin = player.getLong("lastOnline");
         String ipAddress = player.getString("ip");
         Mute mute = getCurrentMute(uuid);
         String server = player.getString("server");
-        return new BseenData(uuid, rank, lastLogin, ipAddress, mute, server);
+        return new BseenData(uuid, rank, tier, lastLogin, ipAddress, mute, server);
     }
 
     public void staffClock(UUID uuid, boolean b) {

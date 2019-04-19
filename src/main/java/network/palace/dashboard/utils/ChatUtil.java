@@ -163,6 +163,7 @@ public class ChatUtil {
         if (player.isNewGuest() && !message.startsWith("/")) return;
 
         Rank rank = player.getRank();
+        SponsorTier tier = player.getSponsorTier();
         boolean trainee = rank.getRankId() >= Rank.TRAINEE.getRankId();
         if (trainee) {
             if (player.isAFK()) {
@@ -354,7 +355,7 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
                 m = ChatColor.translateAlternateColorCodes('&', m);
             }
-            String m2 = rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
+            String m2 = tier.getChatTag(true) + rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + m;
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled() ||

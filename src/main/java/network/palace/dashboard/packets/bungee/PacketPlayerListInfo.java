@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
 
@@ -72,7 +76,7 @@ public class PacketPlayerListInfo extends BasePacket {
                     switch (next.toLowerCase()) {
                         case "uuid":
                             try {
-                                p.setUniqueId(UUID.fromString(str));
+                                p.setUuid(UUID.fromString(str));
                             } catch (Exception ignored) {
                             }
                             break;
@@ -98,73 +102,18 @@ public class PacketPlayerListInfo extends BasePacket {
         return p;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Player {
         private UUID uuid;
         private String username;
         private String address;
         private String server;
         private String rank;
+        private String sponsorTier;
         private int mcVersion;
-
-        public Player(UUID uuid, String username, String address, String server, String rank, int mcVersion) {
-            this.uuid = uuid;
-            this.username = username;
-            this.address = address;
-            this.server = server;
-            this.rank = rank;
-            this.mcVersion = mcVersion;
-        }
-
-        public Player() {
-        }
-
-        public UUID getUniqueId() {
-            return uuid;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public String getServer() {
-            return server;
-        }
-
-        public String getRank() {
-            return rank;
-        }
-
-        public void setUniqueId(UUID uuid) {
-            this.uuid = uuid;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        public void setServer(String server) {
-            this.server = server;
-        }
-
-        public void setRank(String rank) {
-            this.rank = rank;
-        }
-
-        public int getMcVersion() {
-            return mcVersion;
-        }
-
-        public void setMcVersion(int mcVersion) {
-            this.mcVersion = mcVersion;
-        }
 
         @Override
         public String toString() {

@@ -14,6 +14,7 @@ import java.util.UUID;
 public class BseenData {
     private UUID uuid;
     private Rank rank;
+    private SponsorTier sponsorTier;
     private long lastLogin;
     private String ipAddress;
     private Mute mute;

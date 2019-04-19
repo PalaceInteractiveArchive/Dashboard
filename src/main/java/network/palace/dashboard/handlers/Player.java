@@ -17,6 +17,7 @@ public class Player {
     @Getter @Setter private UUID uuid;
     @Getter @Setter private String username;
     @Getter @Setter private Rank rank = Rank.SETTLER;
+    @Getter @Setter private SponsorTier sponsorTier = SponsorTier.NONE;
     @Getter private String address;
     @Getter @Setter private String server;
     @Getter @Setter private UUID bungeeID;

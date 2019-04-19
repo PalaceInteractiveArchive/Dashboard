@@ -212,10 +212,11 @@ public class Party {
 
     public void chat(Player player, String msg) {
         Dashboard dashboard = Launcher.getDashboard();
-        Rank r = player.getRank();
+        Rank rank = player.getRank();
+        SponsorTier tier = player.getSponsorTier();
         String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUniqueId()) ? ChatColor.YELLOW + "* " : "") +
-                r.getFormattedName() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
-                (r.getRankId() >= Rank.TRAINEE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
+                tier.getChatTag(true) + rank.getFormattedName() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
+                (rank.getRankId() >= Rank.TRAINEE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
         for (UUID uuid : getMembers()) {
             if (uuid.equals(player.getUniqueId())) {
                 continue;

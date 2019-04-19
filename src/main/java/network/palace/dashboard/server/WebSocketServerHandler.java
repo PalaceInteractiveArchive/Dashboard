@@ -480,24 +480,26 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                  */
                 case 55: {
                     PacketRankChange packet = new PacketRankChange().fromJSON(object);
-                    final UUID uuid = packet.getUniqueId();
-                    final Rank rank = packet.getRank();
-                    final String source = packet.getSource();
-                    final Player player = dashboard.getPlayer(uuid);
+                    UUID uuid = packet.getUniqueId();
+                    Rank rank = packet.getRank();
+                    SponsorTier tier = packet.getTier();
+                    String source = packet.getSource();
+                    Player player = dashboard.getPlayer(uuid);
 
                     dashboard.getSchedulerManager().runAsync(() -> {
                         String name;
                         if (player == null) {
                             name = dashboard.getMongoHandler().uuidToUsername(uuid);
                         } else {
-                            PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank);
+                            PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank, tier);
                             player.send(packet1);
                             player.setRank(rank);
+                            player.setSponsorTier(tier);
                             name = player.getUsername();
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(player.getServer());
                             if (socketChannel != null) socketChannel.send(packet);
                         }
-                        dashboard.getModerationUtil().rankChange(name, rank, source);
+                        dashboard.getModerationUtil().rankChange(name, rank, tier, source);
 
                         DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
                         if (info != null) {
@@ -719,11 +721,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     List<PacketPlayerListInfo.Player> players = packet.getPlayers();
                     List<Player> list = new ArrayList<>();
                     for (PacketPlayerListInfo.Player p : players) {
-                        if (dashboard.getPlayer(p.getUniqueId()) != null)
+                        if (dashboard.getPlayer(p.getUuid()) != null)
                             continue;
-                        Player tp = new Player(p.getUniqueId(), p.getUsername(), p.getAddress(), p.getServer(),
+                        Player tp = new Player(p.getUuid(), p.getUsername(), p.getAddress(), p.getServer(),
                                 channel.getBungeeID(), p.getMcVersion());
-                        tp.setRank(dashboard.getMongoHandler().getRank(tp.getUniqueId()));
+                        tp.setRank(Rank.fromString(p.getRank()));
+                        tp.setSponsorTier(SponsorTier.fromString(p.getSponsorTier()));
                         list.add(tp);
                         dashboard.getServer(p.getServer()).changeCount(1);
                         dashboard.addPlayer(tp);

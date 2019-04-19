@@ -4,12 +4,12 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public class PartyCommand extends DashboardCommand {
 
     public PartyCommand() {
-        aliases = Arrays.asList("p");
+        aliases = Collections.singletonList("p");
         tabCompletePlayers = true;
     }
 
@@ -170,7 +170,7 @@ public class PartyCommand extends DashboardCommand {
         String dash = ChatColor.GREEN + "- " + ChatColor.AQUA;
         String y = ChatColor.YELLOW.toString();
         player.sendMessage(y + "Party Commands:\n" + dash + "/party help " + y + "- Shows this help menu\n" + dash +
-                "/party [player]" + y + "- Invite a player to your Party\n" + dash + "/party leave " + y +
+                "/party [player] " + y + "- Invite a player to your Party\n" + dash + "/party leave " + y +
                 "- Leave your current Party\n" + dash + "/party list " + y + "- List all of the members in your Party\n"
                 + dash + "/party promote [player] " + y + "- Promote a player to Party Leader\n" + dash +
                 "/party accept " + y + "- Accept a Party invite from a player\n" + dash + "/party deny " + y +

@@ -1,7 +1,9 @@
 package network.palace.dashboard.packets.dashboard;
 
 import com.google.gson.JsonObject;
+import lombok.Getter;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.SponsorTier;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
 
@@ -9,24 +11,22 @@ import java.util.UUID;
 
 public class PacketPlayerRank extends BasePacket {
     private UUID uuid;
-    private Rank rank;
+    @Getter private Rank rank;
+    @Getter private SponsorTier tier;
 
     public PacketPlayerRank() {
-        this(null, Rank.SETTLER);
+        this(null, Rank.SETTLER, SponsorTier.NONE);
     }
 
-    public PacketPlayerRank(UUID uuid, Rank rank) {
+    public PacketPlayerRank(UUID uuid, Rank rank, SponsorTier tier) {
         this.id = PacketID.Dashboard.PLAYERRANK.getID();
         this.uuid = uuid;
         this.rank = rank;
+        this.tier = tier;
     }
 
     public UUID getUniqueId() {
         return uuid;
-    }
-
-    public Rank getRank() {
-        return rank;
     }
 
     public PacketPlayerRank fromJSON(JsonObject obj) {
@@ -36,6 +36,7 @@ public class PacketPlayerRank extends BasePacket {
             this.uuid = null;
         }
         this.rank = Rank.fromString(obj.get("rank").getAsString());
+        this.tier = SponsorTier.fromString(obj.get("tier").getAsString());
         return this;
     }
 
@@ -45,6 +46,7 @@ public class PacketPlayerRank extends BasePacket {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
             obj.addProperty("rank", this.rank.getDBName());
+            obj.addProperty("tier", this.tier.getDBName());
         } catch (Exception e) {
             return null;
         }

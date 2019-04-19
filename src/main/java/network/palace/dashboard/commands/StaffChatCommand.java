@@ -2,10 +2,7 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
-import network.palace.dashboard.handlers.DashboardCommand;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.*;
 
 public class StaffChatCommand extends DashboardCommand {
 
@@ -16,18 +13,19 @@ public class StaffChatCommand extends DashboardCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (args.length > 0) {
-            String message = String.join(" ", args);
-            String response;
-            Rank rank = player.getRank();
-
-            response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getFormattedName()
-                    + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
-                    ChatColor.translateAlternateColorCodes('&', message);
-            dashboard.getChatUtil().staffChatMessage(response);
-            dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getUsername() + " " + message);
+        if (args.length < 1) {
+            player.sendMessage(ChatColor.RED + "/sc [Message]");
             return;
         }
-        player.sendMessage(ChatColor.RED + "/sc [Message]");
+        String message = String.join(" ", args);
+        String response;
+        Rank rank = player.getRank();
+        SponsorTier tier = player.getSponsorTier();
+
+        response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + tier.getChatTag(true) +
+                rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
+                ChatColor.translateAlternateColorCodes('&', message);
+        dashboard.getChatUtil().staffChatMessage(response);
+        dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getUsername() + " " + message);
     }
 }

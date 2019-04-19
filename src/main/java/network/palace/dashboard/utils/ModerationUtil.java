@@ -117,9 +117,9 @@ public class ModerationUtil {
         sendMessage(ChatColor.GREEN + "The chat delay was set to " + time + " seconds by " + source);
     }
 
-    public void rankChange(String name, Rank rank, String source) {
-        sendMessage(ChatColor.GREEN + name + "'s rank has been changed to " + rank.getFormattedName() +
-                ChatColor.GREEN + " by " + source);
+    public void rankChange(String name, Rank rank, SponsorTier tier, String source) {
+        sendMessage(ChatColor.GREEN + name + "'s rank has been changed by " + source + " to " +
+                tier.getChatTag(true) + rank.getFormattedName());
     }
 
     public void sendMessage(String message) {
