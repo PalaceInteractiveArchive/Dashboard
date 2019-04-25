@@ -7,13 +7,12 @@ import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.utils.FriendUtil;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public class FriendCommand extends DashboardCommand {
 
     public FriendCommand() {
-        aliases = Arrays.asList("f");
-        tabCompletePlayers = true;
+        aliases = Collections.singletonList("f");
     }
 
     @Override

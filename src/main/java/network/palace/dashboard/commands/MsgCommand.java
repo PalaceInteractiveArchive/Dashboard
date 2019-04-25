@@ -15,7 +15,7 @@ public class MsgCommand extends DashboardCommand {
 
     public MsgCommand() {
         tabCompletePlayers = true;
-        aliases = Arrays.asList("m", "whisper", "tell", "w", "t");
+        aliases = Arrays.asList("tell", "w");
     }
 
     @Override

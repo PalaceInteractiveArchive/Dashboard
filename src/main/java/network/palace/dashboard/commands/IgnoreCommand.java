@@ -145,33 +145,4 @@ public class IgnoreCommand extends DashboardCommand {
                 ChatColor.AQUA + "- Unignore a player\n" + ChatColor.YELLOW + "/ignore help " +
                 ChatColor.AQUA + "- Show this help menu");
     }
-
-    @Override
-    public Iterable<String> onTabComplete(Player sender, List<String> args) {
-        Dashboard dashboard = Launcher.getDashboard();
-        List<String> list = new ArrayList<>();
-        for (IgnoreData data : sender.getIgnoreData()) {
-            UUID uuid = data.getIgnored();
-            String name = dashboard.getCachedName(uuid) == null ? dashboard.getMongoHandler().uuidToUsername(uuid) : dashboard.getCachedName(uuid);
-            list.add(name);
-        }
-        Collections.sort(list);
-        if (args.size() == 0) {
-            return list;
-        }
-        List<String> l2 = new ArrayList<>();
-        String arg = args.get(args.size() - 1);
-        for (String s : list) {
-            if (s.toLowerCase().startsWith(arg.toLowerCase())) {
-                l2.add(s);
-            }
-        }
-        Collections.sort(l2);
-        return l2;
-    }
-
-    @Override
-    public boolean doesTabComplete() {
-        return true;
-    }
 }
