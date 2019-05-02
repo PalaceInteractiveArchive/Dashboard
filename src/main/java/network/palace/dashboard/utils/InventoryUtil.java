@@ -327,17 +327,17 @@ public class InventoryUtil {
         try {
             Dashboard dashboard = Launcher.getDashboard();
             Document invData = dashboard.getMongoHandler().getParkInventoryData(uuid);
-            for (Object o : invData.get("inventories", ArrayList.class)) {
+            for (Object o : invData.get("storage", ArrayList.class)) {
                 Document inv = (Document) o;
                 int resortID = inv.getInteger("resort");
                 StringBuilder backpack = new StringBuilder("[");
-                ArrayList packcontents = inv.get("packcontents", ArrayList.class);
+                ArrayList packcontents = inv.get("backpack", ArrayList.class);
                 for (int i = 0; i < packcontents.size(); i++) {
                     Document item = (Document) packcontents.get(i);
-                    if (item.getInteger("a") == null) {
+                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         backpack.append("{}");
                     } else {
-                        backpack.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                        backpack.append("{type:").append(item.getString("type")).append(",amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (packcontents.size() - 1)) {
                         backpack.append(",");
@@ -345,13 +345,13 @@ public class InventoryUtil {
                 }
                 backpack.append("]");
                 StringBuilder locker = new StringBuilder("[");
-                ArrayList lockercontents = inv.get("lockercontents", ArrayList.class);
+                ArrayList lockercontents = inv.get("locker", ArrayList.class);
                 for (int i = 0; i < lockercontents.size(); i++) {
                     Document item = (Document) lockercontents.get(i);
-                    if (item.getInteger("a") == null) {
+                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         locker.append("{}");
                     } else {
-                        locker.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                        locker.append("{type:").append(item.getString("type")).append(",amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (lockercontents.size() - 1)) {
                         locker.append(",");
@@ -359,20 +359,20 @@ public class InventoryUtil {
                 }
                 locker.append("]");
                 StringBuilder hotbar = new StringBuilder("[");
-                ArrayList hotbarcontents = inv.get("hotbarcontents", ArrayList.class);
+                ArrayList hotbarcontents = inv.get("hotbar", ArrayList.class);
                 for (int i = 0; i < hotbarcontents.size(); i++) {
                     Document item = (Document) hotbarcontents.get(i);
-                    if (item.getInteger("a") == null) {
+                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         hotbar.append("{}");
                     } else {
-                        hotbar.append("{a:").append(item.getInteger("a")).append(",t:").append(item.getInteger("t")).append(",da:").append(item.getInteger("da")).append(",du:").append(item.getInteger("du")).append(",ta:'").append(item.getString("ta")).append("'}");
+                        hotbar.append("{type:").append(item.getString("type")).append(",amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (hotbarcontents.size() - 1)) {
                         hotbar.append(",");
                     }
                 }
                 hotbar.append("]");
-                int packsize = inv.getInteger("packsize");
+                int packsize = inv.getInteger("backpacksize");
                 int lockersize = inv.getInteger("lockersize");
                 Resort resort = Resort.fromId(resortID);
                 ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "",
