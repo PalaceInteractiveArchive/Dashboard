@@ -576,19 +576,31 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         Player player = dashboard.getPlayer(packet.getUuid());
                         if (!packet.isEmpty()) dashboard.getInventoryUtil().cacheInventory(packet.getUuid(), packet);
                         if (player == null) return;
-                        if (player.getServer().equals(channel.getServerName()) ||
-                                !dashboard.getServer(player.getServer()).isInventory()) {
-                            player.setSendInventoryOnJoin(true);
-                        } else {
-                            DashboardSocketChannel socket = Dashboard.getInstance(player.getServer());
-                            if (socket == null) return;
-                            Resort resort = Resort.fromServer(player.getServer());
-                            ResortInventory inv = dashboard.getInventoryUtil().getInventory(player.getUuid(), resort);
-                            PacketInventoryContent updatePacket = new PacketInventoryContent(player.getUniqueId(), resort,
-                                    inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(), inv.getLockerJSON(),
-                                    inv.getLockerHash(), inv.getLockerSize(), inv.getHotbarJSON(), inv.getHotbarHash());
-                            socket.send(updatePacket);
-                            player.setSendInventoryOnJoin(false);
+
+                        if (packet.isDisconnect()) {
+                            //Player is leaving current server
+                            if (player.getServer().equalsIgnoreCase(channel.getServerName())) {
+                                //Player is still on old server, need to store and send on server switch
+                                player.setSendInventoryOnJoin(true);
+                            } else {
+                                player.setSendInventoryOnJoin(false);
+                                //Player is on new server, check if need to send to that server
+                                if (dashboard.getServer(player.getServer()).isInventory()) {
+                                    //New server is a park server, needs inventory data
+                                    DashboardSocketChannel socket = Dashboard.getInstance(player.getServer());
+                                    if (socket == null) return;
+                                    Resort resort = Resort.fromServer(player.getServer());
+                                    ResortInventory inv = dashboard.getInventoryUtil().getInventory(player.getUuid(), resort);
+                                    PacketInventoryContent updatePacket = new PacketInventoryContent(player.getUniqueId(), resort,
+                                            inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(), inv.getLockerJSON(),
+                                            inv.getLockerHash(), inv.getLockerSize(), inv.getHotbarJSON(), inv.getHotbarHash());
+                                    socket.send(updatePacket);
+//                                } else {
+                                    //New server is not a park server, don't send inventory data
+                                }
+                            }
+//                        } else {
+                            //Packet only contains an update, player is still on current server
                         }
                     });
                     break;

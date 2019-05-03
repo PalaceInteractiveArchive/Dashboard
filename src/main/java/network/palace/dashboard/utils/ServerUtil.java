@@ -230,15 +230,18 @@ public class ServerUtil {
 //                    }
                 return;
             }
-            // Going to Park server
             Server server = dashboard.getServer(target);
             if (server == null) server = getServerByType("Hub");
-            if (server.isPark()) {
-                if (tp.isSendInventoryOnJoin() && server.isInventory()) {
-                    tp.setSendInventoryOnJoin(false);
-                    Resort resort = Resort.fromServer(target);
+            if (server.isInventory()) {
+                //Target is a Park server, check if we need to send inventory data
+
+                if (!dashboard.getServer(tp.getServer()).isInventory() || tp.isSendInventoryOnJoin()) {
+                    //Either current server is not a Park (from Hub to Park)
+                    //or going Park to Park and data already stored and waiting to be sent
+
                     dashboard.getSchedulerManager().runAsync(() -> {
                         try {
+                            Resort resort = Resort.fromServer(target);
                             ResortInventory inv = dashboard.getInventoryUtil().getInventory(tp.getUniqueId(), resort);
                             PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
                                     inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
@@ -255,14 +258,13 @@ public class ServerUtil {
                         }
                     });
                 }
-                if (!server.isInventory()) {
-                    tp.setSendInventoryOnJoin(true);
-                }
+
                 if (tp.isPendingWarp()) {
                     tp.chat("/warp " + tp.getWarp());
                     tp.setPendingWarp(false);
                 }
             }
+
             if (server.getServerType().equals("Creative")) {
                 tp.sendServerIgnoreList(target);
             }
@@ -281,6 +283,7 @@ public class ServerUtil {
             }
             dashboard.getServerUtil().getServer(target).changeCount(1);
             tp.setServer(target);
+            tp.setSendInventoryOnJoin(false);
 
             // Check if the destination is a minigame server
             if (target.matches(WebSocketServerHandler.MINIGAME_REGEX)) {
