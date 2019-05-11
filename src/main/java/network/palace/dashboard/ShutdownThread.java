@@ -48,9 +48,9 @@ public class ShutdownThread extends Thread {
                     ob.addProperty("lockerHash", inv.getLockerHash());
                     ob.addProperty("dbLockerHash", inv.getDbLockerHash());
                     ob.addProperty("lockersize", inv.getLockerSize());
-                    ob.addProperty("hotbarJSON", inv.getHotbarJSON());
-                    ob.addProperty("hotbarHash", inv.getHotbarHash());
-                    ob.addProperty("dbHotbarHash", inv.getDbHotbarHash());
+                    ob.addProperty("baseJSON", inv.getBaseJSON());
+                    ob.addProperty("baseHash", inv.getBaseHash());
+                    ob.addProperty("dbBaseHash", inv.getDbBaseHash());
                     e.add(ob);
                 }
                 o.add("resorts", e);

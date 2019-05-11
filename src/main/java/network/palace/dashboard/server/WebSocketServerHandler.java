@@ -592,8 +592,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                     Resort resort = Resort.fromServer(player.getServer());
                                     ResortInventory inv = dashboard.getInventoryUtil().getInventory(player.getUuid(), resort);
                                     PacketInventoryContent updatePacket = new PacketInventoryContent(player.getUniqueId(), resort,
-                                            inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(), inv.getLockerJSON(),
-                                            inv.getLockerHash(), inv.getLockerSize(), inv.getHotbarJSON(), inv.getHotbarHash());
+                                            inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
+                                            inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
+                                            inv.getBaseJSON(), inv.getBaseHash(),
+                                            inv.getBuildJSON(), inv.getBuildHash());
                                     socket.send(updatePacket);
 //                                } else {
                                     //New server is not a park server, don't send inventory data

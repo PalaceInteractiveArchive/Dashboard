@@ -246,7 +246,7 @@ public class ServerUtil {
                             PacketInventoryContent content = new PacketInventoryContent(tp.getUniqueId(), resort,
                                     inv.getBackpackJSON(), inv.getBackpackHash(), inv.getBackpackSize(),
                                     inv.getLockerJSON(), inv.getLockerHash(), inv.getLockerSize(),
-                                    inv.getHotbarJSON(), inv.getHotbarHash());
+                                    inv.getBaseJSON(), inv.getBaseHash(), inv.getBuildJSON(), inv.getBuildHash());
                             dashboard.getInventoryUtil().cacheInventory(tp.getUniqueId(), content);
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(target);
                             if (socketChannel == null) {

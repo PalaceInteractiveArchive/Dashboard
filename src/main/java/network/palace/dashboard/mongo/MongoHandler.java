@@ -149,8 +149,8 @@ public class MongoHandler {
         playerDocument.put("bans", bans);
 
         Map<String, Object> parkData = new HashMap<>();
-        List<Object> inventoryData = new ArrayList<>();
-        parkData.put("inventories", inventoryData);
+        List<Object> storageData = new ArrayList<>();
+        parkData.put("storage", storageData);
 
         Map<String, String> magicBandData = new HashMap<>();
         magicBandData.put("bandtype", "blue");
@@ -910,7 +910,7 @@ public class MongoHandler {
 
     public Document getParkInventory(UUID uuid, Resort resort) {
         Document doc = null;
-        for (Object o : getPlayer(uuid, new Document("parks.inventories", true)).get("parks.inventories", ArrayList.class)) {
+        for (Object o : getPlayer(uuid, new Document("parks.storage", true)).get("parks.storage", ArrayList.class)) {
             Document inv = (Document) o;
             if (inv.getInteger("resort") == resort.getId()) {
                 doc = inv;
@@ -923,12 +923,12 @@ public class MongoHandler {
     public void setInventoryData(UUID uuid, ResortInventory inv, boolean create) {
         try {
             UpdateData data = InventoryUtil.getDataFromJson(inv.getBackpackJSON(), inv.getBackpackSize(),
-                    inv.getLockerJSON(), inv.getLockerSize(), inv.getHotbarJSON());
+                    inv.getLockerJSON(), inv.getLockerSize(), inv.getBaseJSON(), inv.getBuildJSON());
             if (create) {
-                Document doc = new Document("packcontents", data.getPack()).append("packsize", data.getPackSize())
-                        .append("lockercontents", data.getLocker()).append("lockersize", data.getLockerSize())
-                        .append("hotbarcontents", data.getHotbar()).append("resort", inv.getResort().getId());
-                playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("parks.inventories", doc));
+                Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
+                        .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
+                        .append("base", data.getBase()).append("build", data.getBuild()).append("resort", inv.getResort().getId());
+                playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("parks.storage", doc));
             } else {
                 setInventoryData(uuid, inv.getResort(), data);
             }
@@ -938,11 +938,11 @@ public class MongoHandler {
     }
 
     public void setInventoryData(UUID uuid, Resort resort, UpdateData data) {
-        Document doc = new Document("packcontents", data.getPack()).append("packsize", data.getPackSize())
-                .append("lockercontents", data.getLocker()).append("lockersize", data.getLockerSize())
-                .append("hotbarcontents", data.getHotbar()).append("resort", resort.getId());
-        playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.inventories.resort", resort.getId()),
-                new Document("$set", new Document("parks.inventories.$", doc)));
+        Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
+                .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
+                .append("base", data.getBase()).append("build", data.getBuild()).append("resort", resort.getId());
+        playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.storage.resort", resort.getId()),
+                new Document("$set", new Document("parks.storage.$", doc)));
     }
 
     public void updateInventoryData(UUID uuid, InventoryUpdate update) {

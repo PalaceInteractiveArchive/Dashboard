@@ -23,9 +23,13 @@ public class ResortInventory {
     @Getter @Setter private String dbLockerHash = "";
     @Getter @Setter private int lockerSize;
 
-    @Getter @Setter private String hotbarJSON = "";
-    @Getter @Setter private String hotbarHash = "";
-    @Getter @Setter private String dbHotbarHash = "";
+    @Getter @Setter private String baseJSON = "";
+    @Getter @Setter private String baseHash = "";
+    @Getter @Setter private String dbBaseHash = "";
+
+    @Getter @Setter private String buildJSON = "";
+    @Getter @Setter private String buildHash = "";
+    @Getter @Setter private String dbBuildHash = "";
 
     /**
      * Check if all JSON entries are empty (meaning no data is here, not even empty inventories)
@@ -33,6 +37,6 @@ public class ResortInventory {
      * @return true if three JSON entries are empty, otherwise false
      */
     public boolean isEmpty() {
-        return backpackJSON.isEmpty() && lockerJSON.isEmpty() && hotbarJSON.isEmpty();
+        return backpackJSON.isEmpty() && lockerJSON.isEmpty() && baseJSON.isEmpty();
     }
 }

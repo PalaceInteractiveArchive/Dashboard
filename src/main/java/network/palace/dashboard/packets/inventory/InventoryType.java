@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 public enum InventoryType {
-    BACKPACK(0), LOCKER(1), HOTBAR(2);
+    BACKPACK(0), LOCKER(1), BASE(2), BUILD(3);
     @Getter private int id;
 
     public static InventoryType fromId(int id) {
