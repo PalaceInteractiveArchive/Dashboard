@@ -32,7 +32,7 @@ public class PacketInventoryContent extends BasePacket {
     @Getter private String buildHash;
 
     public PacketInventoryContent() {
-        this(null, Resort.WDW, "", "", 0, "", "", 0, "", "", "", "");
+        this(null, Resort.WDW, "", "", -1, "", "", -1, "", "", "", "");
     }
 
     public PacketInventoryContent(UUID uuid, Resort resort, String backpackJson, String backpackHash,
@@ -54,7 +54,7 @@ public class PacketInventoryContent extends BasePacket {
     }
 
     public boolean isEmpty() {
-        return backpackHash.isEmpty() && lockerHash.isEmpty() && baseHash.isEmpty() && buildHash.isEmpty();
+        return backpackHash.isEmpty() && lockerHash.isEmpty() && baseHash.isEmpty() && buildHash.isEmpty() && backpackSize < 0 && lockerSize < 0;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class PacketInventoryContent extends BasePacket {
             this.backpackHash = obj.get("backpackHash").getAsString();
         }
         if (obj.get("backpackSize").isJsonNull()) {
-            this.backpackSize = 0;
+            this.backpackSize = -1;
         } else {
             this.backpackSize = obj.get("backpackSize").getAsInt();
         }
@@ -91,7 +91,7 @@ public class PacketInventoryContent extends BasePacket {
             this.lockerHash = obj.get("lockerHash").getAsString();
         }
         if (obj.get("lockerSize").isJsonNull()) {
-            this.lockerSize = 0;
+            this.lockerSize = -1;
         } else {
             this.lockerSize = obj.get("lockerSize").getAsInt();
         }

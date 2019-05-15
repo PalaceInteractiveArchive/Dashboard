@@ -59,25 +59,25 @@ public class InventoryUtil {
                         String buildHash;
                         String dbBuildHash;
 
-                        if (ob.get("packJSON").isJsonNull()) {
+                        if (ob.get("backpackJSON").isJsonNull()) {
                             packJSON = "";
                         } else {
-                            packJSON = ob.get("packJSON").getAsString();
+                            packJSON = ob.get("backpackJSON").getAsString();
                         }
-                        if (ob.get("packHash").isJsonNull()) {
+                        if (ob.get("backpackHash").isJsonNull()) {
                             packHash = "";
                         } else {
-                            packHash = ob.get("packHash").getAsString();
+                            packHash = ob.get("backpackHash").getAsString();
                         }
-                        if (ob.get("dbPackHash").isJsonNull()) {
+                        if (ob.get("dbBackpackHash").isJsonNull()) {
                             dbPackHash = "";
                         } else {
-                            dbPackHash = ob.get("dbPackHash").getAsString();
+                            dbPackHash = ob.get("dbBackpackHash").getAsString();
                         }
-                        if (ob.get("packsize").isJsonNull()) {
-                            packsize = 0;
+                        if (ob.get("backpacksize").isJsonNull()) {
+                            packsize = -1;
                         } else {
-                            packsize = ob.get("packsize").getAsInt();
+                            packsize = ob.get("backpacksize").getAsInt();
                         }
 
                         if (ob.get("lockerJSON").isJsonNull()) {
@@ -96,7 +96,7 @@ public class InventoryUtil {
                             dbLockerHash = ob.get("dbLockerHash").getAsString();
                         }
                         if (ob.get("lockersize").isJsonNull()) {
-                            lockersize = 0;
+                            lockersize = -1;
                         } else {
                             lockersize = ob.get("lockersize").getAsInt();
                         }
@@ -206,8 +206,7 @@ public class InventoryUtil {
 
     public static BsonArray jsonToArray(String json) {
         BsonArray array = new BsonArray();
-        if (json == null) return array;
-        System.out.println("JSON: " + json);
+        if (json == null || json.isEmpty()) return array;
         JsonElement element = new JsonParser().parse(json);
         if (element.isJsonArray()) {
             JsonArray baseArray = element.getAsJsonArray();
@@ -237,8 +236,7 @@ public class InventoryUtil {
             }
             ResortInventory inv = new ResortInventory();
             inv.setResort(packet.getResort());
-            inv.setBackpackSize(packet.getBackpackSize());
-            inv.setLockerSize(packet.getLockerSize());
+
             if (packet.getBackpackHash().equals("")) {
                 inv.setBackpackHash(cache.getBackpackHash());
                 inv.setBackpackJSON(cache.getBackpackJSON());
@@ -248,6 +246,13 @@ public class InventoryUtil {
                 inv.setBackpackJSON(packet.getBackpackJson());
                 inv.setDbBackpackHash("");
             }
+
+            if (packet.getBackpackSize() == -1) {
+                inv.setBackpackSize(cache.getBackpackSize());
+            } else {
+                inv.setBackpackSize(packet.getBackpackSize());
+            }
+
             if (packet.getLockerHash().equals("")) {
                 inv.setLockerHash(cache.getLockerHash());
                 inv.setLockerJSON(cache.getLockerJSON());
@@ -257,6 +262,13 @@ public class InventoryUtil {
                 inv.setLockerJSON(packet.getLockerJson());
                 inv.setDbLockerHash("");
             }
+
+            if (packet.getLockerSize() == -1) {
+                inv.setLockerSize(cache.getLockerSize());
+            } else {
+                inv.setLockerSize(packet.getLockerSize());
+            }
+
             if (packet.getBaseHash().equals("")) {
                 inv.setBaseHash(cache.getBaseHash());
                 inv.setBaseJSON(cache.getBaseJSON());
@@ -266,6 +278,7 @@ public class InventoryUtil {
                 inv.setBaseJSON(packet.getBaseJson());
                 inv.setDbBaseHash("");
             }
+
             if (packet.getBuildHash().equals("")) {
                 inv.setBuildHash(cache.getBuildHash());
                 inv.setBuildJSON(cache.getBuildJSON());
@@ -275,6 +288,7 @@ public class InventoryUtil {
                 inv.setBuildJSON(packet.getBuildJson());
                 inv.setDbBuildHash("");
             }
+
             cachedInventories.get(uuid).setInventory(packet.getResort(), inv);
             return;
         }
@@ -422,10 +436,10 @@ public class InventoryUtil {
                     }
                 }
                 build.append("]");
-                int packsize = inv.getInteger("backpacksize");
+                int backpacksize = inv.getInteger("backpacksize");
                 int lockersize = inv.getInteger("lockersize");
                 Resort resort = Resort.fromId(resortID);
-                ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "", packsize,
+                ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "", backpacksize,
                         locker.toString(), generateHash(locker.toString()), "", lockersize,
                         base.toString(), generateHash(base.toString()), "",
                         build.toString(), generateHash(build.toString()), "");

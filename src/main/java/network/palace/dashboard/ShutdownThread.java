@@ -40,10 +40,10 @@ public class ShutdownThread extends Thread {
                 for (ResortInventory inv : cache.getResorts().values()) {
                     JsonObject ob = new JsonObject();
                     ob.addProperty("resort", inv.getResort().getId());
-                    ob.addProperty("packJSON", inv.getBackpackJSON());
-                    ob.addProperty("packHash", inv.getBackpackHash());
-                    ob.addProperty("dbPackHash", inv.getDbBackpackHash());
-                    ob.addProperty("packsize", inv.getBackpackSize());
+                    ob.addProperty("backpackJSON", inv.getBackpackJSON());
+                    ob.addProperty("backpackHash", inv.getBackpackHash());
+                    ob.addProperty("dbBackpackHash", inv.getDbBackpackHash());
+                    ob.addProperty("backpacksize", inv.getBackpackSize());
                     ob.addProperty("lockerJSON", inv.getLockerJSON());
                     ob.addProperty("lockerHash", inv.getLockerHash());
                     ob.addProperty("dbLockerHash", inv.getDbLockerHash());
@@ -51,6 +51,9 @@ public class ShutdownThread extends Thread {
                     ob.addProperty("baseJSON", inv.getBaseJSON());
                     ob.addProperty("baseHash", inv.getBaseHash());
                     ob.addProperty("dbBaseHash", inv.getDbBaseHash());
+                    ob.addProperty("buildJSON", inv.getBuildJSON());
+                    ob.addProperty("buildHash", inv.getBuildHash());
+                    ob.addProperty("dbBuildHash", inv.getDbBuildHash());
                     e.add(ob);
                 }
                 o.add("resorts", e);
