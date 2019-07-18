@@ -6,6 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Rank {
 
+    DIRECTOR("Director", ChatColor.RED + "Director ", ChatColor.RED, ChatColor.YELLOW, true, 12),
     MANAGER("Manager", ChatColor.RED + "Manager ", ChatColor.RED, ChatColor.YELLOW, true, 12),
     ADMIN("Admin", ChatColor.RED + "Admin ", ChatColor.RED, ChatColor.YELLOW, true, 12),
     DEVELOPER("Developer", ChatColor.GOLD + "Developer ", ChatColor.GOLD, ChatColor.YELLOW, true, 12),
@@ -20,9 +21,7 @@ public enum Rank {
     HONORABLE("Honorable", ChatColor.LIGHT_PURPLE + "Honorable ", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, false, 5),
     MAJESTIC("Majestic", ChatColor.DARK_PURPLE + "Majestic ", ChatColor.DARK_PURPLE, ChatColor.WHITE, false, 4),
     NOBLE("Noble", ChatColor.BLUE + "Noble ", ChatColor.BLUE, ChatColor.WHITE, false, 3),
-    SHAREHOLDER("Shareholder", ChatColor.LIGHT_PURPLE + "Shareholder ", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, false, 3),
     DWELLER("Dweller", ChatColor.AQUA + "Dweller ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
-    DVCMEMBER("DVC", ChatColor.AQUA + "DVC ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
     SETTLER("Settler", ChatColor.GRAY + "", ChatColor.DARK_AQUA, ChatColor.WHITE, false, 1);
 
     @Getter private String name;
