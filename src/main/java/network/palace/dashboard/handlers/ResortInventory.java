@@ -9,34 +9,36 @@ import network.palace.dashboard.packets.inventory.Resort;
 /**
  * Created by Marc on 6/10/17.
  */
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResortInventory {
-    @Getter @Setter private Resort resort;
-    @Getter @Setter private String backpackJSON = "";
-    @Getter @Setter private String backpackHash = "";
-    @Getter @Setter private String dbBackpackHash = "";
-    @Getter @Setter private int backpackSize;
+    private Resort resort;
+    private String backpackJSON = "";
+    private String backpackHash = "";
+    private String dbBackpackHash = "";
+    private int backpackSize;
 
-    @Getter @Setter private String lockerJSON = "";
-    @Getter @Setter private String lockerHash = "";
-    @Getter @Setter private String dbLockerHash = "";
-    @Getter @Setter private int lockerSize;
+    private String lockerJSON = "";
+    private String lockerHash = "";
+    private String dbLockerHash = "";
+    private int lockerSize;
 
-    @Getter @Setter private String baseJSON = "";
-    @Getter @Setter private String baseHash = "";
-    @Getter @Setter private String dbBaseHash = "";
+    private String baseJSON = "";
+    private String baseHash = "";
+    private String dbBaseHash = "";
 
-    @Getter @Setter private String buildJSON = "";
-    @Getter @Setter private String buildHash = "";
-    @Getter @Setter private String dbBuildHash = "";
+    private String buildJSON = "";
+    private String buildHash = "";
+    private String dbBuildHash = "";
 
     /**
      * Check if all JSON entries are empty (meaning no data is here, not even empty inventories)
      *
-     * @return true if three JSON entries are empty, otherwise false
+     * @return true if four JSON entries are empty, otherwise false
      */
     public boolean isEmpty() {
-        return backpackJSON.isEmpty() && lockerJSON.isEmpty() && baseJSON.isEmpty();
+        return backpackJSON.isEmpty() && lockerJSON.isEmpty() && baseJSON.isEmpty() && buildJSON.isEmpty();
     }
 }
