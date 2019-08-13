@@ -1032,9 +1032,7 @@ public class ConvertCommand extends DashboardCommand {
                                     monthlyRewards.put("majestic", playerResult.getLong("monthmajestic"));
                                 case NOBLE:
                                     monthlyRewards.put("noble", playerResult.getLong("monthnoble"));
-                                case SHAREHOLDER:
                                 case DWELLER:
-                                case DVCMEMBER:
                                     monthlyRewards.put("dweller", playerResult.getLong("monthdweller"));
                                 case SETTLER:
                                     monthlyRewards.put("settler", playerResult.getLong("monthsettler"));
