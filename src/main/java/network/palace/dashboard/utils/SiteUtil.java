@@ -40,6 +40,7 @@ public class SiteUtil implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         Dashboard dashboard = Launcher.getDashboard();
         try {
+            List<String> director = new ArrayList<>();
             List<String> manager = new ArrayList<>();
             List<String> admin = new ArrayList<>();
             List<String> developer = new ArrayList<>();
@@ -76,9 +77,13 @@ public class SiteUtil implements HttpHandler {
                             break;
                         case MANAGER:
                             manager.add(tp.getUsername());
+                            break;
+                        case DIRECTOR:
+                            director.add(tp.getUsername());
                     }
                 }
             }
+            Collections.sort(director);
             Collections.sort(manager);
             Collections.sort(admin);
             Collections.sort(developer);
@@ -89,6 +94,20 @@ public class SiteUtil implements HttpHandler {
             Collections.sort(trainee);
             JsonArray array = new JsonArray();
             int n = 0;
+            if (!director.isEmpty()) {
+                StringBuilder names = new StringBuilder();
+                for (int i = 0; i < director.size(); i++) {
+                    names.append(director.get(i));
+                    if (i < (director.size() - 1)) {
+                        names.append(", ");
+                    }
+                }
+                JsonObject obj = new JsonObject();
+                obj.addProperty("title", "Director");
+                obj.addProperty("text", names.toString());
+                obj.addProperty("color", getColor(Rank.DIRECTOR));
+                array.add(obj);
+            }
             if (!manager.isEmpty()) {
                 StringBuilder names = new StringBuilder();
                 for (int i = 0; i < manager.size(); i++) {
@@ -234,6 +253,7 @@ public class SiteUtil implements HttpHandler {
         switch (rank) {
             case ADMIN:
             case MANAGER:
+            case DIRECTOR:
                 return "#FF5050";
             case DEVELOPER:
                 return "#FFAA00";
