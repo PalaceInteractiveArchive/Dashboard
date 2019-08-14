@@ -27,6 +27,7 @@ import java.util.*;
  * @since 6/10/2017
  */
 public class InventoryUtil {
+    public static final int STORAGE_VERSION = 1;
     @Getter private Map<UUID, InventoryCache> cachedInventories = new HashMap<>();
 
     public InventoryUtil() {
@@ -195,6 +196,17 @@ public class InventoryUtil {
         }, 1000, 10000);
     }
 
+    /**
+     * Create an UpdateData object based on the provided inventory JSON
+     *
+     * @param backpackJSON the backpack JSON
+     * @param backpackSize the backpack size
+     * @param lockerJSON   the locker JSON
+     * @param lockerSize   the locker size
+     * @param baseJSON     the base JSON
+     * @param buildJSON    the build JSON
+     * @return an UpdateData object based on the provided inventory JSON
+     */
     public static UpdateData getDataFromJson(String backpackJSON, int backpackSize, String lockerJSON, int lockerSize, String baseJSON, String buildJSON) {
         BsonArray pack = jsonToArray(backpackJSON);
         BsonArray locker = jsonToArray(lockerJSON);
@@ -204,6 +216,12 @@ public class InventoryUtil {
         return new UpdateData(pack, backpackSize, locker, lockerSize, base, build);
     }
 
+    /**
+     * Create a BsonArray from the provided JSON string
+     *
+     * @param json the JSON string
+     * @return the BsonArray
+     */
     public static BsonArray jsonToArray(String json) {
         BsonArray array = new BsonArray();
         if (json == null || json.isEmpty()) return array;
@@ -223,13 +241,14 @@ public class InventoryUtil {
     }
 
     /**
-     * Cache a player's inventory
+     * Cache a player's inventory in Dashboard, or update an existing cache of the player's inventory
      *
      * @param uuid   the uuid of the player to cache
      * @param packet A packet containing the player's inventory data
      */
     public void cacheInventory(UUID uuid, PacketInventoryContent packet) {
         if (cachedInventories.containsKey(uuid)) {
+            //If a cache exists, update its data with the new data
             ResortInventory cache = cachedInventories.get(uuid).getResorts().get(packet.getResort());
             if (cache == null) {
                 return;
@@ -290,41 +309,47 @@ public class InventoryUtil {
             }
 
             cachedInventories.get(uuid).setInventory(packet.getResort(), inv);
-            return;
+        } else {
+            //If a cache doesn't exist, make one
+            HashMap<Resort, ResortInventory> map = new HashMap<>();
+            map.put(packet.getResort(), new ResortInventory(packet.getResort(), packet.getBackpackJson(), packet.getBackpackHash(),
+                    "", packet.getBackpackSize(), packet.getLockerJson(), packet.getLockerHash(),
+                    "", packet.getLockerSize(), packet.getBaseJson(), packet.getBaseHash(),
+                    "", packet.getBuildJson(), packet.getBuildHash(), ""));
+            InventoryCache cache = new InventoryCache(uuid, map);
+            cachedInventories.put(uuid, cache);
+            fillMapAsync(uuid);
+            //Fill the new cache with other resort data from the database if it exists
         }
-        HashMap<Resort, ResortInventory> map = new HashMap<>();
-        map.put(packet.getResort(), new ResortInventory(packet.getResort(), packet.getBackpackJson(), packet.getBackpackHash(),
-                "", packet.getBackpackSize(), packet.getLockerJson(), packet.getLockerHash(),
-                "", packet.getLockerSize(), packet.getBaseJson(), packet.getBaseHash(),
-                "", packet.getBuildJson(), packet.getBuildHash(), ""));
-        InventoryCache cache = new InventoryCache(uuid, map);
-        cachedInventories.put(uuid, cache);
-        fillMapAsync(uuid);
     }
 
     /**
-     * Asynchronously fill an inventory map with missing resorts from the database
+     * Asynchronously fill a player's InventoryCache with missing resort data from the database
      *
      * @param uuid the uuid of the player's cache to fill
      */
     private void fillMapAsync(UUID uuid) {
         Launcher.getDashboard().getSchedulerManager().runAsync(() -> {
             InventoryCache cache = cachedInventories.get(uuid);
-            if (cache == null)
-                cache = new InventoryCache(uuid, new HashMap<>());
+
+            if (cache == null) cache = new InventoryCache(uuid, new HashMap<>());
+
             HashMap<Resort, ResortInventory> resorts = cache.getResorts();
             boolean changed = false;
+
             for (Resort resort : Resort.values()) {
-                if (resorts.containsKey(resort)) {
-                    continue;
-                }
+                if (resorts.containsKey(resort)) continue;
+                //A cache entry already exists for that resort, so skip
+
                 changed = true;
                 ResortInventory inv = getResortInventoryFromDatabase(uuid, resort);
-                if (inv.isEmpty())
-                    continue;
+                if (inv.isEmpty()) continue;
+                //The database entry is empty, so don't cache it (could be a bad entry)
+
                 cache.setInventory(resort, inv);
             }
             if (!changed) return;
+            //Only update if any changes were actually made
             cachedInventories.put(uuid, cache);
         });
     }
@@ -367,7 +392,7 @@ public class InventoryUtil {
     }
 
     /**
-     * Get all inventory values from database for a specific user
+     * Get all inventory entries from database for a specific user
      *
      * @param uuid the player's uuid
      * @return A cache with all of the player's resort inventories
@@ -377,9 +402,23 @@ public class InventoryUtil {
         try {
             Dashboard dashboard = Launcher.getDashboard();
             Document invData = dashboard.getMongoHandler().getParkInventoryData(uuid);
+
+            boolean clearUnversionedInventories = false;
+
             for (Object o : invData.get("storage", ArrayList.class)) {
                 Document inv = (Document) o;
+                if (!inv.containsKey("version")) {
+                    System.out.println("UNVERSIONED STORAGE FOUND");
+                    clearUnversionedInventories = true;
+                    continue;
+                }
+                int version = inv.getInteger("version");
                 int resortID = inv.getInteger("resort");
+                Resort resort = Resort.fromId(resortID);
+                if (version != STORAGE_VERSION) {
+                    System.out.println("INCORRECT STORAGE VERSION FOUND");
+                    continue;
+                }
                 StringBuilder backpack = new StringBuilder("[");
                 ArrayList packcontents = inv.get("backpack", ArrayList.class);
                 for (int i = 0; i < packcontents.size(); i++) {
@@ -438,13 +477,13 @@ public class InventoryUtil {
                 build.append("]");
                 int backpacksize = inv.getInteger("backpacksize");
                 int lockersize = inv.getInteger("lockersize");
-                Resort resort = Resort.fromId(resortID);
                 ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "", backpacksize,
                         locker.toString(), generateHash(locker.toString()), "", lockersize,
                         base.toString(), generateHash(base.toString()), "",
                         build.toString(), generateHash(build.toString()), "");
                 map.put(resort, resortInventory);
             }
+            if (clearUnversionedInventories) dashboard.getMongoHandler().clearUnversionedStorage(uuid);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -481,15 +520,6 @@ public class InventoryUtil {
     }
 
     /**
-     * Remove an inventory hash
-     *
-     * @param uuid the uuid who's hash to remove
-     */
-    public void removeHash(UUID uuid) {
-        cachedInventories.remove(uuid);
-    }
-
-    /**
      * Generate hash for inventory JSON
      *
      * @param inventory the JSON
@@ -511,7 +541,7 @@ public class InventoryUtil {
     }
 
     /**
-     * Update player inventory data
+     * Update player inventory data in the database
      *
      * @param uuid   player's uuid
      * @param update class containing all values to change

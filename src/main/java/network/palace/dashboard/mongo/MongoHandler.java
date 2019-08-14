@@ -927,7 +927,8 @@ public class MongoHandler {
             if (create) {
                 Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
                         .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
-                        .append("base", data.getBase()).append("build", data.getBuild()).append("resort", inv.getResort().getId());
+                        .append("base", data.getBase()).append("build", data.getBuild())
+                        .append("resort", inv.getResort().getId()).append("version", InventoryUtil.STORAGE_VERSION);
                 playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("parks.storage", doc));
             } else {
                 setInventoryData(uuid, inv.getResort(), data);
@@ -940,8 +941,11 @@ public class MongoHandler {
     public void setInventoryData(UUID uuid, Resort resort, UpdateData data) {
         Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
                 .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
-                .append("base", data.getBase()).append("build", data.getBuild()).append("resort", resort.getId());
-        playerCollection.updateOne(new Document("uuid", uuid.toString()).append("parks.storage.resort", resort.getId()),
+                .append("base", data.getBase()).append("build", data.getBuild())
+                .append("resort", resort.getId()).append("version", InventoryUtil.STORAGE_VERSION);
+        playerCollection.updateOne(new Document("uuid", uuid.toString())
+                        .append("parks.storage.resort", resort.getId())
+                        .append("parks.storage.version", InventoryUtil.STORAGE_VERSION),
                 new Document("$set", new Document("parks.storage.$", doc)));
     }
 
@@ -952,6 +956,10 @@ public class MongoHandler {
             UpdateData data = entry.getValue();
             setInventoryData(uuid, resort, data);
         }
+    }
+
+    public void clearUnversionedStorage(UUID uuid) {
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("parks.storage", Filters.exists("version", false)));
     }
 
     public Document getSettings(UUID uuid) {
