@@ -108,6 +108,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             int id = object.get("id").getAsInt();
 //            dashboard.getLogger().info(object.toString());
             System.out.println(object.toString());
+            dashboard.getStatUtil().packet();
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
                 /*
@@ -776,7 +777,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                  */
                 case 75: {
                     PacketLogStatistic packet = new PacketLogStatistic().fromJSON(object);
-                    dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().insertLogStatistic(packet.getTableName(), packet.getValues()));
+//                    dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().insertLogStatistic(packet.getTableName(), packet.getValues()));
                     break;
                 }
             }
