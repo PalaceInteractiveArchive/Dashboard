@@ -13,13 +13,13 @@ import java.util.Map;
 @Getter
 public class PacketLogStatistic extends BasePacket {
     private String tableName;
-    private HashMap<String, String> values;
+    private HashMap<String, Object> values;
 
     public PacketLogStatistic() {
         this(null, new HashMap<>());
     }
 
-    public PacketLogStatistic(String tableName, HashMap<String, String> values) {
+    public PacketLogStatistic(String tableName, HashMap<String, Object> values) {
         this.id = PacketID.Dashboard.LOG_STATISTIC.getID();
         this.tableName = tableName;
         this.values = values;
@@ -41,10 +41,17 @@ public class PacketLogStatistic extends BasePacket {
             obj.addProperty("id", this.id);
             obj.addProperty("table-name", tableName);
             JsonArray values = new JsonArray();
-            for (Map.Entry<String, String> entry : this.values.entrySet()) {
+            for (Map.Entry<String, Object> entry : this.values.entrySet()) {
                 JsonObject object = new JsonObject();
                 object.addProperty("field-name", entry.getKey());
-                object.addProperty("value", entry.getValue());
+                Object value = entry.getValue();
+                if (value instanceof Number) {
+                    object.addProperty("value", (Number) value);
+                } else if (value instanceof Boolean) {
+                    object.addProperty("value", (Boolean) value);
+                } else if (value instanceof String) {
+                    object.addProperty("value", (String) value);
+                }
                 values.add(object);
             }
             obj.add("values", values);

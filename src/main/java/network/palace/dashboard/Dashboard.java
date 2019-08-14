@@ -99,6 +99,9 @@ public class Dashboard {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void loadMaintenanceSettings() {
         if (maintenance) {
             maintenanceWhitelist.clear();
             List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.BUILDER,

@@ -22,6 +22,8 @@ public class StatUtil {
     private int playerCount;
 
     public StatUtil() throws SQLException, IOException {
+        Dashboard dashboard = Launcher.getDashboard();
+        dashboard.getLogger().info("Initializing StatUtil...");
         BoneCPConfig config = new BoneCPConfig();
         String address = "";
         String database = "";
@@ -55,9 +57,9 @@ public class StatUtil {
         config.setPartitionCount(2);
         config.setIdleConnectionTestPeriod(300, TimeUnit.SECONDS);
         connectionPool = new BoneCP(config);
+        dashboard.getLogger().info("StatUtil is ready to go!");
 
-        Dashboard dashboard = Launcher.getDashboard();
-        String production = String.valueOf(dashboard.isTestNetwork() ? 0 : 1);
+        int production = dashboard.isTestNetwork() ? 0 : 1;
 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -68,9 +70,9 @@ public class StatUtil {
                     playerCount = 0;
                 }
                 dashboard.getSchedulerManager().runAsync(() -> {
-                    HashMap<String, String> values = new HashMap<>();
-                    values.put("count", String.valueOf(playerCount));
-                    values.put("time", String.valueOf(System.currentTimeMillis() / 1000));
+                    HashMap<String, Object> values = new HashMap<>();
+                    values.put("count", playerCount);
+                    values.put("time", System.currentTimeMillis() / 1000);
                     values.put("production", production);
                     insertLogStatistic("player_count", values);
                 });
@@ -90,21 +92,21 @@ public class StatUtil {
         connectionPool.shutdown();
     }
 
-    public void insertLogStatistic(String tableName, HashMap<String, String> values) {
+    public void insertLogStatistic(String tableName, HashMap<String, Object> values) {
         StringBuilder columnNames = new StringBuilder();
         List<String> keySet = new ArrayList<>(values.keySet());
         for (int i = 0; i < values.size(); i++) {
             columnNames.append(keySet.get(i));
-            if (i <= (values.size() - 1)) {
+            if (i < (values.size() - 1)) {
                 columnNames.append(", ");
             }
         }
 
-        String valueString = "";
+        StringBuilder valueString = new StringBuilder();
         for (int i = 0; i < values.size(); i++) {
-            columnNames.append("?");
-            if (i <= (values.size() - 1)) {
-                columnNames.append(", ");
+            valueString.append("?");
+            if (i < (values.size() - 1)) {
+                valueString.append(", ");
             }
         }
 
@@ -115,10 +117,24 @@ public class StatUtil {
         }
         try (Connection connection = optConnection.get()) {
             PreparedStatement sql = connection.prepareStatement("INSERT INTO " + tableName +
-                    " (" + columnNames.toString() + ") VALUES (" + valueString + ")");
+                    " (" + columnNames.toString() + ") VALUES (" + valueString.toString() + ")");
             int i = 1;
-            for (String s : values.values()) {
-                sql.setString(i++, s);
+            for (Object o : values.values()) {
+                if (o instanceof Integer) {
+                    sql.setInt(i++, (Integer) o);
+                } else if (o instanceof Double) {
+                    sql.setDouble(i++, (Double) o);
+                } else if (o instanceof Float) {
+                    sql.setFloat(i++, (Float) o);
+                } else if (o instanceof Short) {
+                    sql.setShort(i++, (Short) o);
+                } else if (o instanceof Boolean) {
+                    sql.setBoolean(i++, (Boolean) o);
+                } else if (o instanceof String) {
+                    sql.setString(i++, (String) o);
+                } else {
+                    sql.setObject(i++, o);
+                }
             }
             sql.execute();
             sql.close();
