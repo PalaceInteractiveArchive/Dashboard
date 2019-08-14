@@ -4,6 +4,9 @@ import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.packets.dashboard.PacketConnectionType;
+import network.palace.dashboard.server.DashboardSocketChannel;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class StatUtil {
     private BoneCP connectionPool;
-    private int playerCount;
+    private int totalLogins = 0;
 
     public StatUtil() throws SQLException, IOException {
         Dashboard dashboard = Launcher.getDashboard();
@@ -64,20 +67,56 @@ public class StatUtil {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    playerCount = dashboard.getOnlinePlayers().size();
-                } catch (Exception e) {
-                    playerCount = 0;
+                long time = System.currentTimeMillis() / 1000;
+                int logins = totalLogins;
+                totalLogins = 0;
+
+                if (production == 1) {
+                    HashMap<String, Object> totalLogins = new HashMap<>();
+                    totalLogins.put("count", logins);
+                    totalLogins.put("time", time);
+                    insertLogStatistic("logins", totalLogins);
                 }
+
+                int totalPlayerCount = dashboard.getOnlinePlayers().size();
+
+                List<HashMap<String, Object>> list = new ArrayList<>();
+
+                List<DashboardSocketChannel> socketList = Dashboard.getChannels(PacketConnectionType.ConnectionType.BUNGEECORD);
+                HashMap<UUID, Integer> counts = new HashMap<>();
+                for (Player p : Launcher.getDashboard().getOnlinePlayers()) {
+                    UUID bid = p.getBungeeID();
+                    if (counts.containsKey(bid)) {
+                        counts.put(bid, counts.get(bid) + 1);
+                    } else {
+                        counts.put(bid, 1);
+                    }
+                }
+                for (DashboardSocketChannel c : socketList) {
+                    int count = counts.getOrDefault(c.getBungeeID(), 0);
+                    HashMap<String, Object> bungeeCountValues = new HashMap<>();
+                    bungeeCountValues.put("name", c.getServerName());
+                    bungeeCountValues.put("count", count);
+                    bungeeCountValues.put("time", time);
+                    list.add(bungeeCountValues);
+                }
+
                 dashboard.getSchedulerManager().runAsync(() -> {
-                    HashMap<String, Object> values = new HashMap<>();
-                    values.put("count", playerCount);
-                    values.put("time", System.currentTimeMillis() / 1000);
-                    values.put("production", production);
-                    insertLogStatistic("player_count", values);
+                    list.forEach(map -> insertLogStatistic("proxies", map));
+
+                    HashMap<String, Object> totalCountValues = new HashMap<>();
+                    totalCountValues.put("count", totalPlayerCount);
+                    totalCountValues.put("time", time);
+                    totalCountValues.put("production", production);
+
+                    insertLogStatistic("player_count", totalCountValues);
                 });
             }
         }, 10000, 60000);
+    }
+
+    public void newLogin() {
+        totalLogins++;
     }
 
     public Optional<Connection> getConnection() {

@@ -105,7 +105,7 @@ public class Dashboard {
         if (maintenance) {
             maintenanceWhitelist.clear();
             List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.BUILDER,
-                    Rank.ARCHITECT, Rank.SRMOD, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
+                    Rank.ARCHITECT, Rank.SRMOD, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER, Rank.DIRECTOR);
             maintenanceWhitelist.addAll(staff);
         }
     }
@@ -204,6 +204,7 @@ public class Dashboard {
     }
 
     public void addPlayer(Player player) {
+        statUtil.newLogin();
         players.put(player.getUniqueId(), player);
         String server = removeRegisteringPlayer(player.getUniqueId());
         if (player.getServer().equalsIgnoreCase("unknown") && server != null) {
