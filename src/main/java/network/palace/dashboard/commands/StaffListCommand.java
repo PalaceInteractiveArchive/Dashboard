@@ -18,6 +18,7 @@ public class StaffListCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        List<String> director = new ArrayList<>();
         List<String> manager = new ArrayList<>();
         List<String> admin = new ArrayList<>();
         List<String> developer = new ArrayList<>();
@@ -55,9 +56,13 @@ public class StaffListCommand extends DashboardCommand {
                     case MANAGER:
                         manager.add(tp.getUsername() + ":" + tp.getServer());
                         break;
+                    case DIRECTOR:
+                        director.add(tp.getUsername() + ":" + tp.getServer());
+                        break;
                 }
             }
         }
+        Collections.sort(director);
         Collections.sort(manager);
         Collections.sort(admin);
         Collections.sort(developer);
@@ -66,7 +71,7 @@ public class StaffListCommand extends DashboardCommand {
         Collections.sort(builder);
         Collections.sort(mod);
         Collections.sort(trainee);
-        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), manager, admin,
+        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), director, manager, admin,
                 developer, srmod, architect, builder, mod, trainee);
         player.send(packet);
     }

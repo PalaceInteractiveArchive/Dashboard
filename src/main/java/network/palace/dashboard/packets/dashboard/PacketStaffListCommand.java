@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.Getter;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
 
@@ -14,8 +15,10 @@ import java.util.UUID;
 /**
  * Created by Marc on 8/20/16
  */
+@Getter
 public class PacketStaffListCommand extends BasePacket {
     private UUID uuid;
+    private List<String> directors = new ArrayList<>();
     private List<String> managers = new ArrayList<>();
     private List<String> admins = new ArrayList<>();
     private List<String> developers = new ArrayList<>();
@@ -30,10 +33,12 @@ public class PacketStaffListCommand extends BasePacket {
         uuid = null;
     }
 
-    public PacketStaffListCommand(UUID uuid, List<String> managers, List<String> admins, List<String> developers,
-                                  List<String> srmods, List<String> architect, List<String> builders, List<String> mods, List<String> trainees) {
+    public PacketStaffListCommand(UUID uuid, List<String> directors, List<String> managers, List<String> admins,
+                                  List<String> developers, List<String> srmods, List<String> architect,
+                                  List<String> builders, List<String> mods, List<String> trainees) {
         this.id = PacketID.Dashboard.STAFFLISTCOMMAND.getID();
         this.uuid = uuid;
+        this.directors = directors;
         this.managers = managers;
         this.admins = admins;
         this.developers = developers;
@@ -48,43 +53,15 @@ public class PacketStaffListCommand extends BasePacket {
         return uuid;
     }
 
-    public List<String> getAdmins() {
-        return admins;
-    }
-
-    public List<String> getManagers() {
-        return managers;
-    }
-
-    public List<String> getDevelopers() {
-        return developers;
-    }
-
-    public List<String> getSrmods() {
-        return srmods;
-    }
-
-    public List<String> getArchitect() {
-        return architect;
-    }
-
-    public List<String> getBuilders() {
-        return builders;
-    }
-
-    public List<String> getMods() {
-        return mods;
-    }
-
-    public List<String> getTrainees() {
-        return trainees;
-    }
-
     public PacketStaffListCommand fromJSON(JsonObject obj) {
         try {
             this.uuid = UUID.fromString(obj.get("uuid").getAsString());
         } catch (Exception e) {
             this.uuid = null;
+        }
+        JsonArray dir = obj.get("directors").getAsJsonArray();
+        for (JsonElement e : dir) {
+            this.directors.add(e.getAsString());
         }
         JsonArray man = obj.get("managers").getAsJsonArray();
         for (JsonElement e : man) {
@@ -127,6 +104,7 @@ public class PacketStaffListCommand extends BasePacket {
             obj.addProperty("id", this.id);
             obj.addProperty("uuid", this.uuid.toString());
             Gson gson = new Gson();
+            obj.add("directors", gson.toJsonTree(this.directors).getAsJsonArray());
             obj.add("managers", gson.toJsonTree(this.managers).getAsJsonArray());
             obj.add("admins", gson.toJsonTree(this.admins).getAsJsonArray());
             obj.add("developers", gson.toJsonTree(this.developers).getAsJsonArray());
