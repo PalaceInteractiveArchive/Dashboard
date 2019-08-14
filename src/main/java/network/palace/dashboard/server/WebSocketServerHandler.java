@@ -771,6 +771,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getServer(channel.getServerName()).setInventory(true);
                     break;
                 }
+                /*
+                 * Log Statistic
+                 */
+                case 75: {
+                    PacketLogStatistic packet = new PacketLogStatistic().fromJSON(object);
+                    dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().insertLogStatistic(packet.getTableName(), packet.getValues()));
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -62,7 +62,8 @@ public class Launcher {
         try {
             dashboard.getLogger().info("Initializing MongoDB Handler");
             dashboard.setMongoHandler(new MongoHandler());
-            dashboard.setSqlUtil(new SqlUtil());
+//            dashboard.setSqlUtil(new SqlUtil());
+            dashboard.setStatUtil(new StatUtil());
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
@@ -98,7 +99,6 @@ public class Launcher {
             e.printStackTrace();
         }
         dashboard.setAfkUtil(new AFKUtil());
-        dashboard.setStatUtil(new StatUtil());
         dashboard.setVoteUtil(new VoteUtil());
         try {
             dashboard.setForum(new Forum());
