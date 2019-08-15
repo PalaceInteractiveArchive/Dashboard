@@ -427,13 +427,13 @@ public class MongoHandler {
     /**
      * Initial login method where all player data is collected from the database and stored properly
      *
-     * @param player The player object
-     * @param silent true if processing after Dashboard restart where no login messages should be sent, false if normal login
+     * @param player       The player object
+     * @param afterRestart true if processing after Dashboard restart where no login messages should be sent, false if normal login
      */
-    public void login(Player player, boolean silent) {
+    public void login(Player player, boolean afterRestart) {
         Dashboard dashboard = Launcher.getDashboard();
 
-        if (!silent) {
+        if (!afterRestart) {
             dashboard.getSchedulerManager().runAsync(() -> {
                 // Check if the uuid is from MCLeaks before we continue.
                 boolean isMCLeaks = MCLeakUtil.checkPlayer(player);
@@ -510,11 +510,11 @@ public class MongoHandler {
                 player.setFriendRequestToggle(!settings.getBoolean("friendRequestToggle"));
                 player.setMentions(settings.getBoolean("mentions"));
                 player.setNewGuest(!doc.getBoolean("tutorial"));
-                dashboard.addPlayer(player);
+                if (!afterRestart) dashboard.addPlayer(player);
                 dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
                 dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
-                if (!silent && rank.getRankId() >= Rank.CHARACTER.getRankId()) {
+                if (!afterRestart && rank.getRankId() >= Rank.CHARACTER.getRankId()) {
                     String msg = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                             rank.getFormattedName() + " " + ChatColor.YELLOW + player.getUsername() + " has clocked in.";
                     if (disable) {
@@ -545,7 +545,7 @@ public class MongoHandler {
                             ChatColor.YELLOW + ChatColor.BOLD + "/friend requests");
                 }
                 HashMap<UUID, String> friendList = player.getFriends();
-                if (friendList != null && !silent) {
+                if (friendList != null && !afterRestart) {
                     String joinMessage = rank.getTagColor() + player.getUsername() + ChatColor.LIGHT_PURPLE + " has joined.";
                     dashboard.getFriendUtil().friendMessage(player, friendList, joinMessage);
                 }

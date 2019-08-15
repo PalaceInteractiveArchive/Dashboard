@@ -45,6 +45,36 @@
     "version": "2.15"
   },
   {
+    "groupId": "com.squareup.retrofit2",
+    "artifactId": "retrofit",
+    "version": "2.5.0"
+  },
+  {
+    "groupId": "com.squareup.retrofit2",
+    "artifactId": "converter-moshi",
+    "version": "2.5.0"
+  },
+  {
+    "groupId": "com.squareup.moshi",
+    "artifactId": "moshi",
+    "version": "1.5.0"
+  },
+  {
+    "groupId": "com.squareup.okhttp3",
+    "artifactId": "okhttp",
+    "version": "3.14.2"
+  },
+  {
+    "groupId": "com.squareup.okhttp3",
+    "artifactId": "logging-interceptor",
+    "version": "3.14.2"
+  },
+  {
+    "groupId": "com.squareup.okio",
+    "artifactId": "okio",
+    "version": "1.17.2"
+  },
+  {
     "groupId": "mysql",
     "artifactId": "mysql-connector-java",
     "version": "5.1.6"

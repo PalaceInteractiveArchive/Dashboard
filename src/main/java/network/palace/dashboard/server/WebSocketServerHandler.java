@@ -31,6 +31,7 @@ import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.IPUtil;
+import org.influxdb.dto.Point;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -777,7 +778,27 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                  */
                 case 75: {
                     PacketLogStatistic packet = new PacketLogStatistic().fromJSON(object);
-//                    dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().insertLogStatistic(packet.getTableName(), packet.getValues()));
+                    Point.Builder builder = Point.measurement(packet.getMeasurement());
+                    for (Map.Entry<String, Object> entry : packet.getFields().entrySet()) {
+                        Object o = entry.getValue();
+                        if (o instanceof Integer) {
+                            builder.addField(entry.getKey(), (int) entry.getValue());
+                        } else if (o instanceof Double) {
+                            builder.addField(entry.getKey(), (double) entry.getValue());
+                        } else if (o instanceof Float) {
+                            builder.addField(entry.getKey(), (float) entry.getValue());
+                        } else if (o instanceof Short) {
+                            builder.addField(entry.getKey(), (short) entry.getValue());
+                        } else if (o instanceof Boolean) {
+                            builder.addField(entry.getKey(), (boolean) entry.getValue());
+                        } else if (o instanceof String) {
+                            builder.addField(entry.getKey(), (String) entry.getValue());
+                        }
+                    }
+                    for (Map.Entry<String, Object> entry : packet.getTags().entrySet()) {
+                        builder.tag(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                    dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().logDataPoint(builder.build()));
                     break;
                 }
             }
