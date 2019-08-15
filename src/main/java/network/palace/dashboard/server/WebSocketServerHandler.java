@@ -831,9 +831,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         switch (dash.getType()) {
             case BUNGEECORD: {
                 dashboard.getModerationUtil().sendMessage(ChatColor.RED +
-                        "A BungeeCord instance has disconnected from dashboard!" + addon);
+                        "A BungeeCord instance (" + dash.getServerName() + ") has disconnected from dashboard!" + addon);
                 SlackMessage m = new SlackMessage("");
-                SlackAttachment a = new SlackAttachment("A BungeeCord Instance has disconnected from dashboard! #devs");
+                SlackAttachment a = new SlackAttachment("A BungeeCord instance (" + dash.getServerName() + ") has disconnected from dashboard! #devs");
                 a.color("danger");
                 dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                 break;
