@@ -3,6 +3,7 @@ package network.palace.dashboard.packets.dashboard;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
@@ -37,7 +38,14 @@ public class PacketLogStatistic extends BasePacket {
         JsonArray fields = obj.getAsJsonArray("fields");
         for (JsonElement e : fields) {
             JsonObject o = (JsonObject) e;
-            this.fields.put(o.get("key").getAsString(), o.get("value").getAsString());
+            JsonPrimitive primitive = o.get("value").getAsJsonPrimitive();
+            if (primitive.isBoolean()) {
+                this.fields.put(o.get("key").getAsString(), o.get("value").getAsBoolean());
+            } else if (primitive.isNumber()) {
+                this.fields.put(o.get("key").getAsString(), o.get("value").getAsFloat());
+            } else if (primitive.isString()) {
+                this.fields.put(o.get("key").getAsString(), o.get("value").getAsString());
+            }
         }
         return this;
     }

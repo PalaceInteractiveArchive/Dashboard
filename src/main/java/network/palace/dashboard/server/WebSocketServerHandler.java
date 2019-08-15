@@ -34,6 +34,7 @@ import network.palace.dashboard.utils.IPUtil;
 import org.influxdb.dto.Point;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -778,7 +779,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                  */
                 case 75: {
                     PacketLogStatistic packet = new PacketLogStatistic().fromJSON(object);
-                    Point.Builder builder = Point.measurement(packet.getMeasurement());
+                    Point.Builder builder = Point.measurement(packet.getMeasurement())
+                            .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
                     for (Map.Entry<String, Object> entry : packet.getFields().entrySet()) {
                         Object o = entry.getValue();
                         if (o instanceof Integer) {

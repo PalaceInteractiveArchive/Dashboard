@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Marc on 9/28/16
@@ -21,7 +22,6 @@ public class StatUtil {
     private final String url, username, password, database;
 
     private int totalPackets = 0; // used to calculate packets per second
-    private long lastPacketReset = 0;
     private int totalLogins = 0;
 
     public StatUtil() throws SQLException, IOException {
@@ -63,19 +63,19 @@ public class StatUtil {
 
                 float packets = totalPackets;
                 totalPackets = 0;
-                long packetReset = lastPacketReset;
-                lastPacketReset = time;
 
                 int logins = totalLogins;
                 totalLogins = 0;
                 List<Point> points = new ArrayList<>();
 
-                points.add(Point.measurement("logins").addField("count", logins).tag("production", String.valueOf(production)).build());
-                if (packetReset != 0)
-                    points.add(Point.measurement("dashboard_pps").addField("pps", packets / (time - packetReset)).tag("production", String.valueOf(production)).build());
+                points.add(Point.measurement("logins").time(time, TimeUnit.MILLISECONDS)
+                        .addField("count", logins).tag("production", String.valueOf(production)).build());
+                points.add(Point.measurement("dashboard_pps").time(time, TimeUnit.MILLISECONDS)
+                        .addField("pps", ((int) ((packets / 10) * 100)) / 100.0)
+                        .tag("production", String.valueOf(production)).build());
 
                 int totalPlayerCount = dashboard.getOnlinePlayers().size();
-                points.add(Point.measurement("player_count")
+                points.add(Point.measurement("player_count").time(time, TimeUnit.MILLISECONDS)
                         .addField("count", totalPlayerCount)
                         .tag("production", String.valueOf(production)).build());
                 HashMap<UUID, Integer> counts = new HashMap<>();
@@ -84,7 +84,7 @@ public class StatUtil {
                     counts.put(bid, counts.getOrDefault(bid, 0) + 1);
                 });
                 Dashboard.getChannels(PacketConnectionType.ConnectionType.BUNGEECORD).forEach(c -> points.add(Point.measurement("proxies")
-                        .tag("name", c.getServerName()).addField("count",
+                        .time(time, TimeUnit.MILLISECONDS).tag("name", c.getServerName()).addField("count",
                                 counts.getOrDefault(c.getBungeeID(), 0)).build()));
                 dashboard.getSchedulerManager().runAsync(() -> logDataPoint(points));
             }
@@ -109,8 +109,7 @@ public class StatUtil {
         influxDB.setDatabase(database);
         influxDB.setRetentionPolicy("autogen");
         try {
-            BatchPoints batchPoints = BatchPoints.database("palace").tag("async", "true")
-                    .consistency(InfluxDB.ConsistencyLevel.ALL).build();
+            BatchPoints batchPoints = BatchPoints.database("palace").consistency(InfluxDB.ConsistencyLevel.ALL).build();
             points.forEach(batchPoints::point);
             influxDB.write(batchPoints);
         } catch (Exception e) {
