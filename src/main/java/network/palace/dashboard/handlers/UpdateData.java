@@ -11,5 +11,6 @@ public class UpdateData {
     private int packSize;
     private BsonArray locker;
     private int lockerSize;
-    private BsonArray hotbar;
+    private BsonArray base;
+    private BsonArray build;
 }

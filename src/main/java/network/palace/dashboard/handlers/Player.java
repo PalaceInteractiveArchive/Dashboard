@@ -46,7 +46,7 @@ public class Player {
     /**
      * Automatically send player's inventory to target server when switching to a server that handles inventories
      */
-    @Getter @Setter private boolean sendInventoryOnJoin = true;
+    @Getter @Setter private boolean sendInventoryOnJoin = false;
     @Getter @Setter private String isp = "unknown";
 
     public Player(UUID uuid, String username, String address, String server, UUID bungeeID, int mcVersion) {
