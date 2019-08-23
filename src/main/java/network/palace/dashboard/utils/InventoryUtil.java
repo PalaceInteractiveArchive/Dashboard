@@ -426,7 +426,10 @@ public class InventoryUtil {
                     if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         backpack.append("{}");
                     } else {
-                        backpack.append("{type:'").append(item.getString("type")).append("',amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
+                        backpack.append("{type:'").append(item.getString("type"))
+                                .append("',data:").append(item.getInteger("data"))
+                                .append(",amount:").append(item.getInteger("amount"))
+                                .append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (packcontents.size() - 1)) {
                         backpack.append(",");
@@ -440,7 +443,10 @@ public class InventoryUtil {
                     if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         locker.append("{}");
                     } else {
-                        locker.append("{type:'").append(item.getString("type")).append("',amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
+                        locker.append("{type:'").append(item.getString("type"))
+                                .append("',data:").append(item.getInteger("data"))
+                                .append(",amount:").append(item.getInteger("amount"))
+                                .append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (lockercontents.size() - 1)) {
                         locker.append(",");
@@ -454,7 +460,10 @@ public class InventoryUtil {
                     if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         base.append("{}");
                     } else {
-                        base.append("{type:'").append(item.getString("type")).append("',amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
+                        base.append("{type:'").append(item.getString("type"))
+                                .append("',data:").append(item.getInteger("data"))
+                                .append(",amount:").append(item.getInteger("amount"))
+                                .append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (basecontents.size() - 1)) {
                         base.append(",");
@@ -468,7 +477,10 @@ public class InventoryUtil {
                     if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
                         build.append("{}");
                     } else {
-                        build.append("{type:'").append(item.getString("type")).append("',amount:").append(item.getInteger("amount")).append(",tag:'").append(item.getString("tag")).append("'}");
+                        build.append("{type:'").append(item.getString("type"))
+                                .append("',data:").append(item.getInteger("data"))
+                                .append(",amount:").append(item.getInteger("amount"))
+                                .append(",tag:'").append(item.getString("tag")).append("'}");
                     }
                     if (i < (buildcontents.size() - 1)) {
                         build.append(",");
@@ -567,7 +579,9 @@ public class InventoryUtil {
         }
         Document doc;
         try {
-            doc = new Document("type", o.get("type").getAsString()).append("amount", o.get("amount").getAsInt())
+            doc = new Document("type", o.get("type").getAsString())
+                    .append("data", o.get("data").getAsInt())
+                    .append("amount", o.get("amount").getAsInt())
                     .append("tag", o.get("tag").getAsString());
         } catch (IllegalArgumentException ignored) {
             return null;
@@ -588,7 +602,9 @@ public class InventoryUtil {
         }
         BsonDocument doc;
         try {
-            doc = new BsonDocument("type", new BsonString(o.get("type").getAsString())).append("amount", new BsonInt32(o.get("amount").getAsInt()))
+            doc = new BsonDocument("type", new BsonString(o.get("type").getAsString()))
+                    .append("data", new BsonInt32(o.get("data").getAsInt()))
+                    .append("amount", new BsonInt32(o.get("amount").getAsInt()))
                     .append("tag", o.get("tag") == null ? new BsonString("") : new BsonString(o.get("tag").getAsString()));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
