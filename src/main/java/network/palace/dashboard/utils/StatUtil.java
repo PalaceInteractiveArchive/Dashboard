@@ -1,64 +1,118 @@
 package network.palace.dashboard.utils;
 
-import com.goebl.david.Webb;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import org.json.JSONObject;
+import network.palace.dashboard.packets.dashboard.PacketConnectionType;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Marc on 9/28/16
  */
 public class StatUtil {
-    private int playerCount = 0;
-    private static final String statsEndpoint = "https://api.palace.network/stats/player";
-    private static final String apiKey = "aXDaexCS5NAS9mIOTRf3As9GS8exI7pMDYGtvS8N60Vl1ZbBcbBjPLEihADgNqmE";
+    private final String url, username, password, database;
 
-    public StatUtil() {
+    private int totalPackets = 0; // used to calculate packets per second
+    private int totalLogins = 0;
+
+    public StatUtil() throws SQLException, IOException {
         Dashboard dashboard = Launcher.getDashboard();
-        if (dashboard.isTestNetwork()) {
-            return;
+        dashboard.getLogger().info("Initializing StatUtil...");
+        String url = "";
+        String username = "";
+        String password = "";
+        String database = "";
+        try (BufferedReader br = new BufferedReader(new FileReader("stats.txt"))) {
+            String line = br.readLine();
+            while (line != null) {
+                if (line.startsWith("url:")) {
+                    url = line.split("url:")[1];
+                }
+                if (line.startsWith("username:")) {
+                    username = line.split("username:")[1];
+                }
+                if (line.startsWith("password:")) {
+                    password = line.split("password:")[1];
+                }
+                if (line.startsWith("database:")) {
+                    database = line.split("database:")[1];
+                }
+                line = br.readLine();
+            }
         }
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.database = database;
+
+        int production = dashboard.isTestNetwork() ? 0 : 1;
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    playerCount = dashboard.getOnlinePlayers().size();
-                } catch (Exception e) {
-                    playerCount = 0;
-                }
-                dashboard.getSchedulerManager().runAsync(() -> postToCachet(playerCount));
-                dashboard.getSchedulerManager().runAsync(() -> setValue(playerCount));
+                long time = System.currentTimeMillis();
+
+                float packets = totalPackets;
+                totalPackets = 0;
+
+                int logins = totalLogins;
+                totalLogins = 0;
+                List<Point> points = new ArrayList<>();
+
+                points.add(Point.measurement("logins").time(time, TimeUnit.MILLISECONDS)
+                        .addField("count", logins).tag("production", String.valueOf(production)).build());
+                points.add(Point.measurement("dashboard_pps").time(time, TimeUnit.MILLISECONDS)
+                        .addField("pps", ((int) ((packets / 10) * 100)) / 100.0)
+                        .tag("production", String.valueOf(production)).build());
+
+                int totalPlayerCount = dashboard.getOnlinePlayers().size();
+                points.add(Point.measurement("player_count").time(time, TimeUnit.MILLISECONDS)
+                        .addField("count", totalPlayerCount)
+                        .tag("production", String.valueOf(production)).build());
+                HashMap<UUID, Integer> counts = new HashMap<>();
+                Launcher.getDashboard().getOnlinePlayers().forEach(p -> {
+                    UUID bid = p.getBungeeID();
+                    counts.put(bid, counts.getOrDefault(bid, 0) + 1);
+                });
+                Dashboard.getChannels(PacketConnectionType.ConnectionType.BUNGEECORD).forEach(c -> points.add(Point.measurement("proxies")
+                        .time(time, TimeUnit.MILLISECONDS).tag("name", c.getServerName()).addField("count",
+                                counts.getOrDefault(c.getBungeeID(), 0)).build()));
+                dashboard.getSchedulerManager().runAsync(() -> logDataPoint(points));
             }
-        }, 10000, 60000);
+        }, 10000, 10000);
+        dashboard.getLogger().info("StatUtil is ready to go!");
     }
 
-    private void postToCachet(int value) {
-        Webb webb = Webb.create();
-        Launcher.getDashboard().getLogger().info("Sending request to API...");
-        JSONObject response = webb.get(statsEndpoint + "/" + value + "?key=" + apiKey).asJsonObject().getBody();
-        Launcher.getDashboard().getLogger().info("Request sent! Response: " + response.toString());
+    public void packet() {
+        totalPackets++;
     }
 
-    private void setValue(int value) {
-        Dashboard dashboard = Launcher.getDashboard();
-        Optional<Connection> optConnection = dashboard.getSqlUtil().getConnection();
-        if (!optConnection.isPresent()) {
-            ErrorUtil.logError("Unable to connect to mysql");
-            return;
-        }
-        try (Connection connection = optConnection.get()) {
-            PreparedStatement sql = connection.prepareStatement("INSERT INTO stats (time, type, value) VALUES ('" +
-                    (System.currentTimeMillis() / 1000) + "','count','" + value + "')");
-            sql.execute();
-            sql.close();
-        } catch (SQLException e) {
+    public void newLogin() {
+        totalLogins++;
+    }
+
+    public void logDataPoint(Point... points) {
+        logDataPoint(new ArrayList<>(Arrays.asList(points)));
+    }
+
+    public void logDataPoint(List<Point> points) {
+        InfluxDB influxDB = InfluxDBFactory.connect(url, username, password);
+        influxDB.setDatabase(database);
+        influxDB.setRetentionPolicy("autogen");
+        try {
+            BatchPoints batchPoints = BatchPoints.database("palace").consistency(InfluxDB.ConsistencyLevel.ALL).build();
+            points.forEach(batchPoints::point);
+            influxDB.write(batchPoints);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

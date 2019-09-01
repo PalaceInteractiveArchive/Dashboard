@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @AllArgsConstructor
 public enum Rank {
-
+    DIRECTOR("Director", ChatColor.RED + "Director ", ChatColor.RED, ChatColor.YELLOW, true, 12),
     MANAGER("Manager", ChatColor.RED + "Manager ", ChatColor.RED, ChatColor.YELLOW, true, 12),
     ADMIN("Admin", ChatColor.RED + "Admin ", ChatColor.RED, ChatColor.YELLOW, true, 12),
     DEVELOPER("Developer", ChatColor.GOLD + "Developer ", ChatColor.GOLD, ChatColor.YELLOW, true, 12),
-    SRMOD("Sr Mod", ChatColor.YELLOW + "Sr Mod ", ChatColor.YELLOW, ChatColor.GREEN, true, 11),
+    COORDINATOR("Coordinator", ChatColor.YELLOW + "Coordinator ", ChatColor.YELLOW, ChatColor.GREEN, true, 11),
     ARCHITECT("Architect", ChatColor.YELLOW + "Architect ", ChatColor.YELLOW, ChatColor.GREEN, true, 11),
     BUILDER("Builder", ChatColor.GREEN + "Builder ", ChatColor.GREEN, ChatColor.GREEN, true, 10),
     MOD("Mod", ChatColor.GREEN + "Mod ", ChatColor.GREEN, ChatColor.GREEN, true, 10),
@@ -20,9 +20,7 @@ public enum Rank {
     HONORABLE("Honorable", ChatColor.LIGHT_PURPLE + "Honorable ", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, false, 5),
     MAJESTIC("Majestic", ChatColor.DARK_PURPLE + "Majestic ", ChatColor.DARK_PURPLE, ChatColor.WHITE, false, 4),
     NOBLE("Noble", ChatColor.BLUE + "Noble ", ChatColor.BLUE, ChatColor.WHITE, false, 3),
-    SHAREHOLDER("Shareholder", ChatColor.LIGHT_PURPLE + "Shareholder ", ChatColor.LIGHT_PURPLE, ChatColor.WHITE, false, 3),
     DWELLER("Dweller", ChatColor.AQUA + "Dweller ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
-    DVCMEMBER("DVC", ChatColor.AQUA + "DVC ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
     SETTLER("Settler", ChatColor.GRAY + "", ChatColor.DARK_AQUA, ChatColor.WHITE, false, 1);
 
     @Getter private String name;

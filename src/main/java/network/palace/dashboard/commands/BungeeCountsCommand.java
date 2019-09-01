@@ -44,7 +44,8 @@ public class BungeeCountsCommand extends DashboardCommand {
                     break;
                 }
             }
-            player.sendMessage(ChatColor.GREEN + "Bungee (" + channel.getServerName() + "): " + counts.get(channel.getBungeeID()));
+            if (channel != null)
+                player.sendMessage(ChatColor.GREEN + "Bungee (" + channel.getServerName() + "): " + counts.get(channel.getBungeeID()));
         }
     }
 }

@@ -59,15 +59,18 @@ public class Launcher {
         }
         dashboard.getLogger().info("Starting up Dashboard...");
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
+        dashboard.loadConfiguration();
         try {
-            dashboard.getLogger().info("Initializing MongoDB Handler");
+            dashboard.getLogger().info("Initializing MongoDB Handler...");
             dashboard.setMongoHandler(new MongoHandler());
-            dashboard.setSqlUtil(new SqlUtil());
+            dashboard.getLogger().info("Finished initializing MongoDB Handler!");
+            dashboard.loadMaintenanceSettings();
+//            dashboard.setSqlUtil(new SqlUtil());
+            dashboard.setStatUtil(new StatUtil());
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
-        dashboard.loadConfiguration();
         dashboard.setRandom(new Random());
         dashboard.setSchedulerManager(new SchedulerManager());
         dashboard.setInventoryUtil(new InventoryUtil());
@@ -75,11 +78,8 @@ public class Launcher {
 
         dashboard.loadMOTD();
         dashboard.loadJoinServers();
-        if (dashboard.isTestNetwork()) {
-            dashboard.getLogger().info("Test network detected, disabling statistics collection!");
-        } else {
-            dashboard.setSocketConnection(new SocketConnection());
-        }
+
+        if (!dashboard.isTestNetwork()) dashboard.setSocketConnection(new SocketConnection());
 
         dashboard.setServerUtil(new ServerUtil());
         dashboard.setChatUtil(new ChatUtil());
@@ -98,7 +98,6 @@ public class Launcher {
             e.printStackTrace();
         }
         dashboard.setAfkUtil(new AFKUtil());
-        dashboard.setStatUtil(new StatUtil());
         dashboard.setVoteUtil(new VoteUtil());
         try {
             dashboard.setForum(new Forum());

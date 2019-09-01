@@ -86,6 +86,7 @@ public class ShutdownThread extends Thread {
             e.printStackTrace();
         }
         dashboard.getVoteUtil().stop();
+//        dashboard.getSqlUtil().stop();
         dashboard.getSlackUtil().sendDashboardMessage(new SlackMessage(),
                 Collections.singletonList(new SlackAttachment("Dashboard went offline! #devs").color("danger")));
     }

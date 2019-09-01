@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "1.9.7";
+    @Getter public static final String version = "1.9.9";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -52,7 +52,7 @@ public class Dashboard {
     @Getter @Setter private AFKUtil afkUtil;
     @Getter @Setter private StatUtil statUtil;
     @Getter @Setter private VoteUtil voteUtil;
-    @Getter @Setter private SqlUtil sqlUtil;
+    //    @Getter @Setter private SqlUtil sqlUtil;
     @Getter @Setter private SocketConnection socketConnection;
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
@@ -99,10 +99,13 @@ public class Dashboard {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void loadMaintenanceSettings() {
         if (maintenance) {
             maintenanceWhitelist.clear();
             List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.BUILDER,
-                    Rank.ARCHITECT, Rank.SRMOD, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER);
+                    Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER, Rank.DIRECTOR);
             maintenanceWhitelist.addAll(staff);
         }
     }
@@ -201,6 +204,7 @@ public class Dashboard {
     }
 
     public void addPlayer(Player player) {
+        statUtil.newLogin();
         players.put(player.getUniqueId(), player);
         String server = removeRegisteringPlayer(player.getUniqueId());
         if (player.getServer().equalsIgnoreCase("unknown") && server != null) {

@@ -31,8 +31,10 @@ import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.IPUtil;
+import org.influxdb.dto.Point;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -108,6 +110,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             int id = object.get("id").getAsInt();
 //            dashboard.getLogger().info(object.toString());
             System.out.println(object.toString());
+            dashboard.getStatUtil().packet();
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
                 /*
@@ -771,6 +774,35 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getServer(channel.getServerName()).setInventory(true);
                     break;
                 }
+                /*
+                 * Log Statistic
+                 */
+                case 75: {
+                    PacketLogStatistic packet = new PacketLogStatistic().fromJSON(object);
+                    Point.Builder builder = Point.measurement(packet.getMeasurement())
+                            .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+                    for (Map.Entry<String, Object> entry : packet.getFields().entrySet()) {
+                        Object o = entry.getValue();
+                        if (o instanceof Integer) {
+                            builder.addField(entry.getKey(), (int) entry.getValue());
+                        } else if (o instanceof Double) {
+                            builder.addField(entry.getKey(), (double) entry.getValue());
+                        } else if (o instanceof Float) {
+                            builder.addField(entry.getKey(), (float) entry.getValue());
+                        } else if (o instanceof Short) {
+                            builder.addField(entry.getKey(), (short) entry.getValue());
+                        } else if (o instanceof Boolean) {
+                            builder.addField(entry.getKey(), (boolean) entry.getValue());
+                        } else if (o instanceof String) {
+                            builder.addField(entry.getKey(), (String) entry.getValue());
+                        }
+                    }
+                    for (Map.Entry<String, Object> entry : packet.getTags().entrySet()) {
+                        builder.tag(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                    dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().logDataPoint(builder.build()));
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -799,9 +831,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         switch (dash.getType()) {
             case BUNGEECORD: {
                 dashboard.getModerationUtil().sendMessage(ChatColor.RED +
-                        "A BungeeCord instance has disconnected from dashboard!" + addon);
+                        "A BungeeCord instance (" + dash.getServerName() + ") has disconnected from dashboard!" + addon);
                 SlackMessage m = new SlackMessage("");
-                SlackAttachment a = new SlackAttachment("A BungeeCord Instance has disconnected from dashboard! #devs");
+                SlackAttachment a = new SlackAttachment("A BungeeCord instance (" + dash.getServerName() + ") has disconnected from dashboard! #devs");
                 a.color("danger");
                 dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a));
                 break;

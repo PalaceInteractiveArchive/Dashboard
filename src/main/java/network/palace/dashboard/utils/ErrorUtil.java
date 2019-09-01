@@ -23,6 +23,7 @@ public class ErrorUtil {
             e.printStackTrace(System.out);
             return;
         }
+        dashboard.getLogger().error(error + ": " + e.getMessage());
         dashboard.getErrors().error(error, e);
         String msg = ChatColor.RED + "[ERROR] " + ChatColor.WHITE + error;
         for (Player p : dashboard.getOnlinePlayers()) {
@@ -37,6 +38,7 @@ public class ErrorUtil {
         if (dashboard == null) {
             return;
         }
+        dashboard.getLogger().error(error);
         dashboard.getErrors().error(error);
         String msg = ChatColor.RED + "[ERROR] " + ChatColor.WHITE + error;
         for (Player p : dashboard.getOnlinePlayers()) {
