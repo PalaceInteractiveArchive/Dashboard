@@ -271,7 +271,7 @@ public class Forum {
                 return 7;
             case DEVELOPER:
                 return 8;
-            case SRMOD:
+            case COORDINATOR:
                 return 9;
             case ARCHITECT:
                 return 18;

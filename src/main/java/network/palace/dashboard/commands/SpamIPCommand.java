@@ -7,7 +7,7 @@ import network.palace.dashboard.handlers.*;
 public class SpamIPCommand extends DashboardCommand {
 
     public SpamIPCommand() {
-        super(Rank.SRMOD);
+        super(Rank.COORDINATOR);
     }
 
     @Override

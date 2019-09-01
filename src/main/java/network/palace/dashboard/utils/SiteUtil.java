@@ -44,7 +44,7 @@ public class SiteUtil implements HttpHandler {
             List<String> manager = new ArrayList<>();
             List<String> admin = new ArrayList<>();
             List<String> developer = new ArrayList<>();
-            List<String> srmod = new ArrayList<>();
+            List<String> coordinator = new ArrayList<>();
             List<String> architect = new ArrayList<>();
             List<String> builder = new ArrayList<>();
             List<String> mod = new ArrayList<>();
@@ -66,8 +66,8 @@ public class SiteUtil implements HttpHandler {
                         case ARCHITECT:
                             architect.add(tp.getUsername());
                             break;
-                        case SRMOD:
-                            srmod.add(tp.getUsername());
+                        case COORDINATOR:
+                            coordinator.add(tp.getUsername());
                             break;
                         case DEVELOPER:
                             developer.add(tp.getUsername());
@@ -87,7 +87,7 @@ public class SiteUtil implements HttpHandler {
             Collections.sort(manager);
             Collections.sort(admin);
             Collections.sort(developer);
-            Collections.sort(srmod);
+            Collections.sort(coordinator);
             Collections.sort(architect);
             Collections.sort(builder);
             Collections.sort(mod);
@@ -150,18 +150,18 @@ public class SiteUtil implements HttpHandler {
                 obj.addProperty("color", getColor(Rank.DEVELOPER));
                 array.add(obj);
             }
-            if (!srmod.isEmpty()) {
+            if (!coordinator.isEmpty()) {
                 StringBuilder names = new StringBuilder();
-                for (int i = 0; i < srmod.size(); i++) {
-                    names.append(srmod.get(i));
-                    if (i < (srmod.size() - 1)) {
+                for (int i = 0; i < coordinator.size(); i++) {
+                    names.append(coordinator.get(i));
+                    if (i < (coordinator.size() - 1)) {
                         names.append(", ");
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Sr. Mod");
+                obj.addProperty("title", "Coordinator");
                 obj.addProperty("text", names.toString());
-                obj.addProperty("color", getColor(Rank.SRMOD));
+                obj.addProperty("color", getColor(Rank.COORDINATOR));
                 array.add(obj);
             }
             if (!architect.isEmpty()) {
@@ -257,7 +257,7 @@ public class SiteUtil implements HttpHandler {
                 return "#FF5050";
             case DEVELOPER:
                 return "#FFAA00";
-            case SRMOD:
+            case COORDINATOR:
             case ARCHITECT:
                 return "#FFFF00";
             case BUILDER:
