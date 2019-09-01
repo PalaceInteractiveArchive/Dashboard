@@ -22,7 +22,7 @@ public class StaffListCommand extends DashboardCommand {
         List<String> manager = new ArrayList<>();
         List<String> admin = new ArrayList<>();
         List<String> developer = new ArrayList<>();
-        List<String> srmod = new ArrayList<>();
+        List<String> coordinator = new ArrayList<>();
         List<String> architect = new ArrayList<>();
         List<String> builder = new ArrayList<>();
         List<String> mod = new ArrayList<>();
@@ -44,8 +44,8 @@ public class StaffListCommand extends DashboardCommand {
                     case ARCHITECT:
                         architect.add(tp.getUsername() + ":" + tp.getServer());
                         break;
-                    case SRMOD:
-                        srmod.add(tp.getUsername() + ":" + tp.getServer());
+                    case COORDINATOR:
+                        coordinator.add(tp.getUsername() + ":" + tp.getServer());
                         break;
                     case DEVELOPER:
                         developer.add(tp.getUsername() + ":" + tp.getServer());
@@ -66,13 +66,13 @@ public class StaffListCommand extends DashboardCommand {
         Collections.sort(manager);
         Collections.sort(admin);
         Collections.sort(developer);
-        Collections.sort(srmod);
+        Collections.sort(coordinator);
         Collections.sort(architect);
         Collections.sort(builder);
         Collections.sort(mod);
         Collections.sort(trainee);
         PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), director, manager, admin,
-                developer, srmod, architect, builder, mod, trainee);
+                developer, coordinator, architect, builder, mod, trainee);
         player.send(packet);
     }
 }
