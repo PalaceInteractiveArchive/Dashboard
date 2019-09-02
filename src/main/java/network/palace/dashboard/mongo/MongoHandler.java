@@ -55,6 +55,7 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> votingCollection = null;
     @Getter private MongoCollection<Document> warpsCollection = null;
     @Getter private MongoCollection<Document> infractionsCollection = null;
+    @Getter private MongoCollection<Document> storageCollection = null;
     @Getter private MongoCollection<Document> spamIpWhitelist = null;
 
     public MongoHandler() throws IOException {
@@ -102,6 +103,7 @@ public class MongoHandler {
         votingCollection = database.getCollection("voting");
         warpsCollection = database.getCollection("warps");
         infractionsCollection = database.getCollection("infractions");
+        storageCollection = database.getCollection("storage");
         spamIpWhitelist = database.getCollection("spamipwhitelist");
     }
 
@@ -905,12 +907,12 @@ public class MongoHandler {
     }
 
     public Document getParkInventoryData(UUID uuid) {
-        return getParkData(uuid, null);
+        return storageCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).first();
     }
 
     public Document getParkInventory(UUID uuid, Resort resort) {
         Document doc = null;
-        for (Object o : getPlayer(uuid, new Document("parks.storage", true)).get("parks.storage", ArrayList.class)) {
+        for (Object o : getParkInventoryData(uuid).get("storage", ArrayList.class)) {
             Document inv = (Document) o;
             if (inv.getInteger("resort") == resort.getId()) {
                 doc = inv;
@@ -929,7 +931,8 @@ public class MongoHandler {
                         .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
                         .append("base", data.getBase()).append("build", data.getBuild())
                         .append("resort", inv.getResort().getId()).append("version", InventoryUtil.STORAGE_VERSION);
-                playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("parks.storage", doc));
+                storageCollection.insertOne(new Document("uuid", uuid.toString())
+                        .append("storage", doc));
             } else {
                 setInventoryData(uuid, inv.getResort(), data);
             }
@@ -943,10 +946,10 @@ public class MongoHandler {
                 .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
                 .append("base", data.getBase()).append("build", data.getBuild())
                 .append("resort", resort.getId()).append("version", InventoryUtil.STORAGE_VERSION);
-        playerCollection.updateOne(new Document("uuid", uuid.toString())
-                        .append("parks.storage.resort", resort.getId())
-                        .append("parks.storage.version", InventoryUtil.STORAGE_VERSION),
-                new Document("$set", new Document("parks.storage.$", doc)));
+        storageCollection.updateOne(new Document("uuid", uuid.toString())
+                        .append("storage.resort", resort.getId())
+                        .append("storage.version", InventoryUtil.STORAGE_VERSION),
+                new Document("$set", new Document("storage.$", doc)));
     }
 
     public void updateInventoryData(UUID uuid, InventoryUpdate update) {
@@ -959,7 +962,7 @@ public class MongoHandler {
     }
 
     public void clearUnversionedStorage(UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("parks.storage", Filters.exists("version", false)));
+        storageCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("storage", Filters.exists("version", false)));
     }
 
     public Document getSettings(UUID uuid) {
