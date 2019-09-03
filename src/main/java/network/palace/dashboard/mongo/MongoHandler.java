@@ -930,9 +930,9 @@ public class MongoHandler {
                 Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
                         .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
                         .append("base", data.getBase()).append("build", data.getBuild())
-                        .append("resort", inv.getResort().getId()).append("version", InventoryUtil.STORAGE_VERSION);
-                storageCollection.insertOne(new Document("uuid", uuid.toString())
-                        .append("storage", doc));
+                        .append("resort", inv.getResort().getId()).append("version", InventoryUtil.STORAGE_VERSION)
+                        .append("last-updated", System.currentTimeMillis());
+                storageCollection.insertOne(new Document("uuid", uuid.toString()).append("storage", doc));
             } else {
                 setInventoryData(uuid, inv.getResort(), data);
             }
@@ -945,7 +945,8 @@ public class MongoHandler {
         Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
                 .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
                 .append("base", data.getBase()).append("build", data.getBuild())
-                .append("resort", resort.getId()).append("version", InventoryUtil.STORAGE_VERSION);
+                .append("resort", resort.getId()).append("version", InventoryUtil.STORAGE_VERSION)
+                .append("last-updated", System.currentTimeMillis());
         storageCollection.updateOne(new Document("uuid", uuid.toString())
                         .append("storage.resort", resort.getId())
                         .append("storage.version", InventoryUtil.STORAGE_VERSION),

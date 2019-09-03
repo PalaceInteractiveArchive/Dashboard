@@ -23,6 +23,7 @@ import network.palace.dashboard.utils.chat.JaroWinkler;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,7 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "1.9.9";
+    @Getter public static final String version = "2.0.0";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -361,7 +362,7 @@ public class Dashboard {
             FileInputStream fileInputStreamReader = new FileInputStream(serverIcon);
             byte[] bytes = new byte[(int) serverIcon.length()];
             fileInputStreamReader.read(bytes);
-            encodedFile = new String(Base64.getEncoder().encode(bytes), "UTF-8");
+            encodedFile = new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }
