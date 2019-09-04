@@ -405,6 +405,8 @@ public class InventoryUtil {
 
             boolean clearUnversionedInventories = false;
 
+            if (invData == null) return new InventoryCache(uuid, map);
+
             for (Object o : invData.get("storage", ArrayList.class)) {
                 Document inv = (Document) o;
                 if (!inv.containsKey("version")) {
