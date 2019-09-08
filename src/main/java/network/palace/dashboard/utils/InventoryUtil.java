@@ -150,46 +150,47 @@ public class InventoryUtil {
             @Override
             public void run() {
                 for (InventoryCache cache : new ArrayList<>(cachedInventories.values())) {
-                    if (cache == null || cache.getResorts() == null) {
-                        continue;
-                    }
-                    InventoryUpdate update = new InventoryUpdate();
-                    for (ResortInventory inv : cache.getResorts().values()) {
-                        if (inv == null) {
-                            continue;
+                    try {
+                        if (cache == null || cache.getResorts() == null) continue;
+                        InventoryUpdate update = new InventoryUpdate();
+                        for (ResortInventory inv : cache.getResorts().values()) {
+                            if (inv == null) continue;
+                            if (!inv.getDbBackpackHash().equals(inv.getBackpackHash()) ||
+                                    !inv.getDbLockerHash().equals(inv.getLockerHash()) ||
+                                    !inv.getDbBaseHash().equals(inv.getBaseHash()) ||
+                                    !inv.getDbBuildHash().equals(inv.getBuildHash())) {
+
+                                String backpackJSON = inv.getBackpackJSON();
+                                int packSize = inv.getBackpackSize();
+                                String lockerJSON = inv.getLockerJSON();
+                                int lockerSize = inv.getLockerSize();
+                                String baseJSON = inv.getBaseJSON();
+                                String buildJSON = inv.getBuildJSON();
+
+                                UpdateData data = getDataFromJson(backpackJSON, packSize, lockerJSON, lockerSize, baseJSON, buildJSON);
+                                update.setData(inv.getResort(), data);
+
+                                inv.setDbBackpackHash(inv.getBackpackHash());
+                                inv.setDbLockerHash(inv.getLockerHash());
+                                inv.setDbBaseHash(inv.getBaseHash());
+                                inv.setDbBuildHash(inv.getBuildHash());
+                            }
                         }
-                        if (!inv.getDbBackpackHash().equals(inv.getBackpackHash()) ||
-                                !inv.getDbLockerHash().equals(inv.getLockerHash()) ||
-                                !inv.getDbBaseHash().equals(inv.getBaseHash()) ||
-                                !inv.getDbBuildHash().equals(inv.getBuildHash())) {
-
-                            String backpackJSON = inv.getBackpackJSON();
-                            int packSize = inv.getBackpackSize();
-                            String lockerJSON = inv.getLockerJSON();
-                            int lockerSize = inv.getLockerSize();
-                            String baseJSON = inv.getBaseJSON();
-                            String buildJSON = inv.getBuildJSON();
-
-                            UpdateData data = getDataFromJson(backpackJSON, packSize, lockerJSON, lockerSize, baseJSON, buildJSON);
-                            update.setData(inv.getResort(), data);
-
-                            inv.setDbBackpackHash(inv.getBackpackHash());
-                            inv.setDbLockerHash(inv.getLockerHash());
-                            inv.setDbBaseHash(inv.getBaseHash());
-                            inv.setDbBuildHash(inv.getBuildHash());
-                        }
-                    }
-                    boolean updated = false;
-                    Runnable runnable = () -> updateData(cache.getUuid(), update);
-                    if (update.shouldUpdate()) {
-                        updated = true;
-                        dashboard.getSchedulerManager().runAsync(runnable);
-                    }
-                    if (dashboard.getPlayer(cache.getUuid()) == null) {
-                        cachedInventories.remove(cache.getUuid());
-                        if (!updated) {
+                        boolean updated = false;
+                        Runnable runnable = () -> updateData(cache.getUuid(), update);
+                        if (update.shouldUpdate()) {
+                            updated = true;
                             dashboard.getSchedulerManager().runAsync(runnable);
                         }
+                        if (dashboard.getPlayer(cache.getUuid()) == null) {
+                            cachedInventories.remove(cache.getUuid());
+                            if (!updated) {
+                                dashboard.getSchedulerManager().runAsync(runnable);
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("ERROR UPDATING INVENTORY FOR " + cache.getUuid() + ": " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
             }
