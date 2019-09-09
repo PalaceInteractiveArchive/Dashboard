@@ -26,6 +26,7 @@ import java.util.*;
  * @author Innectic
  * @since 6/10/2017
  */
+@SuppressWarnings("DuplicatedCode")
 public class InventoryUtil {
     public static final int STORAGE_VERSION = 1;
     @Getter private Map<UUID, InventoryCache> cachedInventories = new HashMap<>();
@@ -39,7 +40,7 @@ public class InventoryUtil {
                 while (scanner.hasNextLine()) {
                     String json = scanner.nextLine();
                     JsonObject o = new JsonParser().parse(json).getAsJsonObject();
-                    UUID uuid = UUID.fromString(o.get("uuid").getAsString());
+                    UUID uuid = UUID.fromString(o.get("uuid").getAsString().trim());
                     HashMap<Resort, ResortInventory> map = new HashMap<>();
                     JsonArray arr = o.get("resorts").getAsJsonArray();
                     for (int i = 0; i < arr.size(); i++) {
@@ -76,7 +77,7 @@ public class InventoryUtil {
                             dbPackHash = ob.get("dbBackpackHash").getAsString();
                         }
                         if (ob.get("backpacksize").isJsonNull()) {
-                            packsize = -1;
+                            packsize = 0;
                         } else {
                             packsize = ob.get("backpacksize").getAsInt();
                         }
@@ -97,7 +98,7 @@ public class InventoryUtil {
                             dbLockerHash = ob.get("dbLockerHash").getAsString();
                         }
                         if (ob.get("lockersize").isJsonNull()) {
-                            lockersize = -1;
+                            lockersize = 0;
                         } else {
                             lockersize = ob.get("lockersize").getAsInt();
                         }
@@ -144,7 +145,6 @@ public class InventoryUtil {
                 dashboard.getLogger().error("An exception occurred while parsing inventories.txt - " + e.getMessage());
                 e.printStackTrace();
             }
-            f.delete();
         }
         new Timer().schedule(new TimerTask() {
             @Override
@@ -194,7 +194,7 @@ public class InventoryUtil {
                     }
                 }
             }
-        }, 1000, 10000);
+        }, 15000, 10000);
     }
 
     /**
@@ -383,7 +383,7 @@ public class InventoryUtil {
         Dashboard dashboard = Launcher.getDashboard();
         ResortInventory inv = new ResortInventory();
         inv.setResort(resort);
-        dashboard.getMongoHandler().setInventoryData(uuid, inv, true);
+        dashboard.getMongoHandler().setInventoryData(uuid, inv);
         InventoryCache cache = cachedInventories.get(uuid);
         if (cache != null) {
             cache.setInventory(resort, inv);
@@ -404,105 +404,114 @@ public class InventoryUtil {
             Dashboard dashboard = Launcher.getDashboard();
             Document invData = dashboard.getMongoHandler().getParkInventoryData(uuid);
 
-            boolean clearUnversionedInventories = false;
-
             if (invData == null) return new InventoryCache(uuid, map);
 
-            for (Object o : invData.get("storage", ArrayList.class)) {
-                Document inv = (Document) o;
-                if (!inv.containsKey("version")) {
-                    System.out.println("UNVERSIONED STORAGE FOUND");
-                    clearUnversionedInventories = true;
-                    continue;
-                }
-                int version = inv.getInteger("version");
-                int resortID = inv.getInteger("resort");
-                Resort resort = Resort.fromId(resortID);
-                if (version != STORAGE_VERSION) {
-                    System.out.println("INCORRECT STORAGE VERSION FOUND");
-                    continue;
-                }
-                StringBuilder backpack = new StringBuilder("[");
-                ArrayList packcontents = inv.get("backpack", ArrayList.class);
-                for (int i = 0; i < packcontents.size(); i++) {
-                    Document item = (Document) packcontents.get(i);
-                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
-                        backpack.append("{}");
-                    } else {
-                        backpack.append("{type:'").append(item.getString("type"))
-                                .append("',data:").append(item.getInteger("data"))
-                                .append(",amount:").append(item.getInteger("amount"))
-                                .append(",tag:'").append(item.getString("tag")).append("'}");
-                    }
-                    if (i < (packcontents.size() - 1)) {
-                        backpack.append(",");
-                    }
-                }
-                backpack.append("]");
-                StringBuilder locker = new StringBuilder("[");
-                ArrayList lockercontents = inv.get("locker", ArrayList.class);
-                for (int i = 0; i < lockercontents.size(); i++) {
-                    Document item = (Document) lockercontents.get(i);
-                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
-                        locker.append("{}");
-                    } else {
-                        locker.append("{type:'").append(item.getString("type"))
-                                .append("',data:").append(item.getInteger("data"))
-                                .append(",amount:").append(item.getInteger("amount"))
-                                .append(",tag:'").append(item.getString("tag")).append("'}");
-                    }
-                    if (i < (lockercontents.size() - 1)) {
-                        locker.append(",");
-                    }
-                }
-                locker.append("]");
-                StringBuilder base = new StringBuilder("[");
-                ArrayList basecontents = inv.get("base", ArrayList.class);
-                for (int i = 0; i < basecontents.size(); i++) {
-                    Document item = (Document) basecontents.get(i);
-                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
-                        base.append("{}");
-                    } else {
-                        base.append("{type:'").append(item.getString("type"))
-                                .append("',data:").append(item.getInteger("data"))
-                                .append(",amount:").append(item.getInteger("amount"))
-                                .append(",tag:'").append(item.getString("tag")).append("'}");
-                    }
-                    if (i < (basecontents.size() - 1)) {
-                        base.append(",");
-                    }
-                }
-                base.append("]");
-                StringBuilder build = new StringBuilder("[");
-                ArrayList buildcontents = inv.get("build", ArrayList.class);
-                for (int i = 0; i < buildcontents.size(); i++) {
-                    Document item = (Document) buildcontents.get(i);
-                    if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
-                        build.append("{}");
-                    } else {
-                        build.append("{type:'").append(item.getString("type"))
-                                .append("',data:").append(item.getInteger("data"))
-                                .append(",amount:").append(item.getInteger("amount"))
-                                .append(",tag:'").append(item.getString("tag")).append("'}");
-                    }
-                    if (i < (buildcontents.size() - 1)) {
-                        build.append(",");
-                    }
-                }
-                build.append("]");
-                int backpacksize = inv.getInteger("backpacksize");
-                int lockersize = inv.getInteger("lockersize");
-                ResortInventory resortInventory = new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "", backpacksize,
-                        locker.toString(), generateHash(locker.toString()), "", lockersize,
-                        base.toString(), generateHash(base.toString()), "",
-                        build.toString(), generateHash(build.toString()), "");
-                map.put(resort, resortInventory);
+            for (Resort r : Resort.values()) {
+                if (!invData.containsKey(r.getName())) continue;
+                ResortInventory resortInventory = getResortInventoryFromDocument(uuid, (Document) invData.get(r.getName()), r);
+                map.put(resortInventory.getResort(), resortInventory);
             }
-            if (clearUnversionedInventories) dashboard.getMongoHandler().clearUnversionedStorage(uuid);
+
+            if (invData.containsKey("storage")) {
+                for (Object o : invData.get("storage", ArrayList.class)) {
+                    Document doc = (Document) o;
+                    int resortID = doc.getInteger("resort");
+                    Resort resort = Resort.fromId(resortID);
+                    if (map.containsKey(resort)) continue;
+                    ResortInventory resortInventory = getResortInventoryFromDocument(uuid, (Document) o, resort);
+                    map.put(resortInventory.getResort(), resortInventory);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return new InventoryCache(uuid, map);
+    }
+
+    private ResortInventory getResortInventoryFromDocument(UUID uuid, Document inv, Resort resort) {
+        if (!inv.containsKey("version")) {
+            System.out.println("UNVERSIONED STORAGE FOUND " + uuid.toString());
+            return null;
+        }
+        int version = inv.getInteger("version");
+        if (version != STORAGE_VERSION) {
+            System.out.println("INCORRECT STORAGE VERSION FOUND " + uuid.toString());
+            return null;
+        }
+        StringBuilder backpack = new StringBuilder("[");
+        ArrayList packcontents = inv.get("backpack", ArrayList.class);
+        for (int i = 0; i < packcontents.size(); i++) {
+            Document item = (Document) packcontents.get(i);
+            if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
+                backpack.append("{}");
+            } else {
+                backpack.append("{type:'").append(item.getString("type"))
+                        .append("',data:").append(item.getInteger("data"))
+                        .append(",amount:").append(item.getInteger("amount"))
+                        .append(",tag:'").append(item.getString("tag")).append("'}");
+            }
+            if (i < (packcontents.size() - 1)) {
+                backpack.append(",");
+            }
+        }
+        backpack.append("]");
+        StringBuilder locker = new StringBuilder("[");
+        ArrayList lockercontents = inv.get("locker", ArrayList.class);
+        for (int i = 0; i < lockercontents.size(); i++) {
+            Document item = (Document) lockercontents.get(i);
+            if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
+                locker.append("{}");
+            } else {
+                locker.append("{type:'").append(item.getString("type"))
+                        .append("',data:").append(item.getInteger("data"))
+                        .append(",amount:").append(item.getInteger("amount"))
+                        .append(",tag:'").append(item.getString("tag")).append("'}");
+            }
+            if (i < (lockercontents.size() - 1)) {
+                locker.append(",");
+            }
+        }
+        locker.append("]");
+        StringBuilder base = new StringBuilder("[");
+        ArrayList basecontents = inv.get("base", ArrayList.class);
+        for (int i = 0; i < basecontents.size(); i++) {
+            Document item = (Document) basecontents.get(i);
+            if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
+                base.append("{}");
+            } else {
+                base.append("{type:'").append(item.getString("type"))
+                        .append("',data:").append(item.getInteger("data"))
+                        .append(",amount:").append(item.getInteger("amount"))
+                        .append(",tag:'").append(item.getString("tag")).append("'}");
+            }
+            if (i < (basecontents.size() - 1)) {
+                base.append(",");
+            }
+        }
+        base.append("]");
+        StringBuilder build = new StringBuilder("[");
+        ArrayList buildcontents = inv.get("build", ArrayList.class);
+        for (int i = 0; i < buildcontents.size(); i++) {
+            Document item = (Document) buildcontents.get(i);
+            if (!item.containsKey("amount") || !(item.get("amount") instanceof Integer)) {
+                build.append("{}");
+            } else {
+                build.append("{type:'").append(item.getString("type"))
+                        .append("',data:").append(item.getInteger("data"))
+                        .append(",amount:").append(item.getInteger("amount"))
+                        .append(",tag:'").append(item.getString("tag")).append("'}");
+            }
+            if (i < (buildcontents.size() - 1)) {
+                build.append(",");
+            }
+        }
+        build.append("]");
+        int backpacksize = inv.getInteger("backpacksize");
+        int lockersize = inv.getInteger("lockersize");
+        return new ResortInventory(resort, backpack.toString(), generateHash(backpack.toString()), "", backpacksize,
+                locker.toString(), generateHash(locker.toString()), "", lockersize,
+                base.toString(), generateHash(base.toString()), "",
+                build.toString(), generateHash(build.toString()), "");
     }
 
     /**

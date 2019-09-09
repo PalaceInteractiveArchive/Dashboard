@@ -911,7 +911,9 @@ public class MongoHandler {
     }
 
     public Document getParkInventory(UUID uuid, Resort resort) {
-        Document doc = null;
+        Document doc = getParkInventoryData(uuid);
+        if (doc.containsKey(resort.getName())) return (Document) doc.get(resort.getName());
+        doc = null;
         for (Object o : getParkInventoryData(uuid).get("storage", ArrayList.class)) {
             Document inv = (Document) o;
             if (inv.getInteger("resort") == resort.getId()) {
@@ -922,19 +924,27 @@ public class MongoHandler {
         return doc;
     }
 
-    public void setInventoryData(UUID uuid, ResortInventory inv, boolean create) {
+    /**
+     * Update a player's stored inventory
+     *
+     * @param uuid the uuid
+     * @param inv  the inventory data
+     */
+    public void setInventoryData(UUID uuid, ResortInventory inv) {
         try {
             UpdateData data = InventoryUtil.getDataFromJson(inv.getBackpackJSON(), inv.getBackpackSize(),
                     inv.getLockerJSON(), inv.getLockerSize(), inv.getBaseJSON(), inv.getBuildJSON());
-            if (create) {
-                Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
+            if (storageCollection.find(Filters.eq("uuid", uuid.toString())).first() != null) {
+                // Player already has a document, update the existing one
+                setInventoryData(uuid, inv.getResort(), data);
+            } else {
+                // Player doesn't have a document, make a new one
+                Document invDoc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
                         .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
                         .append("base", data.getBase()).append("build", data.getBuild())
-                        .append("resort", inv.getResort().getId()).append("version", InventoryUtil.STORAGE_VERSION)
+                        .append("version", InventoryUtil.STORAGE_VERSION)
                         .append("last-updated", System.currentTimeMillis());
-                storageCollection.insertOne(new Document("uuid", uuid.toString()).append("storage", doc));
-            } else {
-                setInventoryData(uuid, inv.getResort(), data);
+                storageCollection.insertOne(new Document("uuid", uuid.toString()).append(inv.getResort().getName(), invDoc));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -945,12 +955,11 @@ public class MongoHandler {
         Document doc = new Document("backpack", data.getPack()).append("backpacksize", data.getPackSize())
                 .append("locker", data.getLocker()).append("lockersize", data.getLockerSize())
                 .append("base", data.getBase()).append("build", data.getBuild())
-                .append("resort", resort.getId()).append("version", InventoryUtil.STORAGE_VERSION)
+                .append("version", InventoryUtil.STORAGE_VERSION)
                 .append("last-updated", System.currentTimeMillis());
-        storageCollection.updateOne(new Document("uuid", uuid.toString())
-                        .append("storage.resort", resort.getId())
-                        .append("storage.version", InventoryUtil.STORAGE_VERSION),
-                new Document("$set", new Document("storage.$", doc)));
+
+        storageCollection.updateOne(Filters.eq("uuid", uuid.toString()),
+                Updates.set(resort.getName(), doc), new UpdateOptions().upsert(true));
     }
 
     public void updateInventoryData(UUID uuid, InventoryUpdate update) {
@@ -960,10 +969,6 @@ public class MongoHandler {
             UpdateData data = entry.getValue();
             setInventoryData(uuid, resort, data);
         }
-    }
-
-    public void clearUnversionedStorage(UUID uuid) {
-        storageCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("storage", Filters.exists("version", false)));
     }
 
     public Document getSettings(UUID uuid) {

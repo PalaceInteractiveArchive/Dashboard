@@ -13,6 +13,10 @@ public enum Resort {
     @Getter private int id;
     @Getter private String[] server;
 
+    public String getName() {
+        return name().toLowerCase();
+    }
+
     public static Resort fromId(int id) {
         for (Resort type : values()) {
             if (type.getId() == id) return type;
