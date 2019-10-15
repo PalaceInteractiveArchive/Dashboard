@@ -42,6 +42,7 @@ public class Player {
     @Getter private long afkTime = System.currentTimeMillis();
     @Getter @Setter private boolean isAFK = false;
     @Getter @Setter private boolean disabled = false;
+    @Getter @Setter private long warningDelay = 0;
     private List<IgnoreData> ignoredUsers = new ArrayList<>();
     /**
      * Automatically send player's inventory to target server when switching to a server that handles inventories

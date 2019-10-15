@@ -24,6 +24,11 @@ public class WarnCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "I can't find that player!");
             return;
         }
+        if (System.currentTimeMillis() - tp.getWarningDelay() < 4000) {
+            //players can't be warned until at least 4 seconds after their previous warn
+            player.sendMessage(ChatColor.RED + "That player was warned recently, wait at least 4 seconds before warning again.");
+            return;
+        }
         StringBuilder r = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
             r.append(args[i]).append(" ");
@@ -33,6 +38,7 @@ public class WarnCommand extends DashboardCommand {
         tp.sendMessage(ChatColor.RED + "X===== " + ChatColor.YELLOW + "You have been issued a warning! " +
                 ChatColor.RED + "=====X\n\n" + ChatColor.YELLOW + WarningUtil.getCenteredText(reason) + "\n\n" +
                 ChatColor.RED + "X=======================================X");
+        tp.setWarningDelay(System.currentTimeMillis());
         dashboard.getModerationUtil().announceWarning(tp.getUsername(), reason, player.getUsername());
         dashboard.getMongoHandler().warnPlayer(new Warning(tp.getUniqueId(), reason, player.getUniqueId().toString()));
     }
