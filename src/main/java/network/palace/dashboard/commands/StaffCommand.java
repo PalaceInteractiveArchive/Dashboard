@@ -7,7 +7,6 @@ import network.palace.dashboard.packets.dashboard.PacketDisablePlayer;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
@@ -16,7 +15,7 @@ import java.util.UUID;
  * Created by Marc on 4/8/17.
  */
 public class StaffCommand extends DashboardCommand {
-    private static HashMap<UUID, Integer> attempts = new HashMap<>();
+    private HashMap<UUID, Integer> attempts = new HashMap<>();
 
     public StaffCommand() {
         super(Rank.TRAINEE);
@@ -47,10 +46,10 @@ public class StaffCommand extends DashboardCommand {
                         PacketDisablePlayer packet = new PacketDisablePlayer(player.getUniqueId(), false);
                         Dashboard.getInstance(player.getServer()).send(packet);
                         SlackMessage m = new SlackMessage("");
-                        SlackAttachment a = new SlackAttachment("[Successful] *" + player.getRank().getName() + "* " +
-                                player.getUsername() + " " + player.getAddress());
+                        SlackAttachment a = new SlackAttachment("[Successful] *" + player.getRank().getName() + "* `" +
+                                player.getUsername() + "` `" + player.getAddress() + "`");
                         a.color("good");
-                        dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     } else {
                         int trial;
                         if (attempts.containsKey(player.getUniqueId())) {
@@ -69,20 +68,20 @@ public class StaffCommand extends DashboardCommand {
                                     ChatColor.WHITE + "] " + ChatColor.RED + player.getUsername() + " has been locked out of their account!");
                             player.kickPlayer(ChatColor.RED + "Locked out of staff account. Please contact management to unlock your account.");
                             SlackMessage m = new SlackMessage("<!channel> *" + player.getUsername() + " Locked Out*");
-                            SlackAttachment a = new SlackAttachment("*[Locked] " + player.getRank().getName() + "* " +
-                                    player.getUsername() + " " + player.getAddress());
+                            SlackAttachment a = new SlackAttachment("*[Locked] " + player.getRank().getName() + "* `" +
+                                    player.getUsername() + "` `" + player.getAddress() + "`");
                             a.color("danger");
-                            dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                            dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                             return;
                         }
                         dashboard.getChatUtil().staffChatMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" +
                                 ChatColor.WHITE + "] " + ChatColor.GOLD + player.getUsername() + " attempted to login but failed! (" + trial + "/5)");
                         player.sendMessage(ChatColor.RED + "Incorrect password!");
                         SlackMessage m = new SlackMessage("");
-                        SlackAttachment a = new SlackAttachment("[" + trial + "/5] *" + player.getRank().getName() + "* " +
-                                player.getUsername() + " " + player.getAddress());
+                        SlackAttachment a = new SlackAttachment("[" + trial + "/5] *" + player.getRank().getName() + "* `" +
+                                player.getUsername() + "` `" + player.getAddress() + "`");
                         a.color("warning");
-                        dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     }
                     return;
                 }
@@ -101,19 +100,19 @@ public class StaffCommand extends DashboardCommand {
                         if (!dashboard.getMongoHandler().verifyPassword(player.getUniqueId(), oldp)) {
                             player.sendMessage(ChatColor.RED + "Your existing password is incorrect!");
                             SlackMessage m = new SlackMessage("");
-                            SlackAttachment a = new SlackAttachment("[Failed PW Change] *" + player.getRank().getName() + "* " +
-                                    player.getUsername() + " " + player.getAddress());
+                            SlackAttachment a = new SlackAttachment("[Failed PW Change] *" + player.getRank().getName() + "* `" +
+                                    player.getUsername() + "` `" + player.getAddress() + "`");
                             a.color("warning");
-                            dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                            dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                             return;
                         }
                         dashboard.getMongoHandler().setPassword(player.getUniqueId(), newp);
                         player.sendMessage(ChatColor.GREEN + "Your password was successfully changed!");
                         SlackMessage m = new SlackMessage("");
-                        SlackAttachment a = new SlackAttachment("[PW Changed] *" + player.getRank().getName() + "* " +
-                                player.getUsername() + " " + player.getAddress());
+                        SlackAttachment a = new SlackAttachment("[PW Changed] *" + player.getRank().getName() + "* `" +
+                                player.getUsername() + "` `" + player.getAddress() + "`");
                         a.color("good");
-                        dashboard.getSlackUtil().sendDashboardMessage(m, Arrays.asList(a), false);
+                        dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                         return;
                     } else if (args[0].equalsIgnoreCase("force") && player.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
                         String username;
@@ -145,8 +144,8 @@ public class StaffCommand extends DashboardCommand {
 //                    }
                         player.sendMessage(ChatColor.GREEN + username + "'s password was successfully changed!");
                         SlackMessage m = new SlackMessage("");
-                        SlackAttachment a = new SlackAttachment("[PW Force-Changed] *" + username +
-                                "* changed by *" + player.getUsername() + "* " + player.getAddress());
+                        SlackAttachment a = new SlackAttachment("[PW Force-Changed] `" + username +
+                                "` *changed by* `" + player.getUsername() + "` `" + player.getAddress() + "`");
                         a.color("good");
                         dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                         return;
@@ -163,9 +162,5 @@ public class StaffCommand extends DashboardCommand {
                 e.printStackTrace();
             }
         });
-    }
-
-    public static void logout(UUID uuid) {
-        attempts.remove(uuid);
     }
 }

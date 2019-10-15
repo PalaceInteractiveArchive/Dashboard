@@ -245,7 +245,6 @@ public class Dashboard {
     }
 
     public void logout(UUID uuid) {
-        StaffCommand.logout(uuid);
         chatUtil.logout(uuid);
         Player player = getPlayer(uuid);
         if (player != null) {

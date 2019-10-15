@@ -555,8 +555,8 @@ public class MongoHandler {
                 player.setMute(mute);
                 if (disable) {
                     SlackMessage m = new SlackMessage("");
-                    SlackAttachment a = new SlackAttachment(rank.getName() + " " + player.getUsername() +
-                            " connected from a new IP address " + player.getAddress());
+                    SlackAttachment a = new SlackAttachment("*" + rank.getName() + "* `" + player.getUsername() +
+                            "` connected from a new IP address `" + player.getAddress() + "`");
                     a.color("warning");
                     dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     player.sendMessage(ChatColor.YELLOW + "\n\n" + ChatColor.BOLD +
