@@ -8,11 +8,12 @@ import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class ReplyCommand extends DashboardCommand {
 
     public ReplyCommand() {
-        aliases = Arrays.asList("r");
+        aliases = Collections.singletonList("r");
     }
 
     @Override

@@ -23,7 +23,7 @@ public class PartyChatCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "You are not in a party!");
             return;
         }
-        if (!ChatUtil.enoughTime(player)) {
+        if (ChatUtil.notEnoughTime(player)) {
             player.sendMessage(DashboardConstants.NEW_GUEST);
             return;
         }

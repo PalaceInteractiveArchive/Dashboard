@@ -25,7 +25,7 @@ public class MsgCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "/msg [Player] [Message]");
             return;
         }
-        if (!ChatUtil.enoughTime(player)) {
+        if (ChatUtil.notEnoughTime(player)) {
             player.sendMessage(DashboardConstants.NEW_GUEST);
             return;
         }

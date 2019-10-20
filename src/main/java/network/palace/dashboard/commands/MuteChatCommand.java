@@ -8,12 +8,13 @@ import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class MuteChatCommand extends DashboardCommand {
 
     public MuteChatCommand() {
         super(Rank.TRAINEE);
-        aliases = Arrays.asList("chatmute");
+        aliases = Collections.singletonList("chatmute");
     }
 
     @Override

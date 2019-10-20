@@ -218,7 +218,7 @@ public class ChatUtil {
             player.sendMessage(ChatColor.RED + "We're currently loading your chat settings, try chatting again in a few seconds!");
             return;
         }
-        if (!enoughTime(player)) {
+        if (notEnoughTime(player)) {
             player.sendMessage(DashboardConstants.NEW_GUEST);
             return;
         }
@@ -239,7 +239,6 @@ public class ChatUtil {
             }
 
             if (dashboard.isStrictMode() && !messageCache.isEmpty() && message.length() >= 10) {
-
                 ChatMessage chatMessage = null;
                 for (ChatMessage cached : messageCache.values()) {
                     if (chatMessage == null) {
@@ -274,6 +273,7 @@ public class ChatUtil {
                     return;
                 }*/
             }
+
             //ChatDelay Check
             if (rank.getRankId() < Rank.CHARACTER.getRankId() && time.containsKey(player.getUniqueId()) && System.currentTimeMillis() - time.get(player.getUniqueId()) < chatDelay) {
                 String response = DashboardConstants.CHAT_DELAY.replaceAll("<TIME>", String.valueOf(chatDelay / 1000));
@@ -303,6 +303,8 @@ public class ChatUtil {
                 dashboard.getLogger().info("CANCELLED CHAT EVENT SWEAR,ADVERT,SPAM,UNICODE");
                 return;
             }
+
+            //TODO Remove skype check?
             String mm = message.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
                     .replace("/", "").replace("_", "").replace(" ", "").replace(";", "");
             if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
@@ -319,6 +321,7 @@ public class ChatUtil {
                 return;
             }
         }
+
         if (!player.getChannel().equals("all")) {
             switch (player.getChannel()) {
                 case "party":
@@ -335,8 +338,10 @@ public class ChatUtil {
                     return;
             }
         }
+
         String m = msg.toString();
         logMessage(player.getUniqueId(), m);
+
         String emoji;
         try {
             emoji = dashboard.getEmojiUtil().convertMessage(player, m);
@@ -344,13 +349,13 @@ public class ChatUtil {
             player.sendMessage(ChatColor.RED + e.getMessage());
             return;
         }
-        if (!emoji.equals(m)) {
-            m = emoji;
-        }
-        String sname = dashboard.getServer(player.getServer()).getServerType();
-        if (sname.startsWith("New")) {
-            sname = sname.replaceAll("New", "");
-        }
+
+        if (!emoji.equals(m)) m = emoji;
+
+//        String sname = dashboard.getServer(player.getServer()).getServerType();
+//        if (sname.startsWith("New")) {
+//            sname = sname.replaceAll("New", "");
+//        }
         if (dashboard.getServer(player.getServer()).isPark()) {
             if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
                 m = ChatColor.translateAlternateColorCodes('&', m);
@@ -362,7 +367,8 @@ public class ChatUtil {
                         (rank.getRankId() < Rank.CHARACTER.getRankId() && tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()))
                     continue;
                 if (dashboard.getServer(tp.getServer()).isPark()) {
-                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
+//                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
+                    String send = m2;
                     boolean mention = false;
                     if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
                         String possibleMention = m.toLowerCase();
@@ -388,8 +394,8 @@ public class ChatUtil {
         player.chat(m);
     }
 
-    public static boolean enoughTime(Player player) {
-        return (((System.currentTimeMillis() - player.getLoginTime()) / 1000) + player.getOnlineTime()) >= 600;
+    public static boolean notEnoughTime(Player player) {
+        return (((System.currentTimeMillis() - player.getLoginTime()) / 1000) + player.getOnlineTime()) < 600;
     }
 
     public boolean isMuted(Player player) {
@@ -535,7 +541,7 @@ public class ChatUtil {
                 amount++;
             }
         }
-        if (Math.floor((double) (100 * (((float) amount) / size))) >= 50.0) {
+        if (Math.floor(100 * (((float) amount) / size)) >= 50.0) {
             player.sendMessage(DashboardConstants.EXCESSIVE_CAPS);
             StringBuilder s = new StringBuilder();
             for (int i = 0; i < msg.length(); i++) {

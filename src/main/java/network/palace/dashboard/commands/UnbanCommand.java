@@ -8,13 +8,14 @@ import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 public class UnbanCommand extends DashboardCommand {
 
     public UnbanCommand() {
         super(Rank.MOD);
-        aliases = Arrays.asList("pardon");
+        aliases = Collections.singletonList("pardon");
     }
 
     @Override
