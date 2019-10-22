@@ -352,10 +352,10 @@ public class ChatUtil {
 
         if (!emoji.equals(m)) m = emoji;
 
-//        String sname = dashboard.getServer(player.getServer()).getServerType();
-//        if (sname.startsWith("New")) {
-//            sname = sname.replaceAll("New", "");
-//        }
+        String sname = dashboard.getServer(player.getServer()).getServerType();
+        if (sname.startsWith("New")) {
+            sname = sname.replaceAll("New", "");
+        }
         if (dashboard.getServer(player.getServer()).isPark()) {
             if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
                 m = ChatColor.translateAlternateColorCodes('&', m);
@@ -367,8 +367,8 @@ public class ChatUtil {
                         (rank.getRankId() < Rank.CHARACTER.getRankId() && tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()))
                     continue;
                 if (dashboard.getServer(tp.getServer()).isPark()) {
-//                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
-                    String send = m2;
+                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
+//                    String send = m2;
                     boolean mention = false;
                     if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
                         String possibleMention = m.toLowerCase();
