@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.handlers.chat.ChatColor;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.server.DashboardSocketChannel;

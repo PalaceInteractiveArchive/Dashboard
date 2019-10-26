@@ -1,7 +1,6 @@
 package network.palace.dashboard.handlers.chat;
 
 import com.google.common.base.Preconditions;
-import network.palace.dashboard.handlers.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +17,9 @@ import java.util.List;
  * <p>
  * All methods (excluding {@link #append(String)} and {@link #create()} work on
  * the last part appended to the builder, so in the example above "Hello " would
- * be {@link network.palace.dashboard.handlers.ChatColor#RED} and "World" would be
- * {@link network.palace.dashboard.handlers.ChatColor#BLUE} but "!" would be bold and
- * {@link network.palace.dashboard.handlers.ChatColor#BLUE} because append copies the previous
+ * be {@link ChatColor#RED} and "World" would be
+ * {@link ChatColor#BLUE} but "!" would be bold and
+ * {@link ChatColor#BLUE} because append copies the previous
  * part's formatting
  * </p>
  */

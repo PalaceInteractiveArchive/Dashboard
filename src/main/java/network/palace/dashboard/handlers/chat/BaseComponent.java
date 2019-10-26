@@ -1,7 +1,6 @@
 package network.palace.dashboard.handlers.chat;
 
 import lombok.*;
-import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.chat.ComponentBuilder.FormatRetention;
 
 import java.util.ArrayList;
@@ -209,7 +208,7 @@ public abstract class BaseComponent
 
     /**
      * Converts the components to a string that uses the old formatting codes
-     * ({@link network.palace.dashboard.handlers.ChatColor#COLOR_CHAR}
+     * ({@link ChatColor#COLOR_CHAR}
      *
      * @param components the components to convert
      * @return the string in the old format
@@ -242,7 +241,7 @@ public abstract class BaseComponent
 
     /**
      * Returns the color of this component. This uses the parent's color if this
-     * component doesn't have one. {@link network.palace.dashboard.handlers.ChatColor#WHITE}
+     * component doesn't have one. {@link ChatColor#WHITE}
      * is returned if no color is found.
      *
      * @return the color of this component
@@ -480,7 +479,7 @@ public abstract class BaseComponent
 
     /**
      * Converts the component to a string that uses the old formatting codes
-     * ({@link network.palace.dashboard.handlers.ChatColor#COLOR_CHAR}
+     * ({@link ChatColor#COLOR_CHAR}
      *
      * @return the string in the old format
      */

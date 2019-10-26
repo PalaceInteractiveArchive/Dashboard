@@ -1,4 +1,4 @@
-package network.palace.dashboard.handlers;
+package network.palace.dashboard.handlers.chat;
 
 import java.util.HashMap;
 import java.util.Map;

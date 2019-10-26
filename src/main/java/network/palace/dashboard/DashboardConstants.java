@@ -1,6 +1,6 @@
 package network.palace.dashboard;
 
-import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.handlers.chat.ChatColor;
 
 import java.util.regex.Pattern;
 

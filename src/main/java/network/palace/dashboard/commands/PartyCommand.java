@@ -3,6 +3,7 @@ package network.palace.dashboard.commands;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.handlers.chat.ChatColor;
 
 import java.util.Collections;
 

@@ -4,6 +4,7 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
+import network.palace.dashboard.handlers.chat.ChatColor;
 import network.palace.dashboard.utils.ChatUtil;
 import network.palace.dashboard.utils.DateUtil;
 

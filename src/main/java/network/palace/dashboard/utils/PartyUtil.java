@@ -3,7 +3,7 @@ package network.palace.dashboard.utils;
 import com.google.gson.JsonParser;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.handlers.chat.ChatColor;
 import network.palace.dashboard.handlers.Party;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketPartyRequest;

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import network.palace.dashboard.handlers.ChatColor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +21,7 @@ public final class TextComponent extends BaseComponent
 
     /**
      * Converts the old formatting system that used
-     * {@link network.palace.dashboard.handlers.ChatColor#COLOR_CHAR} into the new json based
+     * {@link ChatColor#COLOR_CHAR} into the new json based
      * system.
      *
      * @param message the text to convert
@@ -35,7 +34,7 @@ public final class TextComponent extends BaseComponent
 
     /**
      * Converts the old formatting system that used
-     * {@link network.palace.dashboard.handlers.ChatColor#COLOR_CHAR} into the new json based
+     * {@link ChatColor#COLOR_CHAR} into the new json based
      * system.
      *
      * @param message the text to convert

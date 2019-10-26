@@ -2,6 +2,7 @@ package network.palace.dashboard.handlers;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import network.palace.dashboard.handlers.chat.ChatColor;
 
 @AllArgsConstructor
 public enum SponsorTier {
