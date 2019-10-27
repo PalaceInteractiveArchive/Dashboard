@@ -1,7 +1,7 @@
-package network.palace.dashboard.handlers.chat;
+package network.palace.dashboard.chat;
 
 import lombok.*;
-import network.palace.dashboard.handlers.chat.ComponentBuilder.FormatRetention;
+import network.palace.dashboard.chat.ComponentBuilder.FormatRetention;
 
 import java.util.ArrayList;
 import java.util.List;

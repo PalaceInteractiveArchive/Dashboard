@@ -4,9 +4,9 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.handlers.chat.ChatColor;
-import network.palace.dashboard.handlers.chat.ComponentBuilder;
-import network.palace.dashboard.handlers.chat.HoverEvent;
+import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 
 import java.util.*;
 

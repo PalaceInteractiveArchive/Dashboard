@@ -2,7 +2,7 @@ package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.packets.dashboard.PacketTitle;

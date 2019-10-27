@@ -14,7 +14,7 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.arcade.GameState;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;

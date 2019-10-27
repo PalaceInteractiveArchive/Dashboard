@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;

@@ -4,7 +4,7 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.packets.park.PacketMuteChat;

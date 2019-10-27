@@ -10,7 +10,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.CurrencyType;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.mongo.MongoHandler;

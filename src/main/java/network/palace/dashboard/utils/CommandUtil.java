@@ -1,7 +1,7 @@
 package network.palace.dashboard.utils;
 
 import network.palace.dashboard.commands.*;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketCommandList;

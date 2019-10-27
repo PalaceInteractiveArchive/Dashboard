@@ -1,8 +1,6 @@
 package network.palace.dashboard.chat;
 
 import com.google.gson.*;
-import network.palace.dashboard.handlers.chat.BaseComponent;
-import network.palace.dashboard.handlers.chat.TextComponent;
 
 import java.lang.reflect.Type;
 import java.util.Set;

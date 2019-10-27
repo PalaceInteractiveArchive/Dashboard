@@ -1,7 +1,7 @@
 package network.palace.dashboard.scheduler;
 
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.Player;
 
 import java.io.BufferedReader;

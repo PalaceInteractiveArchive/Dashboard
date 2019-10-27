@@ -1,4 +1,4 @@
-package network.palace.dashboard.handlers.chat;
+package network.palace.dashboard.chat;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,28 +26,28 @@ public final class ClickEvent {
 
         /**
          * Open a url at the path given by
-         * {@link network.palace.dashboard.handlers.chat.ClickEvent#value}
+         * {@link ClickEvent#value}
          */
         OPEN_URL,
         /**
          * Open a file at the path given by
-         * {@link network.palace.dashboard.handlers.chat.ClickEvent#value}
+         * {@link ClickEvent#value}
          */
         OPEN_FILE,
         /**
          * Run the command given by
-         * {@link network.palace.dashboard.handlers.chat.ClickEvent#value}
+         * {@link ClickEvent#value}
          */
         RUN_COMMAND,
         /**
          * Inserts the string given by
-         * {@link network.palace.dashboard.handlers.chat.ClickEvent#value} into the players
+         * {@link ClickEvent#value} into the players
          * text box
          */
         SUGGEST_COMMAND,
         /**
          * Change to the page number given by
-         * {@link network.palace.dashboard.handlers.chat.ClickEvent#value} in a book
+         * {@link ClickEvent#value} in a book
          */
         CHANGE_PAGE
     }

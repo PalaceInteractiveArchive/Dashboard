@@ -3,10 +3,10 @@ package network.palace.dashboard.commands;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.handlers.chat.ChatColor;
-import network.palace.dashboard.handlers.chat.ClickEvent;
-import network.palace.dashboard.handlers.chat.ComponentBuilder;
-import network.palace.dashboard.handlers.chat.HoverEvent;
+import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ClickEvent;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.ModerationUtil;
 

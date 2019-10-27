@@ -1,4 +1,4 @@
-package network.palace.dashboard.handlers.chat;
+package network.palace.dashboard.chat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -105,7 +105,7 @@ public enum ChatColor {
     /**
      * Pattern to remove all colour codes.
      */
-    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf(COLOR_CHAR) + "[0-9A-FK-OR]");
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + COLOR_CHAR + "[0-9A-FK-OR]");
     /**
      * Colour instances keyed by their active character.
      */

@@ -1,4 +1,4 @@
-package network.palace.dashboard.handlers.chat;
+package network.palace.dashboard.chat;
 
 import com.google.common.base.Preconditions;
 

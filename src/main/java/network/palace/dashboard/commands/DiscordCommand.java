@@ -2,7 +2,7 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.discordSocket.DiscordUserInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;

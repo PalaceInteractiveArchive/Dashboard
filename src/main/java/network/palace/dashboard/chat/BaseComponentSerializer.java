@@ -4,10 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import network.palace.dashboard.handlers.chat.BaseComponent;
-import network.palace.dashboard.handlers.chat.ChatColor;
-import network.palace.dashboard.handlers.chat.ClickEvent;
-import network.palace.dashboard.handlers.chat.HoverEvent;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -3,7 +3,7 @@ package network.palace.dashboard.commands;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 
 public class StaffChatCommand extends DashboardCommand {
 
