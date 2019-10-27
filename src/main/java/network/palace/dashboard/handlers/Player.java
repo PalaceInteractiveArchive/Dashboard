@@ -4,8 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.chat.ComponentSerializer;
+import network.palace.dashboard.handlers.chat.BaseComponent;
 import network.palace.dashboard.handlers.chat.ChatColor;
 import network.palace.dashboard.packets.BasePacket;
+import network.palace.dashboard.packets.bungee.PacketComponentMessage;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.server.DashboardSocketChannel;
 
@@ -71,9 +74,7 @@ public class Player {
      * @param packet the packet to send
      */
     public void send(BasePacket packet) {
-        if (packet == null) {
-            return;
-        }
+        if (packet == null) return;
         DashboardSocketChannel bungee = Dashboard.getBungee(bungeeID);
         if (bungee == null) {
             Launcher.getDashboard().getLogger().info("CANCELLED PACKET EVENT INVALID BUNGEE '" + bungeeID + "' '" + uuid + "' '" + username + "'");
@@ -274,5 +275,13 @@ public class Player {
         DashboardSocketChannel socket = Dashboard.getInstance(server);
         PacketIgnoreList packet = new PacketIgnoreList(getUniqueId(), ignoredList);
         socket.send(packet);
+    }
+
+    public void sendMessage(BaseComponent[] baseComponents) {
+        if (baseComponents == null) return;
+        send(new PacketComponentMessage(
+                Collections.singletonList(uuid),
+                ComponentSerializer.toString(baseComponents)
+        ));
     }
 }

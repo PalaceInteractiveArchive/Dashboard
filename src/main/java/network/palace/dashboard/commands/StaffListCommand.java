@@ -4,11 +4,11 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.packets.dashboard.PacketStaffListCommand;
+import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.handlers.chat.ComponentBuilder;
+import network.palace.dashboard.handlers.chat.HoverEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class StaffListCommand extends DashboardCommand {
 
@@ -18,61 +18,32 @@ public class StaffListCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        List<String> director = new ArrayList<>();
-        List<String> manager = new ArrayList<>();
-        List<String> admin = new ArrayList<>();
-        List<String> developer = new ArrayList<>();
-        List<String> coordinator = new ArrayList<>();
-        List<String> architect = new ArrayList<>();
-        List<String> builder = new ArrayList<>();
-        List<String> mod = new ArrayList<>();
-        List<String> trainee = new ArrayList<>();
-        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
-            Rank r = tp.getRank();
-            if (r.getRankId() >= Rank.TRAINEE.getRankId()) {
-                switch (r) {
-                    case TRAINEEBUILD:
-                    case TRAINEE:
-                        trainee.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case MOD:
-                        mod.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case BUILDER:
-                        builder.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case ARCHITECT:
-                        architect.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case COORDINATOR:
-                        coordinator.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case DEVELOPER:
-                        developer.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case ADMIN:
-                        admin.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case MANAGER:
-                        manager.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                    case DIRECTOR:
-                        director.add(tp.getUsername() + ":" + tp.getServer());
-                        break;
-                }
-            }
+        TreeMap<Rank, Set<Player>> players = new TreeMap<>(Comparator.comparingInt(Rank::getRankId));
+        Launcher.getDashboard().getOnlinePlayers().stream()
+                .filter(p -> p.getRank().getRankId() >= Rank.TRAINEE.getRankId())
+                .forEach(tp -> {
+                    Rank rank = tp.getRank();
+                    if (rank.equals(Rank.TRAINEEBUILD)) rank = Rank.TRAINEE;
+                    Set<Player> list = players.getOrDefault(rank, new TreeSet<>(Comparator.comparing(Player::getUsername)));
+                    list.add(tp);
+                    if (!players.containsKey(rank)) players.put(rank, list);
+                });
+        player.sendMessage(ChatColor.GREEN + "Online Staff Members:");
+        for (Map.Entry<Rank, Set<Player>> entry : players.entrySet()) {
+            sendRankMessage(player, entry.getKey(), entry.getValue());
         }
-        Collections.sort(director);
-        Collections.sort(manager);
-        Collections.sort(admin);
-        Collections.sort(developer);
-        Collections.sort(coordinator);
-        Collections.sort(architect);
-        Collections.sort(builder);
-        Collections.sort(mod);
-        Collections.sort(trainee);
-        PacketStaffListCommand packet = new PacketStaffListCommand(player.getUniqueId(), director, manager, admin,
-                developer, coordinator, architect, builder, mod, trainee);
-        player.send(packet);
+    }
+
+    private void sendRankMessage(Player player, Rank rank, Set<Player> members) {
+        ComponentBuilder comp = new ComponentBuilder(rank.getName() + "s: (" + members.size() + ") ").color(rank.getTagColor());
+        int i = 0;
+        for (Player p : members) {
+            comp.append(p.getUsername(), ComponentBuilder.FormatRetention.NONE).color(ChatColor.GREEN)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Currently on: ")
+                            .color(ChatColor.GREEN).append(p.getServer()).color(ChatColor.AQUA).create()));
+            if (i < (members.size() - 1)) comp.append(", ");
+            i++;
+        }
+        player.sendMessage(comp.create());
     }
 }
