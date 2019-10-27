@@ -277,7 +277,7 @@ public class Player {
         socket.send(packet);
     }
 
-    public void sendMessage(BaseComponent[] baseComponents) {
+    public void sendMessage(BaseComponent... baseComponents) {
         if (baseComponents == null) return;
         send(new PacketComponentMessage(
                 Collections.singletonList(uuid),

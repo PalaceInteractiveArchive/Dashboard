@@ -1,12 +1,14 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.handlers.chat.ClickEvent;
+import network.palace.dashboard.handlers.chat.ComponentBuilder;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
-import network.palace.dashboard.packets.dashboard.PacketAudioCommand;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.server.DashboardSocketChannel;
 
@@ -38,7 +40,10 @@ public class AudioCommand extends DashboardCommand {
             }
             return;
         }
-        PacketAudioCommand packet = new PacketAudioCommand(player.getUniqueId(), player.setAudioToken());
-        player.send(packet);
+        player.sendMessage(new ComponentBuilder("\nClick here to connect to our Audio Server!\n")
+                .color(ChatColor.GREEN).underlined(true).bold(true)
+                .event((new ClickEvent(ClickEvent.Action.OPEN_URL,
+                        (Launcher.getDashboard().isTestNetwork() ? "https://audio-test.palace.network/?t=" :
+                                "https://audio.palace.network/?t=") + player.setAudioToken()))).create());
     }
 }

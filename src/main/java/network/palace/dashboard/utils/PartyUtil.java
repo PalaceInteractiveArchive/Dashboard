@@ -3,10 +3,12 @@ package network.palace.dashboard.utils;
 import com.google.gson.JsonParser;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.chat.ChatColor;
 import network.palace.dashboard.handlers.Party;
 import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.packets.dashboard.PacketPartyRequest;
+import network.palace.dashboard.handlers.chat.ChatColor;
+import network.palace.dashboard.handlers.chat.ClickEvent;
+import network.palace.dashboard.handlers.chat.ComponentBuilder;
+import network.palace.dashboard.handlers.chat.HoverEvent;
 
 import java.io.File;
 import java.io.FileReader;
@@ -61,22 +63,28 @@ public class PartyUtil {
             party.getLeader().sendMessage(ChatColor.GREEN + "This player already has a party request pending!");
             return;
         }
-        Party p = findPartyForPlayer(tp.getUniqueId());
-        if (p != null) {
-            if (p.getMembers().size() > 1 || hasTimer(p)) {
+        Party currentParty = findPartyForPlayer(tp.getUniqueId());
+        if (currentParty != null) {
+            if (currentParty.getMembers().size() > 1 || hasTimer(currentParty)) {
                 party.getLeader().sendMessage(ChatColor.RED + "This player is already in a Party!");
                 return;
-
             }
-            partyList.remove(p);
+            partyList.remove(currentParty);
         }
         if (party.getMembers().contains(tp.getUniqueId())) {
             party.getLeader().sendMessage(ChatColor.RED + "This player is already in your party!");
             return;
         }
         timerList.put(tp.getUniqueId(), party);
-        PacketPartyRequest packet = new PacketPartyRequest(tp.getUniqueId(), party.getLeader().getUsername());
-        tp.send(packet);
+
+        tp.sendMessage(new ComponentBuilder(party.getLeader().getUsername()).color(ChatColor.YELLOW)
+                .append(" has invited you to their Party! ").color(ChatColor.GREEN).append("Click here to join the Party.")
+                .color(ChatColor.GOLD).bold(true).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder("Click to join this Party!").color(ChatColor.AQUA).create()))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/party accept"))
+                .append(" This invite will expire in 5 minutes.", ComponentBuilder.FormatRetention.NONE)
+                .color(ChatColor.GREEN).create());
+
         party.messageToAllMembers(ChatColor.YELLOW + party.getLeader().getUsername() + " has asked " + tp.getUsername() +
                 " to join their party, they have 5 minutes to accept!", true);
         new Timer().schedule(new TimerTask() {
