@@ -24,11 +24,16 @@ public class MuteCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "1h = One Hour");
             return;
         }
-        final String username = args[0];
-        final long muteTimestamp = DateUtil.parseDateDiff(args[1], true);
+        String username = args[0];
+        long muteTimestamp = DateUtil.parseDateDiff(args[1], true);
         long length = muteTimestamp - System.currentTimeMillis();
-        if (length > 3600000) {
-            player.sendMessage(ChatColor.RED + "The maximum mute length is 1 hour!");
+        if ((player.getRank().equals(Rank.MEDIA) || player.getRank().equals(Rank.TECHNICIAN) || player.getRank().equals(Rank.TRAINEETECH))) {
+            if (length > 1800000) {
+                player.sendMessage(ChatColor.RED + "You can't mute for longer than 30 minutes!");
+                return;
+            }
+        } else if (length > 3600000) {
+            player.sendMessage(ChatColor.RED + "You can't mute for longer than 1 hour!");
             return;
         }
         dashboard.getSchedulerManager().runAsync(() -> {

@@ -15,6 +15,10 @@ public class BanCommand extends DashboardCommand {
 
     @Override
     public void execute(Player banner, String label, String[] args) {
+        if (banner.getRank().equals(Rank.MEDIA) || banner.getRank().equals(Rank.TECHNICIAN)) {
+            banner.sendMessage(ChatColor.RED + "You do not have permission to execute this command!");
+            return;
+        }
         Dashboard dashboard = Launcher.getDashboard();
         if (args.length < 2) {
             banner.sendMessage(ChatColor.RED + "/ban [Player] [Reason]");
