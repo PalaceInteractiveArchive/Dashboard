@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.chat.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package network.palace.dashboard.packets.dashboard;
 
 import com.google.gson.JsonObject;
-import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.PacketID;
 

@@ -2,12 +2,12 @@ package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.packets.dashboard.PacketFriendRequest;
-import network.palace.dashboard.packets.dashboard.PacketListFriendCommand;
-import network.palace.dashboard.packets.dashboard.PacketListRequestCommand;
+import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ClickEvent;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 
 import java.util.*;
 
@@ -38,9 +38,7 @@ public class FriendUtil {
         Dashboard dashboard = Launcher.getDashboard();
         HashMap<UUID, String> friends = player.getFriends();
         if (friends.isEmpty()) {
-            player.sendMessage(" ");
-            player.sendMessage(ChatColor.RED + "Type /friend add [Player] to add someone");
-            player.sendMessage(" ");
+            player.sendMessage(ChatColor.RED + "\nType /friend add [Player] to add someone\n");
             return;
         }
         int listSize = friends.size();
@@ -75,9 +73,7 @@ public class FriendUtil {
         currentFriends.sort((o1, o2) -> {
             boolean c1 = o1.contains(":");
             boolean c2 = o2.contains(":");
-            if (c1 && c2) {
-                return o1.compareTo(o2);
-            } else if (c1 && !c2) {
+            if (c1 && !c2) {
                 return -1;
             } else if (!c1 && c2) {
                 return 1;
@@ -85,112 +81,42 @@ public class FriendUtil {
                 return o1.compareTo(o2);
             }
         });
-        List<String> fsOnPage = new ArrayList<>(currentFriends.subList(startAmount, endAmount));
-        PacketListFriendCommand packet = new PacketListFriendCommand(player.getUniqueId(), page, maxPage, fsOnPage);
-        player.send(packet);
+        ComponentBuilder message = new ComponentBuilder("\nFriend List ").color(ChatColor.YELLOW)
+                .append("[Page " + page + " of " + maxPage + "]").color(ChatColor.GREEN);
+        for (String str : currentFriends.subList(startAmount, endAmount)) {
+            String[] list = str.split(":");
+            String user = list[0];
+            if (list.length > 1) {
+                String server = list[1];
+                message.append("\n- ").color(ChatColor.AQUA).append(server).color(ChatColor.GREEN)
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to join ")
+                                .color(ChatColor.GREEN).append(server + "!").color(ChatColor.YELLOW)
+                                .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/friend tp " + server));
+            } else {
+                message.append("\n- ").color(ChatColor.AQUA).append(user).color(ChatColor.RED)
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("This player is offline!")
+                                .color(ChatColor.RED).create()));
+            }
+        }
+        player.sendMessage(message.create());
     }
-
-//    public static void toggleRequests(Player player) {
-//        Dashboard dashboard = Launcher.getDashboard();
-//        Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
-//        if (!optConnection.isPresent()) {
-//            ErrorUtil.logError("Unable to connect to mysql");
-//            return;
-//        }
-//        try (Connection connection = optConnection.get()) {
-//            PreparedStatement sql = connection.prepareStatement("UPDATE player_data SET toggled=? WHERE uuid=?");
-//            sql.setInt(1, player.hasFriendToggledOff() ? 1 : 0);
-//            sql.setString(2, player.getUniqueId().toString());
-//            sql.execute();
-//            sql.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public static void listRequests(final Player player) {
         HashMap<UUID, String> requests = player.getRequests();
         if (requests.isEmpty()) {
-            player.sendMessage(" ");
-            player.sendMessage(ChatColor.RED + "You currently have no Friend Requests!");
-            player.sendMessage(" ");
+            player.sendMessage(ChatColor.RED + "\nYou currently have no Friend Requests!\n");
             return;
         }
-        PacketListRequestCommand packet = new PacketListRequestCommand(player.getUniqueId(), new ArrayList<>(requests.values()));
-        player.send(packet);
+        player.sendMessage(ChatColor.GREEN + "Request List:");
+        for (String s : requests.values()) {
+            player.sendMessage(new ComponentBuilder("- ").color(ChatColor.AQUA).append(s)
+                    .color(ChatColor.YELLOW).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            new ComponentBuilder("Click to Accept the Request!").color(ChatColor.GREEN).create()))
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/friend accept " + s)).create());
+        }
+        player.sendMessage(new ComponentBuilder(" ").create());
     }
-
-//    private static HashMap<UUID, String> getList(UUID uuid, int status) {
-//        Dashboard dashboard = Launcher.getDashboard();
-//        List<UUID> uuids = new ArrayList<>();
-//        HashMap<UUID, String> map = new HashMap<>();
-//        Optional<Connection> optConnection = dashboard.getMongoHandler().getConnection();
-//        if (!optConnection.isPresent()) {
-//            ErrorUtil.logError("Unable to connect to mysql");
-//            return map;
-//        }
-//        try (Connection connection = optConnection.get()) {
-//            switch (status) {
-//                case 0: {
-//                    PreparedStatement sql = connection.prepareStatement("SELECT sender FROM friends WHERE receiver=? AND status=0");
-//                    sql.setString(1, uuid.toString());
-//                    ResultSet result = sql.executeQuery();
-//                    while (result.next()) {
-//                        uuids.add(UUID.fromString(result.getString("sender")));
-//                    }
-//                    result.close();
-//                    sql.close();
-//                    break;
-//                }
-//                case 1: {
-//                    PreparedStatement sql = connection.prepareStatement("SELECT sender,receiver FROM friends WHERE (sender=? OR receiver=?) AND status=1");
-//                    sql.setString(1, uuid.toString());
-//                    sql.setString(2, uuid.toString());
-//                    ResultSet result = sql.executeQuery();
-//                    while (result.next()) {
-//                        if (result.getString("sender").equalsIgnoreCase(uuid.toString())) {
-//                            uuids.add(UUID.fromString(result.getString("receiver")));
-//                        } else {
-//                            uuids.add(UUID.fromString(result.getString("sender")));
-//                        }
-//                    }
-//                    break;
-//                }
-//            }
-//            if (uuids.isEmpty()) {
-//                return map;
-//            }
-//            StringBuilder query = new StringBuilder("SELECT username,uuid FROM player_data WHERE uuid=");
-//            for (int i = 0; i < uuids.size(); i++) {
-//                if (i >= (uuids.size() - 1)) {
-//                    query.append("?");
-//                } else {
-//                    query.append("? or uuid=");
-//                }
-//            }
-//            PreparedStatement sql2 = connection.prepareStatement(query.toString());
-//            for (int i = 1; i < (uuids.size() + 1); i++) {
-//                sql2.setString(i, uuids.get(i - 1).toString());
-//            }
-//            ResultSet res2 = sql2.executeQuery();
-//            while (res2.next()) {
-//                map.put(UUID.fromString(res2.getString("uuid")), res2.getString("username"));
-//            }
-//            res2.close();
-//            sql2.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return map;
-//    }
-//
-//    public static HashMap<UUID, String> getFriendList(UUID uuid) {
-//        return getList(uuid, 1);
-//    }
-//
-//    public static HashMap<UUID, String> getRequestList(UUID uuid) {
-//        return getList(uuid, 0);
-//    }
 
     public static void addFriend(Player player, String name) {
         Dashboard dashboard = Launcher.getDashboard();
@@ -243,8 +169,15 @@ public class FriendUtil {
         tp.getRequests().put(player.getUniqueId(), player.getUsername());
         player.sendMessage(ChatColor.YELLOW + "You have sent " + ChatColor.AQUA + tp.getUsername() + ChatColor.YELLOW +
                 " a Friend Request!");
-        PacketFriendRequest packet = new PacketFriendRequest(tp.getUniqueId(), player.getUsername());
-        tp.send(packet);
+
+        tp.sendMessage(new ComponentBuilder("\n" + player.getUsername()).color(ChatColor.GREEN)
+                .append(" has sent you a Friend Request!").color(ChatColor.YELLOW).create());
+        tp.sendMessage(new ComponentBuilder("Click to Accept").color(ChatColor.GREEN).bold(true).event(new
+                ClickEvent(ClickEvent.Action.RUN_COMMAND, "/friend accept " + player.getUsername())).append(" or ",
+                ComponentBuilder.FormatRetention.NONE).color(ChatColor.AQUA).append("Click to Deny\n")
+                .color(ChatColor.RED).bold(true).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/friend deny " + player.getUsername())).create());
+
         /* Add request to database */
         dashboard.getMongoHandler().addFriendRequest(player.getUniqueId(), tp.getUniqueId());
         dashboard.getMongoHandler().logActivity(player.getUniqueId(), "Send Friend Request", name);

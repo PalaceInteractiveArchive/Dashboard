@@ -44,7 +44,8 @@ public enum PacketID {
 
     @AllArgsConstructor
     public enum Bungee {
-        BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70), ONLINEPLAYERLIST(73), UPDATEBUNGEECONFIG(74);
+        BUNGEEID(65), PLAYERLISTINFO(66), SERVERICON(70), ONLINEPLAYERLIST(73), UPDATEBUNGEECONFIG(74),
+        COMPONENT_MESSAGE(76);
         @Getter final int ID;
     }
 

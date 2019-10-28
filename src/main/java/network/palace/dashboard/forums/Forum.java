@@ -3,7 +3,7 @@ package network.palace.dashboard.forums;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.mongo.MongoHandler;

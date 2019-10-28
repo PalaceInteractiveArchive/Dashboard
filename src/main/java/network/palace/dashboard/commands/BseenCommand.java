@@ -3,7 +3,10 @@ package network.palace.dashboard.commands;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.packets.dashboard.PacketBseenCommand;
+import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ClickEvent;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.ModerationUtil;
 
@@ -72,13 +75,33 @@ public class BseenCommand extends DashboardCommand {
                             DateUtil.formatDateDiff(mute.getExpires()) + " by " + ModerationUtil.verifySource(mute.getSource()) +
                             ". Reason: " + mute.getReason());
                 }
-                PacketBseenCommand packet = new PacketBseenCommand(player.getUniqueId(), name, ip, server, online);
                 player.sendMessage(ChatColor.GREEN + name + " has been " + (online ? "online" : "away") + " for " +
                         DateUtil.formatDateDiff(lastLogin));
                 player.sendMessage(ChatColor.RED + "Rank: " + rank.getFormattedName());
                 if (!tier.equals(SponsorTier.NONE))
                     player.sendMessage(ChatColor.RED + "Sponsor: " + tier.getColor() + tier.getName());
-                player.send(packet);
+
+                String divider = " - ";
+                player.sendMessage(new ComponentBuilder(ip).color(ChatColor.AQUA)
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ipseen " + ip))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("Click to run an IP Search").color(ChatColor.AQUA)
+                                        .create())).append(divider).color(ChatColor.DARK_GREEN)
+                        .append("Name Check").color(ChatColor.LIGHT_PURPLE)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/namecheck " + name))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("Click to run a Name Check").color(ChatColor.AQUA)
+                                        .create())).append(divider).color(ChatColor.DARK_GREEN)
+                        .append("Mod Log").color(ChatColor.GREEN)
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("Review Moderation History").color(ChatColor.GREEN)
+                                        .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                "/modlog " + name)).append("\n" + (online ? "Current" : "Last") +
+                                " Server: ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.YELLOW)
+                        .append(server).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("Click to join this server!").color(ChatColor.GREEN)
+                                        .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                "/server " + server)).create());
             } catch (Exception e) {
                 e.printStackTrace();
             }

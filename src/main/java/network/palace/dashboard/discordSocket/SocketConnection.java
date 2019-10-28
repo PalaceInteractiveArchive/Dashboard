@@ -6,7 +6,7 @@ import io.socket.client.Socket;
 import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.chat.ChatColor;
 
 import java.net.URISyntaxException;
 

@@ -2,11 +2,10 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.ChatColor;
+import network.palace.dashboard.chat.*;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
-import network.palace.dashboard.packets.dashboard.PacketJoinCommand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,8 +45,18 @@ public class JoinCommand extends DashboardCommand {
                 return;
             }
         }
-        PacketJoinCommand packet = new PacketJoinCommand(player.getUniqueId(), servers);
-        player.send(packet);
+        TextComponent top = new TextComponent(ChatColor.GREEN + "Here is a list of servers you can join: " +
+                ChatColor.GRAY + "(Click to join)");
+        player.sendMessage(top);
+        for (String server : servers) {
+            if (server.trim().isEmpty()) continue;
+            TextComponent txt = new TextComponent(ChatColor.GREEN + "- " + ChatColor.AQUA + server);
+            txt.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder(ChatColor.GREEN + "Click to join the " + ChatColor.AQUA +
+                            server + ChatColor.GREEN + " server!").create()));
+            txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + server));
+            player.sendMessage(txt);
+        }
     }
 
     private boolean endsInNumber(String s) {
