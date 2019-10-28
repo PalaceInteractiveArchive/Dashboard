@@ -12,7 +12,10 @@ public enum Rank {
     COORDINATOR("Coordinator", ChatColor.YELLOW + "Coordinator ", ChatColor.YELLOW, ChatColor.GREEN, true, 12),
     ARCHITECT("Architect", ChatColor.YELLOW + "Architect ", ChatColor.YELLOW, ChatColor.GREEN, true, 12),
     BUILDER("Builder", ChatColor.GREEN + "Builder ", ChatColor.GREEN, ChatColor.GREEN, true, 11),
+    TECHNICIAN("Technician", ChatColor.BLUE + "Technician ", ChatColor.BLUE, ChatColor.AQUA, true, 11),
+    MEDIA("Media", ChatColor.BLUE + "Media ", ChatColor.BLUE, ChatColor.AQUA, true, 11),
     MOD("Mod", ChatColor.GREEN + "Mod ", ChatColor.GREEN, ChatColor.GREEN, true, 11),
+    TRAINEETECH("Trainee", ChatColor.BLUE + "Trainee ", ChatColor.BLUE, ChatColor.AQUA, false, 10),
     TRAINEEBUILD("Trainee", ChatColor.DARK_GREEN + "Trainee ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 10),
     TRAINEE("Trainee", ChatColor.DARK_GREEN + "Trainee ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 9),
     CHARACTER("Character", ChatColor.BLUE + "Character ", ChatColor.BLUE, ChatColor.BLUE, false, 8),
@@ -48,10 +51,16 @@ public enum Rank {
     }
 
     public String getDBName() {
-        if (this.equals(TRAINEEBUILD)) {
-            return "traineebuild";
+        String s;
+        switch (this) {
+            case TRAINEEBUILD:
+            case TRAINEETECH:
+                s = name().toLowerCase();
+                break;
+            default:
+                s = name.toLowerCase().replaceAll(" ", "");
         }
-        return name.toLowerCase().replaceAll(" ", "");
+        return s;
     }
 
     /**
