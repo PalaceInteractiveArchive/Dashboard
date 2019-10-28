@@ -88,7 +88,7 @@ public class FriendUtil {
             String user = list[0];
             if (list.length > 1) {
                 String server = list[1];
-                message.append("\n- ").color(ChatColor.AQUA).append(server).color(ChatColor.GREEN)
+                message.append("\n- ").color(ChatColor.AQUA).append(user).color(ChatColor.GREEN)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to join ")
                                 .color(ChatColor.GREEN).append(server + "!").color(ChatColor.YELLOW)
                                 .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
