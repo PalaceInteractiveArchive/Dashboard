@@ -1,12 +1,12 @@
 package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.DashboardCommand;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.chat.ComponentBuilder;
 import network.palace.dashboard.chat.HoverEvent;
+import network.palace.dashboard.handlers.DashboardCommand;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 
 import java.util.*;
 
@@ -23,7 +23,7 @@ public class StaffListCommand extends DashboardCommand {
                 .filter(p -> p.getRank().getRankId() >= Rank.TRAINEE.getRankId())
                 .forEach(tp -> {
                     Rank rank = tp.getRank();
-                    if (rank.equals(Rank.TRAINEEBUILD)) rank = Rank.TRAINEE;
+                    if (rank.equals(Rank.TRAINEEBUILD) || rank.equals(Rank.TRAINEETECH)) rank = Rank.TRAINEE;
                     Set<Player> list = players.getOrDefault(rank, new TreeSet<>(Comparator.comparing(Player::getUsername)));
                     list.add(tp);
                     if (!players.containsKey(rank)) players.put(rank, list);
