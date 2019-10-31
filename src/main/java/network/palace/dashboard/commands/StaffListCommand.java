@@ -18,7 +18,7 @@ public class StaffListCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        TreeMap<Rank, Set<Player>> players = new TreeMap<>((r1, r2) -> r2.getRankId() - r1.getRankId());
+        TreeMap<Rank, Set<Player>> players = new TreeMap<>((r1, r2) -> r2.ordinal() - r1.ordinal());
         Launcher.getDashboard().getOnlinePlayers().stream()
                 .filter(p -> p.getRank().getRankId() >= Rank.TRAINEE.getRankId())
                 .forEach(tp -> {
