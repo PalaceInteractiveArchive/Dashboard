@@ -2,12 +2,12 @@ package network.palace.dashboard.utils;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.chat.ClickEvent;
 import network.palace.dashboard.chat.ComponentBuilder;
 import network.palace.dashboard.chat.HoverEvent;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 
 import java.util.*;
 
@@ -78,7 +78,7 @@ public class FriendUtil {
             } else if (!c1 && c2) {
                 return 1;
             } else {
-                return o1.compareTo(o2);
+                return o1.toLowerCase().compareTo(o2.toLowerCase());
             }
         });
         ComponentBuilder message = new ComponentBuilder("\nFriend List ").color(ChatColor.YELLOW)
@@ -88,13 +88,13 @@ public class FriendUtil {
             String user = list[0];
             if (list.length > 1) {
                 String server = list[1];
-                message.append("\n- ").color(ChatColor.AQUA).append(user).color(ChatColor.GREEN)
+                message.append("\n- ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.AQUA).append(user).color(ChatColor.GREEN)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to join ")
                                 .color(ChatColor.GREEN).append(server + "!").color(ChatColor.YELLOW)
                                 .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/friend tp " + server));
+                        "/friend tp " + user));
             } else {
-                message.append("\n- ").color(ChatColor.AQUA).append(user).color(ChatColor.RED)
+                message.append("\n- ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.AQUA).append(user).color(ChatColor.RED)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("This player is offline!")
                                 .color(ChatColor.RED).create()));
             }
