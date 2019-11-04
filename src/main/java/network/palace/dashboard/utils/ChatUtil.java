@@ -203,7 +203,7 @@ public class ChatUtil {
         if (command) {
             if (!dashboard.getCommandUtil().handleCommand(player, msg.toString().replaceFirst("/", ""))) {
                 String s = msg.toString().toLowerCase().replaceFirst("/", "");
-                if (rank.getRankId() < Rank.MOD.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
+                if (rank.getRankId() < Rank.TRAINEEBUILD.getRankId() && (s.startsWith("/calc") || s.startsWith("/calculate") ||
                         s.startsWith("/eval") || s.startsWith("/evaluate") || s.startsWith("/solve") ||
                         s.startsWith("worldedit:/calc") || s.startsWith("worldedit:/calculate") ||
                         s.startsWith("worldedit:/eval") || s.startsWith("worldedit:/evaluate") ||
