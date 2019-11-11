@@ -99,6 +99,7 @@ public class Launcher {
         }
         dashboard.setAfkUtil(new AFKUtil());
         dashboard.setVoteUtil(new VoteUtil());
+        dashboard.setShowUtil(new ShowUtil());
         try {
             dashboard.setForum(new Forum());
         } catch (Exception e) {
