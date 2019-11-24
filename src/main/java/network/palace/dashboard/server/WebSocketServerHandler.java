@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.*;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
@@ -818,6 +818,55 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dashboard.getSchedulerManager().runAsync(() -> dashboard.getStatUtil().logDataPoint(builder.build()));
                     break;
                 }
+                /*
+                 * Shareholder Show Request
+                 */
+                case 77: {
+                    PacketShowRequest packet = new PacketShowRequest().fromJSON(object);
+                    UUID uuid = packet.getUuid();
+                    Player player = dashboard.getPlayer(uuid);
+                    if (player == null) return;
+                    String show = packet.getShowName();
+                    String server = packet.getServer();
+
+                    dashboard.getSchedulerManager().runAsync(() -> {
+                        if (dashboard.getShowUtil().checkPlayer(player)) {
+                            BaseComponent[] comp = new ComponentBuilder("[").color(ChatColor.WHITE)
+                                    .append("Dashboard").color(ChatColor.RED)
+                                    .append("] ").color(ChatColor.WHITE)
+                                    .append(player.getUsername() + " ").color(ChatColor.LIGHT_PURPLE)
+                                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/server " + server))
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                            new ComponentBuilder("Click to run ").color(ChatColor.GREEN)
+                                                    .append("/server " + server).color(ChatColor.YELLOW).create()))
+                                    .append("has requested to start ").color(ChatColor.AQUA)
+                                    .append(show + ", ").color(ChatColor.GREEN)
+                                    .append("please accept or deny this request on ").color(ChatColor.AQUA)
+                                    .append(server + " ").color(ChatColor.GREEN)
+                                    .append("using ").color(ChatColor.AQUA)
+                                    .append("/shows").color(ChatColor.GREEN).create();
+
+                            boolean noStaff = true;
+                            for (Player tp : dashboard.getOnlinePlayers()) {
+                                if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
+                                    tp.sendMessage(comp);
+                                    noStaff = false;
+                                }
+                            }
+
+                            if (noStaff) {
+                                player.sendMessage(ChatColor.RED + "There are no staff members online right now! Try again soon.");
+                                return;
+                            }
+
+                            player.sendMessage(ChatColor.AQUA + "Your request to start " + ChatColor.GREEN + show + ChatColor.AQUA +
+                                    " has been received, please allow a moment for a staff member to respond to your request.");
+
+                            channel.send(new PacketShowRequestResponse(packet.getRequestId()));
+                        }
+                    });
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -829,9 +878,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         super.channelActive(ctx);
         Dashboard dashboard = Launcher.getDashboard();
         DashboardSocketChannel dash = (DashboardSocketChannel) ctx.channel();
-        if (dash.getType().equals(PacketConnectionType.ConnectionType.WEBCLIENT)) {
-            return;
-        }
+        if (dash.getType().equals(PacketConnectionType.ConnectionType.WEBCLIENT)) return;
         boolean devs = false;
         for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp.getRank().getRankId() >= Rank.DEVELOPER.getRankId()) {
@@ -840,9 +887,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             }
         }
         String addon = "";
-        if (!devs) {
-            addon = " No Developer or Manager is online, please notify one.";
-        }
+        if (!devs) addon = " No Developer or Manager is online, please notify one.";
         switch (dash.getType()) {
             case BUNGEECORD: {
                 dashboard.getModerationUtil().sendMessage(ChatColor.RED +

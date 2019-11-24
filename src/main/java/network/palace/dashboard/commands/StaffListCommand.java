@@ -35,7 +35,9 @@ public class StaffListCommand extends DashboardCommand {
     }
 
     private void sendRankMessage(Player player, Rank rank, Set<Player> members) {
-        ComponentBuilder comp = new ComponentBuilder(rank.getName() + "s: (" + members.size() + ") ").color(rank.getTagColor());
+        ComponentBuilder comp = new ComponentBuilder(rank.getName() +
+                (rank.equals(Rank.MEDIA) ? "" : "s") +
+                ": (" + members.size() + ") ").color(rank.getTagColor());
         int i = 0;
         for (Player p : members) {
             comp.append(p.getUsername(), ComponentBuilder.FormatRetention.NONE).color(ChatColor.GREEN)

@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "2.1.1";
+    @Getter public static final String version = "2.1.3";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -56,6 +56,7 @@ public class Dashboard {
     @Getter @Setter private SocketConnection socketConnection;
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
+    @Getter @Setter private ShowUtil showUtil;
 
     @Getter @Setter private boolean strictMode;
     @Getter @Setter private double strictThreshold;
