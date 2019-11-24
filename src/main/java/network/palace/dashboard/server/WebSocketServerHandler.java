@@ -11,10 +11,10 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.arcade.GameState;
 import network.palace.dashboard.packets.arcade.PacketGameStatus;
@@ -68,7 +68,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
-        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(null, null, true);
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(null, null, true, (int) Math.pow(2, 20));
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
@@ -502,17 +502,17 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             name = player.getUsername();
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(player.getServer());
                             if (socketChannel != null) socketChannel.send(packet);
+
+                            DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
+                            if (info != null) {
+                                info.getMinecraft().setRank(rank.toString());
+                                SocketConnection.sendUpdate(info);
+                            }
                         }
                         dashboard.getModerationUtil().rankChange(name, rank, tier, source);
 
-                        DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
-                        if (info != null) {
-                            info.getMinecraft().setRank(rank.toString());
-                            SocketConnection.sendUpdate(info);
-                        }
-
                         try {
-                            int member_id = dashboard.getMongoHandler().getForumMemberId(player.getUniqueId());
+                            int member_id = dashboard.getMongoHandler().getForumMemberId(uuid);
                             if (member_id != -1) {
                                 dashboard.getForum().updatePlayerRank(uuid, member_id, rank);
                             }
