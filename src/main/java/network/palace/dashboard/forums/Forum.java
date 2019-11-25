@@ -247,8 +247,11 @@ public class Forum {
         }
     }
 
-    public void updatePlayerRank(UUID uuid, int member_id, Rank rank) {
+    public void updatePlayerRank(UUID uuid, int member_id, Rank rank, Player player) {
         if (rank.getRankId() >= Rank.DEVELOPER.getRankId()) {
+            if (player != null)
+                player.sendMessage(ChatColor.RED + "Note: Since your rank is " + player.getRank().getFormattedName() +
+                        ChatColor.RED + ", your forum group will not be automatically set.");
             return;
         }
         try (Connection connection = connectionPool.getConnection()) {
