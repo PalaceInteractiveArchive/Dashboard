@@ -514,7 +514,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         try {
                             int member_id = dashboard.getMongoHandler().getForumMemberId(uuid);
                             if (member_id != -1) {
-                                dashboard.getForum().updatePlayerRank(uuid, member_id, rank);
+                                dashboard.getForum().updatePlayerRank(uuid, member_id, rank, player);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
