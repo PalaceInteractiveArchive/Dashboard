@@ -292,7 +292,7 @@ public class Forum {
             case TRAINEE:
                 return 10;
             case SPECIALGUEST:
-                return 32;
+                return 22;
             case SHAREHOLDER:
                 return 38;
             case HONORABLE:
