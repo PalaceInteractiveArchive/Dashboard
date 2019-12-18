@@ -21,7 +21,7 @@ public class DiscordCommand extends DashboardCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         if (args.length < 2) {
-            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palace.network/Discord",
+            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palnet.us/Discord",
                     "Click for more information about Discord!", ChatColor.YELLOW, true);
             player.send(packet);
         } else if (args.length >= 2 && args[0].equals("link")) {
@@ -38,7 +38,7 @@ public class DiscordCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.DARK_RED + "Please specify a valid Discord ID!");
             }
         } else {
-            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palace.network/Discord",
+            PacketLink packet = new PacketLink(player.getUniqueId(), "https://palnet.us/Discord",
                     "Click for more information about Discord!", ChatColor.YELLOW, true);
             player.send(packet);
         }
