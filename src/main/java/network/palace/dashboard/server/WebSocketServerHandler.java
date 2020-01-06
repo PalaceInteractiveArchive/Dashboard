@@ -109,8 +109,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 return;
             }
             int id = object.get("id").getAsInt();
-//            dashboard.getLogger().info(object.toString());
-            System.out.println(object.toString());
+            if (id != 43) System.out.println(object.toString());
             dashboard.getStatUtil().packet();
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
