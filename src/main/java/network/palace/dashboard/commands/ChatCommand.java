@@ -1,15 +1,19 @@
 package network.palace.dashboard.commands;
 
+import com.mongodb.client.MongoCollection;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.handlers.ChatMessage;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Marc on 9/25/16
@@ -18,6 +22,28 @@ public class ChatCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
+        Dashboard dashboard = Launcher.getDashboard();
+        dashboard.getSchedulerManager().runAsync(() -> {
+            MongoCollection<Document> chatCollection = dashboard.getMongoHandler().getChatCollection();
+            player.sendMessage(ChatColor.GREEN + "Processing messages...");
+            for (int i = 1; i < 500; i++) {
+                List<ChatMessage> msgs = new ArrayList<>();
+                player.sendMessage(ChatColor.YELLOW + "Loading from MongoDB, skipping " + ((i - 1) * 100000) + "...");
+                for (Document doc : chatCollection.find().skip((i - 1) * 100000).limit(100000)) {
+                    msgs.add(new ChatMessage(UUID.fromString(doc.getString("uuid")), doc.getString("message"), doc.getLong("time") * 1000));
+                }
+                try {
+                    player.sendMessage(ChatColor.AQUA + "Retrieved, sending to SQL...");
+                    dashboard.getSqlUtil().logChat(msgs);
+                    player.sendMessage(ChatColor.RED + "Sent to SQL!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void test(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
         List<String> list = new ArrayList<>();
         list.add("all");

@@ -2,14 +2,15 @@ package network.palace.dashboard.utils;
 
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
-import network.palace.dashboard.Dashboard;
-import network.palace.dashboard.Launcher;
+import network.palace.dashboard.handlers.ChatMessage;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -46,8 +47,8 @@ public class SqlUtil {
         config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
         config.setUsername(username);
         config.setPassword(password);
-        config.setMinConnectionsPerPartition(5);
-        config.setMaxConnectionsPerPartition(25);
+        config.setMinConnectionsPerPartition(3);
+        config.setMaxConnectionsPerPartition(15);
         config.setIdleMaxAge(100, TimeUnit.SECONDS);
         config.setMaxConnectionAge(300, TimeUnit.SECONDS);
         config.setPartitionCount(2);
@@ -63,10 +64,31 @@ public class SqlUtil {
         }
     }
 
-
     public void stop() {
         connectionPool.shutdown();
-        Dashboard dashboard = Launcher.getDashboard();
-//        dashboard.getActivityUtil().stop();
+    }
+
+    public void logChat(List<ChatMessage> messages) throws Exception {
+        Optional<Connection> connection = getConnection();
+        if (!connection.isPresent()) {
+            throw new SQLException("Could not establish an SQL connection");
+        }
+        StringBuilder values = new StringBuilder();
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < messages.size(); i++) {
+            values.append("(?,?,?)");
+            if (i < (messages.size() - 1)) {
+                values.append(",");
+            }
+        }
+        PreparedStatement sql = connection.get().prepareStatement("INSERT INTO chat (uuid,message,time) VALUES " + values);
+        for (int i = 0; i < messages.size(); i++) {
+            ChatMessage msg = messages.get(i);
+            sql.setString((i * 3) + 1, msg.getUuid().toString());
+            sql.setString((i * 3) + 2, msg.getMessage());
+            sql.setLong((i * 3) + 3, msg.getTime());
+        }
+        sql.execute();
+        sql.close();
     }
 }

@@ -3,8 +3,8 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.packets.park.PacketMuteChat;
@@ -75,14 +75,7 @@ public class ChatUtil {
                             break;
                         }
                     }
-                    for (ChatMessage msg : localMessages) {
-                        dashboard.getMongoHandler().logChat(msg);
-                    }
-//                    HashMap<UUID, List<String>> localMessages = new HashMap<>(messages);
-//                    messages.clear();
-//                    for (Map.Entry<UUID, List<String>> entry : new HashSet<>(localMessages.entrySet())) {
-//                        dashboard.getMongoHandler().logChat(entry.getKey(), entry.getValue());
-//                    }
+                    if (!localMessages.isEmpty()) dashboard.getSqlUtil().logChat(localMessages);
                 } catch (Exception e) {
                     messages.clear();
                     e.printStackTrace();
@@ -486,16 +479,7 @@ public class ChatUtil {
     }
 
     public void logMessage(UUID uuid, String msg) {
-        messages.add(new ChatMessage(uuid, msg, System.currentTimeMillis() / 1000));
-//        if (messages.containsKey(uuid)) {
-//            List<String> msgs = messages.get(uuid);
-//            msgs.add(msg);
-//            messages.put(uuid, msgs);
-//            return;
-//        }
-//        List<String> list = new ArrayList<>();
-//        list.add(msg);
-//        messages.put(uuid, list);
+        messages.add(new ChatMessage(uuid, msg, System.currentTimeMillis()));
     }
 
     private void swearMessage(String name, String msg) {

@@ -64,17 +64,27 @@ public class Launcher {
             dashboard.getLogger().info("Initializing MongoDB Handler...");
             dashboard.setMongoHandler(new MongoHandler());
             dashboard.getLogger().info("Finished initializing MongoDB Handler!");
-            dashboard.loadMaintenanceSettings();
-//            dashboard.setSqlUtil(new SqlUtil());
+            dashboard.getLogger().info("Initializing SQLUtil...");
+            dashboard.setSqlUtil(new SqlUtil());
+            dashboard.getLogger().info("Finished initializing SQLUtil!");
+            dashboard.getLogger().info("Initializing StatUtil...");
             dashboard.setStatUtil(new StatUtil());
+            dashboard.getLogger().info("Finished initializing StatUtil!");
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
+        if (dashboard.isMaintenance()) dashboard.loadMaintenanceSettings();
         dashboard.setRandom(new Random());
+        dashboard.getLogger().info("Initializing ScheduleManager...");
         dashboard.setSchedulerManager(new SchedulerManager());
+        dashboard.getLogger().info("Finished initializing ScheduleManager!");
+        dashboard.getLogger().info("Initializing InventoryUtil...");
         dashboard.setInventoryUtil(new InventoryUtil());
+        dashboard.getLogger().info("Finished initializing InventoryUtil!");
+        dashboard.getLogger().info("Initializing ModerationUtil...");
         dashboard.setModerationUtil(new ModerationUtil());
+        dashboard.getLogger().info("Finished initializing ModerationUtil!");
 
         dashboard.loadMOTD();
         dashboard.loadJoinServers();
