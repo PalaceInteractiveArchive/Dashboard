@@ -92,6 +92,9 @@ public class PacketPlayerListInfo extends BasePacket {
                         case "rank":
                             p.setRank(str);
                             break;
+                        case "tags":
+                            p.setTags(str);
+                            break;
                         case "mcversion":
                             p.setMcVersion(Integer.parseInt(str));
                             break;
@@ -112,13 +115,13 @@ public class PacketPlayerListInfo extends BasePacket {
         private String address;
         private String server;
         private String rank;
-        private String sponsorTier;
+        private String tags;
         private int mcVersion;
 
         @Override
         public String toString() {
             return "Player{uuid=" + uuid.toString() + ",username=" + username + ",address=" + address + ",server=" +
-                    server + ",rank=" + rank + ",mcversion=" + mcVersion + "}";
+                    server + ",rank=" + rank + ",tags=" + tags + ",mcversion=" + mcVersion + "}";
         }
     }
 }
