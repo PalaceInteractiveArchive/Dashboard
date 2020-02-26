@@ -693,6 +693,18 @@ public class ChatUtil {
         }
     }
 
+    public void guideChatMessage(String msg) {
+        Dashboard dashboard = Launcher.getDashboard();
+        for (Player player : dashboard.getOnlinePlayers()) {
+            if ((player.getRank().getRankId() >= Rank.TRAINEE.getRankId() || player.hasTag(RankTag.GUIDE)) && !player.isDisabled()) {
+                try {
+                    player.sendMessage(msg);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
     public void socialSpyMessage(Player from, Player to, String message, String command) {
         Dashboard dashboard = Launcher.getDashboard();
         if (dashboard.getServer(from.getServer()).isPark()) {

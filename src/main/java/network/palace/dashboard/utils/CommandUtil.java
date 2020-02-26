@@ -43,6 +43,7 @@ public class CommandUtil {
         register("find", new FindCommand());
         register("friend", new FriendCommand());
         register("ignore", new IgnoreCommand());
+        register("gc", new GuideChatCommand());
         register("ho", new AdminChatCommand());
         register("ip", new IPCommand());
         register("ipseen", new IPSeenCommand());
