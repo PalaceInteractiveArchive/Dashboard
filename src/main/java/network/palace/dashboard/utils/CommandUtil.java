@@ -1,7 +1,7 @@
 package network.palace.dashboard.utils;
 
-import network.palace.dashboard.commands.*;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.commands.*;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketCommandList;
@@ -122,7 +122,7 @@ public class CommandUtil {
     }
 
     private void execute(Player player, DashboardCommand c, String command, String[] args) {
-        if (!c.canPerformCommand(player.getRank())) {
+        if (!c.canPerformCommand(player)) {
             player.sendMessage(ChatColor.RED + "You do not have permission to execute this command!");
             return;
         }

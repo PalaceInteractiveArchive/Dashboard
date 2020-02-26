@@ -79,6 +79,10 @@ public class Player {
         return tags.remove(tag);
     }
 
+    public boolean hasTag(RankTag tag) {
+        return tags.contains(tag);
+    }
+
     public void sendMessage(String msg) {
         PacketMessage packet = new PacketMessage(uuid, msg);
         send(packet);
