@@ -2,6 +2,10 @@ package network.palace.dashboard.utils;
 
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.commands.*;
+import network.palace.dashboard.commands.admin.*;
+import network.palace.dashboard.commands.chat.*;
+import network.palace.dashboard.commands.moderation.*;
+import network.palace.dashboard.commands.staff.*;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketCommandList;
@@ -25,7 +29,7 @@ public class CommandUtil {
         register("banprovider", new BanProviderCommand());
         register("bconfig", new BConfigCommand());
         register("bseen", new BseenCommand());
-        register("bug", new Bugcommand());
+        register("bug", new BugCommand());
         register("bungeecounts", new BungeeCountsCommand());
         register("cc", new ClearChatCommand());
         register("charlist", new CharListCommand());

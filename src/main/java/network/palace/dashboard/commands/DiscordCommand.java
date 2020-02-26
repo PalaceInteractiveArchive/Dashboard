@@ -1,11 +1,10 @@
 package network.palace.dashboard.commands;
 
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.discordSocket.DiscordUserInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
-import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.packets.dashboard.PacketLink;
 
 /**
@@ -13,10 +12,6 @@ import network.palace.dashboard.packets.dashboard.PacketLink;
  * @since 2/18/2017
  */
 public class DiscordCommand extends DashboardCommand {
-
-    public DiscordCommand() {
-        super(Rank.SETTLER);
-    }
 
     @Override
     public void execute(Player player, String label, String[] args) {
