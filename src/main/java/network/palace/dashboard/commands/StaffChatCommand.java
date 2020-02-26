@@ -28,8 +28,8 @@ public class StaffChatCommand extends DashboardCommand {
         Rank rank = player.getRank();
         List<RankTag> tags = player.getTags();
 
-        response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + rank.getFormattedName() +
-                " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
+        response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + RankTag.format(tags) +
+                rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
                 ChatColor.translateAlternateColorCodes('&', message);
         dashboard.getChatUtil().staffChatMessage(response);
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/sc " + player.getUsername() + " " + message);

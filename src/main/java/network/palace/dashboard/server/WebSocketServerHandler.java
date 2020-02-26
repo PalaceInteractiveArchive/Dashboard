@@ -488,6 +488,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     List<String> tags = packet.getTags();
                     String source = packet.getSource();
                     Player player = dashboard.getPlayer(uuid);
+                    player.send(new PacketPlayerRank(uuid, rank, tags));
 
                     dashboard.getSchedulerManager().runAsync(() -> {
                         String name;
@@ -497,6 +498,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank, tags);
                             player.send(packet1);
                             player.setRank(rank);
+                            player.getTags().forEach(player::removeTag);
                             for (String tag : tags) {
                                 player.addTag(RankTag.fromString(tag));
                             }
