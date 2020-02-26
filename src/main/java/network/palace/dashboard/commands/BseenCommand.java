@@ -2,14 +2,15 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.chat.ClickEvent;
 import network.palace.dashboard.chat.ComponentBuilder;
 import network.palace.dashboard.chat.HoverEvent;
+import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.ModerationUtil;
 
+import java.util.List;
 import java.util.UUID;
 
 public class BseenCommand extends DashboardCommand {
@@ -42,14 +43,14 @@ public class BseenCommand extends DashboardCommand {
                     return;
                 }
                 Rank rank;
-                SponsorTier tier;
+                List<RankTag> tags;
                 long lastLogin;
                 String ip;
                 Mute mute;
                 String server;
                 if (online) {
                     rank = tp.getRank();
-                    tier = tp.getSponsorTier();
+                    tags = tp.getTags();
                     lastLogin = tp.getLoginTime();
                     ip = tp.getAddress();
                     mute = tp.getMute();
@@ -57,7 +58,7 @@ public class BseenCommand extends DashboardCommand {
                 } else {
                     BseenData data = dashboard.getMongoHandler().getBseenInformation(uuid);
                     rank = data.getRank();
-                    tier = data.getSponsorTier();
+                    tags = data.getTags();
                     lastLogin = data.getLastLogin();
                     ip = data.getIpAddress();
                     server = data.getServer();
@@ -78,8 +79,9 @@ public class BseenCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.GREEN + name + " has been " + (online ? "online" : "away") + " for " +
                         DateUtil.formatDateDiff(lastLogin));
                 player.sendMessage(ChatColor.RED + "Rank: " + rank.getFormattedName());
-                if (!tier.equals(SponsorTier.NONE))
-                    player.sendMessage(ChatColor.RED + "Sponsor: " + tier.getColor() + tier.getName());
+                for (RankTag tag : tags) {
+                    player.sendMessage(tag.getColor() + tag.getName());
+                }
 
                 String divider = " - ";
                 player.sendMessage(new ComponentBuilder(ip).color(ChatColor.AQUA)

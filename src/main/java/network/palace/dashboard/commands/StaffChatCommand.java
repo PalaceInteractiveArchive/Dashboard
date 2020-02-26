@@ -2,8 +2,13 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.handlers.DashboardCommand;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.RankTag;
+
+import java.util.List;
 
 public class StaffChatCommand extends DashboardCommand {
 
@@ -21,9 +26,9 @@ public class StaffChatCommand extends DashboardCommand {
         String message = String.join(" ", args);
         String response;
         Rank rank = player.getRank();
-        SponsorTier tier = player.getSponsorTier();
+        List<RankTag> tags = player.getTags();
 
-        response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + tier.getChatTag(true) +
+        response = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " + RankTag.format(tags) +
                 rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
                 ChatColor.translateAlternateColorCodes('&', message);
         dashboard.getChatUtil().staffChatMessage(response);

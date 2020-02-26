@@ -214,9 +214,8 @@ public class Party {
     public void chat(Player player, String msg) {
         Dashboard dashboard = Launcher.getDashboard();
         Rank rank = player.getRank();
-        SponsorTier tier = player.getSponsorTier();
         String m = ChatColor.BLUE + "[Party] " + (leader.equals(player.getUniqueId()) ? ChatColor.YELLOW + "* " : "") +
-                tier.getChatTag(true) + rank.getFormattedName() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
+                RankTag.format(player.getTags()) + rank.getFormattedName() + ChatColor.GRAY + " " + player.getUsername() + ": " + ChatColor.WHITE +
                 (rank.getRankId() >= Rank.TRAINEE.getRankId() ? ChatColor.translateAlternateColorCodes('&', msg) : msg);
         for (UUID uuid : getMembers()) {
             if (uuid.equals(player.getUniqueId())) {

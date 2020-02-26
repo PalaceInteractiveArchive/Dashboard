@@ -5,8 +5,8 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import org.bson.BsonBoolean;
@@ -14,10 +14,7 @@ import org.bson.BsonDocument;
 import org.bson.BsonInt64;
 import org.bson.conversions.Bson;
 
-import java.util.Collections;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Marc on 8/20/16
@@ -118,9 +115,9 @@ public class ModerationUtil {
         sendMessage(ChatColor.GREEN + "The chat delay was set to " + time + " seconds by " + source);
     }
 
-    public void rankChange(String name, Rank rank, SponsorTier tier, String source) {
+    public void rankChange(String name, Rank rank, List<RankTag> tags, String source) {
         sendMessage(ChatColor.GREEN + name + "'s rank has been changed by " + source + " to " +
-                tier.getChatTag(true) + rank.getFormattedName());
+                RankTag.format(tags) + rank.getFormattedName());
     }
 
     public void sendMessage(String message) {
