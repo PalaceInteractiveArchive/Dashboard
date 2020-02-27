@@ -57,6 +57,7 @@ public class Dashboard {
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
     @Getter @Setter private ShowUtil showUtil;
+    @Getter @Setter private GuideUtil guideUtil;
 
     @Getter @Setter private boolean strictMode;
     @Getter @Setter private double strictThreshold;

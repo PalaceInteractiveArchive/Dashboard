@@ -4,6 +4,7 @@ import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.commands.*;
 import network.palace.dashboard.commands.admin.*;
 import network.palace.dashboard.commands.chat.*;
+import network.palace.dashboard.commands.guide.HelpMeCommand;
 import network.palace.dashboard.commands.moderation.*;
 import network.palace.dashboard.commands.staff.*;
 import network.palace.dashboard.handlers.DashboardCommand;
@@ -45,6 +46,7 @@ public class CommandUtil {
         register("pchat", new PartyChatCommand());
         register("sc", new StaffChatCommand());
         /* Guide */
+        register("helpme", new HelpMeCommand());
         /* Moderation */
         register("ban", new BanCommand());
         register("banip", new BanIPCommand());
