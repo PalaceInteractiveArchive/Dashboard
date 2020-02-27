@@ -5,8 +5,14 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.RankTag;
 
 public class GuideHelpCommand extends DashboardCommand {
+
+    public GuideHelpCommand() {
+        super(Rank.TRAINEE, RankTag.GUIDE);
+    }
 
     @Override
     public void execute(Player player, String label, String[] args) {
