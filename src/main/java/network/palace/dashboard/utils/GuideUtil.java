@@ -14,6 +14,7 @@ import java.util.UUID;
 
 public class GuideUtil {
     private HashMap<UUID, Long> lastRequest = new HashMap<>();
+    private HashMap<UUID, String> announcementRequests = new HashMap<>();
 
     /**
      * Check whether a player can submit a help request
@@ -33,7 +34,6 @@ public class GuideUtil {
      * @param request the request being submitted
      */
     public void sendHelpRequest(Player player, String request) {
-        lastRequest.put(player.getUniqueId(), System.currentTimeMillis());
         BaseComponent[] components = new ComponentBuilder("[").color(ChatColor.WHITE)
                 .append("HELP").color(ChatColor.GREEN).append("] ").color(ChatColor.WHITE)
                 .append(player.getUsername()).color(player.getRank().getTagColor())
@@ -57,6 +57,9 @@ public class GuideUtil {
                             new ComponentBuilder("Click to visit ").color(ChatColor.GREEN)
                                     .append("https://palnet.us/Discord").color(ChatColor.YELLOW).create()))
                     .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://palnet.us/Discord")).create());
+        } else {
+            lastRequest.put(player.getUniqueId(), System.currentTimeMillis());
+            player.sendMessage(ChatColor.GREEN + "Your help request has been sent!");
         }
     }
 
@@ -125,5 +128,71 @@ public class GuideUtil {
                 }
             }
         }, 500, 500);
+    }
+
+    /**
+     * Submit an announcement request
+     *
+     * @param player       the guide/trainee submitting the help request
+     * @param announcement the announcement to be broadcasted
+     */
+    public void sendAnnouncementRequest(Player player, String announcement) {
+        String firstMessage = ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                ChatColor.GREEN + player.getUsername() + " wants to send the announcement: " + announcement;
+        BaseComponent[] components = new ComponentBuilder("Accept Request").color(ChatColor.DARK_GREEN).italic(true)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder("Click to accept this announcement request").color(ChatColor.AQUA).create()))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gannounce accept " + player.getUsername()))
+                .append(" - ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.GREEN)
+                .append("Decline Request").color(ChatColor.RED).italic(true)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder("Click to decline this announcement request").color(ChatColor.AQUA).create()))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gannounce decline " + player.getUsername())).create();
+        boolean staff = false;
+        for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
+            if (tp.getRank().getRankId() >= Rank.MOD.getRankId()) {
+                staff = true;
+                tp.sendMessage(firstMessage);
+                tp.sendMessage(components);
+            }
+        }
+        if (!staff) {
+            player.sendMessage(new ComponentBuilder("Unfortunately, there aren't any staff online to accept this announcement request.").color(ChatColor.AQUA).create());
+        } else {
+            announcementRequests.put(player.getUniqueId(), announcement);
+        }
+    }
+
+    /**
+     * Accept an announcement request submitted by a guide/trainee
+     *
+     * @param player   the staff member accepting the request
+     * @param username the guide/trainee who submitted the request
+     */
+    public void acceptAnnouncementRequest(Player player, String username) {
+        Player tp = Launcher.getDashboard().getPlayer(username);
+        if (tp == null || !announcementRequests.containsKey(tp.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "That player hasn't submitted an announcement request recenty!");
+            return;
+        }
+        tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.AQUA +
+                " has accepted your announcement request.");
+        Launcher.getDashboard().getCommandUtil().handleCommand(player, "b " + announcementRequests.remove(tp.getUniqueId()));
+    }
+
+    /**
+     * Decline an announcement request submitted by a guide/trainee
+     *
+     * @param player   the staff member declining the request
+     * @param username the guide/trainee who submitted the request
+     */
+    public void declineAnnouncementRequest(Player player, String username) {
+        Player tp = Launcher.getDashboard().getPlayer(username);
+        if (tp == null || !announcementRequests.containsKey(tp.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "That player hasn't submitted an announcement request recenty!");
+            return;
+        }
+        tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.AQUA +
+                " has declined your announcement request.");
     }
 }
