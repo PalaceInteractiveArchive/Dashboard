@@ -16,26 +16,26 @@ public class BroadcastCommand extends DashboardCommand {
     @Override
     public void execute(Player player, String label, String[] args) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (args.length > 0) {
-            StringBuilder message = new StringBuilder();
-            for (String arg : args) {
-                message.append(arg).append(" ");
-            }
-            String sname = player.getUsername();
-            String msg = ChatColor.WHITE + "[" + ChatColor.AQUA + "Information" +
-                    ChatColor.WHITE + "] " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message.toString());
-            String staff = ChatColor.WHITE + "[" + ChatColor.AQUA +
-                    sname + ChatColor.WHITE + "] " + ChatColor.GREEN +
-                    ChatColor.translateAlternateColorCodes('&', message.toString());
-            for (Player tp : dashboard.getOnlinePlayers()) {
-                if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
-                    tp.sendMessage(staff);
-                } else {
-                    tp.sendMessage(msg);
-                }
-            }
-        } else {
+        if (args.length <= 0) {
             player.sendMessage(ChatColor.RED + "/b [Message]");
+            return;
+        }
+        StringBuilder message = new StringBuilder();
+        for (String arg : args) {
+            message.append(arg).append(" ");
+        }
+        String sname = player.getUsername();
+        String msg = ChatColor.WHITE + "[" + ChatColor.AQUA + "Information" +
+                ChatColor.WHITE + "] " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message.toString());
+        String staff = ChatColor.WHITE + "[" + ChatColor.AQUA +
+                sname + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                ChatColor.translateAlternateColorCodes('&', message.toString());
+        for (Player tp : dashboard.getOnlinePlayers()) {
+            if (dashboard.getPlayer(tp.getUniqueId()).getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
+                tp.sendMessage(staff);
+            } else {
+                tp.sendMessage(msg);
+            }
         }
     }
 }

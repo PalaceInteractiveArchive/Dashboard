@@ -4,6 +4,7 @@ import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.commands.*;
 import network.palace.dashboard.commands.admin.*;
 import network.palace.dashboard.commands.chat.*;
+import network.palace.dashboard.commands.guide.GuideAnnounceCommand;
 import network.palace.dashboard.commands.guide.GuideHelpCommand;
 import network.palace.dashboard.commands.guide.HelpMeCommand;
 import network.palace.dashboard.commands.moderation.*;
@@ -56,6 +57,7 @@ public class CommandUtil {
         register("banprovider", new BanProviderCommand());
         register("bseen", new BseenCommand());
         register("find", new FindCommand());
+        register("gannounce", new GuideAnnounceCommand());
         register("ip", new IPCommand());
         register("ipseen", new IPSeenCommand());
         register("kick", new KickCommand());
