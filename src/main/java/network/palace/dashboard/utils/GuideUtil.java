@@ -175,6 +175,13 @@ public class GuideUtil {
             player.sendMessage(ChatColor.RED + "That player hasn't submitted an announcement request recenty!");
             return;
         }
+        for (Player p : Launcher.getDashboard().getOnlinePlayers()) {
+            if (p.getRank().getRankId() >= Rank.MOD.getRankId()) {
+                tp.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                        ChatColor.GREEN + player.getUsername() + ChatColor.AQUA + " accepted " + ChatColor.GREEN +
+                        tp.getUsername() + "'s " + ChatColor.AQUA + "announcement request");
+            }
+        }
         tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.AQUA +
                 " has accepted your announcement request.");
         Launcher.getDashboard().getCommandUtil().handleCommand(player, "b " + announcementRequests.remove(tp.getUniqueId()));
@@ -188,9 +195,16 @@ public class GuideUtil {
      */
     public void declineAnnouncementRequest(Player player, String username) {
         Player tp = Launcher.getDashboard().getPlayer(username);
-        if (tp == null || !announcementRequests.containsKey(tp.getUniqueId())) {
+        if (tp == null || announcementRequests.remove(tp.getUniqueId()) == null) {
             player.sendMessage(ChatColor.RED + "That player hasn't submitted an announcement request recenty!");
             return;
+        }
+        for (Player p : Launcher.getDashboard().getOnlinePlayers()) {
+            if (p.getRank().getRankId() >= Rank.MOD.getRankId()) {
+                tp.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                        ChatColor.GREEN + player.getUsername() + ChatColor.AQUA + " declined " + ChatColor.GREEN +
+                        tp.getUsername() + "'s " + ChatColor.AQUA + "announcement request");
+            }
         }
         tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.AQUA +
                 " has declined your announcement request.");
