@@ -32,12 +32,15 @@ import org.bson.conversions.Bson;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 /**
  * @author Innectic
  * @since 9/23/2017
  */
+@SuppressWarnings("rawtypes")
 public class MongoHandler {
     private MongoClient client = null;
     @Getter private MongoDatabase database = null;
@@ -58,6 +61,7 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> infractionsCollection = null;
     @Getter private MongoCollection<Document> storageCollection = null;
     @Getter private MongoCollection<Document> spamIpWhitelist = null;
+    @Getter private MongoCollection<Document> helpRequestsCollection = null;
 
     public MongoHandler() throws IOException {
         String address = "";
@@ -106,6 +110,7 @@ public class MongoHandler {
         infractionsCollection = database.getCollection("infractions");
         storageCollection = database.getCollection("storage");
         spamIpWhitelist = database.getCollection("spamipwhitelist");
+        helpRequestsCollection = database.getCollection("help_requests");
     }
 
     public void logInfraction(String name, String message) {
@@ -710,6 +715,42 @@ public class MongoHandler {
     public void removeRankTag(UUID uuid, RankTag tag) {
         if (uuid == null || tag == null) return;
         playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("tags", tag.getDBName()));
+    }
+
+    /**
+     * Log an accepted help request in the database
+     *
+     * @param requesting the requesting player
+     * @param helping    the helping staff member
+     */
+    public void logHelpRequest(UUID requesting, UUID helping) {
+        helpRequestsCollection.insertOne(new Document("requesting", requesting.toString())
+                .append("helping", helping.toString()).append("time", System.currentTimeMillis()));
+    }
+
+    /**
+     * Get the staff member's activity accepting help request
+     *
+     * @param staffMember the staff member to look up
+     * @return a String with comma-separated values for accepted help requests: last day, last week, last month, all time
+     */
+    public String getHelpActivity(UUID staffMember) {
+        List<Long> requests = new ArrayList<>();
+        for (Document doc : helpRequestsCollection.find(Filters.eq("helping", staffMember.toString())).projection(new Document("time", true))) {
+            if (doc.containsKey("time")) requests.add(doc.getLong("time"));
+        }
+        requests.sort((o1, o2) -> (int) (o1 - o2));
+        long dayAgo = Instant.now().minus(Duration.ofDays(1)).toEpochMilli();
+        long weekAgo = Instant.now().minus(Duration.ofDays(7)).toEpochMilli();
+        long monthAgo = Instant.now().minus(Duration.ofDays(30)).toEpochMilli();
+        int dayTotal = 0, weekTotal = 0, monthTotal = 0, total = 0;
+        for (long r : requests) {
+            if (r >= dayAgo) dayTotal++;
+            if (r >= weekAgo) weekTotal++;
+            if (r >= monthAgo) monthTotal++;
+            total++;
+        }
+        return dayTotal + "," + weekTotal + "," + monthTotal + "," + total;
     }
 
     /**

@@ -71,7 +71,7 @@ public class GuideUtil {
      */
     public void acceptHelpRequest(Player player, Player target) {
         if (!lastRequest.containsKey(target.getUniqueId()) ||
-                (System.currentTimeMillis() - lastRequest.remove(player.getUniqueId()) >= 10 * 60 * 1000)) {
+                (System.currentTimeMillis() - lastRequest.remove(target.getUniqueId()) >= 10 * 60 * 1000)) {
             player.sendMessage(ChatColor.RED + "That player hasn't submitted a help request recently!");
             return;
         }
@@ -83,6 +83,7 @@ public class GuideUtil {
                 .append(" has accepted your help request. Contact them by typing ").color(ChatColor.AQUA)
                 .append("/msg " + player.getUsername() + " [Your Message]").color(ChatColor.YELLOW)
                 .append(" (or click on this message)").color(ChatColor.GREEN).create());
+        Launcher.getDashboard().getMongoHandler().logHelpRequest(target.getUniqueId(), player.getUniqueId());
     }
 
     /**
@@ -178,7 +179,7 @@ public class GuideUtil {
         }
         for (Player p : dashboard.getOnlinePlayers()) {
             if (p.getRank().getRankId() >= Rank.MOD.getRankId()) {
-                tp.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                p.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                         ChatColor.GREEN + player.getUsername() + ChatColor.AQUA + " accepted " + ChatColor.GREEN +
                         tp.getUsername() + "'s " + ChatColor.AQUA + "announcement request");
             }
@@ -214,7 +215,7 @@ public class GuideUtil {
         }
         for (Player p : Launcher.getDashboard().getOnlinePlayers()) {
             if (p.getRank().getRankId() >= Rank.MOD.getRankId()) {
-                tp.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
+                p.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                         ChatColor.GREEN + player.getUsername() + ChatColor.AQUA + " declined " + ChatColor.GREEN +
                         tp.getUsername() + "'s " + ChatColor.AQUA + "announcement request");
             }

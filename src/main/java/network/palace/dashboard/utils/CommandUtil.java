@@ -29,6 +29,7 @@ public class CommandUtil {
         register("bungeecounts", new BungeeCountsCommand());
         register("cmds", new CmdsCommand());
         register("dashboardversion", new DashboardVersion());
+        register("glog", new GuideLogCommand());
         register("kickall", new KickAllCommand());
         register("maintenance", new MaintenanceCommand());
         register("msgtoggle", new MsgToggleCommand());
