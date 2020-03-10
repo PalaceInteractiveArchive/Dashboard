@@ -751,7 +751,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         Player tp = new Player(p.getUuid(), p.getUsername(), p.getAddress(), p.getServer(),
                                 channel.getBungeeID(), p.getMcVersion());
                         tp.setRank(Rank.fromString(p.getRank()));
-                        if (!p.getTags().isEmpty()) {
+                        if (p.getTags() != null && !p.getTags().isEmpty()) {
                             for (String s : p.getTags().split(";")) {
                                 tp.addTag(RankTag.fromString(s));
                             }
