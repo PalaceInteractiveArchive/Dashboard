@@ -170,12 +170,13 @@ public class GuideUtil {
      * @param username the guide/trainee who submitted the request
      */
     public void acceptAnnouncementRequest(Player player, String username) {
-        Player tp = Launcher.getDashboard().getPlayer(username);
+        Dashboard dashboard = Launcher.getDashboard();
+        Player tp = dashboard.getPlayer(username);
         if (tp == null || !announcementRequests.containsKey(tp.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "That player hasn't submitted an announcement request recenty!");
             return;
         }
-        for (Player p : Launcher.getDashboard().getOnlinePlayers()) {
+        for (Player p : dashboard.getOnlinePlayers()) {
             if (p.getRank().getRankId() >= Rank.MOD.getRankId()) {
                 tp.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "STAFF" + ChatColor.WHITE + "] " +
                         ChatColor.GREEN + player.getUsername() + ChatColor.AQUA + " accepted " + ChatColor.GREEN +
@@ -184,7 +185,19 @@ public class GuideUtil {
         }
         tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.AQUA +
                 " has accepted your announcement request.");
-        Launcher.getDashboard().getCommandUtil().handleCommand(player, "b " + announcementRequests.remove(tp.getUniqueId()));
+
+        String message = announcementRequests.remove(tp.getUniqueId());
+        String msg = ChatColor.WHITE + "[" + ChatColor.AQUA + "Information" + ChatColor.WHITE + "] " +
+                ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message);
+        String staff = ChatColor.WHITE + "[" + ChatColor.AQUA + tp.getUsername() + ChatColor.WHITE + "] " +
+                ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', message);
+        for (Player p : dashboard.getOnlinePlayers()) {
+            if (dashboard.getPlayer(p.getUniqueId()).getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
+                p.sendMessage(staff);
+            } else {
+                p.sendMessage(msg);
+            }
+        }
     }
 
     /**
