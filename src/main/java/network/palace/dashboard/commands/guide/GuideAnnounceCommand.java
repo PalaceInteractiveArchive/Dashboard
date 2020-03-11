@@ -35,6 +35,7 @@ public class GuideAnnounceCommand extends DashboardCommand {
             dashboard.getGuideUtil().sendAnnouncementRequest(player, ChatColor.translateAlternateColorCodes('&', s.toString()));
         } else {
             if (args.length < 2) {
+                player.sendMessage(ChatColor.GREEN + "Guide Announce Commands:");
                 player.sendMessage(ChatColor.AQUA + "/gannounce accept [Username] - Accept a player's announcement request");
                 player.sendMessage(ChatColor.AQUA + "/gannounce decline [Username] - Decline a player's announcement request");
                 return;

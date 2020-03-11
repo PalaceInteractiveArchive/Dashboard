@@ -41,6 +41,6 @@ public class GuideLogCommand extends DashboardCommand {
                 "Last Day: " + stats[0] + " requests\n" +
                 "Last Week: " + stats[1] + " requests\n" +
                 "Last Month: " + stats[2] + " requests\n" +
-                "All Time: " + stats[3] + " requests\n");
+                "All Time: " + stats[3] + " requests");
     }
 }
