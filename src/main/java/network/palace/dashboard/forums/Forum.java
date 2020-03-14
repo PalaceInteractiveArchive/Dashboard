@@ -4,6 +4,9 @@ import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ClickEvent;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.mongo.MongoHandler;
@@ -134,7 +137,13 @@ public class Forum {
 
             player.sendMessage(ChatColor.GREEN + "Okay, you're almost finished linking! Visit your Forum Profile and look for the six-digit Linking Code. When you've found it, run " +
                     ChatColor.YELLOW + "/link confirm [six-digit code].");
-            player.sendMessage(ChatColor.GREEN + "If you need help, check out our guide here: https:");
+            player.sendMessage(new ComponentBuilder("If you need help, check out our guide ").color(ChatColor.GREEN)
+                    .append("here!").color(ChatColor.YELLOW)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            new ComponentBuilder("Click to visit ").color(ChatColor.GREEN)
+                                    .append("https://forums.palace.network/topic/6141-link-your-minecraft-and-forum-accounts/")
+                                    .color(ChatColor.YELLOW).create()))
+                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forums.palace.network/topic/6141-link-your-minecraft-and-forum-accounts/")).create());
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
             e.printStackTrace();
