@@ -11,20 +11,26 @@ import java.util.List;
 public abstract class DashboardCommand {
     protected List<String> aliases = new ArrayList<>();
     private Rank rank;
+    private RankTag tag;
     @Getter protected boolean tabCompletePlayers = false;
 
     public DashboardCommand() {
-        rank = Rank.SETTLER;
+        this(Rank.SETTLER, null);
     }
 
     public DashboardCommand(Rank rank) {
+        this(rank, null);
+    }
+
+    public DashboardCommand(Rank rank, RankTag tag) {
         this.rank = rank;
+        this.tag = tag;
     }
 
     public abstract void execute(Player player, String label, String[] args);
 
-    public boolean canPerformCommand(Rank rank) {
-        return rank.getRankId() >= this.rank.getRankId();
+    public boolean canPerformCommand(Player player) {
+        return player.getRank().getRankId() >= rank.getRankId() || (tag != null && player.hasTag(tag));
     }
 
     public List<String> getAliases() {

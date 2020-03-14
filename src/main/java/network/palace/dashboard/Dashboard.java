@@ -3,9 +3,9 @@ package network.palace.dashboard;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
-import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
@@ -57,6 +57,7 @@ public class Dashboard {
     @Getter @Setter private PasswordUtil passwordUtil;
     @Getter @Setter private InventoryUtil inventoryUtil;
     @Getter @Setter private ShowUtil showUtil;
+    @Getter @Setter private GuideUtil guideUtil;
 
     @Getter @Setter private boolean strictMode;
     @Getter @Setter private double strictThreshold;
