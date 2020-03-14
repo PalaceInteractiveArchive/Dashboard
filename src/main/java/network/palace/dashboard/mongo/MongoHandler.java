@@ -13,10 +13,10 @@ import com.mongodb.client.model.Updates;
 import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
-import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
 import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.slack.SlackAttachment;
@@ -32,12 +32,15 @@ import org.bson.conversions.Bson;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 /**
  * @author Innectic
  * @since 9/23/2017
  */
+@SuppressWarnings("rawtypes")
 public class MongoHandler {
     private MongoClient client = null;
     @Getter private MongoDatabase database = null;
@@ -58,6 +61,7 @@ public class MongoHandler {
     @Getter private MongoCollection<Document> infractionsCollection = null;
     @Getter private MongoCollection<Document> storageCollection = null;
     @Getter private MongoCollection<Document> spamIpWhitelist = null;
+    @Getter private MongoCollection<Document> helpRequestsCollection = null;
 
     public MongoHandler() throws IOException {
         String address = "";
@@ -106,6 +110,7 @@ public class MongoHandler {
         infractionsCollection = database.getCollection("infractions");
         storageCollection = database.getCollection("storage");
         spamIpWhitelist = database.getCollection("spamipwhitelist");
+        helpRequestsCollection = database.getCollection("help_requests");
     }
 
     public void logInfraction(String name, String message) {
@@ -433,6 +438,7 @@ public class MongoHandler {
      * @param player       The player object
      * @param afterRestart true if processing after Dashboard restart where no login messages should be sent, false if normal login
      */
+    @SuppressWarnings("rawtypes")
     public void login(Player player, boolean afterRestart) {
         Dashboard dashboard = Launcher.getDashboard();
 
@@ -459,7 +465,7 @@ public class MongoHandler {
 
         dashboard.getSchedulerManager().runAsync(() -> {
             try {
-                Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("sponsor", 1)
+                Document doc = getPlayer(player.getUniqueId(), new Document("rank", 1).append("tags", 1)
                         .append("ip", 1).append("username", 1).append("friendRequestToggle", 1).append("onlineTime", 1)
                         .append("tutorial", 1).append("minecraftVersion", 1).append("settings", 1));
                 if (doc == null) {
@@ -470,15 +476,20 @@ public class MongoHandler {
                 player.setOnlineTime(ot == 0 ? 1 : ot);
 
                 Rank rank = Rank.fromString(doc.getString("rank"));
-                SponsorTier tier;
-                if (doc.containsKey("sponsor")) {
-                    tier = SponsorTier.fromString(doc.getString("sponsor"));
-                } else {
-                    tier = SponsorTier.NONE;
+                if (doc.get("tags") != null) {
+                    ArrayList tags = doc.get("tags", ArrayList.class);
+                    for (Object s : tags) {
+                        RankTag tag = RankTag.fromString((String) s);
+                        if (tag != null) {
+                            player.addTag(tag);
+                        }
+                    }
                 }
 
-                if (!rank.equals(Rank.SETTLER) || !tier.equals(SponsorTier.NONE)) {
-                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank, tier);
+                if (!rank.equals(Rank.SETTLER) || !player.getTags().isEmpty()) {
+                    List<String> tags = new ArrayList<>();
+                    player.getTags().forEach(t -> tags.add(t.getDBName()));
+                    PacketPlayerRank packet = new PacketPlayerRank(player.getUniqueId(), rank, tags);
                     player.send(packet);
                 }
 
@@ -509,7 +520,6 @@ public class MongoHandler {
 
                 player.setDisabled(disable);
                 player.setRank(rank);
-                player.setSponsorTier(tier);
                 player.setFriendRequestToggle(!settings.getBoolean("friendRequestToggle"));
                 player.setMentions(settings.getBoolean("mentions"));
                 player.setNewGuest(!doc.getBoolean("tutorial"));
@@ -684,16 +694,63 @@ public class MongoHandler {
         return Rank.fromString(result.getString("rank"));
     }
 
-    public SponsorTier getSponsorTier(UUID uuid) {
-        if (uuid == null) return SponsorTier.NONE;
-        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(new Document("sponsor", 1)).first();
-        if (result == null || !result.containsKey("sponsor")) return SponsorTier.NONE;
-        return SponsorTier.fromString(result.getString("sponsor"));
+    @SuppressWarnings("rawtypes")
+    public List<RankTag> getRankTags(UUID uuid) {
+        if (uuid == null) return new ArrayList<>();
+        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(new Document("tags", 1)).first();
+        if (result == null || !result.containsKey("tags")) return new ArrayList<>();
+        ArrayList list = result.get("tags", ArrayList.class);
+        List<RankTag> tags = new ArrayList<>();
+        for (Object o : list) {
+            tags.add(RankTag.fromString((String) o));
+        }
+        return tags;
     }
 
-    public void setSponsorTier(UUID uuid, SponsorTier tier) {
-        if (uuid == null || tier == null) return;
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), tier.equals(SponsorTier.NONE) ? Updates.unset("sponsor") : Updates.set("sponsor", tier.getDBName()));
+    public void addRankTag(UUID uuid, RankTag tag) {
+        if (uuid == null || tag == null) return;
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.addToSet("tags", tag.getDBName()), new UpdateOptions().upsert(true));
+    }
+
+    public void removeRankTag(UUID uuid, RankTag tag) {
+        if (uuid == null || tag == null) return;
+        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("tags", tag.getDBName()));
+    }
+
+    /**
+     * Log an accepted help request in the database
+     *
+     * @param requesting the requesting player
+     * @param helping    the helping staff member
+     */
+    public void logHelpRequest(UUID requesting, UUID helping) {
+        helpRequestsCollection.insertOne(new Document("requesting", requesting.toString())
+                .append("helping", helping.toString()).append("time", System.currentTimeMillis()));
+    }
+
+    /**
+     * Get the staff member's activity accepting help request
+     *
+     * @param staffMember the staff member to look up
+     * @return a String with comma-separated values for accepted help requests: last day, last week, last month, all time
+     */
+    public String getHelpActivity(UUID staffMember) {
+        List<Long> requests = new ArrayList<>();
+        for (Document doc : helpRequestsCollection.find(Filters.eq("helping", staffMember.toString())).projection(new Document("time", true))) {
+            if (doc.containsKey("time")) requests.add(doc.getLong("time"));
+        }
+        requests.sort((o1, o2) -> (int) (o1 - o2));
+        long dayAgo = Instant.now().minus(Duration.ofDays(1)).toEpochMilli();
+        long weekAgo = Instant.now().minus(Duration.ofDays(7)).toEpochMilli();
+        long monthAgo = Instant.now().minus(Duration.ofDays(30)).toEpochMilli();
+        int dayTotal = 0, weekTotal = 0, monthTotal = 0, total = 0;
+        for (long r : requests) {
+            if (r >= dayAgo) dayTotal++;
+            if (r >= weekAgo) weekTotal++;
+            if (r >= monthAgo) monthTotal++;
+            total++;
+        }
+        return dayTotal + "," + weekTotal + "," + monthTotal + "," + total;
     }
 
     /**
@@ -725,16 +782,21 @@ public class MongoHandler {
     }
 
     public BseenData getBseenInformation(UUID uuid) {
-        Document player = getPlayer(uuid, new Document("username", 1).append("rank", 1).append("sponsor", 1)
+        Document player = getPlayer(uuid, new Document("username", 1).append("rank", 1).append("tags", 1)
                 .append("lastOnline", 1).append("ip", 1).append("mutes", 1).append("server", 1));
         if (player == null) return null;
         Rank rank = Rank.fromString(player.getString("rank"));
-        SponsorTier tier = SponsorTier.fromString(player.getString("sponsor"));
+        List<RankTag> tags = new ArrayList<>();
+        if (player.containsKey("tags")) {
+            for (Object o : player.get("tags", ArrayList.class)) {
+                tags.add(RankTag.fromString((String) o));
+            }
+        }
         long lastLogin = player.getLong("lastOnline");
         String ipAddress = player.getString("ip");
         Mute mute = getCurrentMute(uuid);
         String server = player.getString("server");
-        return new BseenData(uuid, rank, tier, lastLogin, ipAddress, mute, server);
+        return new BseenData(uuid, rank, tags, lastLogin, ipAddress, mute, server);
     }
 
     public void staffClock(UUID uuid, boolean b) {

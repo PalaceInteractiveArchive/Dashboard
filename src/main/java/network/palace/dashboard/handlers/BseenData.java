@@ -3,6 +3,7 @@ package network.palace.dashboard.handlers;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class BseenData {
     private UUID uuid;
     private Rank rank;
-    private SponsorTier sponsorTier;
+    private List<RankTag> tags;
     private long lastLogin;
     private String ipAddress;
     private Mute mute;

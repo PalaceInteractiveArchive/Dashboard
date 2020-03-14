@@ -1,10 +1,10 @@
 package network.palace.dashboard.server;
 
-import network.palace.dashboard.packets.BasePacket;
-import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import network.palace.dashboard.packets.BasePacket;
+import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Marc on 7/14/16
  */
-@SuppressWarnings("unchecked")
 public class DashboardSocketChannel extends NioSocketChannel {
     private static AtomicLong nextId = new AtomicLong(0L);
     protected long id = nextId.getAndIncrement();

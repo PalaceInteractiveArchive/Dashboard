@@ -3,7 +3,10 @@ package network.palace.dashboard.utils;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.DashboardConstants;
 import network.palace.dashboard.Launcher;
+import network.palace.dashboard.chat.BaseComponent;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.*;
@@ -157,7 +160,6 @@ public class ChatUtil {
         if (player.isNewGuest() && !message.startsWith("/")) return;
 
         Rank rank = player.getRank();
-        SponsorTier tier = player.getSponsorTier();
         boolean trainee = rank.getRankId() >= Rank.TRAINEE.getRankId();
         if (trainee) {
             if (player.isAFK()) {
@@ -354,38 +356,55 @@ public class ChatUtil {
             if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
                 m = ChatColor.translateAlternateColorCodes('&', m);
             }
-            String m2 = tier.getChatTag(true) + rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
+            String m2 = RankTag.format(player.getTags()) + rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " +
                     rank.getChatColor() + m;
+            BaseComponent[] components = new ComponentBuilder("[").color(ChatColor.WHITE).event(getPlayerHover(player, sname))
+                    .append(sname).color(ChatColor.GREEN)
+                    .append("] ").color(ChatColor.WHITE)
+                    .append(RankTag.format(player.getTags()))
+                    .append(rank.getFormattedName() + " ")
+                    .append(player.getUsername() + ": ").color(ChatColor.GRAY)
+                    .append(m, ComponentBuilder.FormatRetention.NONE).color(rank.getChatColor()).create();
             for (Player tp : dashboard.getOnlinePlayers()) {
                 if (tp.isNewGuest() || tp.isDisabled() ||
-                        (rank.getRankId() < Rank.CHARACTER.getRankId() && tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()))
+                        (rank.getRankId() < Rank.CHARACTER.getRankId() &&
+                                tp.isIgnored(player.getUniqueId()) &&
+                                tp.getRank().getRankId() < Rank.CHARACTER.getRankId()) ||
+                        !dashboard.getServer(tp.getServer()).isPark())
                     continue;
-                if (dashboard.getServer(tp.getServer()).isPark()) {
-                    String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
-//                    String send = m2;
-                    boolean mention = false;
-                    if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
-                        String possibleMention = m.toLowerCase();
-                        String name = tp.getUsername().toLowerCase();
-                        if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
-                                possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
-                                possibleMention.contains(" " + name + ".") || possibleMention.startsWith(name + ".") ||
-                                possibleMention.contains(" " + name + "!") || possibleMention.startsWith(name + "!")) {
-                            mention = true;
-                            send = ChatColor.BLUE + "* " + send;
-                        }
+//                String send = ChatColor.WHITE + "[" + ChatColor.GREEN + sname + ChatColor.WHITE + "] " + m2;
+                boolean mention = false;
+                if (tp.hasMentions() && !tp.getUniqueId().equals(player.getUniqueId())) {
+                    String possibleMention = m.toLowerCase();
+                    String name = tp.getUsername().toLowerCase();
+                    if (possibleMention.contains(" " + name + " ") || possibleMention.startsWith(name + " ") ||
+                            possibleMention.endsWith(" " + name) || possibleMention.equalsIgnoreCase(name) ||
+                            possibleMention.contains(" " + name + ".") || possibleMention.startsWith(name + ".") ||
+                            possibleMention.contains(" " + name + "!") || possibleMention.startsWith(name + "!")) {
+                        mention = true;
+//                        send = ChatColor.BLUE + "* " + send;
                     }
-                    if (mention) {
-                        tp.sendMessage(send);
-                        tp.mention();
-                    } else {
-                        tp.sendMessage(send);
-                    }
+                }
+                if (mention) {
+                    tp.sendMessage(new ComponentBuilder("* ").color(ChatColor.BLUE).append(components).create());
+                    tp.mention();
+                } else {
+                    tp.sendMessage(components);
                 }
             }
             return;
         }
         player.chat(m);
+    }
+
+    private HoverEvent getPlayerHover(Player player, String server) {
+        ComponentBuilder builder = new ComponentBuilder(player.getRank().getFormattedName())
+                .append(" " + player.getUsername() + "\n").color(ChatColor.GRAY);
+        for (RankTag tag : player.getTags()) {
+            builder.append(tag.getName() + "\n").color(tag.getColor()).italic(true);
+        }
+        builder.append("Server: ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.AQUA).append(server).color(ChatColor.GREEN);
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, builder.create());
     }
 
     public static boolean notEnoughTime(Player player) {
@@ -650,6 +669,18 @@ public class ChatUtil {
         Dashboard dashboard = Launcher.getDashboard();
         for (Player player : dashboard.getOnlinePlayers()) {
             if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId() && !player.isDisabled()) {
+                try {
+                    player.sendMessage(msg);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    public void guideChatMessage(String msg) {
+        Dashboard dashboard = Launcher.getDashboard();
+        for (Player player : dashboard.getOnlinePlayers()) {
+            if ((player.getRank().getRankId() >= Rank.TRAINEE.getRankId() || player.hasTag(RankTag.GUIDE)) && !player.isDisabled()) {
                 try {
                     player.sendMessage(msg);
                 } catch (Exception ignored) {

@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.chat.ComponentSerializer;
 import network.palace.dashboard.chat.BaseComponent;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ComponentSerializer;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.bungee.PacketComponentMessage;
 import network.palace.dashboard.packets.dashboard.*;
@@ -21,7 +21,7 @@ public class Player {
     @Getter @Setter private UUID uuid;
     @Getter @Setter private String username;
     @Getter @Setter private Rank rank = Rank.SETTLER;
-    @Getter @Setter private SponsorTier sponsorTier = SponsorTier.NONE;
+    private List<RankTag> tags = new ArrayList<>();
     @Getter private String address;
     @Getter @Setter private String server;
     @Getter @Setter private UUID bungeeID;
@@ -61,6 +61,26 @@ public class Player {
         this.server = server;
         this.bungeeID = bungeeID;
         this.mcVersion = mcVersion;
+    }
+
+    public List<RankTag> getTags() {
+        if (tags == null || tags.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(tags);
+    }
+
+    public void addTag(RankTag tag) {
+        if (tag == null || tags.contains(tag)) return;
+        tags.add(tag);
+        tags.sort((rankTag, t1) -> t1.getId() - rankTag.getId());
+    }
+
+    public boolean removeTag(RankTag tag) {
+        if (tag == null) return false;
+        return tags.remove(tag);
+    }
+
+    public boolean hasTag(RankTag tag) {
+        return tags.contains(tag);
     }
 
     public void sendMessage(String msg) {

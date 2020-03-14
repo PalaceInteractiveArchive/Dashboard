@@ -485,19 +485,23 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     PacketRankChange packet = new PacketRankChange().fromJSON(object);
                     UUID uuid = packet.getUniqueId();
                     Rank rank = packet.getRank();
-                    SponsorTier tier = packet.getTier();
+                    List<String> tags = packet.getTags();
                     String source = packet.getSource();
                     Player player = dashboard.getPlayer(uuid);
+                    player.send(new PacketPlayerRank(uuid, rank, tags));
 
                     dashboard.getSchedulerManager().runAsync(() -> {
                         String name;
                         if (player == null) {
                             name = dashboard.getMongoHandler().uuidToUsername(uuid);
                         } else {
-                            PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank, tier);
+                            PacketPlayerRank packet1 = new PacketPlayerRank(uuid, rank, tags);
                             player.send(packet1);
                             player.setRank(rank);
-                            player.setSponsorTier(tier);
+                            player.getTags().forEach(player::removeTag);
+                            for (String tag : tags) {
+                                player.addTag(RankTag.fromString(tag));
+                            }
                             name = player.getUsername();
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(player.getServer());
                             if (socketChannel != null) socketChannel.send(packet);
@@ -508,7 +512,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 SocketConnection.sendUpdate(info);
                             }
                         }
-                        dashboard.getModerationUtil().rankChange(name, rank, tier, source);
+                        List<RankTag> realTags = new ArrayList<>();
+                        for (String s : tags) {
+                            realTags.add(RankTag.fromString(s));
+                        }
+                        dashboard.getModerationUtil().rankChange(name, rank, realTags, source);
 
                         try {
                             int member_id = dashboard.getMongoHandler().getForumMemberId(uuid);
@@ -743,7 +751,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         Player tp = new Player(p.getUuid(), p.getUsername(), p.getAddress(), p.getServer(),
                                 channel.getBungeeID(), p.getMcVersion());
                         tp.setRank(Rank.fromString(p.getRank()));
-                        tp.setSponsorTier(SponsorTier.fromString(p.getSponsorTier()));
+                        if (p.getTags() != null && !p.getTags().isEmpty()) {
+                            for (String s : p.getTags().split(";")) {
+                                tp.addTag(RankTag.fromString(s));
+                            }
+                        }
                         list.add(tp);
                         dashboard.getServer(p.getServer()).changeCount(1);
                         dashboard.addPlayer(tp);

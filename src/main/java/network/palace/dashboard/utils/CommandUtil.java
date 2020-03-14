@@ -1,7 +1,14 @@
 package network.palace.dashboard.utils;
 
-import network.palace.dashboard.commands.*;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.commands.*;
+import network.palace.dashboard.commands.admin.*;
+import network.palace.dashboard.commands.chat.*;
+import network.palace.dashboard.commands.guide.GuideAnnounceCommand;
+import network.palace.dashboard.commands.guide.GuideHelpCommand;
+import network.palace.dashboard.commands.guide.HelpMeCommand;
+import network.palace.dashboard.commands.moderation.*;
+import network.palace.dashboard.commands.staff.*;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.packets.dashboard.PacketCommandList;
@@ -17,71 +24,82 @@ public class CommandUtil {
     }
 
     private void initialize() {
-        register("audio", new AudioCommand());
-        register("b", new BroadcastCommand());
-        register("ban", new BanCommand());
-        register("banip", new BanIPCommand());
-        register("bannedproviders", new BannedProvidersCommand());
-        register("banprovider", new BanProviderCommand());
+        /* Admin */
         register("bconfig", new BConfigCommand());
-        register("bseen", new BseenCommand());
-        register("bug", new Bugcommand());
         register("bungeecounts", new BungeeCountsCommand());
+        register("cmds", new CmdsCommand());
+        register("dashboardversion", new DashboardVersion());
+        register("glog", new GuideLogCommand());
+        register("kickall", new KickAllCommand());
+        register("maintenance", new MaintenanceCommand());
+        register("msgtoggle", new MsgToggleCommand());
+        register("processes", new ProcessesCommand());
+        register("reboot", new RebootCommand());
+        register("reloadicon", new ReloadIconCommand());
+        register("send", new SendCommand());
+        register("updatehashes", new UpdateHashesCommand());
+        /* Chat */
         register("cc", new ClearChatCommand());
-        register("charlist", new CharListCommand());
         register("chat", new ChatCommand());
         register("chatdelay", new ChatDelayCommand());
         register("chatreload", new ChatReloadCommand());
         register("chatstatus", new ChatStatusCommand());
-        register("cmds", new CmdsCommand());
-        register("dashboardversion", new DashboardVersion());
-        register("discord", new DiscordCommand());
-        register("find", new FindCommand());
-        register("friend", new FriendCommand());
-        register("ignore", new IgnoreCommand());
+        register("gc", new GuideChatCommand());
         register("ho", new AdminChatCommand());
+        register("pchat", new PartyChatCommand());
+        register("sc", new StaffChatCommand());
+        /* Guide */
+        register("h", new GuideHelpCommand());
+        register("helpme", new HelpMeCommand());
+        /* Moderation */
+        register("ban", new BanCommand());
+        register("banip", new BanIPCommand());
+        register("bannedproviders", new BannedProvidersCommand());
+        register("banprovider", new BanProviderCommand());
+        register("bseen", new BseenCommand());
+        register("find", new FindCommand());
+        register("gannounce", new GuideAnnounceCommand());
         register("ip", new IPCommand());
         register("ipseen", new IPSeenCommand());
-        register("join", new JoinCommand());
         register("kick", new KickCommand());
-        register("kickall", new KickAllCommand());
-        register("link", new LinkCommand());
-        register("maintenance", new MaintenanceCommand());
-        register("mentions", new MentionsCommand());
         register("modlog", new ModlogCommand());
         register("motdrl", new MotdReloadCommand());
-        register("msg", new MsgCommand());
-        register("msgtoggle", new MsgToggleCommand());
         register("mute", new MuteCommand());
         register("mutechat", new MuteChatCommand());
         register("namecheck", new NamecheckCommand());
-        register("oc", new OnlineCountCommand());
-        register("party", new PartyCommand());
         register("parties", new PartiesCommand());
-        register("pchat", new PartyChatCommand());
         register("pmtoggle", new PMToggleCommand());
-        register("processes", new ProcessesCommand());
-        register("punishments", new PunishmentsCommand());
-        register("reboot", new RebootCommand());
-        register("reloadicon", new ReloadIconCommand());
-        register("reply", new ReplyCommand());
-        register("sc", new StaffChatCommand());
-        register("send", new SendCommand());
-        register("server", new ServerCommand());
-        register("social", new SocialCommand());
         register("spamip", new SpamIPCommand());
-        register("staff", new StaffCommand());
-        register("stafflist", new StaffListCommand());
-        register("store", new StoreCommand());
         register("strict", new StrictCommand());
         register("tempban", new TempBanCommand());
         register("unban", new UnbanCommand());
         register("unbanip", new UnbanIPCommand());
         register("unbanprovider", new UnbanProviderCommand());
         register("unmute", new UnmuteCommand());
-        register("updatehashes", new UpdateHashesCommand());
-        register("uptime", new UptimeCommand());
         register("warn", new WarnCommand());
+        /* Staff */
+        register("b", new BroadcastCommand());
+        register("charlist", new CharListCommand());
+        register("server", new ServerCommand());
+        register("staff", new StaffCommand());
+        register("stafflist", new StaffListCommand());
+        /* General */
+        register("audio", new AudioCommand());
+        register("bug", new BugCommand());
+        register("discord", new DiscordCommand());
+        register("friend", new FriendCommand());
+        register("ignore", new IgnoreCommand());
+        register("join", new JoinCommand());
+        register("link", new LinkCommand());
+        register("mentions", new MentionsCommand());
+        register("msg", new MsgCommand());
+        register("oc", new OnlineCountCommand());
+        register("party", new PartyCommand());
+        register("punishments", new PunishmentsCommand());
+        register("reply", new ReplyCommand());
+        register("social", new SocialCommand());
+        register("store", new StoreCommand());
+        register("uptime", new UptimeCommand());
         register("whereami", new WhereAmICommand());
     }
 
@@ -122,7 +140,7 @@ public class CommandUtil {
     }
 
     private void execute(Player player, DashboardCommand c, String command, String[] args) {
-        if (!c.canPerformCommand(player.getRank())) {
+        if (!c.canPerformCommand(player)) {
             player.sendMessage(ChatColor.RED + "You do not have permission to execute this command!");
             return;
         }

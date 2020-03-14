@@ -2,8 +2,11 @@ package network.palace.dashboard.commands;
 
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
-import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.handlers.DashboardCommand;
+import network.palace.dashboard.handlers.IgnoreData;
+import network.palace.dashboard.handlers.Player;
+import network.palace.dashboard.handlers.Rank;
 
 import java.text.DateFormatSymbols;
 import java.util.*;
