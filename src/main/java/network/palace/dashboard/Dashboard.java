@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "2.2.0";
+    @Getter public static final String version = "2.2.1";
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
