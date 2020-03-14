@@ -6,7 +6,13 @@ import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 
+import java.util.Collections;
+
 public class HelpMeCommand extends DashboardCommand {
+
+    public HelpMeCommand() {
+        aliases = Collections.singletonList("help");
+    }
 
     @Override
     public void execute(Player player, String label, String[] args) {

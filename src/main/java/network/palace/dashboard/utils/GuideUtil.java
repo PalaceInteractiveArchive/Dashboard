@@ -75,6 +75,16 @@ public class GuideUtil {
             player.sendMessage(ChatColor.RED + "That player hasn't submitted a help request recently!");
             return;
         }
+        BaseComponent[] components = new ComponentBuilder("[").color(ChatColor.WHITE)
+                .append("HELP").color(ChatColor.GREEN).append("] ").color(ChatColor.WHITE)
+                .append(player.getUsername()).color(player.getRank().getTagColor())
+                .append(" accepted ").color(ChatColor.AQUA)
+                .append(target.getUsername() + "'s ").color(target.getRank().getTagColor())
+                .append("help request").color(ChatColor.AQUA).create();
+        Launcher.getDashboard().getOnlinePlayers().stream()
+                .filter(tp -> tp.getRank().getRankId() >= Rank.TRAINEE.getRankId() || tp.hasTag(RankTag.GUIDE))
+                .forEach(tp -> tp.sendMessage(components));
+
         Rank rank = player.getRank();
         target.sendMessage(new ComponentBuilder(rank.getName()).color(rank.getTagColor()).bold(true)
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + player.getUsername() + " "))
