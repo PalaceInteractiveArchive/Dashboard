@@ -29,8 +29,7 @@ public class GuideChatCommand extends DashboardCommand {
         List<RankTag> tags = player.getTags();
 
         response = ChatColor.WHITE + "[" + ChatColor.DARK_GREEN + "GUIDE" + ChatColor.WHITE + "] " + RankTag.format(tags) +
-                rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.WHITE +
-                ChatColor.translateAlternateColorCodes('&', message);
+                rank.getFormattedName() + " " + ChatColor.GRAY + player.getUsername() + ": " + ChatColor.GRAY + message;
         dashboard.getChatUtil().guideChatMessage(response);
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/gc " + player.getUsername() + " " + message);
     }
