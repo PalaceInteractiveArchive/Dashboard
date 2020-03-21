@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "2.2.2";
+    @Getter public final String version;
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -82,6 +82,10 @@ public class Dashboard {
     @Getter @Setter private boolean maintenance = false;
     @Getter @Setter private List<UUID> maintenanceWhitelist = new ArrayList<>();
     @Getter @Setter private boolean testNetwork = false;
+
+    public Dashboard() {
+        version = getClass().getPackage().getImplementationVersion();
+    }
 
     public void loadConfiguration() {
         try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {

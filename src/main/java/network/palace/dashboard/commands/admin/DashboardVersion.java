@@ -1,6 +1,6 @@
 package network.palace.dashboard.commands.admin;
 
-import network.palace.dashboard.Dashboard;
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
@@ -17,6 +17,6 @@ public class DashboardVersion extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        player.sendMessage(ChatColor.GREEN + "Dashboard currently running v" + Dashboard.getVersion());
+        player.sendMessage(ChatColor.GREEN + "Dashboard currently running v" + Launcher.getDashboard().getVersion());
     }
 }
