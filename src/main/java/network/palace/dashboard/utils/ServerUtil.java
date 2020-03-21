@@ -1,5 +1,6 @@
 package network.palace.dashboard.utils;
 
+import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
@@ -28,6 +29,7 @@ public class ServerUtil {
     private int lastArcade = 0;
     private HashMap<String, Integer> lastHubs = new HashMap<>();
     private TimerTask lobbyDataTask;
+    @Getter private boolean serverQueuesEnabled = true;
 
     private Map<String, UUID> mutedServers = new HashMap<>();
 
@@ -397,20 +399,22 @@ public class ServerUtil {
 
     public void sendPlayer(Player player, Server server) {
         if (player == null) return;
-        String currentQueue = leaveServerQueue(player);
-        if (currentQueue != null)
-            player.sendMessage(ChatColor.AQUA + "You have left the queue to join " + ChatColor.YELLOW + currentQueue);
+        if (serverQueuesEnabled) {
+            String currentQueue = leaveServerQueue(player);
+            if (currentQueue != null)
+                player.sendMessage(ChatColor.AQUA + "You have left the queue to join " + ChatColor.YELLOW + currentQueue);
 
-        if (!server.getName().startsWith("Hub")) {
-            Server.ServerQueue queue = server.getServerQueue();
-            queue.handleJoin(player.getUniqueId());
-            // Add to queue if the queue is enabled, or if a queue needs to be enabled
-            if (queue.hasQueue() || queue.isQueueNeeded()) {
-                int pos = queue.joinQueue(player);
-                player.sendMessage(ChatColor.YELLOW + server.getName() + ChatColor.GREEN +
-                        " is very busy right now, so you have been placed in a queue to join it. You are in position " +
-                        ChatColor.YELLOW + "#" + pos + ".");
-                return;
+            if (!server.getName().startsWith("Hub")) {
+                Server.ServerQueue queue = server.getServerQueue();
+                queue.handleJoin(player.getUniqueId());
+                // Add to queue if the queue is enabled, or if a queue needs to be enabled
+                if (queue.hasQueue() || queue.isQueueNeeded()) {
+                    int pos = queue.joinQueue(player);
+                    player.sendMessage(ChatColor.YELLOW + server.getName() + ChatColor.GREEN +
+                            " is very busy right now, so you have been placed in a queue to join it. You are in position " +
+                            ChatColor.YELLOW + "#" + pos + ".");
+                    return;
+                }
             }
         }
         sendPlayerDirect(player, server.getName());
@@ -484,5 +488,9 @@ public class ServerUtil {
             if (queue.hasQueue() && queue.leaveQueue(player)) return server.getName();
         }
         return null;
+    }
+
+    public boolean toggleServerQueueEnabled() {
+        return (serverQueuesEnabled = !serverQueuesEnabled);
     }
 }

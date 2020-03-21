@@ -37,6 +37,7 @@ public class CommandUtil {
         register("reboot", new RebootCommand());
         register("reloadicon", new ReloadIconCommand());
         register("send", new SendCommand());
+        register("toggleserverqueue", new ToggleServerQueueCommand());
         register("updatehashes", new UpdateHashesCommand());
         /* Chat */
         register("cc", new ClearChatCommand());
