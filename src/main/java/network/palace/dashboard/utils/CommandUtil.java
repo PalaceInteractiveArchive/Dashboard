@@ -80,6 +80,7 @@ public class CommandUtil {
         /* Staff */
         register("b", new BroadcastCommand());
         register("charlist", new CharListCommand());
+        register("mocap", new MotionCaptureCommand());
         register("server", new ServerCommand());
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
