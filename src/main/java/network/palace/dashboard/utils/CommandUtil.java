@@ -37,6 +37,7 @@ public class CommandUtil {
         register("reboot", new RebootCommand());
         register("reloadicon", new ReloadIconCommand());
         register("send", new SendCommand());
+        register("toggleserverqueue", new ToggleServerQueueCommand());
         register("updatehashes", new UpdateHashesCommand());
         /* Chat */
         register("cc", new ClearChatCommand());
@@ -91,6 +92,7 @@ public class CommandUtil {
         register("friend", new FriendCommand());
         register("ignore", new IgnoreCommand());
         register("join", new JoinCommand());
+        register("leavedashqueue", new LeaveServerQueueCommand());
         register("link", new LinkCommand());
         register("mentions", new MentionsCommand());
         register("msg", new MsgCommand());

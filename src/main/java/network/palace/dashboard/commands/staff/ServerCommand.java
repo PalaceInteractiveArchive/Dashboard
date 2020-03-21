@@ -136,7 +136,7 @@ public class ServerCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.RED + "That server doesn't exist!");
                 return;
             }
-            dashboard.getServerUtil().sendPlayer(player, server.getName());
+            dashboard.getServerUtil().sendPlayer(player, server);
             return;
         }
         if (args.length == 0) {

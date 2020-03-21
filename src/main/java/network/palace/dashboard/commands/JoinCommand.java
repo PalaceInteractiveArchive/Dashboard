@@ -6,6 +6,7 @@ import network.palace.dashboard.chat.*;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.Server;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,16 +31,19 @@ public class JoinCommand extends DashboardCommand {
                 }
                 try {
                     dashboard.getServerUtil().sendPlayerByType(player, formatName(args[0]));
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    e.printStackTrace();
                     player.sendMessage(ChatColor.RED + "There was a problem joining that server!");
                 }
                 return;
             }
+            Server server;
             if (endsInNumber(args[0]) && exists(args[0].substring(0, args[0].length() - 1)) &&
-                    dashboard.getServerUtil().getServer(formatName(args[0])) != null) {
+                    (server = dashboard.getServerUtil().getServer(formatName(args[0]))) != null) {
                 try {
-                    dashboard.getServerUtil().sendPlayer(player, formatName(args[0]));
-                } catch (Exception ignored) {
+                    dashboard.getServerUtil().sendPlayer(player, server);
+                } catch (Exception e) {
+                    e.printStackTrace();
                     player.sendMessage(ChatColor.RED + "There was a problem joining that server!");
                 }
                 return;
