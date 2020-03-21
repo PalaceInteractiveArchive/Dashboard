@@ -352,7 +352,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         tp.sendMessage(ChatColor.RED + "We are having trouble connecting you to that server! Try again soon.");
                         return;
                     }
-                    dashboard.getServerUtil().sendPlayer(tp, target.getName());
+                    dashboard.getServerUtil().sendPlayer(tp, target);
                     break;
                 }
                 /*
@@ -573,7 +573,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             if (!target.getName().toLowerCase().startsWith("hub") && !target.getName().toLowerCase().startsWith("arcade")) {
                                 tp.sendMessage(ChatColor.RED + "No fallback servers are available, so you were sent to a Park server.");
                             }
-                            dashboard.getServerUtil().sendPlayer(tp, target.getName());
+                            dashboard.getServerUtil().sendPlayer(tp, target);
                         }
                     }
                     break;
