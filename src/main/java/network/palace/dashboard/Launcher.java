@@ -37,6 +37,7 @@ public class Launcher {
     @Getter private static Dashboard dashboard;
 
     public Launcher() {
+        System.out.println("Launching Dashboard with " + getClass().getClassLoader().getClass().getSimpleName());
         dashboard = new Dashboard();
 
         dashboard.setStartTime(System.currentTimeMillis());

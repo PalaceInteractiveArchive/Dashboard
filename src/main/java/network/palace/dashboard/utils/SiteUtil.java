@@ -27,7 +27,7 @@ import java.util.List;
 public class SiteUtil implements HttpHandler {
 
     public SiteUtil() throws IOException {
-        URL whatismyip = new URL("http://checkip.amazonaws.com");
+        URL whatismyip = new URL("https://checkip.amazonaws.com");
         BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
         String ip = in.readLine();
         HttpServer server = HttpServer.create(new InetSocketAddress(ip, 7319), 0);

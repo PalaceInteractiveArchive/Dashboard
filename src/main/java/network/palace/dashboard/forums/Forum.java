@@ -29,7 +29,8 @@ public class Forum {
     private BoneCP connectionPool = null;
     private Random random;
 
-    public Forum() throws IOException, SQLException {
+    public Forum() throws IOException, SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.jdbc.Driver");
         initialize();
     }
 
