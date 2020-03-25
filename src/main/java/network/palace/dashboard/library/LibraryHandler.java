@@ -1,4 +1,4 @@
-package network.palace.library;
+package network.palace.dashboard.library;
 
 import lombok.Getter;
 import org.json.simple.JSONArray;

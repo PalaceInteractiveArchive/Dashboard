@@ -22,12 +22,12 @@ public class DashboardServerSocketChannel extends NioServerSocketChannel {
             }
         } catch (Throwable t) {
             Dashboard dashboard = Launcher.getDashboard();
-            dashboard.getLogger().error("Failed to create a new channel from an accepted discordSocket.");
+            dashboard.getLogger().severe("Failed to create a new channel from an accepted discordSocket.");
             t.printStackTrace();
             try {
                 ch.close();
             } catch (Throwable t2) {
-                dashboard.getLogger().error("Failed to close a discordSocket.");
+                dashboard.getLogger().severe("Failed to close a discordSocket.");
                 t2.printStackTrace();
             }
         }

@@ -56,8 +56,8 @@ public class ChatUtil {
                 mutedChats.add(server);
             }
         } catch (Exception e) {
-            dashboard.getLogger().error("An exception occurred while parsing chat.txt - " + e.getMessage());
-            ErrorUtil.logError("Error parsing chat.txt", e);
+            dashboard.getLogger().severe("An exception occurred while parsing chat.txt - " + e.getMessage());
+//            ErrorUtil.logError("Error parsing chat.txt", e);
         }
         f.delete();
         reload();
@@ -89,7 +89,7 @@ public class ChatUtil {
                 } catch (Exception e) {
                     messages.clear();
                     e.printStackTrace();
-                    dashboard.getErrors().error("Error logging chat: " + e.getMessage());
+                    dashboard.getLogger().severe("Error logging chat: " + e.getMessage());
                 }
             }
         }, 0, 5000);

@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 /**
  * Created by Marc on 1/15/17.
@@ -89,7 +91,9 @@ public class VoteUtil {
                         if (socketAddress == null) {
                             socketAddress = new InetSocketAddress(host, port);
                         }
-                        dashboard.getLogger().error("Votifier was not able to bind to " + socketAddress, future.cause());
+                        LogRecord rec = new LogRecord(Level.SEVERE, "Votifier was not able to bind to " + socketAddress);
+                        rec.setThrown(future.cause());
+                        dashboard.getLogger().log(rec);
                     }
                 });
     }
@@ -137,9 +141,11 @@ public class VoteUtil {
     public void onError(Channel channel, Throwable throwable) {
         Dashboard dashboard = Launcher.getDashboard();
         if (debug) {
-            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress(), throwable);
+            LogRecord rec = new LogRecord(Level.SEVERE, "Unable to process vote from " + channel.remoteAddress());
+            rec.setThrown(throwable);
+            dashboard.getLogger().log(rec);
         } else {
-            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
+            dashboard.getLogger().severe("Unable to process vote from " + channel.remoteAddress());
         }
     }
 

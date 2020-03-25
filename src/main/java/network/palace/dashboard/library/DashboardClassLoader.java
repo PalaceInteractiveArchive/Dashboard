@@ -1,4 +1,4 @@
-package network.palace.library;
+package network.palace.dashboard.library;
 
 import java.net.URL;
 import java.net.URLClassLoader;

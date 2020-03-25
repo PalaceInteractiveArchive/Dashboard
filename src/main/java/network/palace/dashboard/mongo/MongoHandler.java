@@ -524,7 +524,7 @@ public class MongoHandler {
                 player.setMentions(settings.getBoolean("mentions"));
                 player.setNewGuest(!doc.getBoolean("tutorial"));
                 if (!afterRestart) dashboard.addPlayer(player);
-                dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
+                dashboard.getLogger().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
                 dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
                 if (!afterRestart && rank.getRankId() >= Rank.CHARACTER.getRankId()) {

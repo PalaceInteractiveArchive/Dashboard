@@ -19,7 +19,6 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.utils.*;
 import network.palace.dashboard.utils.chat.JaroWinkler;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class Dashboard {
     @Getter public final String version;
@@ -68,8 +68,6 @@ public class Dashboard {
     @Getter @Setter private Forum forum;
     @Getter @Setter private Random random;
     @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
-    @Getter @Setter private Logger errors = Logger.getLogger("Dashboard-Errors");
-    @Getter @Setter private Logger playerLog = Logger.getLogger("Dashboard-Players");
     private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
@@ -110,9 +108,11 @@ public class Dashboard {
     public void loadMaintenanceSettings() {
         if (maintenance) {
             maintenanceWhitelist.clear();
+            System.out.println("Loading list of staff members for maintenance mode...");
             List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.BUILDER,
                     Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER, Rank.DIRECTOR);
             maintenanceWhitelist.addAll(staff);
+            System.out.println("Finished loading staff member list for maintenance mode!");
         }
     }
 

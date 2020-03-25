@@ -142,7 +142,7 @@ public class InventoryUtil {
                     cachedInventories.put(uuid, cache);
                 }
             } catch (Exception e) {
-                dashboard.getLogger().error("An exception occurred while parsing inventories.txt - " + e.getMessage());
+                dashboard.getLogger().severe("An exception occurred while parsing inventories.txt - " + e.getMessage());
                 e.printStackTrace();
             }
         }

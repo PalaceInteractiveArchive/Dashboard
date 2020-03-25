@@ -360,7 +360,7 @@ public class ServerUtil {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
+            dashboard.getLogger().severe("Error loading servers, shutting Dashboard!");
             System.exit(0);
         }
     }

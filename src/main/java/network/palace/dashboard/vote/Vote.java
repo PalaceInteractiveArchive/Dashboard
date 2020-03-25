@@ -1,6 +1,6 @@
 package network.palace.dashboard.vote;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 /**
  * Created by Marc on 1/15/17.
@@ -38,16 +38,17 @@ public class Vote {
         this.timeStamp = timeStamp;
     }
 
-    private static String getTimestamp(JSONObject object) {
+    private static String getTimestamp(JsonObject object) {
         try {
-            return Long.toString(object.getLong("timestamp"));
+            return Long.toString(object.get("timestamp").getAsLong());
         } catch (Exception e) {
-            return object.getString("timestamp");
+            return object.get("timestamp").getAsString();
         }
     }
 
-    public Vote(JSONObject jsonObject) {
-        this(jsonObject.getString("serviceName"), jsonObject.getString("username"), jsonObject.getString("address"), getTimestamp(jsonObject));
+    public Vote(JsonObject jsonObject) {
+        this(jsonObject.get("serviceName").getAsString(), jsonObject.get("username").getAsString(),
+                jsonObject.get("address").getAsString(), getTimestamp(jsonObject));
     }
 
     @Override
@@ -132,12 +133,12 @@ public class Vote {
         return timeStamp;
     }
 
-    public JSONObject serialize() {
-        JSONObject ret = new JSONObject();
-        ret.put("serviceName", serviceName);
-        ret.put("username", username);
-        ret.put("address", address);
-        ret.put("timestamp", timeStamp);
+    public JsonObject serialize() {
+        JsonObject ret = new JsonObject();
+        ret.addProperty("serviceName", serviceName);
+        ret.addProperty("username", username);
+        ret.addProperty("address", address);
+        ret.addProperty("timestamp", timeStamp);
         return ret;
     }
 
