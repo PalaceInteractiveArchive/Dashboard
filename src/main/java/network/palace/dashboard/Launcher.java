@@ -7,7 +7,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import jline.console.ConsoleReader;
 import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
-import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.log.ForwardLogHandler;
 import network.palace.dashboard.log.LoggerOutputStream;
 import network.palace.dashboard.log.TerminalConsoleWriterThread;
@@ -132,11 +131,11 @@ public class Launcher {
         dashboard.setVoteUtil(new VoteUtil());
         dashboard.setShowUtil(new ShowUtil());
         dashboard.setGuideUtil(new GuideUtil());
-        try {
-            dashboard.setForum(new Forum());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            dashboard.setForum(new Forum());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         dashboard.setupShowReminder();
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
