@@ -295,7 +295,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 case 24: {
                     PacketPlayerDisconnect packet = new PacketPlayerDisconnect().fromJSON(object);
                     dashboard.logout(packet.getUniqueId());
-                    dashboard.getLogger().info("Removing Player Object for UUID " + packet.getUniqueId() + " Source: Player Disconnect");
                     break;
                 }
                 /*
@@ -685,7 +684,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getBungeeID().equals(uuid) && !players.contains(tp.getUniqueId())) {
                             dashboard.logout(tp.getUniqueId());
-                            dashboard.getLogger().info("Removing Player Object for UUID " + tp.getUniqueId() + " Source: Player List Task");
+                            dashboard.getLogger().info("Player List Clean-Up: " + tp.getUsername() + "|" + tp.getUniqueId());
                         }
                     }
                     break;
@@ -728,7 +727,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         }
                     }
                     dashboard.getLogger().info("Bungee UUID updated for Bungee on " +
-                            channel.localAddress().getAddress().toString());
+                            channel.localAddress().getAddress().toString() + " to " + nid);
                     break;
                 }
                 /*
@@ -752,7 +751,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         list.add(tp);
                         dashboard.getServer(p.getServer()).changeCount(1);
                         dashboard.addPlayer(tp);
-                        dashboard.getLogger().info("New Player Object for UUID " + tp.getUniqueId() + " username " + tp.getUsername() + " Source: Player List Info packet");
+                        dashboard.getLogger().info("Player Join (BungeeJoin): " + tp.getUsername() + "|" + tp.getUniqueId());
                         dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                     }
                     dashboard.getSchedulerManager().runAsync(() -> list.forEach(p -> dashboard.getMongoHandler().login(p, true)));

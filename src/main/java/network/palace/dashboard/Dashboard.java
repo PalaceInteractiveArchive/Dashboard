@@ -250,7 +250,6 @@ public class Dashboard {
     }
 
     public void logout(UUID uuid) {
-        chatUtil.logout(uuid);
         Player player = getPlayer(uuid);
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {
@@ -259,7 +258,11 @@ public class Dashboard {
             }
             if (player.getTutorial() != null) player.getTutorial().cancel();
             mongoHandler.logout(player);
+            Launcher.getDashboard().getLogger().info("Player Quit: " + player.getUsername() + "|" + uuid.toString());
+        } else {
+            Launcher.getDashboard().getLogger().info("Player Quit: " + uuid.toString());
         }
+        chatUtil.logout(uuid);
         PacketKick packet = new PacketKick("See ya real soon!");
         PacketContainer kick = new PacketContainer(uuid, packet.getJSON().toString());
         for (Object o : WebSocketServerHandler.getGroup()) {
