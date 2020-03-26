@@ -161,7 +161,7 @@ public class ChatUtil {
         UUID uuid = packet.getUniqueId();
         Player player = dashboard.getPlayer(uuid);
         String message = packet.getMessage();
-        dashboard.getLogger().info((player == null ? "PLAYER IS NULL " : "") + "CHAT MESSAGE FROM " + uuid.toString() + ": '" + message + "'");
+        dashboard.getLogger().info((player == null ? "PLAYER IS NULL " : "") + "(" + player.getUsername() + "|" + uuid.toString() + "): '" + message + "'");
 
         if (player == null) return;
         if (player.isNewGuest() && !message.startsWith("/")) return;

@@ -444,14 +444,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                                         ") has connected to dashboard.");
                             }
-                            if (name.startsWith("Hub")) {
-                                new Timer().schedule(new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        dashboard.getServerUtil().runLobbyDataTask();
-                                    }
-                                }, 5000);
-                            }
                             break;
                         }
                     }
@@ -469,12 +461,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (tp != null) {
                         username = tp.getUsername();
                         uuid = tp.getUniqueId();
-                        tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods!\n" +
+                        tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods.\n" +
                                 ChatColor.AQUA + "You have been temporarily banned for 3 Days.\n" + ChatColor.YELLOW +
                                 "If you believe this was a mistake, send an appeal at " +
                                 "https://palnet.us/appeal.");
                     }
-                    Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "dashboard");
+                    Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "Dashboard");
                     dashboard.getMongoHandler().banPlayer(uuid, ban);
                     dashboard.getModerationUtil().announceBan(ban);
                     break;
