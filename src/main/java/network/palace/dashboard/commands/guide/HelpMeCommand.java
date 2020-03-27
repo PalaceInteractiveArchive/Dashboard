@@ -16,7 +16,7 @@ public class HelpMeCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        if (args.length < 1) {
+        if (args.length < 1 || label.equalsIgnoreCase("help")) {
             player.sendMessage(ChatColor.AQUA + "To get help, explain what you need help with:");
             player.sendMessage(ChatColor.AQUA + "/helpme [Reason]");
             return;
