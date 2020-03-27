@@ -40,6 +40,11 @@
     "version": "2.12.1"
   },
   {
+    "groupId": "org.json",
+    "artifactId": "json",
+    "version": "20190722"
+  },
+  {
     "groupId": "io.socket",
     "artifactId": "socket.io-client",
     "version": "0.8.3"
