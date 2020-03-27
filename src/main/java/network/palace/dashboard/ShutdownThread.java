@@ -25,7 +25,7 @@ public class ShutdownThread extends Thread {
     @Override
     public void run() {
         Dashboard dashboard = Launcher.getDashboard();
-        dashboard.getLogger().warn("Shutting down Dashboard...");
+        dashboard.getLogger().warning("Shutting down Dashboard...");
         for (Player p : dashboard.getOnlinePlayers()) {
             if (!p.getChannel().equalsIgnoreCase("all")) {
                 p.setChannel("all");

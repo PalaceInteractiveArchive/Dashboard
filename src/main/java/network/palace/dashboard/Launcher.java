@@ -4,9 +4,13 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import jline.console.ConsoleReader;
 import lombok.Getter;
 import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
+import network.palace.dashboard.log.ForwardLogHandler;
+import network.palace.dashboard.log.LoggerOutputStream;
+import network.palace.dashboard.log.TerminalConsoleWriterThread;
 import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
 import network.palace.dashboard.scheduler.SchedulerManager;
@@ -17,16 +21,19 @@ import network.palace.dashboard.server.WebSocketServerInitializer;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.*;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.*;
+import java.util.logging.Handler;
 
 /**
  * @author Innectic
@@ -35,29 +42,53 @@ import java.util.TimerTask;
 public class Launcher {
 
     @Getter private static Dashboard dashboard;
+    private ConsoleReader reader;
+    @Getter private static org.apache.logging.log4j.Logger packetLogger;
 
     public Launcher() {
+        System.out.println("Launching Dashboard with " + getClass().getClassLoader().getClass().getSimpleName());
         dashboard = new Dashboard();
 
-        dashboard.setStartTime(System.currentTimeMillis());
-        PatternLayout layout = new PatternLayout("[%d{HH:mm:ss}] [%p] - %m%n");
-        dashboard.getLogger().addAppender(new ConsoleAppender(layout));
+        /* Configure Logging */
         try {
-            dashboard.getLogger().addAppender(new FileAppender(layout, "dashboard.log", true));
+            // Have ConsoleReader listen to System.in and System.out
+            reader = new ConsoleReader(System.in, System.out);
+            reader.setExpandEvents(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            dashboard.getErrors().addAppender(new FileAppender(layout, "error.log", true));
-        } catch (IOException e) {
-            ErrorUtil.logError("Error opening error.log", e);
+
+        // Pass to logs instead of directly to standard output
+        java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
+        global.setUseParentHandlers(false);
+        for (Handler handler : global.getHandlers()) {
+            global.removeHandler(handler);
         }
-        try {
-            dashboard.getPlayerLog().addAppender(new FileAppender(layout, "players.log", true));
-        } catch (IOException e) {
-            ErrorUtil.logError("Error opening players.log", e);
+        global.addHandler(new ForwardLogHandler());
+
+        // Output this.reader to System.out
+        new TerminalConsoleWriterThread(System.out, this.reader).start();
+
+        // Configure RootLogger to output as System.out and System.err
+        Logger logger = (Logger) LogManager.getRootLogger();
+        for (Appender appender : logger.getAppenders().values()) {
+            if (appender instanceof ConsoleAppender) {
+                logger.removeAppender(appender);
+            }
         }
-        dashboard.getLogger().info("Starting up Dashboard...");
+        System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
+        System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
+
+        // Create PacketLogger only for logging incoming/outgoing packets
+        packetLogger = LogManager.getLogger("PacketOut");
+
+        java.util.logging.Logger mongoLogger = java.util.logging.Logger.getLogger("org.mongodb.driver");
+        mongoLogger.setLevel(java.util.logging.Level.SEVERE);
+        /* Finished Configuring Logging */
+
+        dashboard.setStartTime(System.currentTimeMillis());
+        packetLogger.info("Starting up Dashboard at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Date.from(Instant.now())));
+        dashboard.getLogger().info("Starting up Dashboard at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Date.from(Instant.now())));
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         dashboard.loadConfiguration();
         try {

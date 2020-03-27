@@ -128,7 +128,7 @@ public class ModerationUtil {
                 player.sendMessage(msg);
             }
         }
-        dashboard.getLogger().warn(msg);
+        dashboard.getLogger().warning(msg);
     }
 
     public void togglePrivate(boolean enabled, String name) {

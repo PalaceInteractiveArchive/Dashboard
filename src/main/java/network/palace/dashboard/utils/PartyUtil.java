@@ -34,7 +34,7 @@ public class PartyUtil {
                 partyList.add(new Party(new JsonParser().parse(json).getAsJsonObject()));
             }
         } catch (Exception e) {
-            dashboard.getLogger().error("An exception occurred while parsing parties.txt - " + e.getMessage());
+            dashboard.getLogger().severe("An exception occurred while parsing parties.txt - " + e.getMessage());
             e.printStackTrace();
         }
         f.delete();

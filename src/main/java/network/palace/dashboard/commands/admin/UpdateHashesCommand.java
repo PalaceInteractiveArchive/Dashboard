@@ -140,6 +140,7 @@ public class UpdateHashesCommand extends DashboardCommand {
                         file.delete();
                     }
                 }
+                dir.delete();
                 player.sendMessage(ChatColor.BLUE + "Task complete");
             } catch (Exception e) {
                 e.printStackTrace();

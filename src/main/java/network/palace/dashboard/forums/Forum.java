@@ -1,7 +1,7 @@
 package network.palace.dashboard.forums;
 
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.chat.ClickEvent;
@@ -20,16 +20,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Marc on 12/12/16.
  */
 public class Forum {
-    private BoneCP connectionPool = null;
+    //    private BoneCP connectionPool = null;
+    private HikariDataSource connectionPool = null;
     private Random random;
 
-    public Forum() throws IOException, SQLException {
+    public Forum() throws IOException, SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.jdbc.Driver");
         initialize();
     }
 
@@ -56,23 +57,34 @@ public class Forum {
                 line = br.readLine();
             }
         }
-        BoneCPConfig config = new BoneCPConfig();
+
+        // Begin configuration of Hikari DataSource
+        HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
         config.setUsername(username);
         config.setPassword(password);
-        config.setMinConnectionsPerPartition(3);
-        config.setMaxConnectionsPerPartition(30);
-        config.setPartitionCount(1);
-        config.setIdleConnectionTestPeriod(300, TimeUnit.SECONDS);
-        connectionPool = new BoneCP(config);
+
+        // See: https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
+        config.addDataSourceProperty("rewriteBatchedStatements", "true");
+        config.addDataSourceProperty("cacheResultSetMetadata", "true");
+        config.addDataSourceProperty("cacheServerConfiguration", "true");
+        config.addDataSourceProperty("elideSetAutoCommits", "true");
+        config.addDataSourceProperty("maintainTimeStats", "false");
+
+        connectionPool = new HikariDataSource(config);
     }
 
     public boolean isConnected() {
-        return connectionPool != null && !connectionPool.getDbIsDown().get();
+        return connectionPool != null && connectionPool.isRunning();
     }
 
     public void stop() {
-        connectionPool.shutdown();
+        connectionPool.close();
     }
 
     public void linkAccount(Player player, String email) {

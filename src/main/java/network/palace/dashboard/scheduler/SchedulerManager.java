@@ -1,13 +1,15 @@
 package network.palace.dashboard.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import network.palace.dashboard.utils.ErrorUtil;
+import network.palace.dashboard.Launcher;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 /**
  * Created by Marc on 7/15/16
@@ -31,7 +33,10 @@ public class SchedulerManager {
         try {
             executor.submit(runnable);
         } catch (RejectedExecutionException e) {
-            ErrorUtil.logError("Error scheduling async task in SchedulerManager", e);
+//            e.printStackTrace();
+            LogRecord rec = new LogRecord(Level.SEVERE, "Error scheduling async task in ScheduleManager");
+            rec.setThrown(e);
+            Launcher.getDashboard().getLogger().log(rec);
         }
     }
 
