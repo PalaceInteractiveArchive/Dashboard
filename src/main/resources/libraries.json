@@ -60,6 +60,36 @@
     "version": "2.15"
   },
   {
+    "groupId": "com.squareup.okhttp3",
+    "artifactId": "okhttp",
+    "version": "3.13.1"
+  },
+  {
+    "groupId": "com.squareup.okhttp3",
+    "artifactId": "logging-interceptor",
+    "version": "3.13.1"
+  },
+  {
+    "groupId": "com.squareup.okio",
+    "artifactId": "okio",
+    "version": "1.13.0"
+  },
+  {
+    "groupId": "com.squareup.retrofit2",
+    "artifactId": "retrofit",
+    "version": "2.5.0"
+  },
+  {
+    "groupId": "com.squareup.retrofit2",
+    "artifactId": "converter-moshi",
+    "version": "2.5.0"
+  },
+  {
+    "groupId": "com.squareup.moshi",
+    "artifactId": "moshi",
+    "version": "1.9.2"
+  },
+  {
     "groupId": "org.slf4j",
     "artifactId": "slf4j-api",
     "version": "1.7.2"
@@ -83,16 +113,6 @@
     "groupId": "io.socket",
     "artifactId": "engine.io-client",
     "version": "0.8.3"
-  },
-  {
-    "groupId": "com.squareup.okhttp3",
-    "artifactId": "okhttp",
-    "version": "3.5.0"
-  },
-  {
-    "groupId": "com.squareup.okio",
-    "artifactId": "okio",
-    "version": "1.11.0"
   },
   {
     "groupId": "org.mongodb",
