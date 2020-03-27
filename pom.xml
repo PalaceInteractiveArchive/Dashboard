@@ -179,8 +179,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.googlecode.json-simple</include>
-                                    <!--                                    <include>org.apache.logging.log4j</include>-->
-                                    <!--                                    <include>org.slf4j</include>-->
                                 </includes>
                             </artifactSet>
                         </configuration>
