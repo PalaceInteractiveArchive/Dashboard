@@ -480,7 +480,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     List<String> tags = packet.getTags();
                     String source = packet.getSource();
                     Player player = dashboard.getPlayer(uuid);
-                    player.send(new PacketPlayerRank(uuid, rank, tags));
+                    if (player != null) player.send(new PacketPlayerRank(uuid, rank, tags));
 
                     dashboard.getSchedulerManager().runAsync(() -> {
                         String name;
