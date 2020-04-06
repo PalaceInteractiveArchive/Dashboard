@@ -8,6 +8,7 @@ import network.palace.dashboard.chat.ComponentBuilder;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
+import network.palace.dashboard.handlers.Server;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
@@ -45,6 +46,7 @@ public class MultiShowCommand extends DashboardCommand {
                             }
                         }
                         dashboard.getModerationUtil().sendMessage(ChatColor.translateAlternateColorCodes('&', "&aAttempting to start &b" + showName + " &aon " + String.join("&a, &b", servers) + "&a."));
+                        break;
                     case "stop":
                         PacketShowStop stopPacket = new PacketShowStop(args[1]);
                         for (Object o : WebSocketServerHandler.getGroup()) {
@@ -56,6 +58,7 @@ public class MultiShowCommand extends DashboardCommand {
                             }
                         }
                         dashboard.getModerationUtil().sendMessage(ChatColor.translateAlternateColorCodes('&', "&aAttempting to stop &b" + showName + " &aon " + String.join("&a, &b", servers) + "&a."));
+                        break;
                     default:
                         player.sendMessage(ChatColor.GREEN + "MultiShow Commands:\n" + ChatColor.AQUA + "- /multishow start [show] [server] " +
                                 ChatColor.GREEN + "- Starts the specified show on all instances of the specified server\n" + ChatColor.AQUA + "- /multishow stop [show] [server] " +
@@ -72,11 +75,12 @@ public class MultiShowCommand extends DashboardCommand {
                 ChatColor.GREEN + "- Starts the specified show on all instances of the specified server\n" + ChatColor.AQUA + "- /multishow stop [show] [server] " +
                 ChatColor.GREEN + "- Stops the specified show on all instances of the specified server\n" + ChatColor.AQUA + "- /multishow help " +
                 ChatColor.GREEN + "- View this help menu");
+
     }
 
     private boolean exists(String s) {
-        for (String server : Launcher.getDashboard().getJoinServers()) {
-            if (server.equalsIgnoreCase(s)) {
+        for (Server server : Launcher.getDashboard().getServers()) {
+            if (server.getName().equalsIgnoreCase(s)) {
                 return true;
             }
         }
