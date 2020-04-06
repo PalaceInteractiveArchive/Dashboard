@@ -16,7 +16,7 @@ public class PacketShowStop extends BasePacket {
     }
 
     public PacketShowStop(String showName) {
-        this.id = PacketID.Park.SHOW_START.getID();
+        this.id = PacketID.Park.SHOW_STOP.getID();
         this.showName = showName;
     }
 
