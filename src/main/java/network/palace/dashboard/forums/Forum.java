@@ -293,7 +293,7 @@ public class Forum {
                 return 4;
             case MANAGER:
                 return 33;
-            case ADMIN:
+            case LEAD:
                 return 7;
             case DEVELOPER:
                 return 8;
