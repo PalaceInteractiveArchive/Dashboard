@@ -110,7 +110,7 @@ public class Dashboard {
             maintenanceWhitelist.clear();
             System.out.println("Loading list of staff members for maintenance mode...");
             List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.BUILDER,
-                    Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER, Rank.DIRECTOR);
+                    Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.LEAD, Rank.MANAGER, Rank.DIRECTOR);
             maintenanceWhitelist.addAll(staff);
             System.out.println("Finished loading staff member list for maintenance mode!");
         }

@@ -72,7 +72,7 @@ public class SiteUtil implements HttpHandler {
                         case DEVELOPER:
                             developer.add(tp.getUsername());
                             break;
-                        case ADMIN:
+                        case LEAD:
                             admin.add(tp.getUsername());
                             break;
                         case MANAGER:
@@ -133,7 +133,7 @@ public class SiteUtil implements HttpHandler {
                 JsonObject obj = new JsonObject();
                 obj.addProperty("title", "Admin");
                 obj.addProperty("text", names.toString());
-                obj.addProperty("color", getColor(Rank.ADMIN));
+                obj.addProperty("color", getColor(Rank.LEAD));
                 array.add(obj);
             }
             if (!developer.isEmpty()) {
@@ -251,7 +251,7 @@ public class SiteUtil implements HttpHandler {
 
     private String getColor(Rank rank) {
         switch (rank) {
-            case ADMIN:
+            case LEAD:
             case MANAGER:
             case DIRECTOR:
                 return "#FF5050";

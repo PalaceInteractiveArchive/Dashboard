@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>network.palace</groupId>
     <artifactId>Dashboard</artifactId>
-    <version>2.2.8</version>
+    <version>2.2.9</version>
 
     <repositories>
         <repository>
