@@ -3,14 +3,10 @@ package network.palace.dashboard.commands.staff;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
-import network.palace.dashboard.chat.ClickEvent;
-import network.palace.dashboard.chat.ComponentBuilder;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
-import network.palace.dashboard.packets.audio.PacketContainer;
-import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.park.PacketShowStart;
 import network.palace.dashboard.packets.park.PacketShowStop;
@@ -80,7 +76,7 @@ public class MultiShowCommand extends DashboardCommand {
 
     private boolean exists(String s) {
         for (Server server : Launcher.getDashboard().getServers()) {
-            if (server.getName().equalsIgnoreCase(s)) {
+            if (server.getName().startsWith(s)) {
                 return true;
             }
         }
