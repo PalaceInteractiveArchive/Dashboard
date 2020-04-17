@@ -125,7 +125,7 @@ public class Server {
             // If queue was previously off, turn it on
             if (startQueue == -1) {
                 startQueue = System.currentTimeMillis();
-                Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN + "Server queue " +
+                System.out.println(ChatColor.GREEN + "Server queue " +
                         ChatColor.YELLOW + "enabled " + ChatColor.GREEN + "for " + ChatColor.YELLOW + getName());
             }
             joinQueue.add(player);
@@ -143,7 +143,7 @@ public class Server {
                 // If queue is empty and has existed for at least 20 seconds, turn it off
                 if (startQueue != -1 && System.currentTimeMillis() - startQueue > 20000) {
                     startQueue = -1;
-                    Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN + "Server queue " +
+                    System.out.println(ChatColor.GREEN + "Server queue " +
                             ChatColor.RED + "disabled " + ChatColor.GREEN + "for " + ChatColor.YELLOW + getName());
                 }
                 return false;
