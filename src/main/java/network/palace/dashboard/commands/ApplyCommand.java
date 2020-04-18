@@ -9,7 +9,7 @@ public class ApplyCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        PacketLink packet = new PacketLink(player.getUniqueId(), "https://palnet.us/apply", "Click here to apply",
+        PacketLink packet = new PacketLink(player.getUniqueId(), "https://palnet.us/apply", "Click here to see what positions we have open!",
                 ChatColor.YELLOW, true);
         player.send(packet);
     }
