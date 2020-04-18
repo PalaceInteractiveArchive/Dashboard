@@ -1,16 +1,16 @@
 package network.palace.dashboard.commands;
 
-import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.*;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.packets.dashboard.PacketLink;
 
 public class ApplyCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        PacketLink packet = new PacketLink(player.getUniqueId(), "https://palnet.us/apply", "Click here to see what positions we have open!",
-                ChatColor.YELLOW, true);
-        player.send(packet);
+        player.sendMessage(new ComponentBuilder("\nClick to see what positions we have available!\n")
+        .color(ChatColor.YELLOW).underlined(false).bold(true)
+        .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://palnet.us/apply"))
+        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, "Click me")).create());
     }
 }
