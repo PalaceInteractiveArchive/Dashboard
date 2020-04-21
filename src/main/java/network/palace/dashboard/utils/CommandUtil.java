@@ -88,6 +88,7 @@ public class CommandUtil {
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
         /* General */
+        register("apply", new ApplyCommand());
         register("audio", new AudioCommand());
         register("bug", new BugCommand());
         register("discord", new DiscordCommand());
