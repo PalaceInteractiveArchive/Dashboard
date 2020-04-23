@@ -103,6 +103,7 @@ public class CommandUtil {
         register("party", new PartyCommand());
         register("punishments", new PunishmentsCommand());
         register("reply", new ReplyCommand());
+        register("rules", new RulesCommand());
         register("social", new SocialCommand());
         register("store", new StoreCommand());
         register("uptime", new UptimeCommand());
