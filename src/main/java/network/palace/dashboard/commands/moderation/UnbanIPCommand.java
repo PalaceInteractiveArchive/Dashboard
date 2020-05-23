@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class UnbanIPCommand extends DashboardCommand {
 
     public UnbanIPCommand() {
-        super(Rank.MOD);
+        super(Rank.LEAD);
         aliases = Arrays.asList("pardonip", "pardon-ip");
     }
 
