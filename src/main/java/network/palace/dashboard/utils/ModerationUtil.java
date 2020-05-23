@@ -78,8 +78,41 @@ public class ModerationUtil {
     }
 
     public void announceBan(AddressBan ban) {
-        sendMessage(ChatColor.GREEN + "IP " + ban.getAddress() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
-                verifySource(ban.getSource()) + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason());
+        Dashboard dashboard = Launcher.getDashboard();
+        String ipMessage = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                "IP " + ban.getAddress() + ChatColor.RED + " was banned by " + ChatColor.GREEN + verifySource(ban.getSource())
+                + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason();
+        String blockMessage = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                "IP X.X.X.X" + ChatColor.RED + " was banned by " + ChatColor.GREEN + verifySource(ban.getSource())
+                + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason();
+        for (Player player : dashboard.getOnlinePlayers()) {
+            int id = player.getRank().getRankId();
+            if (id < Rank.TRAINEE.getRankId()) continue;
+            if (id < Rank.LEAD.getRankId()) {
+                player.sendMessage(blockMessage);
+            } else {
+                player.sendMessage(ipMessage);
+            }
+        }
+        dashboard.getLogger().warning(ipMessage);
+    }
+
+    public void announceUnban(AddressBan ban) {
+        Dashboard dashboard = Launcher.getDashboard();
+        String ipMessage = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                "IP " + ban.getAddress() + ChatColor.RED + " has been unbanned by " + ChatColor.GREEN + verifySource(ban.getSource());
+        String blockMessage = ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                "IP X.X.X.X" + ChatColor.RED + " has been unbanned by " + ChatColor.GREEN + verifySource(ban.getSource());
+        for (Player player : dashboard.getOnlinePlayers()) {
+            int id = player.getRank().getRankId();
+            if (id < Rank.TRAINEE.getRankId()) continue;
+            if (id < Rank.LEAD.getRankId()) {
+                player.sendMessage(blockMessage);
+            } else {
+                player.sendMessage(ipMessage);
+            }
+        }
+        dashboard.getLogger().warning(ipMessage);
     }
 
     public void announceBan(ProviderBan ban) {

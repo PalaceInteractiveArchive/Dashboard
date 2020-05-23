@@ -3,6 +3,7 @@ package network.palace.dashboard.commands.moderation;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.handlers.AddressBan;
 import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
@@ -25,6 +26,6 @@ public class UnbanIPCommand extends DashboardCommand {
         }
         String address = args[0];
         dashboard.getMongoHandler().unbanAddress(address);
-        dashboard.getModerationUtil().announceUnban("IP " + address, player.getUsername());
+        dashboard.getModerationUtil().announceUnban(new AddressBan(address, "", player.getUsername()));
     }
 }
