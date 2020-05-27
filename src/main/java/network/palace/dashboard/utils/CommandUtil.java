@@ -88,6 +88,7 @@ public class CommandUtil {
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
         /* General */
+        register("apply", new ApplyCommand());
         register("audio", new AudioCommand());
         register("bug", new BugCommand());
         register("discord", new DiscordCommand());
@@ -102,6 +103,7 @@ public class CommandUtil {
         register("party", new PartyCommand());
         register("punishments", new PunishmentsCommand());
         register("reply", new ReplyCommand());
+        register("rules", new RulesCommand());
         register("social", new SocialCommand());
         register("store", new StoreCommand());
         register("uptime", new UptimeCommand());
