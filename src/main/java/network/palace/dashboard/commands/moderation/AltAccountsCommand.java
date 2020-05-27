@@ -6,6 +6,7 @@ import network.palace.dashboard.chat.*;
 import network.palace.dashboard.handlers.*;
 import org.bson.Document;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class AltAccountsCommand extends DashboardCommand {
 
     public AltAccountsCommand() {
         super(Rank.TRAINEE);
-        aliases = Collections.singletonList("ipseen");
+        aliases = Arrays.asList("alts", "ipseen");
     }
 
     @Override
