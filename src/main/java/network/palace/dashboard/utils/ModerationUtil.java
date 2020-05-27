@@ -78,8 +78,25 @@ public class ModerationUtil {
     }
 
     public void announceBan(AddressBan ban) {
-        sendMessage(ChatColor.GREEN + "IP " + ban.getAddress() + ChatColor.RED + " was banned by " + ChatColor.GREEN +
-                verifySource(ban.getSource()) + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason());
+        sendRestrictedMessage(
+                ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                        "IP " + ban.getAddress() + ChatColor.RED + " was banned by " + ChatColor.GREEN + verifySource(ban.getSource())
+                        + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason(),
+                ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                        "IP X.X.X.X" + ChatColor.RED + " was banned by " + ChatColor.GREEN + verifySource(ban.getSource())
+                        + ChatColor.RED + " Reason: " + ChatColor.GREEN + ban.getReason(),
+                Rank.LEAD
+        );
+    }
+
+    public void announceUnban(AddressBan ban) {
+        sendRestrictedMessage(
+                ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                        "IP " + ban.getAddress() + ChatColor.RED + " has been unbanned by " + ChatColor.GREEN + verifySource(ban.getSource()),
+                ChatColor.WHITE + "[" + ChatColor.RED + "Dashboard" + ChatColor.WHITE + "] " + ChatColor.GREEN +
+                        "IP X.X.X.X" + ChatColor.RED + " has been unbanned by " + ChatColor.GREEN + verifySource(ban.getSource()),
+                Rank.LEAD
+        );
     }
 
     public void announceBan(ProviderBan ban) {
@@ -131,6 +148,20 @@ public class ModerationUtil {
         dashboard.getLogger().warning(msg);
     }
 
+    public void sendRestrictedMessage(String fullMessage, String blockedMessage, Rank cutoffRank) {
+        Dashboard dashboard = Launcher.getDashboard();
+        for (Player player : dashboard.getOnlinePlayers()) {
+            int id = player.getRank().getRankId();
+            if (id < Rank.TRAINEE.getRankId()) continue;
+            if (id < cutoffRank.getRankId()) {
+                player.sendMessage(blockedMessage);
+            } else {
+                player.sendMessage(fullMessage);
+            }
+        }
+        dashboard.getLogger().warning(fullMessage);
+    }
+
     public void togglePrivate(boolean enabled, String name) {
         sendMessage(ChatColor.GREEN + "Private messages have been " + (enabled ? "enabled" : ChatColor.RED +
                 "disabled" + ChatColor.GREEN) + " by " + name);
@@ -169,17 +200,31 @@ public class ModerationUtil {
     }
 
     public void announceSpamWhitelistAdd(SpamIPWhitelist whitelist) {
-        sendMessage(ChatColor.GREEN + whitelist.getAddress() + " is now whitelisted from Spam IP protection with a limit of " +
-                ChatColor.YELLOW + whitelist.getLimit() + ChatColor.GREEN + " accounts.");
+        sendRestrictedMessage(
+                ChatColor.GREEN + whitelist.getAddress() + " is now whitelisted from Spam IP protection with a limit of " +
+                        ChatColor.YELLOW + whitelist.getLimit() + ChatColor.GREEN + " accounts",
+                ChatColor.GREEN + "X.X.X.X is now whitelisted from Spam IP protection with a limit of " +
+                        ChatColor.YELLOW + whitelist.getLimit() + ChatColor.GREEN + " accounts",
+                Rank.LEAD
+        );
     }
 
     public void announceSpamWhitelistRemove(String ip) {
-        sendMessage(ChatColor.GREEN + ip + " is no longer whitelisted from Spam IP protection.");
+        sendRestrictedMessage(
+                ChatColor.GREEN + ip + " is no longer whitelisted from Spam IP protection",
+                ChatColor.GREEN + "X.X.X.X is no longer whitelisted from Spam IP protection",
+                Rank.LEAD
+        );
     }
 
     public void announceSpamIPConnect(int limit, String address) {
-        sendMessage(ChatColor.RED + "IP " + ChatColor.GREEN + address + ChatColor.RED +
-                " reached its maximum allowed player count of " + ChatColor.GREEN + limit + ChatColor.RED + " players.");
+        sendRestrictedMessage(
+                ChatColor.RED + "IP " + ChatColor.GREEN + address + ChatColor.RED +
+                        " reached its maximum allowed player count of " + ChatColor.GREEN + limit + ChatColor.RED + " players",
+                ChatColor.RED + "IP " + ChatColor.GREEN + "X.X.X.X" + ChatColor.RED +
+                        " reached its maximum allowed player count of " + ChatColor.GREEN + limit + ChatColor.RED + " players",
+                Rank.LEAD
+        );
     }
 
     public void announceSpamMessage(String username, String message) {

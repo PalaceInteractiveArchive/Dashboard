@@ -11,7 +11,7 @@ import network.palace.dashboard.handlers.Rank;
 public class BanIPCommand extends DashboardCommand {
 
     public BanIPCommand() {
-        super(Rank.MOD);
+        super(Rank.LEAD);
     }
 
     @Override
