@@ -12,7 +12,7 @@ import java.util.List;
 public class BannedProvidersCommand extends DashboardCommand {
 
     public BannedProvidersCommand() {
-        super(Rank.MOD);
+        super(Rank.LEAD);
     }
 
     @Override

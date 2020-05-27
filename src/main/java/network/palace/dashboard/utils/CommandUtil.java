@@ -56,6 +56,7 @@ public class CommandUtil {
         register("guidelist", new GuideListCommand());
         register("helpme", new HelpMeCommand());
         /* Moderation */
+        register("altaccounts", new AltAccountsCommand());
         register("ban", new BanCommand());
         register("banip", new BanIPCommand());
         register("bannedproviders", new BannedProvidersCommand());
@@ -63,7 +64,6 @@ public class CommandUtil {
         register("bseen", new BseenCommand());
         register("find", new FindCommand());
         register("ip", new IPCommand());
-        register("ipseen", new IPSeenCommand());
         register("kick", new KickCommand());
         register("modlog", new ModlogCommand());
         register("motdrl", new MotdReloadCommand());
@@ -89,6 +89,7 @@ public class CommandUtil {
         register("stafflist", new StaffListCommand());
         register("multishow", new MultiShowCommand());
         /* General */
+        register("apply", new ApplyCommand());
         register("audio", new AudioCommand());
         register("bug", new BugCommand());
         register("discord", new DiscordCommand());
@@ -103,6 +104,7 @@ public class CommandUtil {
         register("party", new PartyCommand());
         register("punishments", new PunishmentsCommand());
         register("reply", new ReplyCommand());
+        register("rules", new RulesCommand());
         register("social", new SocialCommand());
         register("store", new StoreCommand());
         register("uptime", new UptimeCommand());

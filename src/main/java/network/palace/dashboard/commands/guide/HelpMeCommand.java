@@ -27,6 +27,10 @@ public class HelpMeCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "You need to wait a little bit before sending another help request.");
             return;
         }
+        if (dashboard.getGuideUtil().overloaded()) {
+            player.sendMessage(ChatColor.AQUA + "We're currently receiving a high volume of help requests. We apologize for the inconvenience.");
+            return;
+        }
         StringBuilder request = new StringBuilder();
         for (int i = 0; i < args.length; i++) {
             request.append(args[i]);

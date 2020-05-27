@@ -11,7 +11,7 @@ import network.palace.dashboard.handlers.SpamIPWhitelist;
 public class SpamIPCommand extends DashboardCommand {
 
     public SpamIPCommand() {
-        super(Rank.COORDINATOR);
+        super(Rank.LEAD);
     }
 
     @Override
