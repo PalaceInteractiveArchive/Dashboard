@@ -84,10 +84,10 @@ public class CommandUtil {
         register("b", new BroadcastCommand());
         register("charlist", new CharListCommand());
         register("mocap", new MotionCaptureCommand());
+        register("multishow", new MultiShowCommand());
         register("server", new ServerCommand());
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
-        register("multishow", new MultiShowCommand());
         /* General */
         register("apply", new ApplyCommand());
         register("audio", new AudioCommand());
