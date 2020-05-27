@@ -233,4 +233,14 @@ public class GuideUtil {
         tp.sendMessage(player.getRank().getTagColor() + player.getUsername() + ChatColor.AQUA +
                 " has declined your announcement request.");
     }
+
+    public boolean overloaded() {
+        int count = 0;
+        long current = System.currentTimeMillis();
+        for (long sent : lastRequest.values()) {
+            if ((current - sent) <= 30 * 1000) count++;
+            if (count >= 5) break;
+        }
+        return count >= 5;
+    }
 }
