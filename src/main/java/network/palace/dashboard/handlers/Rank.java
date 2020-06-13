@@ -6,6 +6,7 @@ import network.palace.dashboard.chat.ChatColor;
 
 @AllArgsConstructor
 public enum Rank {
+    OWNER("Owner", ChatColor.RED + "Owner ", ChatColor.RED, ChatColor.YELLOW, true, 13),
     DIRECTOR("Director", ChatColor.RED + "Director ", ChatColor.RED, ChatColor.YELLOW, true, 13),
     MANAGER("Manager", ChatColor.RED + "Manager ", ChatColor.RED, ChatColor.YELLOW, true, 13),
     LEAD("Lead", ChatColor.GOLD + "Lead ", ChatColor.GOLD, ChatColor.YELLOW, true, 13),
@@ -28,12 +29,12 @@ public enum Rank {
     DWELLER("Dweller", ChatColor.AQUA + "Dweller ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
     SETTLER("Settler", ChatColor.GRAY + "", ChatColor.DARK_AQUA, ChatColor.WHITE, false, 1);
 
-    @Getter private String name;
-    @Getter private String scoreboardName;
-    @Getter private ChatColor tagColor;
-    @Getter private ChatColor chatColor;
-    @Getter private boolean isOp;
-    @Getter private int rankId;
+    @Getter private final String name;
+    @Getter private final String scoreboardName;
+    @Getter private final ChatColor tagColor;
+    @Getter private final ChatColor chatColor;
+    @Getter private final boolean isOp;
+    @Getter private final int rankId;
 
     /**
      * Get rank object from a string
