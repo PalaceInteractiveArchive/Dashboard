@@ -86,6 +86,7 @@ public class CommandUtil {
         register("mocap", new MotionCaptureCommand());
         register("multishow", new MultiShowCommand());
         register("server", new ServerCommand());
+        register("sglist", new SGListCommand());
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
         /* General */
