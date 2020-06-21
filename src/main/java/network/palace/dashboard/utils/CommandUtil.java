@@ -108,6 +108,7 @@ public class CommandUtil {
         register("social", new SocialCommand());
         register("store", new StoreCommand());
         register("uptime", new UptimeCommand());
+        register("vqjoin", new VirtualQueueJoinCommand());
         register("whereami", new WhereAmICommand());
     }
 

@@ -28,6 +28,7 @@ import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.packets.inventory.PacketInventoryContent;
 import network.palace.dashboard.packets.inventory.Resort;
 import network.palace.dashboard.packets.park.*;
+import network.palace.dashboard.packets.park.queue.*;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
@@ -44,8 +45,7 @@ import java.util.stream.Collectors;
  * @since 6/15/15
  */
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
-
-    private static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     private WebSocketServerHandshaker handshaker;
 
@@ -868,6 +868,56 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             channel.send(new PacketShowRequestResponse(packet.getRequestId()));
                         }
                     });
+                    break;
+                }
+                /*
+                 * Create VirtualQueue
+                 */
+                case 81: {
+                    CreateQueuePacket packet = new CreateQueuePacket().fromJSON(object);
+                    if (!channel.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) return;
+                    Server server = dashboard.getServer(channel.getServerName(), true);
+                    if (server != null) dashboard.getParkQueueManager().createQueue(packet, server);
+                    break;
+                }
+                /*
+                 * Remove VirtualQueue
+                 */
+                case 82: {
+                    RemoveQueuePacket packet = new RemoveQueuePacket().fromJSON(object);
+                    if (!channel.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) return;
+                    Server server = dashboard.getServer(channel.getServerName(), true);
+                    if (server != null) dashboard.getParkQueueManager().removeQueue(packet, server);
+                    break;
+                }
+                /*
+                 * Update VirtualQueue
+                 */
+                case 83: {
+                    UpdateQueuePacket packet = new UpdateQueuePacket().fromJSON(object);
+                    if (!channel.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) return;
+                    Server server = dashboard.getServer(channel.getServerName(), true);
+                    if (server != null) dashboard.getParkQueueManager().updateQueue(packet, server);
+                    break;
+                }
+                /*
+                 * Admit VirtualQueue
+                 */
+                case 84: {
+                    AdmitQueuePacket packet = new AdmitQueuePacket().fromJSON(object);
+                    if (!channel.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) return;
+                    Server server = dashboard.getServer(channel.getServerName(), true);
+                    if (server != null) dashboard.getParkQueueManager().admitQueue(packet, server);
+                    break;
+                }
+                /*
+                 * Announce VirtualQueue
+                 */
+                case 85: {
+                    AnnounceQueuePacket packet = new AnnounceQueuePacket().fromJSON(object);
+                    if (!channel.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) return;
+                    Server server = dashboard.getServer(channel.getServerName(), true);
+                    if (server != null) dashboard.getParkQueueManager().announceQueue(packet, server);
                     break;
                 }
             }
