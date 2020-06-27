@@ -48,7 +48,7 @@ public class ParkQueueManager {
 
         Launcher.getDashboard().sendToAllConnections(channel -> {
             Server s = Launcher.getDashboard().getServer(channel.getServerName());
-            return s != null && s.isPark();
+            return s != null && !s.getUniqueId().equals(server.getUniqueId()) && s.isPark();
         }, Collections.singletonList(packet));
     }
 
