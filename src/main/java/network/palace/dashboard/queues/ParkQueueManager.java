@@ -9,10 +9,7 @@ import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.park.queue.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class ParkQueueManager {
     private final List<VirtualQueue> queues = new ArrayList<>();
@@ -48,6 +45,11 @@ public class ParkQueueManager {
         queues.add(queue);
         Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN + "A virtual queue (" + queue.getName() +
                 ChatColor.GREEN + ") has been created on " + ChatColor.AQUA + server.getName());
+
+        Launcher.getDashboard().sendToAllConnections(channel -> {
+            Server s = Launcher.getDashboard().getServer(channel.getServerName());
+            return s != null && s.isPark();
+        }, Collections.singletonList(packet));
     }
 
     /**
@@ -64,6 +66,11 @@ public class ParkQueueManager {
             Launcher.getDashboard().getModerationUtil().sendMessage(ChatColor.GREEN + "A virtual queue (" + queue.getName() +
                     ChatColor.GREEN + ") has been removed from " + ChatColor.AQUA + server.getName());
             queues.remove(queue);
+
+            Launcher.getDashboard().sendToAllConnections(channel -> {
+                Server s = Launcher.getDashboard().getServer(channel.getServerName());
+                return s != null && s.isPark();
+            }, Collections.singletonList(packet));
         }
     }
 
@@ -130,5 +137,11 @@ public class ParkQueueManager {
             if (queue.getId().equals(id)) return queue;
         }
         return null;
+    }
+
+    public void serverStartup(Server server) {
+        List<BasePacket> packets = new ArrayList<>();
+        queues.forEach(q -> packets.add(new CreateQueuePacket(q.getId(), q.getName(), q.getHoldingArea())));
+        Launcher.getDashboard().sendToAllConnections(channel -> channel.getServerName().equals(server.getName()), packets);
     }
 }

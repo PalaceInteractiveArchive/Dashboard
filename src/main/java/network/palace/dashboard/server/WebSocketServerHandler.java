@@ -443,6 +443,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                                         ") has connected to dashboard.");
                             }
+                            if (s.isPark()) dashboard.getParkQueueManager().serverStartup(s);
                             break;
                         }
                     }
