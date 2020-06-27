@@ -443,7 +443,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                                         ") has connected to dashboard.");
                             }
-                            if (s.isPark()) dashboard.getParkQueueManager().serverStartup(s);
+                            if (s.isPark()) dashboard.getParkQueueManager().serverConnect(s);
                             break;
                         }
                     }
@@ -979,6 +979,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 s.setGameState(GameState.LOBBY);
                 s.setGameNeedsUpdate(true);
                 s.setArcade(false);
+                if (s.isPark()) {
+                    dashboard.getParkQueueManager().serverDisconnect(s);
+                }
                 if (name.matches(MINIGAME_REGEX)) {
                     PacketGameStatus packet = new PacketGameStatus(GameState.RESTARTING, 0, 0, name);
                     for (DashboardSocketChannel ch : Dashboard.getChannels(PacketConnectionType.ConnectionType.INSTANCE)) {

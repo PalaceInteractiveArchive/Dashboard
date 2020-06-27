@@ -139,9 +139,22 @@ public class ParkQueueManager {
         return null;
     }
 
-    public void serverStartup(Server server) {
+    public void serverConnect(Server server) {
         List<BasePacket> packets = new ArrayList<>();
-        queues.forEach(q -> packets.add(new CreateQueuePacket(q.getId(), q.getName(), q.getHoldingArea())));
-        Launcher.getDashboard().sendToAllConnections(channel -> channel.getServerName().equals(server.getName()), packets);
+        queues.forEach(q -> packets.add(new CreateQueuePacket(q.getId(), q.getName(), q.getHoldingArea(), q.getServer().getName())));
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Launcher.getDashboard().sendToAllConnections(channel -> channel.getServerName().equals(server.getName()), packets);
+            }
+        }, 15000L);
+    }
+
+    public void serverDisconnect(Server s) {
+        List<VirtualQueue> toRemove = new ArrayList<>();
+        queues.forEach(q -> {
+            if (q.getServer().getUniqueId().equals(s.getUniqueId())) toRemove.add(q);
+        });
+        toRemove.forEach(q -> removeQueue(new RemoveQueuePacket(q.getId()), s));
     }
 }
