@@ -142,12 +142,7 @@ public class ParkQueueManager {
     public void serverConnect(Server server) {
         List<BasePacket> packets = new ArrayList<>();
         queues.forEach(q -> packets.add(new CreateQueuePacket(q.getId(), q.getName(), q.getHoldingArea(), q.getServer().getName())));
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Launcher.getDashboard().sendToAllConnections(channel -> channel.getServerName().equals(server.getName()), packets);
-            }
-        }, 15000L);
+        Launcher.getDashboard().sendToAllConnections(channel -> channel.getServerName().equals(server.getName()), packets);
     }
 
     public void serverDisconnect(Server s) {
