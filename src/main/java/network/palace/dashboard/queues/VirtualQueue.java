@@ -22,6 +22,7 @@ public class VirtualQueue {
     @Getter private boolean open = false;
     // the list of players in queue
     private final LinkedList<UUID> queue = new LinkedList<>();
+    private final List<UUID> sendToServer = new ArrayList<>();
 
     @Getter @Setter private boolean updated = false;
 
@@ -44,14 +45,14 @@ public class VirtualQueue {
         ListIterator<UUID> iterator = queue.listIterator();
         UUID uuid;
         int position = 1;
-        String msg = open ? (ChatColor.GREEN + "The virtual queue " + name + " has opened! You're in position #") :
-                (ChatColor.AQUA + "The virtual queue " + name + " has been closed! You're still in line, but you will lose your place if you leave the queue.");
+        String msg = open ? (ChatColor.GREEN + "The virtual queue " + name + ChatColor.GREEN + " has opened! You're in position #") :
+                (ChatColor.AQUA + "The virtual queue " + name + ChatColor.AQUA + " has been closed! You're still in line, but you will lose your place if you leave the queue.");
         while (iterator.hasNext()) {
             uuid = iterator.next();
             position++;
             Player tp;
             if (uuid != null && ((tp = Launcher.getDashboard().getPlayer(uuid)) != null)) {
-                tp.sendMessage(msg + (open ? (msg + position) : msg));
+                tp.sendMessage(open ? (msg + position) : msg);
             }
         }
     }
@@ -67,7 +68,11 @@ public class VirtualQueue {
         }
         queue.add(player.getUniqueId());
         updated = true;
-        player.sendMessage(ChatColor.GREEN + "You joined the virtual queue " + name + "!");
+        player.sendMessage(ChatColor.GREEN + "You joined the virtual queue " + name +
+                " in position #" + getPosition(player.getUniqueId()) + "!");
+        if (getPosition(player.getUniqueId()) <= holdingArea) {
+            player.sendMessage(ChatColor.GREEN + "");
+        }
         return true;
     }
 
@@ -107,11 +112,11 @@ public class VirtualQueue {
         int position = 1;
         while (iterator.hasNext()) {
             uuid = iterator.next();
-            position++;
             Player tp;
             if (uuid != null && ((tp = Launcher.getDashboard().getPlayer(uuid)) != null)) {
                 sendPositionMessage(tp, position);
             }
+            position++;
         }
     }
 
@@ -135,5 +140,29 @@ public class VirtualQueue {
 
     public List<UUID> getMembers() {
         return new ArrayList<>(queue);
+    }
+
+    public List<UUID> getSendingToServer() {
+        return new ArrayList<>(sendToServer);
+    }
+
+    /**
+     * Mark this player as going to be sent to the server in the next timer cycle
+     *
+     * @param player the player
+     */
+    public void markAsSendingToServer(Player player) {
+        if (sendToServer.contains(player.getUniqueId())) return;
+        sendToServer.add(player.getUniqueId());
+        player.sendMessage(ChatColor.GREEN + "In " + ChatColor.AQUA + ChatColor.BOLD + "10 seconds " +
+                ChatColor.GREEN + "you will be sent to " + ChatColor.AQUA + server.getName() + ChatColor.GREEN +
+                " for the queue " + name + "...");
+    }
+
+    public void sendToServer(Player player) {
+        sendToServer.remove(player.getUniqueId());
+        player.sendMessage(ChatColor.GREEN + "Sending you to " + ChatColor.AQUA + server.getName() +
+                ChatColor.GREEN + " for the queue " + name + "...");
+        Launcher.getDashboard().getServerUtil().sendPlayer(player, server);
     }
 }
