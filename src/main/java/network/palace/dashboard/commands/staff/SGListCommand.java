@@ -9,10 +9,10 @@ import network.palace.dashboard.handlers.Rank;
 
 import java.util.*;
 
-public class CharListCommand extends DashboardCommand {
+public class SGListCommand extends DashboardCommand {
 
-    public CharListCommand() {
-        super(Rank.CHARACTER);
+    public SGListCommand() {
+        super(Rank.SPECIALGUEST);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class CharListCommand extends DashboardCommand {
         HashMap<String, List<String>> servers = new HashMap<>();
         for (Player tp : dashboard.getOnlinePlayers()) {
             if (tp == null || tp.getRank() == null || tp.getServer() == null) continue;
-            if (tp.getRank().equals(Rank.CHARACTER)) {
+            if (tp.getRank().equals(Rank.SPECIALGUEST)) {
                 String server = tp.getServer();
                 if (servers.containsKey(server)) {
                     List<String> characters = servers.remove(server);
@@ -34,11 +34,11 @@ public class CharListCommand extends DashboardCommand {
             }
         }
         if (servers.isEmpty()) {
-            player.sendMessage(ChatColor.RED + "No Characters are online right now!");
+            player.sendMessage(ChatColor.RED + "No Special Guests are online right now!");
         } else {
             List<String> msgs = new ArrayList<>();
             for (Map.Entry<String, List<String>> entry : servers.entrySet()) {
-                StringBuilder msg = new StringBuilder(ChatColor.GREEN + entry.getKey() + ": " + ChatColor.BLUE);
+                StringBuilder msg = new StringBuilder(ChatColor.GREEN + entry.getKey() + ": " + ChatColor.DARK_PURPLE);
                 List<String> list = new ArrayList<>(entry.getValue());
                 for (int i = 0; i < list.size(); i++) {
                     String tp = list.get(i);
@@ -49,7 +49,7 @@ public class CharListCommand extends DashboardCommand {
                 }
                 msgs.add(msg.toString());
             }
-            player.sendMessage(ChatColor.BLUE + "Online Characters:");
+            player.sendMessage(ChatColor.DARK_PURPLE + "Online Special Guests:");
             for (String s : msgs) {
                 player.sendMessage(s);
             }
