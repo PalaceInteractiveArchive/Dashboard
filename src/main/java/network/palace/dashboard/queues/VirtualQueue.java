@@ -90,6 +90,7 @@ public class VirtualQueue {
         int position = queue.indexOf(uuid);
         if (position >= 0) {
             queue.remove(uuid);
+            sendToServer.remove(uuid);
             updated = true;
             ListIterator<UUID> iterator = queue.listIterator(position);
             UUID playerInQueue;

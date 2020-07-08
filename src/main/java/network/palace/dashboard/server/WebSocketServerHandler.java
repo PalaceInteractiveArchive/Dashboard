@@ -921,6 +921,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (server != null) dashboard.getParkQueueManager().announceQueue(packet, server);
                     break;
                 }
+                /*
+                 * Player Join/Leave Queue
+                 */
+                case 86: {
+                    PlayerQueuePacket packet = new PlayerQueuePacket().fromJSON(object);
+                    if (!channel.getType().equals(PacketConnectionType.ConnectionType.INSTANCE)) return;
+                    Player player = dashboard.getPlayer(packet.getUuid());
+                    if (player == null) return;
+                    if (packet.isJoin()) {
+                        dashboard.getParkQueueManager().joinQueue(player, packet.getQueueId());
+                    } else {
+                        dashboard.getParkQueueManager().leaveQueue(player, packet.getQueueId());
+                    }
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -159,6 +159,12 @@ public class ParkQueueManager {
         queue.joinQueue(player);
     }
 
+    public void leaveQueue(Player player, String id) {
+        VirtualQueue queue = getQueue(id);
+        if (queue == null) return;
+        queue.leaveQueue(player, true);
+    }
+
     private VirtualQueue getQueue(String id) {
         for (VirtualQueue queue : queues) {
             if (queue.getId().equals(id)) return queue;
@@ -168,7 +174,10 @@ public class ParkQueueManager {
 
     public void serverConnect(Server server) {
         List<BasePacket> packets = new ArrayList<>();
-        queues.forEach(q -> packets.add(new CreateQueuePacket(q.getId(), q.getName(), q.getHoldingArea(), q.getServer().getName())));
+        queues.forEach(q -> {
+            packets.add(new CreateQueuePacket(q.getId(), q.getName(), q.getHoldingArea(), q.getServer().getName()));
+            packets.add(new UpdateQueuePacket(q.getId(), q.isOpen(), q.getMembers()));
+        });
         Launcher.getDashboard().sendToAllConnections(channel -> channel.getServerName().equals(server.getName()), packets);
     }
 
