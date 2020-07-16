@@ -113,7 +113,7 @@ public class StatUtil {
             points.forEach(batchPoints::point);
             influxDB.write(batchPoints);
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error logging to InfluxDB", e);
         }
     }
 }

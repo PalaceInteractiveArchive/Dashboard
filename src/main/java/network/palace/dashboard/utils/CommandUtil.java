@@ -1,5 +1,6 @@
 package network.palace.dashboard.utils;
 
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.commands.*;
 import network.palace.dashboard.commands.admin.*;
@@ -135,7 +136,7 @@ public class CommandUtil {
             return true;
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "An internal error occurred whilst executing this command.");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error processing command", e);
             return true;
         }
     }

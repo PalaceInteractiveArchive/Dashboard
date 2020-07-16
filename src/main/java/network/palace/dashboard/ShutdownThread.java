@@ -25,7 +25,7 @@ public class ShutdownThread extends Thread {
     @Override
     public void run() {
         Dashboard dashboard = Launcher.getDashboard();
-        dashboard.getLogger().warning("Shutting down Dashboard...");
+        dashboard.getLogger().warn("Shutting down Dashboard...");
         for (Player p : dashboard.getOnlinePlayers()) {
             if (!p.getChannel().equalsIgnoreCase("all")) {
                 p.setChannel("all");
@@ -66,7 +66,7 @@ public class ShutdownThread extends Thread {
             }
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error saving inventories.txt", e);
         }
         File chat = new File("chat.txt");
         try {
@@ -78,7 +78,7 @@ public class ShutdownThread extends Thread {
             }
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error saving chat.txt", e);
         }
         File parties = new File("parties.txt");
         try {
@@ -90,7 +90,7 @@ public class ShutdownThread extends Thread {
             }
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error saving parties.txt", e);
         }
         dashboard.getVoteUtil().stop();
 //        dashboard.getSqlUtil().stop();

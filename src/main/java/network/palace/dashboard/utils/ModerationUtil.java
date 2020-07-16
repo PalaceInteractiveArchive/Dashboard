@@ -64,7 +64,7 @@ public class ModerationUtil {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Launcher.getDashboard().getLogger().error("Error removing expired punishments", e);
                 }
             }
         }, 10 * 1000, 600 * 1000L);
@@ -145,7 +145,7 @@ public class ModerationUtil {
                 player.sendMessage(msg);
             }
         }
-        dashboard.getLogger().warning(msg);
+        dashboard.getLogger().warn(msg);
     }
 
     public void sendRestrictedMessage(String fullMessage, String blockedMessage, Rank cutoffRank) {
@@ -159,7 +159,7 @@ public class ModerationUtil {
                 player.sendMessage(fullMessage);
             }
         }
-        dashboard.getLogger().warning(fullMessage);
+        dashboard.getLogger().warn(fullMessage);
     }
 
     public void togglePrivate(boolean enabled, String name) {

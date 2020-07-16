@@ -58,7 +58,7 @@ public class BanCommand extends DashboardCommand {
                 }
                 dashboard.getModerationUtil().announceBan(ban);
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error processing ban", e);
             }
         });
     }

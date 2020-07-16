@@ -56,7 +56,7 @@ public class ChatUtil {
                 mutedChats.add(server);
             }
         } catch (Exception e) {
-            dashboard.getLogger().severe("An exception occurred while parsing chat.txt - " + e.getMessage());
+            dashboard.getLogger().error("An exception occurred while parsing chat.txt - " + e.getMessage());
 //            ErrorUtil.logError("Error parsing chat.txt", e);
         }
         f.delete();
@@ -73,7 +73,7 @@ public class ChatUtil {
                             ChatMessage msg = messages.pop();
                             localMessages.add(msg);
                         } catch (NoSuchElementException e2) {
-                            e2.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error logging chat", e2);
                             messages.clear();
                             break;
                         }
@@ -88,8 +88,7 @@ public class ChatUtil {
 //                    }
                 } catch (Exception e) {
                     messages.clear();
-                    e.printStackTrace();
-                    dashboard.getLogger().severe("Error logging chat: " + e.getMessage());
+                    dashboard.getLogger().error("Error logging chat", e);
                 }
             }
         }, 0, 5000);
@@ -137,7 +136,7 @@ public class ChatUtil {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading swears.txt", e);
         }
         try (BufferedReader br = new BufferedReader(new FileReader("links.txt"))) {
             String line = br.readLine();
@@ -152,7 +151,7 @@ public class ChatUtil {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading links.txt", e);
         }
     }
 

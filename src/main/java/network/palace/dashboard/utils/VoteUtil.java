@@ -36,8 +36,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Marc on 1/15/17.
@@ -91,9 +89,7 @@ public class VoteUtil {
                         if (socketAddress == null) {
                             socketAddress = new InetSocketAddress(host, port);
                         }
-                        LogRecord rec = new LogRecord(Level.SEVERE, "Votifier was not able to bind to " + socketAddress);
-                        rec.setThrown(future.cause());
-                        dashboard.getLogger().log(rec);
+                        dashboard.getLogger().info("Votifier was not able to bind to " + socketAddress);
                     }
                 });
     }
@@ -140,13 +136,11 @@ public class VoteUtil {
 
     public void onError(Channel channel, Throwable throwable) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (debug) {
-            LogRecord rec = new LogRecord(Level.SEVERE, "Unable to process vote from " + channel.remoteAddress());
-            rec.setThrown(throwable);
-            dashboard.getLogger().log(rec);
-        } else {
-            dashboard.getLogger().severe("Unable to process vote from " + channel.remoteAddress());
-        }
+//        if (debug) {
+//            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
+//        } else {
+        dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
+//        }
     }
 
     public Map<String, Key> getTokens() {
@@ -205,11 +199,11 @@ public class VoteUtil {
                         return;
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Launcher.getDashboard().getLogger().error("Error processing vote", e);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error processing vote", e);
         }
     }
 

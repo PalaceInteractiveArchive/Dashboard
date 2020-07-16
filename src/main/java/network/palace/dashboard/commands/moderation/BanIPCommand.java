@@ -61,7 +61,7 @@ public class BanIPCommand extends DashboardCommand {
                 }
                 dashboard.getModerationUtil().announceBan(ban);
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error processing ip ban", e);
             }
         });
     }

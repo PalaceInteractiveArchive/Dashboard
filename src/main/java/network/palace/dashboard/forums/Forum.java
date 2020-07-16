@@ -158,7 +158,7 @@ public class Forum {
                     .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forums.palace.network/topic/6141-link-your-minecraft-and-forum-accounts/")).create());
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error linking forum account", e);
         }
     }
 
@@ -190,12 +190,12 @@ public class Forum {
                     setForumGroupSql.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error unlinking forum account", e);
             }
             mongoHandler.unlinkForumAccount(player.getUniqueId());
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error unlinking forum account", e);
         }
         player.sendMessage(ChatColor.GREEN + "Your Minecraft and Forums accounts are no longer linked.");
     }
@@ -248,7 +248,7 @@ public class Forum {
             Launcher.getDashboard().getMongoHandler().unsetForumLinkingCode(player.getUniqueId());
         } catch (SQLException e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error confirming forum account", e);
             return;
         }
         player.sendMessage(ChatColor.GREEN + "All done! Your Minecraft and Forums accounts are now linked.");
@@ -264,7 +264,7 @@ public class Forum {
             sql.execute();
             sql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating name on forum account", e);
         }
     }
 
@@ -283,7 +283,7 @@ public class Forum {
             setForumGroupSql.execute();
             setForumGroupSql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating rank on forum account", e);
         }
     }
 

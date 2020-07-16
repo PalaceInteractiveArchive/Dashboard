@@ -163,7 +163,7 @@ public class StaffCommand extends DashboardCommand {
                     player.sendMessage(ChatColor.GOLD + "/staff force [Username] [Password] - Force-change a staff member's password");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error processing /staff", e);
             }
         });
     }

@@ -109,7 +109,7 @@ public class UpdateHashesCommand extends DashboardCommand {
                                 player.sendMessage(ChatColor.GREEN + "SHA-1 hash for " + version.getName() + " is " + hash);
                             }
                         } catch (IOException | NoSuchAlgorithmException e) {
-                            e.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error downloading resource pack", e);
                             player.sendMessage(ChatColor.RED + e.getClass().getName() + e.getMessage());
                         }
                     }
@@ -143,7 +143,7 @@ public class UpdateHashesCommand extends DashboardCommand {
                 dir.delete();
                 player.sendMessage(ChatColor.BLUE + "Task complete");
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error updating resource packs", e);
                 player.sendMessage(ChatColor.RED + "There was an error processing the resource packs!");
             }
         });

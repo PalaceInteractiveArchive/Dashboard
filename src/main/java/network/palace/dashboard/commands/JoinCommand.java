@@ -32,7 +32,7 @@ public class JoinCommand extends DashboardCommand {
                 try {
                     dashboard.getServerUtil().sendPlayerByType(player, formatName(args[0]));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Launcher.getDashboard().getLogger().error("Error sending player to server", e);
                     player.sendMessage(ChatColor.RED + "There was a problem joining that server!");
                 }
                 return;
@@ -43,7 +43,7 @@ public class JoinCommand extends DashboardCommand {
                 try {
                     dashboard.getServerUtil().sendPlayer(player, server);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Launcher.getDashboard().getLogger().error("Error sending player to server", e);
                     player.sendMessage(ChatColor.RED + "There was a problem joining that server!");
                 }
                 return;

@@ -25,14 +25,9 @@
     "version": "4.1.42.Final"
   },
   {
-    "groupId": "org.apache.logging.log4j",
-    "artifactId": "log4j-core",
-    "version": "2.12.1"
-  },
-  {
-    "groupId": "org.apache.logging.log4j",
-    "artifactId": "log4j-api",
-    "version": "2.12.1"
+    "groupId": "org.slf4j",
+    "artifactId": "slf4j-api",
+    "version": "1.7.13"
   },
   {
     "groupId": "jline",
@@ -88,11 +83,6 @@
     "groupId": "com.squareup.moshi",
     "artifactId": "moshi",
     "version": "1.9.2"
-  },
-  {
-    "groupId": "org.slf4j",
-    "artifactId": "slf4j-api",
-    "version": "1.7.2"
   },
   {
     "groupId": "org.slf4j",
