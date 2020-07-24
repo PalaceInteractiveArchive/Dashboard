@@ -32,6 +32,7 @@ import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.IPUtil;
+import org.apache.logging.log4j.Level;
 import org.influxdb.dto.Point;
 
 import java.util.*;
@@ -109,9 +110,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 return;
             }
             int id = object.get("id").getAsInt();
-//            if (id != 43) {
-//                Launcher.getPacketLogger().log(Level.DEBUG, object.toString());
-//            }
+            if (id != 43) {
+                Launcher.getPacketLogger().log(Level.DEBUG, object.toString());
+            }
             dashboard.getStatUtil().packet();
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
