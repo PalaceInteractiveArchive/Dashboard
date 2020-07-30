@@ -102,7 +102,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             try {
                 object = (JsonObject) new JsonParser().parse(request);
             } catch (Exception e) {
-                dashboard.getLogger().warning("Error processing packet [" + request + "] from " +
+                dashboard.getLogger().warn("Error processing packet [" + request + "] from " +
                         ((io.netty.channel.socket.SocketChannel) ctx).localAddress());
                 return;
             }
@@ -110,7 +110,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 return;
             }
             int id = object.get("id").getAsInt();
-            if (id != 43) Launcher.getPacketLogger().log(Level.DEBUG, object.toString());
+            if (id != 43) {
+                Launcher.getPacketLogger().log(Level.DEBUG, object.toString());
+            }
             dashboard.getStatUtil().packet();
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
@@ -516,7 +518,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getForum().updatePlayerRank(uuid, member_id, rank, player);
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error processing rank change", e);
                         }
                     });
 
@@ -770,7 +772,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         exists = dashboard.hasPlayer(uuid);
                     }
                     if (!exists)
-                        dashboard.getLogger().warning("Received request to verify player that doesn't exist " + uuid);
+                        dashboard.getLogger().warn("Received request to verify player that doesn't exist " + uuid);
                     channel.send(new PacketConfirmPlayer(uuid, exists));
                     break;
                 }
@@ -872,7 +874,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error processing incoming packet", e);
         }
     }
 
@@ -961,7 +963,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        Launcher.getDashboard().getLogger().error("WebSocket exception", cause);
         ctx.close();
     }
 
@@ -973,7 +975,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             try {
                 handleWebSocketFrame(ctx, (WebSocketFrame) msg);
             } catch (Exception e) {
-                e.printStackTrace();
+                dashboard.getLogger().error("Error reading websocket channel", e);
             }
         }
     }
@@ -991,7 +993,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dash.send(packet);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error sending packet", e);
             }
         }
     }
@@ -1002,7 +1004,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             if (socketChannel == null) return;
             socketChannel.send(packet);
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error sending inventory update", e);
         }
     }
 

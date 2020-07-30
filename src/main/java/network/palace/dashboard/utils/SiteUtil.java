@@ -245,7 +245,7 @@ public class SiteUtil implements HttpHandler {
             os.write(response.getBytes());
             os.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error responding to stafflist API", e);
         }
     }
 

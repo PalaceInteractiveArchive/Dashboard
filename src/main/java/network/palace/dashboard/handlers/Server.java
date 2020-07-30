@@ -125,7 +125,7 @@ public class Server {
             // If queue was previously off, turn it on
             if (startQueue == -1) {
                 startQueue = System.currentTimeMillis();
-                System.out.println("Server queue enabled for " + getName());
+                Launcher.getDashboard().getLogger().info("Server queue enabled for " + getName());
             }
             joinQueue.add(player);
             return joinQueue.size();
@@ -142,7 +142,7 @@ public class Server {
                 // If queue is empty and has existed for at least 20 seconds, turn it off
                 if (startQueue != -1 && System.currentTimeMillis() - startQueue > 20000) {
                     startQueue = -1;
-                    System.out.println("Server queue disabled for " + getName());
+                    Launcher.getDashboard().getLogger().info("Server queue disabled for " + getName());
                 }
                 return false;
             } else {

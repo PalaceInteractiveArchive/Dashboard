@@ -41,7 +41,7 @@ public class SlackUtil {
         try {
             s.push(webhook, msg, attachments);
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error sending slack message", e);
         }
     }
 }

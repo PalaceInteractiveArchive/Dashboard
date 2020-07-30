@@ -55,7 +55,7 @@ public class ServerCommand extends DashboardCommand {
                     }
                     player.sendMessage(ChatColor.GREEN + "All Bungees notified! Server '" + name + "' can now be joined.");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Launcher.getDashboard().getLogger().error("Error registering server", e);
                 }
             });
             return;

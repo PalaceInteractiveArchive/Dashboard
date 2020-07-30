@@ -106,7 +106,7 @@ public class BseenCommand extends DashboardCommand {
                                         .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 "/server " + server)).create());
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error processing bseen", e);
             }
         });
     }

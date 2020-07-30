@@ -19,6 +19,8 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.utils.*;
 import network.palace.dashboard.utils.chat.JaroWinkler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +32,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public class Dashboard {
     @Getter public final String version;
@@ -67,7 +68,7 @@ public class Dashboard {
 
     @Getter @Setter private Forum forum;
     @Getter @Setter private Random random;
-    @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
+    @Getter @Setter private Logger logger = LoggerFactory.getLogger(Dashboard.class);
     private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
@@ -101,19 +102,19 @@ public class Dashboard {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading dashboard config", e);
         }
     }
 
     public void loadMaintenanceSettings() {
         if (maintenance) {
             maintenanceWhitelist.clear();
-            System.out.println("Loading list of staff members for maintenance mode...");
+            logger.info("Loading list of staff members for maintenance mode...");
             List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.TRAINEETECH, Rank.MOD,
                     Rank.MEDIA, Rank.TECHNICIAN, Rank.BUILDER, Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.LEAD,
                     Rank.MANAGER, Rank.DIRECTOR, Rank.OWNER);
             maintenanceWhitelist.addAll(staff);
-            System.out.println("Finished loading staff member list for maintenance mode!");
+            logger.info("Finished loading staff member list for maintenance mode!");
         }
     }
 
@@ -137,7 +138,7 @@ public class Dashboard {
             motd = motd.replaceAll("%n%", System.getProperty("line.separator"));
             motdMaintenance = motdMaintenance.replaceAll("%n%", System.getProperty("line.separator"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading motd", e);
         }
     }
 
@@ -154,7 +155,7 @@ public class Dashboard {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading join servers", e);
         }
     }
 
@@ -372,7 +373,7 @@ public class Dashboard {
             fileInputStreamReader.read(bytes);
             encodedFile = new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading server icon", e);
         }
         return encodedFile;
     }

@@ -295,7 +295,7 @@ public class MongoHandler {
                 current = list.get(0);
                 setPreviousNames(uuid, list.subList(1, list.size()));
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error retrieving previous usernames", e);
             }
             if (!username.isEmpty() && !current.equals(username)) {
                 playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("username", current));
@@ -575,7 +575,7 @@ public class MongoHandler {
                             "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error handling player login", e);
             }
         });
     }
@@ -959,7 +959,7 @@ public class MongoHandler {
         Document current = (Document) getPlayer(uuid, new Document("parks." + limit, 1)).get("parks");
         String[] split;
         if (limit.contains(".")) {
-            split = limit.split(".");
+            split = limit.split("\\.");
         } else {
             split = new String[]{limit};
         }
@@ -1010,7 +1010,7 @@ public class MongoHandler {
                 storageCollection.insertOne(new Document("uuid", uuid.toString()).append(inv.getResort().getName(), invDoc));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating inventory data in the database", e);
         }
     }
 

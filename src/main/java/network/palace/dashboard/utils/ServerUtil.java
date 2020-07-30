@@ -283,7 +283,7 @@ public class ServerUtil {
                             }
                             socketChannel.send(content);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error on server switch", e);
                         }
                     });
                 }
@@ -326,7 +326,7 @@ public class ServerUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error on server switch", e);
         }
     }
 
@@ -359,8 +359,7 @@ public class ServerUtil {
                 this.servers.put(s.getName(), s);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            dashboard.getLogger().severe("Error loading servers, shutting Dashboard!");
+            dashboard.getLogger().error("Error loading servers, stopping Dashboard!", e);
             System.exit(0);
         }
     }
