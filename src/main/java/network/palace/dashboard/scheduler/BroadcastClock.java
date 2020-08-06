@@ -37,7 +37,7 @@ public class BroadcastClock extends TimerTask {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading announcements.txt", e);
         }
         if (!newList.equals(announcements)) {
             announcements = newList;

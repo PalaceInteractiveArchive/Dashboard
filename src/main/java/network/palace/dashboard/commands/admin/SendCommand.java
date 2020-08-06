@@ -35,7 +35,7 @@ public class SendCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + "all players" + ChatColor.GREEN +
                         " to " + ChatColor.YELLOW + server.getName());
                 for (Player tp : dashboard.getOnlinePlayers()) {
-                    dashboard.getServerUtil().sendPlayer(tp, server.getName());
+                    dashboard.getServerUtil().sendPlayer(tp, server);
                 }
                 return;
             }
@@ -48,7 +48,7 @@ public class SendCommand extends DashboardCommand {
                     if (tp == null)
                         continue;
                     if (tp.getServer().equals(name)) {
-                        dashboard.getServerUtil().sendPlayer(tp, server.getName());
+                        dashboard.getServerUtil().sendPlayer(tp, server);
                     }
                 }
                 return;
@@ -61,7 +61,7 @@ public class SendCommand extends DashboardCommand {
                 }
                 player.sendMessage(ChatColor.GREEN + "Sending " + ChatColor.GOLD + tp.getUsername() + ChatColor.GREEN +
                         " to " + ChatColor.YELLOW + server.getName());
-                dashboard.getServerUtil().sendPlayer(tp, server.getName());
+                dashboard.getServerUtil().sendPlayer(tp, server);
             }
         }
     }

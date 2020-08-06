@@ -32,7 +32,7 @@ public class AFKUtil {
                         try {
                             warn(tp);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error processing AFK warn", e);
                         }
                     }
                 }

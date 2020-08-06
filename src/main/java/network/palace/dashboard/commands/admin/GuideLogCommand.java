@@ -12,7 +12,7 @@ import java.util.UUID;
 public class GuideLogCommand extends DashboardCommand {
 
     public GuideLogCommand() {
-        super(Rank.ADMIN);
+        super(Rank.LEAD);
         tabCompletePlayers = true;
     }
 

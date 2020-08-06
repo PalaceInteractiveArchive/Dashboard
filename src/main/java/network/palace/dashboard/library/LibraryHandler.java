@@ -10,10 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
@@ -25,7 +23,7 @@ import java.util.Set;
  */
 public final class LibraryHandler {
 
-    public static void loadLibraries(Class clazz) {
+    public static void loadLibraries(Class<?> clazz) {
         if (clazz == null) return;
         // Loop through list from json
         try {
@@ -105,27 +103,17 @@ public final class LibraryHandler {
     }
 
     private static void addURL(URL url) throws IOException {
-        // Check if this is already loaded
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        Class<URLClassLoader> sysClass = URLClassLoader.class;
-        try {
-            Method method = sysClass.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-            method.invoke(sysLoader, url);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            throw new IOException("Error, could not add URL to system classloader");
-        }
+        Start.getClassLoader().addURL(url);
     }
 
     private static class MavenObject {
-        @Getter private String groupId = null;
-        @Getter private String artifactId = null;
-        @Getter private String version = null;
-        @Getter private String repo = "http://repo1.maven.org/maven2";
+        @Getter private String groupId;
+        @Getter private String artifactId;
+        @Getter private String version;
+        @Getter private String repo;
 
         MavenObject(String groupId, String artifactId, String version) {
-            this(groupId, artifactId, version, "http://repo1.maven.org/maven2");
+            this(groupId, artifactId, version, "https://repo1.maven.org/maven2");
         }
 
         MavenObject(String groupId, String artifactId, String version, String repo) {

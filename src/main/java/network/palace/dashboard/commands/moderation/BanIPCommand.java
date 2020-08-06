@@ -11,7 +11,7 @@ import network.palace.dashboard.handlers.Rank;
 public class BanIPCommand extends DashboardCommand {
 
     public BanIPCommand() {
-        super(Rank.MOD);
+        super(Rank.LEAD);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class BanIPCommand extends DashboardCommand {
                 }
                 dashboard.getModerationUtil().announceBan(ban);
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error processing ip ban", e);
             }
         });
     }

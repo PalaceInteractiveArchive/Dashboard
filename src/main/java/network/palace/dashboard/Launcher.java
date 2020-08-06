@@ -17,16 +17,13 @@ import network.palace.dashboard.server.WebSocketServerInitializer;
 import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.*;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.*;
 
 /**
  * @author Innectic
@@ -35,29 +32,21 @@ import java.util.TimerTask;
 public class Launcher {
 
     @Getter private static Dashboard dashboard;
+    @Getter private static Logger packetLogger;
 
     public Launcher() {
+        System.out.println("Launching Dashboard with " + getClass().getClassLoader().getClass().getSimpleName());
         dashboard = new Dashboard();
 
+        // Create PacketLogger only for logging incoming/outgoing packets
+        packetLogger = LogManager.getLogger("PacketOut");
+
+        java.util.logging.Logger mongoLogger = java.util.logging.Logger.getLogger("org.mongodb.driver");
+        mongoLogger.setLevel(java.util.logging.Level.OFF);
+        /* Finished Configuring Logging */
+
         dashboard.setStartTime(System.currentTimeMillis());
-        PatternLayout layout = new PatternLayout("[%d{HH:mm:ss}] [%p] - %m%n");
-        dashboard.getLogger().addAppender(new ConsoleAppender(layout));
-        try {
-            dashboard.getLogger().addAppender(new FileAppender(layout, "dashboard.log", true));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            dashboard.getErrors().addAppender(new FileAppender(layout, "error.log", true));
-        } catch (IOException e) {
-            ErrorUtil.logError("Error opening error.log", e);
-        }
-        try {
-            dashboard.getPlayerLog().addAppender(new FileAppender(layout, "players.log", true));
-        } catch (IOException e) {
-            ErrorUtil.logError("Error opening players.log", e);
-        }
-        dashboard.getLogger().info("Starting up Dashboard...");
+        dashboard.getLogger().info("Starting up Dashboard at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Date.from(Instant.now())));
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         dashboard.loadConfiguration();
         try {
@@ -71,7 +60,7 @@ public class Launcher {
             dashboard.setStatUtil(new StatUtil());
             dashboard.getLogger().info("Finished initializing StatUtil!");
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error starting Dashboard!", e);
             System.exit(0);
         }
         if (dashboard.isMaintenance()) dashboard.loadMaintenanceSettings();
@@ -105,7 +94,7 @@ public class Launcher {
         try {
             dashboard.setSiteUtil(new SiteUtil());
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading SiteUtil", e);
         }
         dashboard.setAfkUtil(new AFKUtil());
         dashboard.setVoteUtil(new VoteUtil());
@@ -114,7 +103,7 @@ public class Launcher {
         try {
             dashboard.setForum(new Forum());
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading Forum", e);
         }
         dashboard.setupShowReminder();
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -139,7 +128,7 @@ public class Launcher {
                     Collections.singletonList(new SlackAttachment("Dashboard has successfully started up!").color("good")));
             ch.closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error with web socket server", e);
         } finally {
             dashboard.getMongoHandler().disconnect();
 

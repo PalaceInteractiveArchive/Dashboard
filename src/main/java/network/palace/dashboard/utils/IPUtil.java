@@ -10,6 +10,7 @@ import network.palace.dashboard.Launcher;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 /**
@@ -68,7 +69,7 @@ public class IPUtil {
     private static ProviderData request(String address) {
         String url = "http://ip-api.com/json/" + address + "?fields=33550";
         try (InputStream is = new URL(url).openStream()) {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String jsonText = readAll(rd);
             JsonParser parser = new JsonParser();
             JsonObject obj = parser.parse(jsonText).getAsJsonObject();
@@ -79,7 +80,7 @@ public class IPUtil {
                     obj.get("region").getAsString(), obj.get("regionName").getAsString(),
                     obj.get("timezone").getAsString());
         } catch (IOException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error retrieving IP address", e);
             return null;
         }
     }

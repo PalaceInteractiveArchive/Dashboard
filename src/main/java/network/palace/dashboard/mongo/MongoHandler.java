@@ -1,7 +1,6 @@
 package network.palace.dashboard.mongo;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
@@ -35,6 +34,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author Innectic
@@ -295,7 +295,7 @@ public class MongoHandler {
                 current = list.get(0);
                 setPreviousNames(uuid, list.subList(1, list.size()));
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error retrieving previous usernames", e);
             }
             if (!username.isEmpty() && !current.equals(username)) {
                 playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("username", current));
@@ -524,7 +524,7 @@ public class MongoHandler {
                 player.setMentions(settings.getBoolean("mentions"));
                 player.setNewGuest(!doc.getBoolean("tutorial"));
                 if (!afterRestart) dashboard.addPlayer(player);
-                dashboard.getPlayerLog().info("New Player Object for UUID " + player.getUniqueId() + " username " + player.getUsername() + " Source: MongoHandler.login");
+                dashboard.getLogger().info("Player Join: " + player.getUsername() + "|" + player.getUniqueId());
                 dashboard.addToCache(player.getUniqueId(), player.getUsername());
 
                 if (!afterRestart && rank.getRankId() >= Rank.CHARACTER.getRankId()) {
@@ -575,7 +575,7 @@ public class MongoHandler {
                             "/staff login [password]" + ChatColor.YELLOW + "" + ChatColor.BOLD + " to verify your account.\n");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error handling player login", e);
             }
         });
     }
@@ -654,14 +654,14 @@ public class MongoHandler {
         List<String> players = new ArrayList<>();
 
         playerCollection.find(Filters.eq("ip", ip)).projection(new Document("username", 1))
-                .forEach((Block<Document>) document -> players.add(document.getString("username")));
+                .forEach((Consumer<Document>) document -> players.add(document.getString("username")));
         return players;
     }
 
     public List<UUID> getPlayersByRank(Rank... ranks) {
         List<UUID> foundPlayers = new ArrayList<>();
         for (Rank rank : ranks) {
-            playerCollection.find(Filters.eq("rank", rank.getDBName())).forEach((Block<Document>) document ->
+            playerCollection.find(Filters.eq("rank", rank.getDBName())).forEach((Consumer<Document>) document ->
                     foundPlayers.add(UUID.fromString(document.getString("uuid"))));
         }
         return foundPlayers;
@@ -670,14 +670,14 @@ public class MongoHandler {
     public List<String> getPlayerNamesFromRank(Rank rank) {
         List<String> list = new ArrayList<>();
         playerCollection.find(MongoFilter.RANK.getFilter(rank.getDBName())).projection(new Document("username", 1))
-                .forEach((Block<Document>) d -> list.add(d.getString("username")));
+                .forEach((Consumer<Document>) d -> list.add(d.getString("username")));
         return list;
     }
 
     public List<UUID> getPlayerUUIDsFromRank(Rank rank) {
         List<UUID> list = new ArrayList<>();
         playerCollection.find(MongoFilter.RANK.getFilter(rank.getDBName())).projection(new Document("uuid", 1))
-                .forEach((Block<Document>) d -> list.add(UUID.fromString(d.getString("uuid"))));
+                .forEach((Consumer<Document>) d -> list.add(UUID.fromString(d.getString("uuid"))));
         return list;
     }
 
@@ -959,7 +959,7 @@ public class MongoHandler {
         Document current = (Document) getPlayer(uuid, new Document("parks." + limit, 1)).get("parks");
         String[] split;
         if (limit.contains(".")) {
-            split = limit.split(".");
+            split = limit.split("\\.");
         } else {
             split = new String[]{limit};
         }
@@ -1010,7 +1010,7 @@ public class MongoHandler {
                 storageCollection.insertOne(new Document("uuid", uuid.toString()).append(inv.getResort().getName(), invDoc));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating inventory data in the database", e);
         }
     }
 

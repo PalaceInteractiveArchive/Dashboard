@@ -1,7 +1,7 @@
 package network.palace.dashboard.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import network.palace.dashboard.utils.ErrorUtil;
+import network.palace.dashboard.Launcher;
 
 import java.util.List;
 import java.util.Timer;
@@ -31,7 +31,7 @@ public class SchedulerManager {
         try {
             executor.submit(runnable);
         } catch (RejectedExecutionException e) {
-            ErrorUtil.logError("Error scheduling async task in SchedulerManager", e);
+            Launcher.getDashboard().getLogger().info("Error scheduling async task in ScheduleManager");
         }
     }
 

@@ -6,17 +6,18 @@ import network.palace.dashboard.handlers.DashboardCommand;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 
-import java.util.Arrays;
+public class ToggleServerQueueCommand extends DashboardCommand {
 
-public class DashboardVersion extends DashboardCommand {
-
-    public DashboardVersion() {
+    public ToggleServerQueueCommand() {
         super(Rank.DEVELOPER);
-        aliases.addAll(Arrays.asList("dashboardver", "dashver"));
     }
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        player.sendMessage(ChatColor.GREEN + "Dashboard currently running v" + Launcher.getDashboard().getVersion());
+        if (Launcher.getDashboard().getServerUtil().toggleServerQueueEnabled()) {
+            player.sendMessage(ChatColor.GREEN + "Server queues have been enabled!");
+        } else {
+            player.sendMessage(ChatColor.RED + "Server queues have been disabled!");
+        }
     }
 }

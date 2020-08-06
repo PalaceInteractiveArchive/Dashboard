@@ -16,7 +16,7 @@ public class HelpMeCommand extends DashboardCommand {
 
     @Override
     public void execute(Player player, String label, String[] args) {
-        if (args.length < 1) {
+        if (args.length < 1 || label.equalsIgnoreCase("help")) {
             player.sendMessage(ChatColor.AQUA + "To get help, explain what you need help with:");
             player.sendMessage(ChatColor.AQUA + "/helpme [Reason]");
             return;
@@ -25,6 +25,10 @@ public class HelpMeCommand extends DashboardCommand {
         player.sendMessage(ChatColor.GREEN + "Processing your help request...");
         if (!dashboard.getGuideUtil().canSubmitHelpRequest(player)) {
             player.sendMessage(ChatColor.RED + "You need to wait a little bit before sending another help request.");
+            return;
+        }
+        if (dashboard.getGuideUtil().overloaded()) {
+            player.sendMessage(ChatColor.AQUA + "We're currently receiving a high volume of help requests. We apologize for the inconvenience.");
             return;
         }
         StringBuilder request = new StringBuilder();

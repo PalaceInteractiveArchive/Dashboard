@@ -9,7 +9,7 @@ import network.palace.dashboard.handlers.Rank;
 public class IPCommand extends DashboardCommand {
 
     public IPCommand() {
-        super(Rank.TRAINEE);
+        super(Rank.LEAD);
         tabCompletePlayers = true;
     }
 

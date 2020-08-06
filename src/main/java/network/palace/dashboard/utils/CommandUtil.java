@@ -1,11 +1,13 @@
 package network.palace.dashboard.utils;
 
+import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.commands.*;
 import network.palace.dashboard.commands.admin.*;
 import network.palace.dashboard.commands.chat.*;
 import network.palace.dashboard.commands.guide.GuideAnnounceCommand;
 import network.palace.dashboard.commands.guide.GuideHelpCommand;
+import network.palace.dashboard.commands.guide.GuideListCommand;
 import network.palace.dashboard.commands.guide.HelpMeCommand;
 import network.palace.dashboard.commands.moderation.*;
 import network.palace.dashboard.commands.staff.*;
@@ -37,6 +39,7 @@ public class CommandUtil {
         register("reboot", new RebootCommand());
         register("reloadicon", new ReloadIconCommand());
         register("send", new SendCommand());
+        register("toggleserverqueue", new ToggleServerQueueCommand());
         register("updatehashes", new UpdateHashesCommand());
         /* Chat */
         register("cc", new ClearChatCommand());
@@ -49,18 +52,19 @@ public class CommandUtil {
         register("pchat", new PartyChatCommand());
         register("sc", new StaffChatCommand());
         /* Guide */
+        register("gannounce", new GuideAnnounceCommand());
         register("h", new GuideHelpCommand());
+        register("guidelist", new GuideListCommand());
         register("helpme", new HelpMeCommand());
         /* Moderation */
+        register("altaccounts", new AltAccountsCommand());
         register("ban", new BanCommand());
         register("banip", new BanIPCommand());
         register("bannedproviders", new BannedProvidersCommand());
         register("banprovider", new BanProviderCommand());
         register("bseen", new BseenCommand());
         register("find", new FindCommand());
-        register("gannounce", new GuideAnnounceCommand());
         register("ip", new IPCommand());
-        register("ipseen", new IPSeenCommand());
         register("kick", new KickCommand());
         register("modlog", new ModlogCommand());
         register("motdrl", new MotdReloadCommand());
@@ -80,16 +84,21 @@ public class CommandUtil {
         /* Staff */
         register("b", new BroadcastCommand());
         register("charlist", new CharListCommand());
+        register("mocap", new MotionCaptureCommand());
+        register("multishow", new MultiShowCommand());
         register("server", new ServerCommand());
+        register("sglist", new SGListCommand());
         register("staff", new StaffCommand());
         register("stafflist", new StaffListCommand());
         /* General */
+        register("apply", new ApplyCommand());
         register("audio", new AudioCommand());
         register("bug", new BugCommand());
         register("discord", new DiscordCommand());
         register("friend", new FriendCommand());
         register("ignore", new IgnoreCommand());
         register("join", new JoinCommand());
+        register("leavedashqueue", new LeaveServerQueueCommand());
         register("link", new LinkCommand());
         register("mentions", new MentionsCommand());
         register("msg", new MsgCommand());
@@ -97,6 +106,7 @@ public class CommandUtil {
         register("party", new PartyCommand());
         register("punishments", new PunishmentsCommand());
         register("reply", new ReplyCommand());
+        register("rules", new RulesCommand());
         register("social", new SocialCommand());
         register("store", new StoreCommand());
         register("uptime", new UptimeCommand());
@@ -126,7 +136,7 @@ public class CommandUtil {
             return true;
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "An internal error occurred whilst executing this command.");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error processing command", e);
             return true;
         }
     }

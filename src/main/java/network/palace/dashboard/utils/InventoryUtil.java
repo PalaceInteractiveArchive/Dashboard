@@ -26,7 +26,7 @@ import java.util.*;
  * @author Innectic
  * @since 6/10/2017
  */
-@SuppressWarnings("DuplicatedCode")
+@SuppressWarnings({"DuplicatedCode", "rawtypes"})
 public class InventoryUtil {
     public static final int STORAGE_VERSION = 1;
     @Getter private Map<UUID, InventoryCache> cachedInventories = new HashMap<>();
@@ -142,8 +142,7 @@ public class InventoryUtil {
                     cachedInventories.put(uuid, cache);
                 }
             } catch (Exception e) {
-                dashboard.getLogger().error("An exception occurred while parsing inventories.txt - " + e.getMessage());
-                e.printStackTrace();
+                dashboard.getLogger().error("An exception occurred while parsing inventories.txt", e);
             }
         }
         new Timer().schedule(new TimerTask() {
@@ -189,8 +188,7 @@ public class InventoryUtil {
                             }
                         }
                     } catch (Exception e) {
-                        System.out.println("ERROR UPDATING INVENTORY FOR " + cache.getUuid() + ": " + e.getMessage());
-                        e.printStackTrace();
+                        dashboard.getLogger().error("ERROR UPDATING INVENTORY FOR " + cache.getUuid() + ": " + e.getMessage(), e);
                     }
                 }
             }
@@ -374,7 +372,7 @@ public class InventoryUtil {
             }
             return inv;
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading inventory", e);
             return new ResortInventory();
         }
     }
@@ -423,19 +421,19 @@ public class InventoryUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error loading inventory from database", e);
         }
         return new InventoryCache(uuid, map);
     }
 
     private ResortInventory getResortInventoryFromDocument(UUID uuid, Document inv, Resort resort) {
         if (!inv.containsKey("version")) {
-            System.out.println("UNVERSIONED STORAGE FOUND " + uuid.toString());
+            Launcher.getDashboard().getLogger().info("UNVERSIONED STORAGE FOUND " + uuid.toString());
             return null;
         }
         int version = inv.getInteger("version");
         if (version != STORAGE_VERSION) {
-            System.out.println("INCORRECT STORAGE VERSION FOUND " + uuid.toString());
+            Launcher.getDashboard().getLogger().info("INCORRECT STORAGE VERSION FOUND " + uuid.toString());
             return null;
         }
         StringBuilder backpack = new StringBuilder("[");
@@ -558,8 +556,7 @@ public class InventoryUtil {
             digest.update(inventory.getBytes());
             return DatatypeConverter.printHexBinary(digest.digest()).toLowerCase();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            System.out.println("NO MD5?");
+            Launcher.getDashboard().getLogger().error("Error generaing inventory hash", e);
             return "null";
         }
     }
@@ -574,7 +571,7 @@ public class InventoryUtil {
         try {
             Launcher.getDashboard().getMongoHandler().updateInventoryData(uuid, update);
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating inventory in database", e);
         }
     }
 
@@ -619,7 +616,7 @@ public class InventoryUtil {
                     .append("amount", new BsonInt32(o.get("amount").getAsInt()))
                     .append("tag", o.get("tag") == null ? new BsonString("") : new BsonString(o.get("tag").getAsString()));
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error converting Json to Bson", e);
             return null;
         }
         return doc;

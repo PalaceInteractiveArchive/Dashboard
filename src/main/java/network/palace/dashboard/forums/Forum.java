@@ -1,9 +1,12 @@
 package network.palace.dashboard.forums;
 
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
+import network.palace.dashboard.chat.ClickEvent;
+import network.palace.dashboard.chat.ComponentBuilder;
+import network.palace.dashboard.chat.HoverEvent;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.mongo.MongoHandler;
@@ -17,16 +20,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Marc on 12/12/16.
  */
 public class Forum {
-    private BoneCP connectionPool = null;
+    //    private BoneCP connectionPool = null;
+    private HikariDataSource connectionPool = null;
     private Random random;
 
-    public Forum() throws IOException, SQLException {
+    public Forum() throws IOException, SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.jdbc.Driver");
         initialize();
     }
 
@@ -53,23 +57,34 @@ public class Forum {
                 line = br.readLine();
             }
         }
-        BoneCPConfig config = new BoneCPConfig();
+
+        // Begin configuration of Hikari DataSource
+        HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
         config.setUsername(username);
         config.setPassword(password);
-        config.setMinConnectionsPerPartition(3);
-        config.setMaxConnectionsPerPartition(30);
-        config.setPartitionCount(1);
-        config.setIdleConnectionTestPeriod(300, TimeUnit.SECONDS);
-        connectionPool = new BoneCP(config);
+
+        // See: https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
+        config.addDataSourceProperty("rewriteBatchedStatements", "true");
+        config.addDataSourceProperty("cacheResultSetMetadata", "true");
+        config.addDataSourceProperty("cacheServerConfiguration", "true");
+        config.addDataSourceProperty("elideSetAutoCommits", "true");
+        config.addDataSourceProperty("maintainTimeStats", "false");
+
+        connectionPool = new HikariDataSource(config);
     }
 
     public boolean isConnected() {
-        return connectionPool != null && !connectionPool.getDbIsDown().get();
+        return connectionPool != null && connectionPool.isRunning();
     }
 
     public void stop() {
-        connectionPool.shutdown();
+        connectionPool.close();
     }
 
     public void linkAccount(Player player, String email) {
@@ -134,10 +149,16 @@ public class Forum {
 
             player.sendMessage(ChatColor.GREEN + "Okay, you're almost finished linking! Visit your Forum Profile and look for the six-digit Linking Code. When you've found it, run " +
                     ChatColor.YELLOW + "/link confirm [six-digit code].");
-            player.sendMessage(ChatColor.GREEN + "If you need help, check out our guide here: https:");
+            player.sendMessage(new ComponentBuilder("If you need help, check out our guide ").color(ChatColor.GREEN)
+                    .append("here!").color(ChatColor.YELLOW)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            new ComponentBuilder("Click to visit ").color(ChatColor.GREEN)
+                                    .append("https://forums.palace.network/topic/6141-link-your-minecraft-and-forum-accounts/")
+                                    .color(ChatColor.YELLOW).create()))
+                    .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forums.palace.network/topic/6141-link-your-minecraft-and-forum-accounts/")).create());
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error linking forum account", e);
         }
     }
 
@@ -169,12 +190,12 @@ public class Forum {
                     setForumGroupSql.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error unlinking forum account", e);
             }
             mongoHandler.unlinkForumAccount(player.getUniqueId());
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error unlinking forum account", e);
         }
         player.sendMessage(ChatColor.GREEN + "Your Minecraft and Forums accounts are no longer linked.");
     }
@@ -227,7 +248,7 @@ public class Forum {
             Launcher.getDashboard().getMongoHandler().unsetForumLinkingCode(player.getUniqueId());
         } catch (SQLException e) {
             player.sendMessage(ChatColor.RED + "There was an error, please try again later!");
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error confirming forum account", e);
             return;
         }
         player.sendMessage(ChatColor.GREEN + "All done! Your Minecraft and Forums accounts are now linked.");
@@ -243,7 +264,7 @@ public class Forum {
             sql.execute();
             sql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating name on forum account", e);
         }
     }
 
@@ -262,7 +283,7 @@ public class Forum {
             setForumGroupSql.execute();
             setForumGroupSql.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error updating rank on forum account", e);
         }
     }
 
@@ -272,7 +293,7 @@ public class Forum {
                 return 4;
             case MANAGER:
                 return 33;
-            case ADMIN:
+            case LEAD:
                 return 7;
             case DEVELOPER:
                 return 8;

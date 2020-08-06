@@ -25,7 +25,7 @@ public class SocketConnection {
         } catch (URISyntaxException e) {
             dashboard.getLogger().info(ChatColor.DARK_RED + "Discord link socket uri syntax error!");
             socket = null;
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error with Discord socket connection", e);
             return;
         }
         if (socket == null) return;

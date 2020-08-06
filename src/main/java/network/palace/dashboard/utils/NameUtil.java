@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import network.palace.dashboard.Launcher;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,7 +32,7 @@ public class NameUtil {
                 names.addAll(list);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error retrieving name history from Mojang API", e);
         }
         return names;
     }

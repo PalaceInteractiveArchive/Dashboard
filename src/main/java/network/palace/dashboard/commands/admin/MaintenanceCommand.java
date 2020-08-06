@@ -32,8 +32,9 @@ public class MaintenanceCommand extends DashboardCommand {
         dashboard.setMaintenance(!dashboard.isMaintenance());
         PacketMaintenance packet = new PacketMaintenance(dashboard.isMaintenance());
         if (dashboard.isMaintenance()) {
+            player.sendMessage(ChatColor.GREEN + "Loading list of staff members for maintenance mode...");
             List<UUID> staff = dashboard.getMongoHandler().getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD,
-                    Rank.MOD, Rank.BUILDER, Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER, Rank.DIRECTOR);
+                    Rank.MOD, Rank.BUILDER, Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.LEAD, Rank.MANAGER, Rank.DIRECTOR);
             dashboard.setMaintenanceWhitelist(staff);
             PacketMaintenanceWhitelist whitelist = new PacketMaintenanceWhitelist(staff);
             player.sendMessage(ChatColor.GREEN + "Maintenance Mode enabled! Notifying Bungees...");

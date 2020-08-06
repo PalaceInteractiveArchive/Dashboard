@@ -32,6 +32,7 @@ import network.palace.dashboard.slack.SlackAttachment;
 import network.palace.dashboard.slack.SlackMessage;
 import network.palace.dashboard.utils.DateUtil;
 import network.palace.dashboard.utils.IPUtil;
+import org.apache.logging.log4j.Level;
 import org.influxdb.dto.Point;
 
 import java.util.*;
@@ -109,7 +110,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 return;
             }
             int id = object.get("id").getAsInt();
-            if (id != 43) System.out.println(object.toString());
+            if (id != 43) {
+                Launcher.getPacketLogger().log(Level.DEBUG, object.toString());
+            }
             dashboard.getStatUtil().packet();
             DashboardSocketChannel channel = (DashboardSocketChannel) ctx.channel();
             switch (id) {
@@ -294,7 +297,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 case 24: {
                     PacketPlayerDisconnect packet = new PacketPlayerDisconnect().fromJSON(object);
                     dashboard.logout(packet.getUniqueId());
-                    dashboard.getPlayerLog().info("Removing Player Object for UUID " + packet.getUniqueId() + " Source: Player Disconnect");
                     break;
                 }
                 /*
@@ -352,7 +354,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         tp.sendMessage(ChatColor.RED + "We are having trouble connecting you to that server! Try again soon.");
                         return;
                     }
-                    dashboard.getServerUtil().sendPlayer(tp, target.getName());
+                    dashboard.getServerUtil().sendPlayer(tp, target);
                     break;
                 }
                 /*
@@ -443,14 +445,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getModerationUtil().sendMessage(ChatColor.GREEN + "A new server instance (" + name + running +
                                         ") has connected to dashboard.");
                             }
-                            if (name.startsWith("Hub")) {
-                                new Timer().schedule(new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        dashboard.getServerUtil().runLobbyDataTask();
-                                    }
-                                }, 5000);
-                            }
                             break;
                         }
                     }
@@ -468,12 +462,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     if (tp != null) {
                         username = tp.getUsername();
                         uuid = tp.getUniqueId();
-                        tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods!\n" +
+                        tp.kickPlayer(ChatColor.RED + "Palace Network does not authorize the use of World Downloader Mods.\n" +
                                 ChatColor.AQUA + "You have been temporarily banned for 3 Days.\n" + ChatColor.YELLOW +
                                 "If you believe this was a mistake, send an appeal at " +
                                 "https://palnet.us/appeal.");
                     }
-                    Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "dashboard");
+                    Ban ban = new Ban(uuid, username, false, timestamp, "Attempting to use a World Downloader", "Dashboard");
                     dashboard.getMongoHandler().banPlayer(uuid, ban);
                     dashboard.getModerationUtil().announceBan(ban);
                     break;
@@ -488,7 +482,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     List<String> tags = packet.getTags();
                     String source = packet.getSource();
                     Player player = dashboard.getPlayer(uuid);
-                    player.send(new PacketPlayerRank(uuid, rank, tags));
+                    if (player != null) player.send(new PacketPlayerRank(uuid, rank, tags));
 
                     dashboard.getSchedulerManager().runAsync(() -> {
                         String name;
@@ -524,7 +518,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                                 dashboard.getForum().updatePlayerRank(uuid, member_id, rank, player);
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error processing rank change", e);
                         }
                     });
 
@@ -573,7 +567,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             if (!target.getName().toLowerCase().startsWith("hub") && !target.getName().toLowerCase().startsWith("arcade")) {
                                 tp.sendMessage(ChatColor.RED + "No fallback servers are available, so you were sent to a Park server.");
                             }
-                            dashboard.getServerUtil().sendPlayer(tp, target.getName());
+                            dashboard.getServerUtil().sendPlayer(tp, target);
                         }
                     }
                     break;
@@ -692,7 +686,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     for (Player tp : dashboard.getOnlinePlayers()) {
                         if (tp.getBungeeID().equals(uuid) && !players.contains(tp.getUniqueId())) {
                             dashboard.logout(tp.getUniqueId());
-                            dashboard.getPlayerLog().info("Removing Player Object for UUID " + tp.getUniqueId() + " Source: Player List Task");
+                            dashboard.getLogger().info("Player List Clean-Up: " + tp.getUsername() + "|" + tp.getUniqueId());
                         }
                     }
                     break;
@@ -735,7 +729,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         }
                     }
                     dashboard.getLogger().info("Bungee UUID updated for Bungee on " +
-                            channel.localAddress().getAddress().toString());
+                            channel.localAddress().getAddress().toString() + " to " + nid);
                     break;
                 }
                 /*
@@ -759,7 +753,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         list.add(tp);
                         dashboard.getServer(p.getServer()).changeCount(1);
                         dashboard.addPlayer(tp);
-                        dashboard.getPlayerLog().info("New Player Object for UUID " + tp.getUniqueId() + " username " + tp.getUsername() + " Source: Player List Info packet");
+                        dashboard.getLogger().info("Player Join (BungeeJoin): " + tp.getUsername() + "|" + tp.getUniqueId());
                         dashboard.addToCache(tp.getUniqueId(), tp.getUsername());
                     }
                     dashboard.getSchedulerManager().runAsync(() -> list.forEach(p -> dashboard.getMongoHandler().login(p, true)));
@@ -778,7 +772,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                         exists = dashboard.hasPlayer(uuid);
                     }
                     if (!exists)
-                        dashboard.getPlayerLog().error("Received request to verify player that doesn't exist " + uuid);
+                        dashboard.getLogger().warn("Received request to verify player that doesn't exist " + uuid);
                     channel.send(new PacketConfirmPlayer(uuid, exists));
                     break;
                 }
@@ -880,7 +874,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error processing incoming packet", e);
         }
     }
 
@@ -969,7 +963,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        Launcher.getDashboard().getLogger().error("WebSocket exception", cause);
         ctx.close();
     }
 
@@ -981,7 +975,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             try {
                 handleWebSocketFrame(ctx, (WebSocketFrame) msg);
             } catch (Exception e) {
-                dashboard.getLogger().warn(e.getMessage(), e);
+                dashboard.getLogger().error("Error reading websocket channel", e);
             }
         }
     }
@@ -999,7 +993,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                     dash.send(packet);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error sending packet", e);
             }
         }
     }
@@ -1010,7 +1004,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             if (socketChannel == null) return;
             socketChannel.send(packet);
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error sending inventory update", e);
         }
     }
 

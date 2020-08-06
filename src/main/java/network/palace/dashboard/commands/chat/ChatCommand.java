@@ -50,7 +50,7 @@ public class ChatCommand extends DashboardCommand {
         list.add("party");
         if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
             list.add("staff");
-            if (player.getRank().getRankId() >= Rank.ADMIN.getRankId()) {
+            if (player.getRank().getRankId() >= Rank.LEAD.getRankId()) {
                 list.add("admin");
             }
         }
@@ -86,7 +86,7 @@ public class ChatCommand extends DashboardCommand {
             list.add("party");
             if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                 list.add("staff");
-                if (player.getRank().getRankId() >= Rank.ADMIN.getRankId()) {
+                if (player.getRank().getRankId() >= Rank.LEAD.getRankId()) {
                     list.add("admin");
                 }
             }
@@ -97,7 +97,7 @@ public class ChatCommand extends DashboardCommand {
             list.add("party");
             if (player.getRank().getRankId() >= Rank.TRAINEE.getRankId()) {
                 list.add("staff");
-                if (player.getRank().getRankId() >= Rank.ADMIN.getRankId()) {
+                if (player.getRank().getRankId() >= Rank.LEAD.getRankId()) {
                     list.add("admin");
                 }
             }

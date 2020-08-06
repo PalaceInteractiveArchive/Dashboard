@@ -89,7 +89,7 @@ public class VoteUtil {
                         if (socketAddress == null) {
                             socketAddress = new InetSocketAddress(host, port);
                         }
-                        dashboard.getLogger().error("Votifier was not able to bind to " + socketAddress, future.cause());
+                        dashboard.getLogger().info("Votifier was not able to bind to " + socketAddress);
                     }
                 });
     }
@@ -136,11 +136,11 @@ public class VoteUtil {
 
     public void onError(Channel channel, Throwable throwable) {
         Dashboard dashboard = Launcher.getDashboard();
-        if (debug) {
-            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress(), throwable);
-        } else {
-            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
-        }
+//        if (debug) {
+//            dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
+//        } else {
+        dashboard.getLogger().error("Unable to process vote from " + channel.remoteAddress());
+//        }
     }
 
     public Map<String, Key> getTokens() {
@@ -199,11 +199,11 @@ public class VoteUtil {
                         return;
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Launcher.getDashboard().getLogger().error("Error processing vote", e);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error processing vote", e);
         }
     }
 

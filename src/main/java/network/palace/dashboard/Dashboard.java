@@ -19,7 +19,8 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 import network.palace.dashboard.utils.*;
 import network.palace.dashboard.utils.chat.JaroWinkler;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Dashboard {
-    @Getter public static final String version = "2.2.1";
+    @Getter public final String version;
     @Getter public final int PORT = 7892;
     @Getter @Setter public String HOST;
 
@@ -67,9 +68,7 @@ public class Dashboard {
 
     @Getter @Setter private Forum forum;
     @Getter @Setter private Random random;
-    @Getter @Setter private Logger logger = Logger.getLogger("Dashboard");
-    @Getter @Setter private Logger errors = Logger.getLogger("Dashboard-Errors");
-    @Getter @Setter private Logger playerLog = Logger.getLogger("Dashboard-Players");
+    @Getter @Setter private Logger logger = LoggerFactory.getLogger(Dashboard.class);
     private HashMap<UUID, String> registering = new HashMap<>();
     @Getter @Setter private HashMap<UUID, Player> players = new HashMap<>();
     @Getter @Setter private HashMap<UUID, String> cache = new HashMap<>();
@@ -82,6 +81,10 @@ public class Dashboard {
     @Getter @Setter private boolean maintenance = false;
     @Getter @Setter private List<UUID> maintenanceWhitelist = new ArrayList<>();
     @Getter @Setter private boolean testNetwork = false;
+
+    public Dashboard() {
+        version = getClass().getPackage().getImplementationVersion();
+    }
 
     public void loadConfiguration() {
         try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
@@ -99,7 +102,7 @@ public class Dashboard {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading dashboard config", e);
         }
     }
 
@@ -107,9 +110,12 @@ public class Dashboard {
         getLogger().info("Loading maintenance settings...");
         if (maintenance) {
             maintenanceWhitelist.clear();
-            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.MOD, Rank.BUILDER,
-                    Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.ADMIN, Rank.MANAGER, Rank.DIRECTOR);
+            logger.info("Loading list of staff members for maintenance mode...");
+            List<UUID> staff = mongoHandler.getPlayersByRank(Rank.TRAINEE, Rank.TRAINEEBUILD, Rank.TRAINEETECH, Rank.MOD,
+                    Rank.MEDIA, Rank.TECHNICIAN, Rank.BUILDER, Rank.ARCHITECT, Rank.COORDINATOR, Rank.DEVELOPER, Rank.LEAD,
+                    Rank.MANAGER, Rank.DIRECTOR, Rank.OWNER);
             maintenanceWhitelist.addAll(staff);
+            logger.info("Finished loading staff member list for maintenance mode!");
         }
         getLogger().info("Finished loading maintenance settings!");
     }
@@ -134,7 +140,7 @@ public class Dashboard {
             motd = motd.replaceAll("%n%", System.getProperty("line.separator"));
             motdMaintenance = motdMaintenance.replaceAll("%n%", System.getProperty("line.separator"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading motd", e);
         }
     }
 
@@ -151,7 +157,7 @@ public class Dashboard {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading join servers", e);
         }
     }
 
@@ -248,7 +254,6 @@ public class Dashboard {
     }
 
     public void logout(UUID uuid) {
-        chatUtil.logout(uuid);
         Player player = getPlayer(uuid);
         if (player != null) {
             if (!player.getServer().equalsIgnoreCase("unknown")) {
@@ -257,7 +262,11 @@ public class Dashboard {
             }
             if (player.getTutorial() != null) player.getTutorial().cancel();
             mongoHandler.logout(player);
+            Launcher.getDashboard().getLogger().info("Player Quit: " + player.getUsername() + "|" + uuid.toString());
+        } else {
+            Launcher.getDashboard().getLogger().info("Player Quit: " + uuid.toString());
         }
+        chatUtil.logout(uuid);
         PacketKick packet = new PacketKick("See ya real soon!");
         PacketContainer kick = new PacketContainer(uuid, packet.getJSON().toString());
         for (Object o : WebSocketServerHandler.getGroup()) {
@@ -366,7 +375,7 @@ public class Dashboard {
             fileInputStreamReader.read(bytes);
             encodedFile = new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading server icon", e);
         }
         return encodedFile;
     }

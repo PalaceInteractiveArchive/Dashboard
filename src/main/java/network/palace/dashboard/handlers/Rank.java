@@ -6,18 +6,19 @@ import network.palace.dashboard.chat.ChatColor;
 
 @AllArgsConstructor
 public enum Rank {
+    OWNER("Owner", ChatColor.RED + "Owner ", ChatColor.RED, ChatColor.YELLOW, true, 13),
     DIRECTOR("Director", ChatColor.RED + "Director ", ChatColor.RED, ChatColor.YELLOW, true, 13),
     MANAGER("Manager", ChatColor.RED + "Manager ", ChatColor.RED, ChatColor.YELLOW, true, 13),
-    ADMIN("Admin", ChatColor.RED + "Admin ", ChatColor.RED, ChatColor.YELLOW, true, 13),
-    DEVELOPER("Developer", ChatColor.GOLD + "Developer ", ChatColor.GOLD, ChatColor.YELLOW, true, 13),
+    LEAD("Lead", ChatColor.GOLD + "Lead ", ChatColor.GOLD, ChatColor.YELLOW, true, 13),
+    DEVELOPER("Developer", ChatColor.BLUE + "Developer ", ChatColor.BLUE, ChatColor.AQUA, true, 13),
     COORDINATOR("Coordinator", ChatColor.YELLOW + "Coordinator ", ChatColor.YELLOW, ChatColor.GREEN, true, 12),
     ARCHITECT("Architect", ChatColor.YELLOW + "Architect ", ChatColor.YELLOW, ChatColor.GREEN, true, 12),
-    BUILDER("Builder", ChatColor.GREEN + "Builder ", ChatColor.GREEN, ChatColor.GREEN, true, 11),
+    BUILDER("Builder", ChatColor.BLUE + "Builder ", ChatColor.BLUE, ChatColor.AQUA, true, 11),
     TECHNICIAN("Technician", ChatColor.BLUE + "Technician ", ChatColor.BLUE, ChatColor.AQUA, true, 11),
     MEDIA("Media", ChatColor.BLUE + "Media ", ChatColor.BLUE, ChatColor.AQUA, true, 11),
     MOD("Mod", ChatColor.GREEN + "Mod ", ChatColor.GREEN, ChatColor.GREEN, true, 11),
     TRAINEETECH("Trainee", ChatColor.BLUE + "Trainee ", ChatColor.BLUE, ChatColor.AQUA, false, 10),
-    TRAINEEBUILD("Trainee", ChatColor.DARK_GREEN + "Trainee ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 10),
+    TRAINEEBUILD("Trainee", ChatColor.BLUE + "Trainee ", ChatColor.BLUE, ChatColor.AQUA, false, 10),
     TRAINEE("Trainee", ChatColor.DARK_GREEN + "Trainee ", ChatColor.DARK_GREEN, ChatColor.DARK_GREEN, false, 9),
     CHARACTER("Character", ChatColor.BLUE + "Character ", ChatColor.BLUE, ChatColor.BLUE, false, 8),
     SPECIALGUEST("Special Guest", ChatColor.DARK_PURPLE + "SG ", ChatColor.DARK_PURPLE, ChatColor.WHITE, false, 7),
@@ -28,12 +29,12 @@ public enum Rank {
     DWELLER("Dweller", ChatColor.AQUA + "Dweller ", ChatColor.AQUA, ChatColor.WHITE, false, 2),
     SETTLER("Settler", ChatColor.GRAY + "", ChatColor.DARK_AQUA, ChatColor.WHITE, false, 1);
 
-    @Getter private String name;
-    @Getter private String scoreboardName;
-    @Getter private ChatColor tagColor;
-    @Getter private ChatColor chatColor;
-    @Getter private boolean isOp;
-    @Getter private int rankId;
+    @Getter private final String name;
+    @Getter private final String scoreboardName;
+    @Getter private final ChatColor tagColor;
+    @Getter private final ChatColor chatColor;
+    @Getter private final boolean isOp;
+    @Getter private final int rankId;
 
     /**
      * Get rank object from a string
@@ -43,6 +44,7 @@ public enum Rank {
      */
     public static Rank fromString(String name) {
         if (name == null) return SETTLER;
+        if (name.equalsIgnoreCase("admin")) return LEAD;
         String rankName = name.replaceAll(" ", "");
 
         for (Rank rank : Rank.values()) {

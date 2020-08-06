@@ -84,19 +84,20 @@ public class BseenCommand extends DashboardCommand {
                 }
 
                 String divider = " - ";
-                player.sendMessage(new ComponentBuilder(ip).color(ChatColor.AQUA)
-                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ipseen " + ip))
+                player.sendMessage(new ComponentBuilder("Alt Accounts").color(ChatColor.AQUA)
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/altaccounts " + (player.getRank().getRankId() >= Rank.LEAD.getRankId() ? ip : name)))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder("Click to run an IP Search").color(ChatColor.AQUA)
+                                new ComponentBuilder("Click to search for alt accounts").color(ChatColor.AQUA)
+                                        .append(player.getRank().getRankId() >= Rank.LEAD.getRankId() ? ("\nUser IP: " + ip) : "").color(ChatColor.GOLD)
                                         .create())).append(divider).color(ChatColor.DARK_GREEN)
                         .append("Name Check").color(ChatColor.LIGHT_PURPLE)
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/namecheck " + name))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder("Click to run a Name Check").color(ChatColor.AQUA)
+                                new ComponentBuilder("Click to run a name check").color(ChatColor.AQUA)
                                         .create())).append(divider).color(ChatColor.DARK_GREEN)
                         .append("Mod Log").color(ChatColor.GREEN)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder("Review Moderation History").color(ChatColor.GREEN)
+                                new ComponentBuilder("Review moderation history").color(ChatColor.GREEN)
                                         .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 "/modlog " + name)).append("\n" + (online ? "Current" : "Last") +
                                 " Server: ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.YELLOW)
@@ -105,7 +106,7 @@ public class BseenCommand extends DashboardCommand {
                                         .create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 "/server " + server)).create());
             } catch (Exception e) {
-                e.printStackTrace();
+                Launcher.getDashboard().getLogger().error("Error processing bseen", e);
             }
         });
     }

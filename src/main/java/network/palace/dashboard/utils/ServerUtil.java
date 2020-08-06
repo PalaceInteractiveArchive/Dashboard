@@ -1,5 +1,6 @@
 package network.palace.dashboard.utils;
 
+import lombok.Getter;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
@@ -7,7 +8,6 @@ import network.palace.dashboard.handlers.Party;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.ResortInventory;
 import network.palace.dashboard.handlers.Server;
-import network.palace.dashboard.packets.arcade.PacketGameStatus;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.dashboard.*;
 import network.palace.dashboard.packets.inventory.PacketInventoryContent;
@@ -16,7 +16,6 @@ import network.palace.dashboard.server.DashboardSocketChannel;
 import network.palace.dashboard.server.WebSocketServerHandler;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by Marc on 7/14/16
@@ -30,6 +29,7 @@ public class ServerUtil {
     private int lastArcade = 0;
     private HashMap<String, Integer> lastHubs = new HashMap<>();
     private TimerTask lobbyDataTask;
+    @Getter private boolean serverQueuesEnabled = true;
 
     private Map<String, UUID> mutedServers = new HashMap<>();
 
@@ -113,7 +113,7 @@ public class ServerUtil {
                     dash.send(packet);
                 }
             }
-        }, 0, 5000);
+        }, 0, 5 * 1000);
         /*
          * Muted Servers Timer
          */
@@ -181,26 +181,51 @@ public class ServerUtil {
             }
         };
         new Timer().schedule(lobbyDataTask, 5000, 5 * 1000);
+        new Timer().schedule(new TimerTask() {
+            int i = 0;
+
+            @Override
+            public void run() {
+                servers.values().stream()
+                        .filter(s -> s.getServerQueue().hasQueue())
+                        .forEach(server -> {
+                            Server.ServerQueue queue = server.getServerQueue();
+                            if (i % 2 == 0) queue.clearExpired();
+                            if (queue.hasQueue()) {
+                                if (i == 0) queue.statusUpdate();
+                                Player tp = queue.nextFromQueue();
+                                if (tp != null) {
+                                    tp.sendMessage(ChatColor.GREEN + "You're up! Sending you to " + ChatColor.YELLOW + server.getName() + "...");
+                                    sendPlayerDirect(tp, server.getName());
+                                }
+                            }
+                        });
+                i++;
+                if (i >= 5) {
+                    i = 0;
+                }
+            }
+        }, 10 * 1000L, 1000L);
         /*
          * Game Server Timer
          */
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                List<Server> arcades = getServers().stream().filter(Server::isArcade).collect(Collectors.toList());
-                for (Server s : getServers()) {
-                    if (!s.getName().matches(WebSocketServerHandler.MINIGAME_REGEX) || !s.isGameNeedsUpdate()) continue;
-                    PacketGameStatus status = new PacketGameStatus(s.getGameState(), s.getCount(), s.getGameMaxPlayers(), s.getName());
-                    s.setGameNeedsUpdate(false);
-                    for (Server arcade : arcades) {
-                        DashboardSocketChannel socketChannel = Dashboard.getInstance(arcade.getName());
-                        if (socketChannel != null) {
-                            socketChannel.send(status);
-                        }
-                    }
-                }
-            }
-        }, 0, 1000);
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                List<Server> arcades = getServers().stream().filter(Server::isArcade).collect(Collectors.toList());
+//                for (Server s : getServers()) {
+//                    if (!s.getName().matches(WebSocketServerHandler.MINIGAME_REGEX) || !s.isGameNeedsUpdate()) continue;
+//                    PacketGameStatus status = new PacketGameStatus(s.getGameState(), s.getCount(), s.getGameMaxPlayers(), s.getName());
+//                    s.setGameNeedsUpdate(false);
+//                    for (Server arcade : arcades) {
+//                        DashboardSocketChannel socketChannel = Dashboard.getInstance(arcade.getName());
+//                        if (socketChannel != null) {
+//                            socketChannel.send(status);
+//                        }
+//                    }
+//                }
+//            }
+//        }, 0, 1000);
     }
 
     public void serverSwitchEvent(UUID uuid, String target) {
@@ -258,7 +283,7 @@ public class ServerUtil {
                             }
                             socketChannel.send(content);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Launcher.getDashboard().getLogger().error("Error on server switch", e);
                         }
                     });
                 }
@@ -301,7 +326,7 @@ public class ServerUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error on server switch", e);
         }
     }
 
@@ -334,8 +359,7 @@ public class ServerUtil {
                 this.servers.put(s.getName(), s);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            dashboard.getLogger().error("Error loading servers, shutting Dashboard!");
+            dashboard.getLogger().error("Error loading servers, stopping Dashboard!", e);
             System.exit(0);
         }
     }
@@ -368,11 +392,41 @@ public class ServerUtil {
         return s;
     }
 
-    public void sendPlayer(Player player, String server) {
-        PacketSendToServer packet = new PacketSendToServer(player.getUniqueId(), server);
-        if (player != null) {
-            player.send(packet);
+    public void sendPlayer(Player player, String name) {
+        sendPlayer(player, getServer(name));
+    }
+
+    public void sendPlayer(Player player, Server server) {
+        if (player == null) return;
+        if (serverQueuesEnabled) {
+            String currentQueue = leaveServerQueue(player);
+            if (currentQueue != null)
+                player.sendMessage(ChatColor.AQUA + "You have left the queue to join " + ChatColor.YELLOW + currentQueue);
+
+            if (!server.getName().startsWith("Hub")) {
+                Server.ServerQueue queue = server.getServerQueue();
+                queue.handleJoin(player.getUniqueId());
+                // Add to queue if the queue is enabled, or if a queue needs to be enabled
+                if (queue.hasQueue() || queue.isQueueNeeded()) {
+                    int pos = queue.joinQueue(player);
+                    player.sendMessage(ChatColor.YELLOW + server.getName() + ChatColor.GREEN +
+                            " is very busy right now, so you have been placed in a queue to join it. You are in position " +
+                            ChatColor.YELLOW + "#" + pos + ".");
+                    return;
+                }
+            }
         }
+        sendPlayerDirect(player, server.getName());
+    }
+
+    /**
+     * Send a player to a server without any load/capacity checks
+     *
+     * @param player the player
+     * @param server the server
+     */
+    private void sendPlayerDirect(Player player, String server) {
+        player.send(new PacketSendToServer(player.getUniqueId(), server));
     }
 
     public void sendPlayerByType(Player player, String type) {
@@ -387,7 +441,7 @@ public class ServerUtil {
             player.sendMessage(ChatColor.RED + "No '" + type + "' server is available right now! Please try again soon.");
             return;
         }
-        sendPlayer(player, s.getName());
+        sendPlayer(player, s);
     }
 
     public void addServer(Server server) {
@@ -425,5 +479,17 @@ public class ServerUtil {
         lastArcade = 0;
         lastHubs = new HashMap<>();
         lobbyDataTask.run();
+    }
+
+    public String leaveServerQueue(Player player) {
+        for (Server server : servers.values()) {
+            Server.ServerQueue queue = server.getServerQueue();
+            if (queue.hasQueue() && queue.leaveQueue(player)) return server.getName();
+        }
+        return null;
+    }
+
+    public boolean toggleServerQueueEnabled() {
+        return (serverQueuesEnabled = !serverQueuesEnabled);
     }
 }
