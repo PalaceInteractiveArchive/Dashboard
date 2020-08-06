@@ -1,7 +1,7 @@
 package network.palace.dashboard.utils;
 
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import network.palace.dashboard.handlers.ChatMessage;
 
 import java.io.BufferedReader;
@@ -12,16 +12,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Marc on 7/14/16
  */
 public class SqlUtil {
-    private BoneCP connectionPool;
+    private HikariDataSource mainDatabase;
 
     public SqlUtil() throws SQLException, IOException {
-        BoneCPConfig config = new BoneCPConfig();
         String address = "";
         String database = "";
         String username = "";
@@ -44,28 +42,37 @@ public class SqlUtil {
                 line = br.readLine();
             }
         }
+
+        HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://" + address + ":3306/" + database);
         config.setUsername(username);
         config.setPassword(password);
-        config.setMinConnectionsPerPartition(3);
-        config.setMaxConnectionsPerPartition(15);
-        config.setIdleMaxAge(100, TimeUnit.SECONDS);
-        config.setMaxConnectionAge(300, TimeUnit.SECONDS);
-        config.setPartitionCount(2);
-        config.setIdleConnectionTestPeriod(300, TimeUnit.SECONDS);
-        connectionPool = new BoneCP(config);
+
+        // See: https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
+        config.addDataSourceProperty("rewriteBatchedStatements", "true");
+        config.addDataSourceProperty("cacheResultSetMetadata", "true");
+        config.addDataSourceProperty("cacheServerConfiguration", "true");
+        config.addDataSourceProperty("elideSetAutoCommits", "true");
+        config.addDataSourceProperty("maintainTimeStats", "false");
+
+        mainDatabase = new HikariDataSource(config);
     }
 
     public Optional<Connection> getConnection() {
         try {
-            return Optional.of(connectionPool.getConnection());
+            return Optional.of(mainDatabase.getConnection());
         } catch (SQLException e) {
             return Optional.empty();
         }
     }
 
     public void stop() {
-        connectionPool.shutdown();
+        mainDatabase.close();
     }
 
     public void logChat(List<ChatMessage> messages) throws Exception {

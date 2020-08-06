@@ -133,12 +133,6 @@
             <artifactId>bson</artifactId>
             <version>3.11.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.jolbox</groupId>
-            <artifactId>bonecp</artifactId>
-            <version>0.8.0.RELEASE</version>
-        </dependency>
     </dependencies>
 
     <properties>

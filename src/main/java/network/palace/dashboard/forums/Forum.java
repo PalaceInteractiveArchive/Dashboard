@@ -25,7 +25,6 @@ import java.util.UUID;
  * Created by Marc on 12/12/16.
  */
 public class Forum {
-    //    private BoneCP connectionPool = null;
     private HikariDataSource connectionPool = null;
     private Random random;
 
