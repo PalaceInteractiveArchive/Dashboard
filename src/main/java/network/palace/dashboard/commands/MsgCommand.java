@@ -65,6 +65,12 @@ public class MsgCommand extends DashboardCommand {
                 player.sendMessage(ChatColor.RED + "Please do not ask for Skype information!");
                 return;
             }
+            if (dashboard.getChatUtil().strictModeCheck(msg.toString())) {
+                player.sendMessage(ChatColor.RED + "Your message was similar to another recently said in chat and was marked as spam. We apologize if this was done in error, we're constantly improving our chat filter.");
+                dashboard.getModerationUtil().announceSpamMessage(player.getUsername(), msg.toString());
+                dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
+                return;
+            }
         }
         if (tp.hasMentions()) {
             tp.mention();

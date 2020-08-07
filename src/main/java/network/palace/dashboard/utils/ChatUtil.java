@@ -240,40 +240,11 @@ public class ChatUtil {
                 return;
             }
 
-            if (dashboard.isStrictMode() && !messageCache.isEmpty() && message.length() >= 10) {
-                ChatMessage chatMessage = null;
-                for (ChatMessage cached : messageCache.values()) {
-                    if (chatMessage == null) {
-                        chatMessage = cached;
-                        continue;
-                    }
-                    if (cached.getTime() > chatMessage.getTime()) {
-                        chatMessage = cached;
-                    }
-                }
-
-//                ChatMessage chatMessage = (ChatMessage) this.messageCache.values().toArray()[messageCache.size() - 1];
-
-                //Only strict-check messages said within the last 10 seconds
-                if (chatMessage != null && System.currentTimeMillis() - chatMessage.getTime() < 10 * 1000) {
-                    String lastMessage = chatMessage.getMessage();
-                    double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
-                    if (distance >= dashboard.getStrictThreshold()) {
-                        player.sendMessage(ChatColor.RED + "Your message was similar to another recently said in chat and was marked as spam. We apologize if this was done in error, we're constantly improving our chat filter.");
-//                    swearMessage(player.getUsername(), message);
-                        dashboard.getModerationUtil().announceSpamMessage(player.getUsername(), message);
-                        dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
-                        return;
-                    }
-                }
-                /*String secondLastMessage = (String) this.messageCache.values().toArray()[messageCache.size() - 2];
-                double secondDistance = dashboard.getChatAlgorithm().similarity(message, secondLastMessage);
-                //Slightly less strict second check
-                if (secondDistance >= (dashboard.getStrictThreshold() * 1.4)) {
-                    swearMessage(player.getUsername(), message);
-                    dashboard.getLogger().info("CANCELLED CHAT EVENT SECOND STRICT MODE");
-                    return;
-                }*/
+            if (strictModeCheck(message)) {
+                player.sendMessage(ChatColor.RED + "Your message was similar to another recently said in chat and was marked as spam. We apologize if this was done in error, we're constantly improving our chat filter.");
+                dashboard.getModerationUtil().announceSpamMessage(player.getUsername(), message);
+                dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
+                return;
             }
 
             //ChatDelay Check
@@ -401,6 +372,32 @@ public class ChatUtil {
             return;
         }
         player.chat(m);
+    }
+
+    public boolean strictModeCheck(String message) {
+        Dashboard dashboard = Launcher.getDashboard();
+        if (dashboard.isStrictMode() && !messageCache.isEmpty() && message.length() >= 10) {
+            ChatMessage chatMessage = null;
+            for (ChatMessage cached : messageCache.values()) {
+                if (chatMessage == null) {
+                    chatMessage = cached;
+                    continue;
+                }
+                if (cached.getTime() > chatMessage.getTime()) {
+                    chatMessage = cached;
+                }
+            }
+
+            //Only strict-check messages said within the last 10 seconds
+            if (chatMessage != null && System.currentTimeMillis() - chatMessage.getTime() < 10 * 1000) {
+                String lastMessage = chatMessage.getMessage();
+                double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
+                if (distance >= dashboard.getStrictThreshold()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private HoverEvent getPlayerHover(Player player, String server) {

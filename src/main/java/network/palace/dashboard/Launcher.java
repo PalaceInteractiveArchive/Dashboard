@@ -79,7 +79,7 @@ public class Launcher {
         dashboard.setWarningUtil(new WarningUtil());
         dashboard.setPasswordUtil(new PasswordUtil());
         dashboard.setFriendUtil(new FriendUtil());
-        dashboard.setStrictThreshold(0.5);
+        dashboard.setStrictThreshold(0.8);
         dashboard.setStrictMode(false);
         try {
             dashboard.setSiteUtil(new SiteUtil());
