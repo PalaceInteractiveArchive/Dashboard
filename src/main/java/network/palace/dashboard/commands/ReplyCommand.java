@@ -27,10 +27,8 @@ public class ReplyCommand extends DashboardCommand {
             player.sendMessage(ChatColor.RED + "You don't have anyone to respond to!");
             return;
         }
-        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
-            if (dashboard.getChatUtil().isMuted(player)) {
-                return;
-            }
+        if (player.getRank().getRankId() < Rank.TRAINEE.getRankId() && dashboard.getChatUtil().isMuted(player)) return;
+        if (player.getRank().getRankId() < Rank.CHARACTER.getRankId()) {
             if (!tp.canRecieveMessages() || tp.isIgnored(player.getUniqueId()) && tp.getRank().getRankId() < Rank.CHARACTER.getRankId()) {
                 player.sendMessage(ChatColor.RED + "This person has messages disabled!");
                 return;
@@ -51,10 +49,10 @@ public class ReplyCommand extends DashboardCommand {
                     || dashboard.getChatUtil().spamCheck(player, msg.toString()) || dashboard.getChatUtil().containsUnicode(player, msg.toString())) {
                 return;
             }
-            String mm = msg.toString().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
-                    .replace("/", "").replace("_", "").replace(" ", "");
-            if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
-                player.sendMessage(ChatColor.RED + "Please do not ask for Skype information!");
+            if (dashboard.getChatUtil().strictModeCheck(msg.toString())) {
+                player.sendMessage(ChatColor.RED + "Your message was similar to another recently said in chat and was marked as spam. We apologize if this was done in error, we're constantly improving our chat filter.");
+                dashboard.getModerationUtil().announceSpamMessage(player.getUsername(), msg.toString());
+                dashboard.getLogger().info("CANCELLED CHAT EVENT STRICT MODE");
                 return;
             }
         }

@@ -69,12 +69,6 @@ public class PartyChatCommand extends DashboardCommand {
                     || dashboard.getChatUtil().spamCheck(player, msg.toString()) || dashboard.getChatUtil().containsUnicode(player, msg.toString())) {
                 return;
             }
-            String mm = msg.toString().toLowerCase().replace(".", "").replace("-", "").replace(",", "")
-                    .replace("/", "").replace("_", "").replace(" ", "");
-            if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
-                player.sendMessage(ChatColor.RED + "Please do not ask for Skype information!");
-                return;
-            }
         }
         party.chat(player, msg.toString());
         dashboard.getChatUtil().logMessage(player.getUniqueId(), "/pchat " + party.getLeader().getUsername() + " " + msg);
