@@ -9,10 +9,13 @@ import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.handlers.Player;
 import network.palace.dashboard.handlers.Rank;
 import network.palace.dashboard.handlers.Server;
+import network.palace.dashboard.handlers.SocketCallback;
 import network.palace.dashboard.mongo.MongoHandler;
+import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.audio.PacketContainer;
 import network.palace.dashboard.packets.audio.PacketKick;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
+import network.palace.dashboard.queues.ParkQueueManager;
 import network.palace.dashboard.scheduler.SchedulerManager;
 import network.palace.dashboard.scheduler.ShowReminder;
 import network.palace.dashboard.server.DashboardSocketChannel;
@@ -59,6 +62,7 @@ public class Dashboard {
     @Getter @Setter private InventoryUtil inventoryUtil;
     @Getter @Setter private ShowUtil showUtil;
     @Getter @Setter private GuideUtil guideUtil;
+    @Getter @Setter private ParkQueueManager parkQueueManager;
 
     @Getter @Setter private boolean strictMode;
     @Getter @Setter private double strictThreshold;
@@ -267,14 +271,39 @@ public class Dashboard {
         chatUtil.logout(uuid);
         PacketKick packet = new PacketKick("See ya real soon!");
         PacketContainer kick = new PacketContainer(uuid, packet.getJSON().toString());
+        sendToAllConnections(kick, null, PacketConnectionType.ConnectionType.AUDIOSERVER);
+        players.remove(uuid);
+    }
+
+    /**
+     * Send a packet to connections based on several checks
+     *
+     * @param packet the packet to send
+     * @param check  an optional callback that lets a custom verification be performed
+     * @param types  an optional list of types to filter out by
+     */
+    public void sendToAllConnections(BasePacket packet, SocketCallback check, PacketConnectionType.ConnectionType... types) {
+        List<PacketConnectionType.ConnectionType> matchingTypes = new ArrayList<>(Arrays.asList(types));
         for (Object o : WebSocketServerHandler.getGroup()) {
             DashboardSocketChannel dash = (DashboardSocketChannel) o;
-            if (!dash.getType().equals(PacketConnectionType.ConnectionType.AUDIOSERVER)) {
-                continue;
-            }
-            dash.send(kick);
+            if ((!matchingTypes.isEmpty() && !matchingTypes.contains(dash.getType()))
+                    || (check != null && !check.verify(dash))) continue;
+            dash.send(packet);
         }
-        players.remove(uuid);
+    }
+
+    /**
+     * Send multiple packets to connections based on a check
+     *
+     * @param check   a callback that lets a custom verification be performed
+     * @param packets the packets to send
+     */
+    public void sendToAllConnections(SocketCallback check, List<BasePacket> packets) {
+        for (Object o : WebSocketServerHandler.getGroup()) {
+            DashboardSocketChannel dash = (DashboardSocketChannel) o;
+            if (!check.verify(dash)) continue;
+            packets.forEach(dash::send);
+        }
     }
 
     public List<String> getJoinServers() {

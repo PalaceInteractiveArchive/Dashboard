@@ -9,6 +9,7 @@ import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
+import network.palace.dashboard.queues.ParkQueueManager;
 import network.palace.dashboard.scheduler.SchedulerManager;
 import network.palace.dashboard.server.DashboardServerSocketChannel;
 import network.palace.dashboard.server.DashboardSocketChannel;
@@ -90,6 +91,7 @@ public class Launcher {
         dashboard.setVoteUtil(new VoteUtil());
         dashboard.setShowUtil(new ShowUtil());
         dashboard.setGuideUtil(new GuideUtil());
+        dashboard.setParkQueueManager(new ParkQueueManager());
         try {
             dashboard.setForum(new Forum());
         } catch (Exception e) {
