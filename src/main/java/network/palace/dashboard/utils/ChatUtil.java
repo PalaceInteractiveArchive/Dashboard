@@ -166,8 +166,7 @@ public class ChatUtil {
         if (player.isNewGuest() && !message.startsWith("/")) return;
 
         Rank rank = player.getRank();
-        boolean trainee = rank.getRankId() >= Rank.TRAINEE.getRankId();
-        if (trainee) {
+        if (rank.getRankId() >= Rank.TRAINEE.getRankId()) {
             if (player.isAFK()) {
                 player.setAFK(false);
                 player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Your AFK Timer has been reset!");
@@ -228,7 +227,7 @@ public class ChatUtil {
             dashboard.getLogger().info("CANCELLED CHAT EVENT PLAYER MUTED");
             return;
         }
-        if (!trainee) {
+        if (rank.getRankId() < Rank.CHARACTER.getRankId()) {
             //Muted Chat Check
             String server = player.getServer();
             if (dashboard.getServer(server).isPark()) {
@@ -274,15 +273,6 @@ public class ChatUtil {
             if (containsSwear(player, temp) || isAdvert(player, temp) ||
                     spamCheck(player, temp) || containsUnicode(player, temp)) {
                 dashboard.getLogger().info("CANCELLED CHAT EVENT SWEAR,ADVERT,SPAM,UNICODE");
-                return;
-            }
-
-            //TODO Remove skype check?
-            String mm = message.toLowerCase().replace(".", "").replace("-", "").replace(",", "")
-                    .replace("/", "").replace("_", "").replace(" ", "").replace(";", "");
-            if (mm.contains("skype") || mm.contains(" skyp ") || mm.startsWith("skyp ") || mm.endsWith(" skyp") || mm.contains("skyp*")) {
-                player.sendMessage(DashboardConstants.SKYPE_INFORMATION);
-                dashboard.getLogger().info("CANCELLED CHAT EVENT SKYPE");
                 return;
             }
 
@@ -392,9 +382,7 @@ public class ChatUtil {
             if (chatMessage != null && System.currentTimeMillis() - chatMessage.getTime() < 10 * 1000) {
                 String lastMessage = chatMessage.getMessage();
                 double distance = dashboard.getChatAlgorithm().similarity(message, lastMessage);
-                if (distance >= dashboard.getStrictThreshold()) {
-                    return true;
-                }
+                return distance >= dashboard.getStrictThreshold();
             }
         }
         return false;
