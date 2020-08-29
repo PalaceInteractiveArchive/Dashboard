@@ -642,7 +642,7 @@ public class ChatUtil {
                 return false;
             }
             advertMessage(player.getUsername(), msg);
-            player.sendMessage(DashboardConstants.LINK_WARNING);
+            player.sendMessage(ChatColor.RED + DashboardConstants.LINK_WARNING);
             return true;
         }
         return false;
