@@ -46,7 +46,7 @@ public class HelpMeCommand extends DashboardCommand {
             }
         }
         if (player.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
-            if (dashboard.getChatUtil().containsSwear(player, request.toString()) || dashboard.getChatUtil().isAdvert(player, request.toString())
+            if (dashboard.getChatUtil().containsSwear(player, request.toString())
                     || dashboard.getChatUtil().spamCheck(player, request.toString()) || dashboard.getChatUtil().containsUnicode(player, request.toString())) {
                 return;
             }
