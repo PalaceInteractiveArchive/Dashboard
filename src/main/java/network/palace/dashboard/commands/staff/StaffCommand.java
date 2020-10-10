@@ -19,7 +19,6 @@ import java.util.UUID;
  * Created by Marc on 4/8/17.
  */
 public class StaffCommand extends DashboardCommand {
-    private HashMap<UUID, Integer> attempts = new HashMap<>();
 
     public StaffCommand() {
         super(Rank.TRAINEE);
@@ -55,7 +54,7 @@ public class StaffCommand extends DashboardCommand {
                         a.color("good");
                         dashboard.getSlackUtil().sendDashboardMessage(m, Collections.singletonList(a), false);
                     } else {
-                        int trial;
+                        int trial = dashboard.getMongoHandler().getStaffPasswordAttempts(player.getUniqueId());
                         if (attempts.containsKey(player.getUniqueId())) {
                             attempts.put(player.getUniqueId(), attempts.remove(player.getUniqueId()) + 1);
                             trial = attempts.get(player.getUniqueId());

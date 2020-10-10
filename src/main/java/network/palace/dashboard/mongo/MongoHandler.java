@@ -1048,7 +1048,7 @@ public class MongoHandler {
     }
 
     public boolean verifyPassword(UUID uuid, String pass) {
-        Document doc = getPlayer(uuid, new Document("staffPassword", 1));
+        Document doc = getPlayer(uuid, new Document("staff", 1).append("staffPassword", 1));
         if (doc == null || !doc.containsKey("staffPassword")) return false;
         String dbPassword = doc.getString("staffPassword");
         return Launcher.getDashboard().getPasswordUtil().validPassword(pass, dbPassword);
@@ -1168,6 +1168,9 @@ public class MongoHandler {
 
     public void unlinkForumAccount(UUID uuid) {
         playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.unset("forums"));
+    }
+
+    public int getStaffPasswordAttempts(UUID uuid) {
     }
 
     public enum MongoFilter {
