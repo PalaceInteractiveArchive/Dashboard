@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 public enum Resort {
-    WDW(0, new String[]{"all"}), DLR(1, new String[]{"dlr"}), USO(2, new String[]{"uso"});
+    WDW(0, new String[]{"all"}), DLR(1, new String[]{"dlr"}), USO(2, new String[]{"uso", "usoevent"});
     @Getter private int id;
     @Getter private String[] server;
 
