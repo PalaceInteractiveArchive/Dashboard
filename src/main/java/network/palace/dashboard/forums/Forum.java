@@ -310,6 +310,7 @@ public class Forum {
             case TRAINEETECH:
                 return 34;
             case TRAINEEBUILD:
+                return 46;
             case TRAINEE:
                 return 10;
             case SPECIALGUEST:
