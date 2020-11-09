@@ -1,5 +1,6 @@
 package network.palace.dashboard.utils;
 
+import com.mongodb.client.model.Filters;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -13,7 +14,6 @@ import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.handlers.CurrencyType;
 import network.palace.dashboard.handlers.Player;
-import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.dashboard.PacketConnectionType;
 import network.palace.dashboard.packets.dashboard.PacketUpdateEconomy;
 import network.palace.dashboard.server.DashboardSocketChannel;
@@ -182,7 +182,7 @@ public class VoteUtil {
             }
             Document update = new Document("$inc", new Document("tokens", 5)).append("$set", new Document("vote", new Document("lastTime",
                     System.currentTimeMillis()).append("lastSite", serverId)));
-            dashboard.getMongoHandler().getPlayerCollection().updateOne(MongoHandler.MongoFilter.UUID.getFilter(uuid.toString()), update);
+            dashboard.getMongoHandler().getPlayerCollection().updateOne(Filters.eq("uuid", uuid.toString()), update);
             dashboard.getMongoHandler().logTransaction(uuid, 5, "Vote", CurrencyType.TOKENS, false);
             if (p == null) {
                 return;

@@ -26,7 +26,6 @@ import network.palace.dashboard.utils.MCLeakUtil;
 import network.palace.dashboard.utils.NameUtil;
 import org.bson.BsonInt32;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -250,7 +249,7 @@ public class MongoHandler {
      * @implNote This method shouldn't be used frequently, use {@link #getPlayer(UUID, Document)} to get specific data
      */
     public Document getPlayer(UUID uuid) {
-        return playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).first();
+        return playerCollection.find(Filters.eq("uuid", uuid.toString())).first();
     }
 
     /**
@@ -261,17 +260,17 @@ public class MongoHandler {
      * @return a Document with the limited data
      */
     public Document getPlayer(UUID uuid, Document limit) {
-        FindIterable<Document> doc = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(limit);
+        FindIterable<Document> doc = playerCollection.find(Filters.eq("uuid", uuid.toString())).projection(limit);
         if (doc == null) return null;
         return doc.first();
     }
 
     public Document getPlayer(String player) {
-        return playerCollection.find(MongoFilter.USERNAME.getFilter(player)).first();
+        return playerCollection.find(Filters.eq("username", player)).first();
     }
 
     public Document getPlayer(String player, Document limit) {
-        FindIterable<Document> doc = playerCollection.find(MongoFilter.USERNAME.getFilter(player)).projection(limit);
+        FindIterable<Document> doc = playerCollection.find(Filters.eq("username", player)).projection(limit);
         if (doc == null) return null;
         return doc.first();
     }
@@ -283,7 +282,7 @@ public class MongoHandler {
      * @param list the list of previous usernames
      */
     public void setPreviousNames(UUID uuid, List<String> list) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("previousNames", list));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("previousNames", list));
     }
 
     public void updatePreviousUsernames(UUID uuid, String username) {
@@ -298,7 +297,7 @@ public class MongoHandler {
                 Launcher.getDashboard().getLogger().error("Error retrieving previous usernames", e);
             }
             if (!username.isEmpty() && !current.equals(username)) {
-                playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("username", current));
+                playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("username", current));
             }
         });
     }
@@ -336,7 +335,7 @@ public class MongoHandler {
         Document muteDocument = new Document("created", mute.getCreated()).append("expires", mute.getExpires())
                 .append("reason", mute.getReason()).append("source", mute.getSource()).append("active", true);
 
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("mutes", muteDocument));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.push("mutes", muteDocument));
     }
 
     public Ban getCurrentBan(UUID uuid) {
@@ -357,14 +356,14 @@ public class MongoHandler {
         Document kickDocument = new Document("reason", kick.getReason())
                 .append("time", System.currentTimeMillis())
                 .append("source", kick.getSource());
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("kicks", kickDocument));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.push("kicks", kickDocument));
     }
 
     public void warnPlayer(Warning warning) {
         Document warningDocument = new Document("reason", warning.getReason())
                 .append("time", System.currentTimeMillis())
                 .append("source", warning.getSource());
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(warning.getUniqueId().toString()),
+        playerCollection.updateOne(Filters.eq("uuid", warning.getUniqueId().toString()),
                 Updates.push("warnings", warningDocument), new UpdateOptions().upsert(true));
     }
 
@@ -380,7 +379,7 @@ public class MongoHandler {
                 .append("permanent", ban.isPermanent()).append("reason", ban.getReason())
                 .append("source", ban.getSource()).append("active", true);
 
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("bans", banDocument));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.push("bans", banDocument));
     }
 
     public void banProvider(ProviderBan ban) {
@@ -425,7 +424,7 @@ public class MongoHandler {
         Document doc = new Document("isp", data.getIsp()).append("country", data.getCountry())
                 .append("region", data.getRegion()).append("regionName", data.getRegionName())
                 .append("timezone", data.getTimezone());
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), new Document("$set", doc));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), new Document("$set", doc));
     }
 
     public void login(Player player) {
@@ -504,7 +503,7 @@ public class MongoHandler {
 
                 if (!disable && (!ip.equals(player.getAddress()) || protocolVersion != player.getMcVersion() ||
                         !username.equals(player.getUsername()))) {
-                    playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
+                    playerCollection.updateOne(Filters.eq("uuid", player.getUniqueId().toString()),
                             new Document("$set", new Document("ip", player.getAddress())
                                     .append("username", player.getUsername())
                                     .append("minecraftVersion", new BsonInt32(player.getMcVersion()))));
@@ -586,7 +585,7 @@ public class MongoHandler {
         if (player.getServer() != null) {
             server = player.getServer();
         }
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()),
+        playerCollection.updateOne(Filters.eq("uuid", player.getUniqueId().toString()),
                 new Document("$set", new Document("server", server).append("lastOnline", System.currentTimeMillis()))
                         .append("$inc", new Document("onlineTime", (int) ((System.currentTimeMillis() / 1000) -
                                 (player.getLoginTime() / 1000)))));
@@ -626,7 +625,7 @@ public class MongoHandler {
      */
     public UUID usernameToUUID(String username) {
         try {
-            FindIterable<Document> list = playerCollection.find(MongoFilter.USERNAME.getFilter(username));
+            FindIterable<Document> list = playerCollection.find(Filters.eq("username", username));
             if (list == null || list.first() == null) return null;
             return UUID.fromString(list.first().getString("uuid"));
         } catch (IllegalArgumentException e) {
@@ -642,7 +641,7 @@ public class MongoHandler {
      */
     public String uuidToUsername(UUID uuid) {
         try {
-            FindIterable<Document> list = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString()));
+            FindIterable<Document> list = playerCollection.find(Filters.eq("uuid", uuid.toString()));
             if (list == null || list.first() == null) return null;
             return list.first().getString("username");
         } catch (IllegalArgumentException e) {
@@ -669,14 +668,14 @@ public class MongoHandler {
 
     public List<String> getPlayerNamesFromRank(Rank rank) {
         List<String> list = new ArrayList<>();
-        playerCollection.find(MongoFilter.RANK.getFilter(rank.getDBName())).projection(new Document("username", 1))
+        playerCollection.find(Filters.eq("rank", rank.getDBName())).projection(new Document("username", 1))
                 .forEach((Consumer<Document>) d -> list.add(d.getString("username")));
         return list;
     }
 
     public List<UUID> getPlayerUUIDsFromRank(Rank rank) {
         List<UUID> list = new ArrayList<>();
-        playerCollection.find(MongoFilter.RANK.getFilter(rank.getDBName())).projection(new Document("uuid", 1))
+        playerCollection.find(Filters.eq("rank", rank.getDBName())).projection(new Document("uuid", 1))
                 .forEach((Consumer<Document>) d -> list.add(UUID.fromString(d.getString("uuid"))));
         return list;
     }
@@ -689,7 +688,7 @@ public class MongoHandler {
      */
     public Rank getRank(UUID uuid) {
         if (uuid == null) return Rank.SETTLER;
-        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(new Document("rank", 1)).first();
+        Document result = playerCollection.find(Filters.eq("uuid", uuid.toString())).projection(new Document("rank", 1)).first();
         if (result == null || !result.containsKey("rank")) return Rank.SETTLER;
         return Rank.fromString(result.getString("rank"));
     }
@@ -697,7 +696,7 @@ public class MongoHandler {
     @SuppressWarnings("rawtypes")
     public List<RankTag> getRankTags(UUID uuid) {
         if (uuid == null) return new ArrayList<>();
-        Document result = playerCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).projection(new Document("tags", 1)).first();
+        Document result = playerCollection.find(Filters.eq("uuid", uuid.toString())).projection(new Document("tags", 1)).first();
         if (result == null || !result.containsKey("tags")) return new ArrayList<>();
         ArrayList list = result.get("tags", ArrayList.class);
         List<RankTag> tags = new ArrayList<>();
@@ -709,12 +708,12 @@ public class MongoHandler {
 
     public void addRankTag(UUID uuid, RankTag tag) {
         if (uuid == null || tag == null) return;
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.addToSet("tags", tag.getDBName()), new UpdateOptions().upsert(true));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.addToSet("tags", tag.getDBName()), new UpdateOptions().upsert(true));
     }
 
     public void removeRankTag(UUID uuid, RankTag tag) {
         if (uuid == null || tag == null) return;
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pull("tags", tag.getDBName()));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.pull("tags", tag.getDBName()));
     }
 
     /**
@@ -774,7 +773,7 @@ public class MongoHandler {
      * @param set    whether or not the transaction was a set
      */
     public void logTransaction(UUID uuid, int amount, String source, CurrencyType type, boolean set) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.push("transactions", new BasicDBObject("amount", amount)
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.push("transactions", new BasicDBObject("amount", amount)
                 .append("type", (set ? "set " : "add ") + type.getName())
                 .append("source", source)
                 .append("server", "Dashboard")
@@ -805,16 +804,16 @@ public class MongoHandler {
 
     public void ignorePlayer(Player player, UUID uuid) {
         long time = System.currentTimeMillis();
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()), Updates.push("ignoring", new Document("uuid", uuid.toString()).append("started", time)));
+        playerCollection.updateOne(Filters.eq("uuid", player.getUniqueId().toString()), Updates.push("ignoring", new Document("uuid", uuid.toString()).append("started", time)));
         player.addIgnoreData(new IgnoreData(player.getUniqueId(), uuid, time));
     }
 
     public void unignorePlayer(Player player, UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(player.getUniqueId().toString()), Updates.pull("ignoring", new Document("uuid", uuid.toString())));
+        playerCollection.updateOne(Filters.eq("uuid", player.getUniqueId().toString()), Updates.pull("ignoring", new Document("uuid", uuid.toString())));
     }
 
     public void completeTutorial(UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("tutorial", true));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("tutorial", true));
     }
 
     public List<Server> getServers() {
@@ -932,12 +931,12 @@ public class MongoHandler {
         while (!list.isEmpty()) {
             array.add(new BsonDocument("message", new BsonString(list.remove(0))).append("time", new BsonInt64(System.currentTimeMillis() / 1000)));
         }
-        chatCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.pushEach("messages", array),
+        chatCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.pushEach("messages", array),
                 new UpdateOptions().upsert(true));*/
     }
 
     public void logAFK(UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()),
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()),
                 Updates.push("afklogs", System.currentTimeMillis()), new UpdateOptions().upsert(true));
     }
 
@@ -970,7 +969,7 @@ public class MongoHandler {
     }
 
     public Document getParkInventoryData(UUID uuid) {
-        return storageCollection.find(MongoFilter.UUID.getFilter(uuid.toString())).first();
+        return storageCollection.find(Filters.eq("uuid", uuid.toString())).first();
     }
 
     public Document getParkInventory(UUID uuid, Resort resort) {
@@ -1039,12 +1038,12 @@ public class MongoHandler {
     }
 
     public void setSetting(UUID uuid, String key, Object value) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("settings." + key, value),
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("settings." + key, value),
                 new UpdateOptions().upsert(true));
     }
 
     public void updateAddress(UUID uuid, String address) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("ip", address));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("ip", address));
     }
 
     public boolean verifyPassword(UUID uuid, String pass) {
@@ -1062,7 +1061,7 @@ public class MongoHandler {
         Dashboard dashboard = Launcher.getDashboard();
         String salt = dashboard.getPasswordUtil().getNewSalt();
         String hashed = dashboard.getPasswordUtil().hashPassword(pass, salt);
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("staffPassword", hashed), new UpdateOptions().upsert(true));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("staffPassword", hashed), new UpdateOptions().upsert(true));
     }
 
     public ArrayList getBans(UUID uuid) {
@@ -1100,13 +1099,13 @@ public class MongoHandler {
 
     public void insertDiscord(final DiscordCacheInfo info) {
         SocketConnection.sendNewlink(info);
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(info.getMinecraft().getUuid()),
+        playerCollection.updateOne(Filters.eq("uuid", info.getMinecraft().getUuid()),
                 Updates.set("discordUsername", info.getDiscord().getUsername()));
     }
 
     public void removeDiscord(DiscordCacheInfo info) {
         String discordUsername = info.getDiscord().getUsername();
-        playerCollection.updateMany(Filters.or(MongoFilter.UUID.getFilter(info.getMinecraft().getUuid()),
+        playerCollection.updateMany(Filters.or(Filters.eq("uuid", info.getMinecraft().getUuid()),
                 new Document("discordUsername", discordUsername)), Updates.unset("discordUsername"));
     }
 
@@ -1154,35 +1153,19 @@ public class MongoHandler {
 
     public void setForumLinkingCode(UUID uuid, int member_id, String code) {
         Document forumDoc = new Document("member_id", member_id).append("linking-code", code);
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("forums", forumDoc));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("forums", forumDoc));
     }
 
     public void setForumAccountData(UUID uuid, int member_id) {
         Document forumDoc = new Document("member_id", member_id);
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.set("forums", forumDoc));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("forums", forumDoc));
     }
 
     public void unsetForumLinkingCode(UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.unset("forums.linking-code"));
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.unset("forums.linking-code"));
     }
 
     public void unlinkForumAccount(UUID uuid) {
-        playerCollection.updateOne(MongoFilter.UUID.getFilter(uuid.toString()), Updates.unset("forums"));
-    }
-
-    public enum MongoFilter {
-        UUID, USERNAME, RANK;
-
-        public Bson getFilter(String s) {
-            switch (this) {
-                case UUID:
-                    return Filters.eq("uuid", s);
-                case USERNAME:
-                    return Filters.regex("username", "^" + s + "$", "i");
-                case RANK:
-                    return Filters.eq("rank", s);
-            }
-            return null;
-        }
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.unset("forums"));
     }
 }
