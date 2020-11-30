@@ -45,7 +45,7 @@ public class SiteUtil implements HttpHandler {
             List<String> admin = new ArrayList<>();
             List<String> developer = new ArrayList<>();
             List<String> coordinator = new ArrayList<>();
-            List<String> architect = new ArrayList<>();
+            List<String> technician = new ArrayList<>();
             List<String> builder = new ArrayList<>();
             List<String> mod = new ArrayList<>();
             List<String> trainee = new ArrayList<>();
@@ -54,17 +54,18 @@ public class SiteUtil implements HttpHandler {
                 if (r.getRankId() >= Rank.TRAINEE.getRankId()) {
                     switch (r) {
                         case TRAINEEBUILD:
+                        case TRAINEETECH:
                         case TRAINEE:
                             trainee.add(tp.getUsername());
-                            break;
-                        case MOD:
-                            mod.add(tp.getUsername());
                             break;
                         case BUILDER:
                             builder.add(tp.getUsername());
                             break;
-                        case ARCHITECT:
-                            architect.add(tp.getUsername());
+                        case TECHNICIAN:
+                            technician.add(tp.getUsername());
+                            break;
+                        case MOD:
+                            mod.add(tp.getUsername());
                             break;
                         case COORDINATOR:
                             coordinator.add(tp.getUsername());
@@ -164,18 +165,18 @@ public class SiteUtil implements HttpHandler {
                 obj.addProperty("color", getColor(Rank.COORDINATOR));
                 array.add(obj);
             }
-            if (!architect.isEmpty()) {
+            if (!technician.isEmpty()) {
                 StringBuilder names = new StringBuilder();
-                for (int i = 0; i < architect.size(); i++) {
-                    names.append(architect.get(i));
-                    if (i < (architect.size() - 1)) {
+                for (int i = 0; i < technician.size(); i++) {
+                    names.append(technician.get(i));
+                    if (i < (technician.size() - 1)) {
                         names.append(", ");
                     }
                 }
                 JsonObject obj = new JsonObject();
-                obj.addProperty("title", "Architect");
+                obj.addProperty("title", "Technician");
                 obj.addProperty("text", names.toString());
-                obj.addProperty("color", getColor(Rank.ARCHITECT));
+                obj.addProperty("color", getColor(Rank.TECHNICIAN));
                 array.add(obj);
             }
             if (!builder.isEmpty()) {
