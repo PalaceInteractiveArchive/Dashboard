@@ -89,7 +89,7 @@ public class SiteUtil implements HttpHandler {
             Collections.sort(admin);
             Collections.sort(developer);
             Collections.sort(coordinator);
-            Collections.sort(architect);
+            Collections.sort(technician);
             Collections.sort(builder);
             Collections.sort(mod);
             Collections.sort(trainee);
