@@ -252,21 +252,33 @@ public class SiteUtil implements HttpHandler {
 
     private String getColor(Rank rank) {
         switch (rank) {
-            case LEAD:
             case MANAGER:
             case DIRECTOR:
+            case OWNER:
+                // red
                 return "#FF5050";
-            case DEVELOPER:
+            case LEAD:
+                // gold
                 return "#FFAA00";
-            case COORDINATOR:
-            case ARCHITECT:
-                return "#FFFF00";
+            case TRAINEETECH:
+            case TRAINEEBUILD:
+            case MEDIA:
             case BUILDER:
+            case TECHNICIAN:
+            case DEVELOPER:
+                // blue
+                return "#0000FF";
+            case COORDINATOR:
+                // yellow
+                return "#FFFF00";
             case MOD:
+                // green
                 return "#00FF00";
             case TRAINEE:
+                // dark green
                 return "#009933";
         }
+        // default
         return "good";
     }
 }
