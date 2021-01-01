@@ -501,6 +501,19 @@ public class MongoHandler {
 
                 boolean disable = !player.getAddress().equals(doc.getString("ip")) && rank.getRankId() >= Rank.TRAINEE.getRankId();
 
+                if (!username.equals(player.getUsername())) {
+                    FindIterable<Document> sameName = playerCollection.find(Filters.eq("username", player.getUsername())).projection(new Document("_id", true).append("uuid", true).append("username", true));
+                    dashboard.getLogger().warn("Username needs to be updated! Checking for existing duplicates...");
+                    for (Document userWithSameName : sameName) {
+                        dashboard.getLogger().warn("Found a duplicate! " + userWithSameName.getString("uuid") + "|" + userWithSameName.getString("username"));
+                        List<String> previousUsernames = NameUtil.getNames("", userWithSameName.getString("uuid"));
+                        Collections.reverse(previousUsernames);
+                        playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("username", previousUsernames.get(0)));
+                        playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("previousNames", previousUsernames.subList(1, previousUsernames.size())));
+                        dashboard.getLogger().warn("Updated duplicate to " + userWithSameName.getString("uuid") + "|" + previousUsernames.get(0));
+                    }
+                }
+
                 if (!disable && (!ip.equals(player.getAddress()) || protocolVersion != player.getMcVersion() ||
                         !username.equals(player.getUsername()))) {
                     playerCollection.updateOne(Filters.eq("uuid", player.getUniqueId().toString()),
