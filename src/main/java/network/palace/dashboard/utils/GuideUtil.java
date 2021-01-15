@@ -47,7 +47,7 @@ public class GuideUtil {
         for (Player tp : Launcher.getDashboard().getOnlinePlayers()) {
             if (tp.getRank().getRankId() >= Rank.TRAINEE.getRankId() || tp.hasTag(RankTag.GUIDE)) {
                 staff = true;
-                if (tp.hasMentions() && tp.hasTag(RankTag.GUIDE)) {
+                if (tp.hasMentions() && tp.hasTag(RankTag.GUIDE) && tp.getRank().getRankId() < Rank.TRAINEE.getRankId()) {
                     tp.mention();
                 }
                 tp.sendMessage(components);
