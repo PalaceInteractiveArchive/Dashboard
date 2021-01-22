@@ -120,6 +120,14 @@ public class MongoHandler {
         player.setNewGuest(true);
         player.setOnlineTime(1);
 
+        try {
+            Launcher.getDashboard().getLogger().warn("New user! Checking for existing duplicate usernames...");
+            checkForOldDuplicateUsernames(player.getUsername());
+        } catch (Exception e) {
+            e.printStackTrace();
+            Launcher.getDashboard().getLogger().error("Error checking for duplicate username for " + player.getUsername() + "|" + player.getUniqueId());
+        }
+
         Document playerDocument = new Document();
         playerDocument.put("uuid", player.getUniqueId().toString());
         playerDocument.put("username", player.getUsername());
@@ -502,16 +510,8 @@ public class MongoHandler {
                 boolean disable = !player.getAddress().equals(doc.getString("ip")) && rank.getRankId() >= Rank.TRAINEE.getRankId();
 
                 if (!username.equals(player.getUsername())) {
-                    FindIterable<Document> sameName = playerCollection.find(Filters.eq("username", player.getUsername())).projection(new Document("_id", true).append("uuid", true).append("username", true));
                     dashboard.getLogger().warn("Username needs to be updated! Checking for existing duplicates...");
-                    for (Document userWithSameName : sameName) {
-                        dashboard.getLogger().warn("Found a duplicate! " + userWithSameName.getString("uuid") + "|" + userWithSameName.getString("username"));
-                        List<String> previousUsernames = NameUtil.getNames("", userWithSameName.getString("uuid"));
-                        Collections.reverse(previousUsernames);
-                        playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("username", previousUsernames.get(0)));
-                        playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("previousNames", previousUsernames.subList(1, previousUsernames.size())));
-                        dashboard.getLogger().warn("Updated duplicate to " + userWithSameName.getString("uuid") + "|" + previousUsernames.get(0));
-                    }
+                    checkForOldDuplicateUsernames(player.getUsername());
                 }
 
                 if (!disable && (!ip.equals(player.getAddress()) || protocolVersion != player.getMcVersion() ||
@@ -590,6 +590,19 @@ public class MongoHandler {
                 Launcher.getDashboard().getLogger().error("Error handling player login", e);
             }
         });
+    }
+
+    private void checkForOldDuplicateUsernames(String username) throws Exception {
+        Dashboard dashboard = Launcher.getDashboard();
+        FindIterable<Document> sameName = playerCollection.find(Filters.eq("username", username)).projection(new Document("_id", true).append("uuid", true).append("username", true));
+        for (Document userWithSameName : sameName) {
+            dashboard.getLogger().warn("Found a duplicate! " + userWithSameName.getString("uuid") + "|" + userWithSameName.getString("username"));
+            List<String> previousUsernames = NameUtil.getNames("", userWithSameName.getString("uuid"));
+            Collections.reverse(previousUsernames);
+            playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("username", previousUsernames.get(0)));
+            playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("previousNames", previousUsernames.subList(1, previousUsernames.size())));
+            dashboard.getLogger().warn("Updated duplicate to " + userWithSameName.getString("uuid") + "|" + previousUsernames.get(0));
+        }
     }
 
     public void logout(Player player) {
