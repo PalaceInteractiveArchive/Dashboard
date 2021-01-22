@@ -12,8 +12,6 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.*;
-import network.palace.dashboard.discordSocket.DiscordCacheInfo;
-import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.BasePacket;
 import network.palace.dashboard.packets.arcade.GameState;
@@ -501,11 +499,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                             DashboardSocketChannel socketChannel = Dashboard.getInstance(player.getServer());
                             if (socketChannel != null) socketChannel.send(packet);
 
-                            DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
-                            if (info != null) {
-                                info.getMinecraft().setRank(rank.toString());
-                                SocketConnection.sendUpdate(info);
-                            }
+//                            DiscordCacheInfo info = dashboard.getMongoHandler().getUserFromPlayer(player);
+//                            if (info != null) {
+//                                info.getMinecraft().setRank(rank.toString());
+//                                SocketConnection.sendUpdate(info);
+//                            }
                         }
                         List<RankTag> realTags = new ArrayList<>();
                         for (String s : tags) {

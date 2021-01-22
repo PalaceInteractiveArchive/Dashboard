@@ -5,7 +5,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
-import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.forums.Forum;
 import network.palace.dashboard.mongo.MongoHandler;
 import network.palace.dashboard.packets.audio.PacketHeartbeat;
@@ -68,8 +67,6 @@ public class Launcher {
 
         dashboard.loadMOTD();
         dashboard.loadJoinServers();
-
-        if (!dashboard.isTestNetwork()) dashboard.setSocketConnection(new SocketConnection());
 
         dashboard.setServerUtil(new ServerUtil());
         dashboard.setChatUtil(new ChatUtil());

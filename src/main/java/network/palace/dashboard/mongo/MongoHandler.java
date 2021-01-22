@@ -14,7 +14,6 @@ import network.palace.dashboard.Dashboard;
 import network.palace.dashboard.Launcher;
 import network.palace.dashboard.chat.ChatColor;
 import network.palace.dashboard.discordSocket.DiscordCacheInfo;
-import network.palace.dashboard.discordSocket.SocketConnection;
 import network.palace.dashboard.handlers.*;
 import network.palace.dashboard.packets.dashboard.PacketPlayerRank;
 import network.palace.dashboard.packets.inventory.Resort;
@@ -1126,11 +1125,11 @@ public class MongoHandler {
         playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.unset("discord"));
     }
 
-    public void insertDiscord(final DiscordCacheInfo info) {
-        SocketConnection.sendNewlink(info);
-        playerCollection.updateOne(Filters.eq("uuid", info.getMinecraft().getUuid()),
-                Updates.set("discordUsername", info.getDiscord().getUsername()));
-    }
+//    public void insertDiscord(final DiscordCacheInfo info) {
+//        SocketConnection.sendNewlink(info);
+//        playerCollection.updateOne(Filters.eq("uuid", info.getMinecraft().getUuid()),
+//                Updates.set("discordUsername", info.getDiscord().getUsername()));
+//    }
 //
 //    public void removeDiscord(DiscordCacheInfo info) {
 //        String discordUsername = info.getDiscord().getUsername();
