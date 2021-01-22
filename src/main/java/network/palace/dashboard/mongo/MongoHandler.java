@@ -1110,25 +1110,41 @@ public class MongoHandler {
         serversCollection.deleteMany(new Document("name", name));
     }
 
+    public void startDiscordLink(UUID uuid) {
+        Document discordDocument = new Document("discordID", "")
+                .append("refreshToken", "");
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.set("discord", discordDocument));
+    }
+
+    public boolean verifyDiscordLink(UUID uuid) {
+        Document discordDocument = playerCollection.find(Filters.eq("uuid", uuid.toString())).projection(new Document("discord", true)).first();
+
+        return discordDocument.containsKey("discord");
+    }
+
+    public void removeDiscordLink(UUID uuid) {
+        playerCollection.updateOne(Filters.eq("uuid", uuid.toString()), Updates.unset("discord"));
+    }
+
     public void insertDiscord(final DiscordCacheInfo info) {
         SocketConnection.sendNewlink(info);
         playerCollection.updateOne(Filters.eq("uuid", info.getMinecraft().getUuid()),
                 Updates.set("discordUsername", info.getDiscord().getUsername()));
     }
-
-    public void removeDiscord(DiscordCacheInfo info) {
-        String discordUsername = info.getDiscord().getUsername();
-        playerCollection.updateMany(Filters.or(Filters.eq("uuid", info.getMinecraft().getUuid()),
-                new Document("discordUsername", discordUsername)), Updates.unset("discordUsername"));
-    }
-
-    public DiscordCacheInfo getUserFromPlayer(Player player) {
-        DiscordCacheInfo.Minecraft mc = new DiscordCacheInfo.Minecraft(player.getUsername(),
-                player.getUniqueId().toString(), player.getRank().getDBName());
-        Document doc = getPlayer(player.getUniqueId(), new Document("discordUsername", 1));
-        if (doc == null || !doc.containsKey("discordUsername")) return null;
-        return new DiscordCacheInfo(mc, new DiscordCacheInfo.Discord(doc.getString("discordUsername")));
-    }
+//
+//    public void removeDiscord(DiscordCacheInfo info) {
+//        String discordUsername = info.getDiscord().getUsername();
+//        playerCollection.updateMany(Filters.or(Filters.eq("uuid", info.getMinecraft().getUuid()),
+//                new Document("discordUsername", discordUsername)), Updates.unset("discordUsername"));
+//    }
+//
+//    public DiscordCacheInfo getUserFromPlayer(Player player) {
+//        DiscordCacheInfo.Minecraft mc = new DiscordCacheInfo.Minecraft(player.getUsername(),
+//                player.getUniqueId().toString(), player.getRank().getDBName());
+//        Document doc = getPlayer(player.getUniqueId(), new Document("discordUsername", 1));
+//        if (doc == null || !doc.containsKey("discordUsername")) return null;
+//        return new DiscordCacheInfo(mc, new DiscordCacheInfo.Discord(doc.getString("discordUsername")));
+//    }
 
     public void addSpamIPWhitelist(SpamIPWhitelist whitelist) {
         spamIpWhitelist.insertOne(new Document("ip", whitelist.getAddress()).append("limit", whitelist.getLimit()));
