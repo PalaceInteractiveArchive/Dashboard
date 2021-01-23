@@ -596,12 +596,16 @@ public class MongoHandler {
         Dashboard dashboard = Launcher.getDashboard();
         FindIterable<Document> sameName = playerCollection.find(Filters.eq("username", username)).projection(new Document("_id", true).append("uuid", true).append("username", true));
         for (Document userWithSameName : sameName) {
-            dashboard.getLogger().warn("Found a duplicate! " + userWithSameName.getString("uuid") + "|" + userWithSameName.getString("username"));
-            List<String> previousUsernames = NameUtil.getNames("", userWithSameName.getString("uuid"));
-            Collections.reverse(previousUsernames);
-            playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("username", previousUsernames.get(0)));
-            playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("previousNames", previousUsernames.subList(1, previousUsernames.size())));
-            dashboard.getLogger().warn("Updated duplicate to " + userWithSameName.getString("uuid") + "|" + previousUsernames.get(0));
+            try {
+                dashboard.getLogger().warn("Found a duplicate! " + userWithSameName.getString("uuid") + "|" + userWithSameName.getString("username"));
+                List<String> previousUsernames = NameUtil.getNames("", userWithSameName.getString("uuid"));
+                Collections.reverse(previousUsernames);
+                playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("username", previousUsernames.get(0)));
+                playerCollection.updateOne(Filters.eq("_id", userWithSameName.getObjectId("_id")), Updates.set("previousNames", previousUsernames.subList(1, previousUsernames.size())));
+                dashboard.getLogger().warn("Updated duplicate to " + userWithSameName.getString("uuid") + "|" + previousUsernames.get(0));
+            } catch (Exception e) {
+                dashboard.getLogger().error("Failed to check username history for " + userWithSameName.getString("uuid"));
+            }
         }
     }
 
