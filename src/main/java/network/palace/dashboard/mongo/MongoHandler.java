@@ -85,13 +85,13 @@ public class MongoHandler {
                 line = br.readLine();
             }
         }
-        connect("mongodb://" + username + ":" + password + "@" + address + "/" + database);
+        connect("mongodb://" + username + ":" + password + "@" + address + "/" + database, database);
     }
 
-    public void connect(String uri) {
+    public void connect(String uri, String dbName) {
         MongoClientURI connectionString = new MongoClientURI(uri);
         client = new MongoClient(connectionString);
-        database = client.getDatabase("palace");
+        database = client.getDatabase(dbName);
         playerCollection = database.getCollection("players");
         chatCollection = database.getCollection("chat");
         activityCollection = database.getCollection("activity");
